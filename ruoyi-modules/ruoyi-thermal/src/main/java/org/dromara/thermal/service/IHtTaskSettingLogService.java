@@ -1,0 +1,27 @@
+package org.dromara.thermal.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.IService;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.thermal.domain.HtTaskSettingLog;
+import org.dromara.thermal.domain.vo.HtTaskSettingLogVo;
+import org.dromara.thermal.domain.vo.HtTaskSettingLogItemVo;
+
+import java.util.List;
+
+/**
+ * 调控设定日志服务接口
+ */
+public interface IHtTaskSettingLogService extends IService<HtTaskSettingLog> {
+
+    /**
+     * 分页查询设定日志
+     */
+    TableDataInfo<HtTaskSettingLogVo> selectPageList(LambdaQueryWrapper<HtTaskSettingLog> lqw, PageQuery pageQuery);
+
+    /**
+     * 根据主表ID查询子表明细
+     */
+    List<HtTaskSettingLogItemVo> selectItemsByMainId(String mainId);
+}

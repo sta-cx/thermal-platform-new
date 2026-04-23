@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.dromara.thermal.mapper.HtTasksMapper">
+
+    <select id="selectAllByOrgId" resultType="org.dromara.thermal.domain.HtTasks">
+        SELECT id, name, type, cron_expression, strategy_id, priority, status,
+               number, last_time, total, org_id, company_id, adjust_basis, scope_type,
+               description, bean_class, job_group, days, nums, standard, end_time,
+               execution_time, out_temp_pj, is_use_report_rate, report_rate, is_use_first_control
+        FROM ht_tasks
+        WHERE org_id = #{orgId}
+        ORDER BY create_time DESC
+    </select>
+
+    <delete id="deleteScopeByTaskId">
+        DELETE FROM ht_scope WHERE tasks_id = #{taskId}
+    </delete>
+
+</mapper>
