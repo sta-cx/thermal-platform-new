@@ -101,10 +101,6 @@ public class HtTasksController extends BaseController {
     @PutMapping
     public R<Void> update(@Validated @RequestBody HtTasks task,
                           @RequestParam(required = false) List<String> scopeIds) {
-        HtTasks existing = tasksService.getById(task.getId());
-        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
-            return R.fail("修改之前请先停止任务！");
-        }
         return toAjax(tasksService.updateWithScope(task, scopeIds));
     }
 
@@ -115,10 +111,6 @@ public class HtTasksController extends BaseController {
     @Log(title = "调控任务", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable Integer id) {
-        HtTasks existing = tasksService.getById(id);
-        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
-            return R.fail("删除前请先停止任务！");
-        }
         return toAjax(tasksService.removeById(id));
     }
 
@@ -129,12 +121,6 @@ public class HtTasksController extends BaseController {
     @Log(title = "调控任务", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
     public R<Void> removeBatch(@RequestParam List<Integer> ids) {
-        for (Integer id : ids) {
-            HtTasks existing = tasksService.getById(id);
-            if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
-                return R.fail("任务[ID:" + id + "]正在运行，删除前请先停止！");
-            }
-        }
         return toAjax(tasksService.removeByIds(ids));
     }
 

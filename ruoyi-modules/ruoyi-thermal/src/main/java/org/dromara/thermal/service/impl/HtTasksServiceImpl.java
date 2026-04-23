@@ -58,11 +58,14 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateWithScope(HtTasks entity, List<String> scopeIds) {
+        // 在事务内检查状态，防止 TOCTOU 竞争
+        HtTasks existing = getById(entity.getId());
+        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+            throw new RuntimeException("修改之前请先停止任务！");
+        }
         boolean updated = updateById(entity);
         if (updated) {
-            // 删除旧的范围记录
             baseMapper.deleteScopeByTaskId(entity.getId());
-            // 插入新的范围记录
             if (scopeIds != null && !scopeIds.isEmpty()) {
                 for (String scopeId : scopeIds) {
                     if (scopeId == null || scopeId.isBlank()) continue;
@@ -74,6 +77,28 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
             }
         }
         return updated;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean removeById(java.io.Serializable id) {
+        HtTasks existing = getById((Integer) id);
+        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+            throw new RuntimeException("删除前请先停止任务！");
+        }
+        return super.removeById(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean removeByIds(java.util.Collection<?> idList) {
+        for (Object id : idList) {
+            HtTasks existing = getById((Integer) id);
+            if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+                throw new RuntimeException("任务[ID:" + id + "]正在运行，删除前请先停止！");
+            }
+        }
+        return super.removeByIds(idList);
     }
 
     @Override

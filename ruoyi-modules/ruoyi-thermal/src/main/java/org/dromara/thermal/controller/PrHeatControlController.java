@@ -11,8 +11,8 @@ import org.dromara.thermal.utils.HeatMeterControl;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
@@ -27,7 +27,17 @@ import java.util.List;
 @RequestMapping("/thermal/ht/control")
 public class PrHeatControlController extends BaseController {
 
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+    private static final String CMD_OPEN_VALVE = "2001";
+    private static final String CMD_CLOSE_VALVE = "2002";
+    private static final String CMD_SET_ANGLE = "2003";
+    private static final String CMD_QUERY_STATUS = "2004";
+
     private final HeatMeterControl heatMeterControl;
+
+    private String now() {
+        return LocalDateTime.now().format(DATE_FMT);
+    }
 
     /**
      * 手动控制阀门开度
@@ -36,8 +46,7 @@ public class PrHeatControlController extends BaseController {
     @PostMapping("/manual")
     public R<Void> handControl(@RequestParam String meterNum,
                                @RequestParam String valveOpening) {
-        String dateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String command = heatMeterControl.mbusControl(meterNum, "2003", valveOpening, dateTime);
+        String command = heatMeterControl.mbusControl(meterNum, CMD_SET_ANGLE, valveOpening, now());
         boolean success = heatMeterControl.postData(new String[]{command});
         return success ? R.ok() : R.fail("阀门控制指令发送失败");
     }
@@ -48,8 +57,7 @@ public class PrHeatControlController extends BaseController {
     @SaCheckLogin
     @GetMapping("/query")
     public R<String> selectMeter(@RequestParam String meterNum) {
-        String dateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String command = heatMeterControl.mbusControl(meterNum, "2004", "", dateTime);
+        String command = heatMeterControl.mbusControl(meterNum, CMD_QUERY_STATUS, "", now());
         boolean success = heatMeterControl.postData(new String[]{command});
         return success ? R.ok("状态查询指令已发送") : R.fail("状态查询指令发送失败");
     }
@@ -60,8 +68,7 @@ public class PrHeatControlController extends BaseController {
     @SaCheckLogin
     @PostMapping("/openValve")
     public R<Void> openValve(@RequestParam String meterNum) {
-        String dateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String command = heatMeterControl.mbusControl(meterNum, "2001", "100", dateTime);
+        String command = heatMeterControl.mbusControl(meterNum, CMD_OPEN_VALVE, "100", now());
         boolean success = heatMeterControl.postData(new String[]{command});
         return success ? R.ok() : R.fail("开阀指令发送失败");
     }
@@ -72,8 +79,7 @@ public class PrHeatControlController extends BaseController {
     @SaCheckLogin
     @PostMapping("/closeValve")
     public R<Void> closeValve(@RequestParam String meterNum) {
-        String dateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String command = heatMeterControl.mbusControl(meterNum, "2002", "0", dateTime);
+        String command = heatMeterControl.mbusControl(meterNum, CMD_CLOSE_VALVE, "0", now());
         boolean success = heatMeterControl.postData(new String[]{command});
         return success ? R.ok() : R.fail("关阀指令发送失败");
     }
@@ -88,8 +94,7 @@ public class PrHeatControlController extends BaseController {
                        @RequestParam(defaultValue = "99") Integer maxAdjust,
                        @RequestParam Integer currentAngle) {
         int newAngle = Math.min(currentAngle + adjustStep, maxAdjust);
-        String dateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String command = heatMeterControl.mbusControl(meterNum, "2003", String.valueOf(newAngle), dateTime);
+        String command = heatMeterControl.mbusControl(meterNum, CMD_SET_ANGLE, String.valueOf(newAngle), now());
         boolean success = heatMeterControl.postData(new String[]{command});
         return success ? R.ok("开度调整为: " + newAngle) : R.fail("开度调整失败");
     }
@@ -104,8 +109,7 @@ public class PrHeatControlController extends BaseController {
                        @RequestParam(defaultValue = "0") Integer minAdjust,
                        @RequestParam Integer currentAngle) {
         int newAngle = Math.max(currentAngle - adjustStep, minAdjust);
-        String dateTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-        String command = heatMeterControl.mbusControl(meterNum, "2003", String.valueOf(newAngle), dateTime);
+        String command = heatMeterControl.mbusControl(meterNum, CMD_SET_ANGLE, String.valueOf(newAngle), now());
         boolean success = heatMeterControl.postData(new String[]{command});
         return success ? R.ok("开度调整为: " + newAngle) : R.fail("开度调整失败");
     }

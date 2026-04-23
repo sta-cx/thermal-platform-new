@@ -25,6 +25,7 @@ public class HtScopeServiceImpl extends ServiceImpl<HtScopeMapper, HtScope> impl
         LambdaQueryWrapper<HtScope> lqw = new LambdaQueryWrapper<>();
         lqw.eq(HtScope::getTasksId, taskId);
         lqw.eq(orgId != null && !orgId.isEmpty(), HtScope::getOrgId, orgId);
+        // scopeType 参数用于过滤执行状态（0=正常 9=完成调控）
         if (scopeType != null) {
             lqw.eq(HtScope::getStatus, scopeType);
         }

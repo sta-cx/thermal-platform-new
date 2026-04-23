@@ -69,7 +69,7 @@ public class HtRepairController extends BaseController {
     @Log(title = "报修记录", businessType = BusinessType.INSERT)
     @PostMapping
     public R<Void> insert(@Validated @RequestBody HtRepair repair) {
-        repair.setRepairNo("R" + System.currentTimeMillis());
+        repair.setRepairNo("R" + java.util.UUID.randomUUID().toString().substring(0, 8));
         return toAjax(htRepairService.save(repair));
     }
 

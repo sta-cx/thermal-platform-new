@@ -11,6 +11,7 @@ import org.dromara.common.web.core.BaseController;
 import org.dromara.meter.domain.*;
 import org.dromara.meter.domain.vo.*;
 import org.dromara.meter.mapper.MtMeterMatchMapper;
+import org.dromara.meter.service.IMtMeterMatchService;
 import org.dromara.meter.service.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class AgentMeterController extends BaseController {
     private final IMtWaterArchiveService waterService;
     private final IMtHeatArchiveService heatService;
     private final IMtGasArchiveService gasService;
-    private final MtMeterMatchMapper meterMatchMapper;
+    private final IMtMeterMatchService meterMatchService;
 
     /**
      * 分页查询已分配的仪表列表
@@ -84,7 +85,7 @@ public class AgentMeterController extends BaseController {
     }
 
     /**
-     * 批量分配仪表给公司
+     * 批量分配仪表给公司（事务操作：先删后插）
      */
     @SaCheckLogin
     @Log(title = "仪表分配", businessType = BusinessType.INSERT)
@@ -93,22 +94,8 @@ public class AgentMeterController extends BaseController {
             @RequestParam String companyId,
             @RequestParam String archiveIds,
             @RequestParam String meterType) {
-        // 删除该公司该类型的所有分配
-        meterMatchMapper.delete(
-            new LambdaQueryWrapper<MtMeterMatch>()
-                .eq(MtMeterMatch::getCompanyId, companyId)
-                .eq(MtMeterMatch::getMeterType, meterType)
-        );
-        // 批量新增分配
         List<String> ids = Arrays.asList(archiveIds.split(","));
-        for (String archiveId : ids) {
-            if (archiveId.isBlank()) continue;
-            MtMeterMatch match = new MtMeterMatch();
-            match.setCompanyId(companyId);
-            match.setArchiveId(archiveId.trim());
-            match.setMeterType(meterType);
-            meterMatchMapper.insert(match);
-        }
+        meterMatchService.batchAllocate(companyId, ids, meterType);
         return R.ok();
     }
 

@@ -41,6 +41,8 @@
     </update>
 
     <update id="markPayStatus">
+        <!-- 注意: 旧系统使用 status 字段同时表示执行状态和缴费状态
+             此处保持兼容，后续应添加独立的 pay_status 列 -->
         UPDATE ht_scope SET status = #{val}
         WHERE id IN
         <foreach collection="scopeIds" item="id" open="(" separator="," close=")">
