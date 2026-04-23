@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.dromara.meter.mapper.MtMeterVendorMapper">
+
+    <!-- 校验名称是否重复 -->
+    <select id="verifyName" resultType="int">
+        SELECT COUNT(name) FROM mt_meter_vendor
+        <where>
+            <if test="name != null and name != ''">
+                name = #{name}
+            </if>
+            <if test="id != null and id != ''">
+                AND id != #{id}
+            </if>
+        </where>
+    </select>
+
+    <!-- 统计厂商被仪表分类引用的次数 -->
+    <select id="countByVendorId" resultType="int">
+        SELECT COUNT(id)
+        FROM mt_meter_sort
+        WHERE vendor_id = #{vendorId}
+    </select>
+
+    <!-- 查询所有启用的厂商 -->
+    <select id="selectAllEnabled" resultType="org.dromara.meter.domain.vo.MtMeterVendorVo">
+        SELECT id, name, code, is_enabled
+        FROM mt_meter_vendor
+        WHERE is_enabled = 1
+        ORDER BY seq, create_time DESC
+    </select>
+
+</mapper>

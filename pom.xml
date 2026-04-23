@@ -357,6 +357,20 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- 仪表模块 -->
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-meter</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <!-- 热力调控模块 -->
+            <dependency>
+                <groupId>org.dromara</groupId>
+                <artifactId>ruoyi-thermal</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

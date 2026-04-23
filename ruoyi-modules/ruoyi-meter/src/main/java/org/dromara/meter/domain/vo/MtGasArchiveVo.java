@@ -1,0 +1,38 @@
+package org.dromara.meter.domain.vo;
+
+import io.github.linpeilie.annotations.AutoMapper;
+import lombok.Data;
+import org.dromara.meter.domain.MtGasArchive;
+
+/**
+ * 燃气表档案视图对象
+ * 迁移自旧系统 MtGasArchive
+ */
+@Data
+@AutoMapper(target = MtGasArchive.class)
+public class MtGasArchiveVo {
+
+    private String id;
+
+    /** 分类ID */
+    private String sortId;
+
+    /** 编号 */
+    private String code;
+
+    /** 名称 */
+    private String name;
+
+    /** 规格 */
+    private String specification;
+
+    /** 型号 */
+    private String model;
+
+    /** 排序 */
+    private String seq;
+
+    /** 是否启用 (0=禁用 1=启用) */
+    private Integer isEnabled;
+
+}

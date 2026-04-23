@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.dromara.thermal.mapper.HtAlertMapper">
+
+    <!-- 查询仪表的异常报警列表 -->
+    <select id="selectAbnormalAlarmList" resultType="org.dromara.thermal.domain.vo.HtAlertVo">
+        SELECT a.id, a.meter_id, a.alert_type, a.alert_time, a.alert_status,
+               a.in_temp, a.out_temp, a.room_temp, a.valve, a.company_id
+        FROM ht_alert a
+        WHERE a.meter_id = #{meterId}
+          AND a.alert_status = '0'
+        ORDER BY a.alert_time DESC
+    </select>
+
+    <!-- 按报警类型统计数量 -->
+    <select id="selectTypeCount" resultType="java.util.Map">
+        SELECT alert_type AS alertType, COUNT(*) AS count
+        FROM ht_alert
+        WHERE company_id = #{companyId}
+        GROUP BY alert_type
+    </select>
+
+</mapper>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.dromara.thermal.mapper.HtInstructionMapper">
+
+    <select id="countByStrategySub" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM ht_strategy_sub WHERE instruction_id = #{instructionId}
+    </select>
+
+    <select id="selectAllList" resultType="org.dromara.thermal.domain.HtInstruction">
+        SELECT id, name, type, instruction, remark, create_by, create_time
+        FROM ht_instruction
+    </select>
+
+</mapper>

@@ -1,0 +1,88 @@
+package org.dromara.meter.controller;
+
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import jakarta.validation.constraints.NotBlank;
+import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.domain.R;
+import org.dromara.common.log.annotation.Log;
+import org.dromara.common.log.enums.BusinessType;
+import org.dromara.common.mybatis.core.page.PageQuery;
+import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.web.core.BaseController;
+import org.dromara.meter.domain.MtGasArchive;
+import org.dromara.meter.domain.vo.MtGasArchiveVo;
+import org.dromara.meter.service.IMtGasArchiveService;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * 燃气表档案管理
+ * 迁移自旧系统 MtGasArchiveController
+ * 旧端点: /gasArchive/* -> 新端点: /thermal/meter/gas/*
+ */
+@Validated
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/thermal/meter/gas")
+public class MtGasArchiveController extends BaseController {
+
+    private final IMtGasArchiveService gasArchiveService;
+
+    /**
+     * 分页查询燃气表档案列表
+     * 旧端点: GET /gasArchive/pageList
+     * 新端点: GET /thermal/meter/gas/pageList
+     */
+    @SaCheckLogin
+    @GetMapping("/pageList")
+    public TableDataInfo<MtGasArchiveVo> pageList(@RequestParam @NotBlank String sortId,
+                                                   @RequestParam(required = false) String search,
+                                                   PageQuery pageQuery) {
+        LambdaQueryWrapper<MtGasArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(MtGasArchive::getSortId, sortId);
+        if (search != null && !search.trim().isEmpty()) {
+            lqw.and(w -> w.eq(MtGasArchive::getCode, search.trim())
+                          .or().eq(MtGasArchive::getName, search.trim()));
+        }
+        lqw.orderByAsc(MtGasArchive::getSeq).orderByDesc(MtGasArchive::getCreateTime);
+        return gasArchiveService.selectPageList(lqw, pageQuery);
+    }
+
+    /**
+     * 新增燃气表档案
+     * 旧端点: POST /gasArchive/insertData
+     * 新端点: POST /thermal/meter/gas
+     */
+    @SaCheckLogin
+    @Log(title = "燃气表档案", businessType = BusinessType.INSERT)
+    @PostMapping
+    public R<Void> add(@Validated @RequestBody MtGasArchive archive) {
+        return toAjax(gasArchiveService.save(archive));
+    }
+
+    /**
+     * 修改燃气表档案
+     * 旧端点: POST /gasArchive/updateData
+     * 新端点: PUT /thermal/meter/gas
+     */
+    @SaCheckLogin
+    @Log(title = "燃气表档案", businessType = BusinessType.UPDATE)
+    @PutMapping
+    public R<Void> edit(@Validated @RequestBody MtGasArchive archive) {
+        return toAjax(gasArchiveService.updateById(archive));
+    }
+
+    /**
+     * 删除燃气表档案
+     * 旧端点: POST /gasArchive/deleteData
+     * 新端点: DELETE /thermal/meter/gas/{id}
+     */
+    @SaCheckLogin
+    @Log(title = "燃气表档案", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{id}")
+    public R<Void> remove(@PathVariable String id) {
+        return toAjax(gasArchiveService.removeById(id));
+    }
+
+}
