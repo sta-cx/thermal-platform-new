@@ -23,9 +23,6 @@ public class HtRepairVo {
     /** 楼宇名称 */
     private String buildingName;
 
-    /** 单元ID */
-    private String unitId;
-
     /** 单元编码 */
     private String unitCode;
 
