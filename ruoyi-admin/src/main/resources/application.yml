@@ -21,8 +21,8 @@ server:
       worker: 256
 
 captcha:
-  # 是否启用验证码校验
-  enable: true
+  # 是否启用验证码校验（开发测试可关闭）
+  enable: false
   # 验证码类型 math 数组计算 char 字符验证
   type: math
   # 数字验证码位数
@@ -116,6 +116,12 @@ security:
     - /*/api-docs
     - /*/api-docs/**
     - /warm-flow-ui/config
+    # 认证相关接口
+    - /auth/**
+    # 验证码接口
+    - /code
+    # 健康检查
+    - /actuator/**
 
 # 多租户配置
 tenant:
@@ -168,8 +174,8 @@ mybatis-encryptor:
 
 # api接口加密
 api-decrypt:
-  # 是否开启全局接口加密
-  enabled: true
+  # 是否开启全局接口加密（开发测试可关闭，前端迁移后再开启）
+  enabled: false
   # AES 加密头标识
   headerFlag: encrypt-key
   # 响应加密公钥 非对称算法的公私钥 如：SM2，RSA 使用者请自行更换
