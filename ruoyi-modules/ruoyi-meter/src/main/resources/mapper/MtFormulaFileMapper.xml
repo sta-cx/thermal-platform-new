@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.dromara.meter.mapper.MtFormulaFileMapper">
+
+    <select id="validateName" resultType="int">
+        SELECT COUNT(id) FROM mt_formula_file
+        WHERE name = #{name}
+        <if test="id != null and id != ''">
+            AND id != #{id}
+        </if>
+    </select>
+
+    <select id="getFormulaType" resultType="java.util.HashMap">
+        SELECT dict_label AS label, dict_value AS value
+        FROM sys_dict_data
+        WHERE dict_type = 'formula'
+        ORDER BY dict_sort
+    </select>
+
+    <select id="getFormulaElement" resultType="java.util.HashMap">
+        SELECT dict_label AS label, dict_value AS value
+        FROM sys_dict_data
+        WHERE dict_type = 'formula_element'
+        ORDER BY dict_sort
+    </select>
+
+    <select id="selectByType" resultType="org.dromara.meter.domain.MtFormulaFile">
+        SELECT id, name, type, cformula, eformula, seq, is_enabled, create_time
+        FROM mt_formula_file
+        WHERE type = #{type} AND is_enabled = '1'
+        ORDER BY seq, create_time DESC
+    </select>
+
+</mapper>
