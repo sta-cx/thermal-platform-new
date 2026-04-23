@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 调控任务服务实现
@@ -73,5 +74,57 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
             }
         }
         return updated;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean changeStatus(Integer id, Integer status) {
+        // TODO: Quartz/snail-job集成 - 实际启动/停止调度任务
+        // 当前仅更新数据库状态
+        return baseMapper.updateTaskStatus(id, status) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean runTask(Integer id) {
+        // TODO: Quartz/snail-job集成 - 立即触发任务执行
+        baseMapper.updateLastTime(id);
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean markSpecial(List<String> scopeIds, String val, String remark) {
+        return baseMapper.markScopeAsSpecial(scopeIds, val, remark) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean markSpecialUnit(List<String> scopeIds, String val, String remark) {
+        return baseMapper.markUnitAsSpecial(scopeIds, val, remark) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean markPayStatus(List<String> scopeIds, String val) {
+        return baseMapper.markPayStatus(scopeIds, val) > 0;
+    }
+
+    @Override
+    public double refreshBalanceRate(String taskId) {
+        return baseMapper.queryBalanceRate(taskId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean saveValveAngle(String taskId, String scopeType) {
+        // TODO: 指令生成管线 - Phase 4c-3 完整实现
+        // 当前标记范围为调控完成状态
+        return baseMapper.updateScopeStatus(taskId, 9) > 0;
+    }
+
+    @Override
+    public Map<String, Object> querySummary(String orgId, String buildingId, String unitCode) {
+        return baseMapper.querySummary(orgId, buildingId, unitCode);
     }
 }

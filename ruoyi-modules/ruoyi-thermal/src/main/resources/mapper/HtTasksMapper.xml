@@ -16,4 +16,72 @@
         DELETE FROM ht_scope WHERE tasks_id = #{taskId}
     </delete>
 
+    <update id="updateTaskStatus">
+        UPDATE ht_tasks SET status = #{status}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="updateLastTime">
+        UPDATE ht_tasks SET last_time = NOW(), number = number + 1 WHERE id = #{id}
+    </update>
+
+    <update id="markScopeAsSpecial">
+        UPDATE ht_scope SET is_special = #{val}
+        WHERE id IN
+        <foreach collection="scopeIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="markUnitAsSpecial">
+        UPDATE ht_scope SET is_special = #{val}
+        WHERE id IN
+        <foreach collection="scopeIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="markPayStatus">
+        UPDATE ht_scope SET status = #{val}
+        WHERE id IN
+        <foreach collection="scopeIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="queryBalanceRate" resultType="double">
+        SELECT ROUND(
+            COUNT(CASE WHEN status IN (0, 1, 9) THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0), 2
+        ) FROM ht_scope WHERE tasks_id = #{taskId}
+    </select>
+
+    <select id="queryAvgReturnTemp" resultType="double">
+        SELECT ROUND(AVG(out_temp), 2) FROM ht_scope WHERE tasks_id = #{taskId}
+    </select>
+
+    <update id="updateValveAngleH">
+        -- 保存户阀设定开度（指令生成管线 - Phase 4c-3 实现）
+        UPDATE ht_scope SET status = 9 WHERE tasks_id = #{taskId}
+    </update>
+
+    <update id="updateValveAngleD">
+        -- 保存单元阀设定开度（指令生成管线 - Phase 4c-3 实现）
+        UPDATE ht_scope SET status = 9 WHERE tasks_id = #{taskId}
+    </update>
+
+    <update id="updateScopeStatus">
+        UPDATE ht_scope SET status = #{status} WHERE tasks_id = #{taskId}
+    </update>
+
+    <select id="querySummary" resultType="java.util.HashMap">
+        SELECT
+            COUNT(*) AS total,
+            SUM(CASE WHEN is_special = 1 THEN 1 ELSE 0 END) AS specialCount,
+            SUM(CASE WHEN status = 9 THEN 1 ELSE 0 END) AS completedCount
+        FROM ht_scope
+        WHERE org_id = #{orgId}
+        <if test="buildingId != null and buildingId != ''">
+            AND building_id = #{buildingId}
+        </if>
+    </select>
+
 </mapper>
