@@ -5,9 +5,14 @@ import org.redisson.api.RAtomicLong;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.TimeUnit;
+
 @Service
 @RequiredArgsConstructor
 public class ThermalCodeServiceImpl implements ThermalCodeService {
+
+    /** Redis key 过期时间：1 年，防止无限制增长 */
+    private static final long CODE_TTL_DAYS = 365;
 
     private final RedissonClient redissonClient;
 
@@ -15,6 +20,7 @@ public class ThermalCodeServiceImpl implements ThermalCodeService {
         String key = "thermal:code:" + type + ":" + sortId;
         RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
         long next = atomicLong.incrementAndGet();
+        atomicLong.expire(CODE_TTL_DAYS, TimeUnit.DAYS);
         return "0" + next;
     }
 

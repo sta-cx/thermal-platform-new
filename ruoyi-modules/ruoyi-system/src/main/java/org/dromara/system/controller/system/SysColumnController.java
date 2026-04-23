@@ -50,7 +50,7 @@ public class SysColumnController extends BaseController {
     @SaCheckLogin
     @Log(title = "自定义列", businessType = BusinessType.UPDATE)
     @PostMapping("/saveOrUpdate")
-    public R<Integer> saveOrUpdate(
+    public R<Void> saveOrUpdate(
             @RequestParam @NotBlank String tableName,
             @RequestParam String columnName) {
         Long userId = LoginHelper.getUserId();
@@ -58,17 +58,18 @@ public class SysColumnController extends BaseController {
         sysColumn.setUserId(userId);
         sysColumn.setPageName(tableName);
         sysColumn.setColumnName(columnName);
-        return R.ok(sysColumnService.saveOrUpdate(sysColumn));
+        return toAjax(sysColumnService.saveOrUpdate(sysColumn));
     }
 
     /**
-     * 删除自定义列
+     * 删除自定义列（校验用户归属）
      */
     @SaCheckLogin
     @Log(title = "自定义列", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {
-        sysColumnService.deleteById(id);
+        Long userId = LoginHelper.getUserId();
+        sysColumnService.deleteById(id, userId);
         return R.ok();
     }
 }

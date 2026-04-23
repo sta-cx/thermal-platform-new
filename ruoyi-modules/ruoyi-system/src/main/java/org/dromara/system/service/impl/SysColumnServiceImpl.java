@@ -1,6 +1,7 @@
 package org.dromara.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.dromara.system.domain.SysColumn;
 import org.dromara.system.domain.vo.SysColumnVo;
@@ -12,32 +13,33 @@ import org.springframework.stereotype.Service;
  * 用户自定义表格列服务实现
  */
 @Service
-@RequiredArgsConstructor
-public class SysColumnServiceImpl implements ISysColumnService {
-
-    private final SysColumnMapper baseMapper;
+public class SysColumnServiceImpl extends ServiceImpl<SysColumnMapper, SysColumn> implements ISysColumnService {
 
     @Override
     public SysColumnVo getByUserIdAndPageName(Long userId, String pageName) {
-        return baseMapper.selectVoOne(new LambdaQueryWrapper<SysColumn>()
+        return getBaseMapper().selectVoOne(new LambdaQueryWrapper<SysColumn>()
             .eq(SysColumn::getUserId, userId)
             .eq(SysColumn::getPageName, pageName));
     }
 
     @Override
-    public int saveOrUpdate(SysColumn sysColumn) {
-        SysColumn existing = baseMapper.selectOne(new LambdaQueryWrapper<SysColumn>()
+    public synchronized boolean saveOrUpdate(SysColumn sysColumn) {
+        // 基于 userId+pageName 唯一约束做 upsert
+        // synchronized 防止并发插入导致重复键异常
+        SysColumn existing = getBaseMapper().selectOne(new LambdaQueryWrapper<SysColumn>()
             .eq(SysColumn::getUserId, sysColumn.getUserId())
             .eq(SysColumn::getPageName, sysColumn.getPageName()));
         if (existing != null) {
             sysColumn.setId(existing.getId());
-            return baseMapper.updateById(sysColumn);
+            return getBaseMapper().updateById(sysColumn) > 0;
         }
-        return baseMapper.insert(sysColumn);
+        return getBaseMapper().insert(sysColumn) > 0;
     }
 
     @Override
-    public int deleteById(Long id) {
-        return baseMapper.deleteById(id);
+    public boolean deleteById(Long id, Long userId) {
+        return remove(new LambdaQueryWrapper<SysColumn>()
+            .eq(SysColumn::getId, id)
+            .eq(SysColumn::getUserId, userId));
     }
 }

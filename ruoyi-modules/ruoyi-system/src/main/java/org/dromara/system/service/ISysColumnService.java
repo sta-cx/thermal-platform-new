@@ -16,10 +16,10 @@ public interface ISysColumnService {
     /**
      * 新增或更新自定义列
      */
-    int saveOrUpdate(SysColumn sysColumn);
+    boolean saveOrUpdate(SysColumn sysColumn);
 
     /**
-     * 删除自定义列
+     * 删除自定义列（校验用户归属）
      */
-    int deleteById(Long id);
+    boolean deleteById(Long id, Long userId);
 }
