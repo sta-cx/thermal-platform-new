@@ -1,5 +1,9 @@
 --- # 供热平台专属配置
 thermal:
+  # MBus 阀门控制中间件地址
+  mbus:
+    url: http://127.0.0.1/middle/property/heatreading/operation
+
   # 旧系统数据库配置（用于数据迁移时的数据读取）
   legacy:
     enabled: true
