@@ -16,6 +16,7 @@ import org.dromara.thermal.service.IHtStrategyService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -68,15 +69,20 @@ public class HtStrategyServiceImpl extends ServiceImpl<HtStrategyMapper, HtStrat
     public boolean updateById(HtStrategy entity) {
         boolean result = super.updateById(entity);
         if (result && entity.getSubList() != null) {
-            // Delete old sub-table records
             subMapper.deleteByStrategyId(entity.getId());
-            // Insert new sub-table records
             for (HtStrategySub sub : entity.getSubList()) {
                 sub.setStrategyId(entity.getId());
                 subMapper.insert(sub);
             }
         }
         return result;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean removeById(Serializable id) {
+        subMapper.deleteByStrategyId((String) id);
+        return super.removeById(id);
     }
 
 }

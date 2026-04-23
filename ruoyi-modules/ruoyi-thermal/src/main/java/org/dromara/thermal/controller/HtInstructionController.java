@@ -11,6 +11,7 @@ import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.common.web.core.BaseController;
 import org.dromara.thermal.domain.HtInstruction;
+import org.dromara.thermal.domain.vo.HtInstructionVo;
 import org.dromara.thermal.service.IHtInstructionService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,7 +38,7 @@ public class HtInstructionController extends BaseController {
      */
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<HtInstruction> list(@RequestParam(required = false) String search, PageQuery pageQuery) {
+    public TableDataInfo<HtInstructionVo> list(@RequestParam(required = false) String search, PageQuery pageQuery) {
         LambdaQueryWrapper<HtInstruction> lqw = new LambdaQueryWrapper<>();
         String keyword = search != null ? search.trim() : null;
         boolean hasSearch = keyword != null && !keyword.isEmpty();

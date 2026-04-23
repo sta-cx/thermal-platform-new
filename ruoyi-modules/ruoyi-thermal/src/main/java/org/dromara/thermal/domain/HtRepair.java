@@ -2,6 +2,7 @@ package org.dromara.thermal.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
@@ -92,6 +93,7 @@ public class HtRepair extends BaseEntity {
     private String companyId;
 
     /** 是否删除 (0=正常 1=删除) */
+    @TableLogic(value = "0", delval = "1")
     private Integer isDelete;
 
     /** 创建人姓名 */

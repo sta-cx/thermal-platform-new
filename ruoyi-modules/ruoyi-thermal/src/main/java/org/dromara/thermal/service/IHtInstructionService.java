@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.thermal.domain.HtInstruction;
+import org.dromara.thermal.domain.vo.HtInstructionVo;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public interface IHtInstructionService extends IService<HtInstruction> {
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<HtInstruction> selectPageList(LambdaQueryWrapper<HtInstruction> lqw, PageQuery pageQuery);
+    TableDataInfo<HtInstructionVo> selectPageList(LambdaQueryWrapper<HtInstruction> lqw, PageQuery pageQuery);
 
     /**
      * 统计指令被策略子表引用的次数

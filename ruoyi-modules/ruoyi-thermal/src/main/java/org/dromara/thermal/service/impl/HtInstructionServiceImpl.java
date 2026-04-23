@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
 import org.dromara.thermal.domain.HtInstruction;
+import org.dromara.thermal.domain.vo.HtInstructionVo;
 import org.dromara.thermal.mapper.HtInstructionMapper;
 import org.dromara.thermal.service.IHtInstructionService;
 import org.springframework.stereotype.Service;
@@ -24,8 +25,8 @@ public class HtInstructionServiceImpl extends ServiceImpl<HtInstructionMapper, H
     private final HtInstructionMapper baseMapper;
 
     @Override
-    public TableDataInfo<HtInstruction> selectPageList(LambdaQueryWrapper<HtInstruction> lqw, PageQuery pageQuery) {
-        Page<HtInstruction> result = baseMapper.selectPage(pageQuery.build(), lqw);
+    public TableDataInfo<HtInstructionVo> selectPageList(LambdaQueryWrapper<HtInstruction> lqw, PageQuery pageQuery) {
+        Page<HtInstructionVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
     }
 

@@ -82,6 +82,9 @@ public class MtMeterSortController extends BaseController {
     @Log(title = "仪表分类", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable String id, @RequestParam String meterType) {
+        if (!java.util.List.of("01", "02", "03", "04").contains(meterType)) {
+            return R.fail("无效的仪表类型");
+        }
         int count = sortService.countBySortId(id, meterType);
         if (count > 0) {
             return R.fail("该分类已被仪表档案引用，无法删除");

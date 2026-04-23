@@ -41,7 +41,10 @@ public class MtTcArchiveServiceImpl extends ServiceImpl<MtTcArchiveMapper, MtTcA
     public boolean save(MtTcArchive entity) {
         boolean saved = super.save(entity);
         if (saved) {
-            baseMapper.insertMeterToAgent(entity);
+            int inserted = baseMapper.insertMeterToAgent(entity);
+            if (inserted == 0) {
+                throw new RuntimeException("未找到默认代理商公司，无法自动分配");
+            }
         }
         return saved;
     }

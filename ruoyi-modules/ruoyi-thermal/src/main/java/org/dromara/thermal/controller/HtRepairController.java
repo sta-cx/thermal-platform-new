@@ -8,6 +8,7 @@ import org.dromara.common.log.annotation.Log;
 import org.dromara.common.log.enums.BusinessType;
 import org.dromara.common.mybatis.core.page.PageQuery;
 import org.dromara.common.mybatis.core.page.TableDataInfo;
+import org.dromara.common.satoken.utils.LoginHelper;
 import org.dromara.common.web.core.BaseController;
 import org.dromara.thermal.domain.HtRepair;
 import org.dromara.thermal.domain.vo.HtRepairVo;
@@ -113,13 +114,13 @@ public class HtRepairController extends BaseController {
     @SaCheckLogin
     @Log(title = "报修记录", businessType = BusinessType.DELETE)
     @DeleteMapping("/{repairNo}")
-    public R<Void> delete(@PathVariable String repairNo,
-                          @RequestParam String companyId) {
-        int rows = htRepairService.markAsDeleted(repairNo, companyId);
+    public R<Void> delete(@PathVariable String repairNo) {
+        Long deptId = LoginHelper.getDeptId();
+        int rows = htRepairService.markAsDeleted(repairNo, deptId != null ? deptId.toString() : null);
         if (rows > 0) {
             return toAjax(true);
         }
-        return R.fail("删除失败，请检查报修编号和公司ID");
+        return R.fail("删除失败，请检查报修编号");
     }
 
     /**
