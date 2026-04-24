@@ -101,7 +101,7 @@ sa-token:
   # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)
   is-share: false
   # jwt秘钥
-  jwt-secret-key: sdkj2024
+  jwt-secret-key: ${JWT_SECRET_KEY:sdkj2024}
 
 # security配置
 security:
@@ -179,10 +179,10 @@ api-decrypt:
   headerFlag: encrypt-key
   # 响应加密公钥 非对称算法的公私钥 如：SM2，RSA 使用者请自行更换
   # 对应前端解密私钥 [REMOVED]=
-  publicKey: [REMOVED]==
+  publicKey: ${RSA_PUBLIC_KEY:[REMOVED]==}
   # 请求解密私钥 非对称算法的公私钥 如：SM2，RSA 使用者请自行更换
   # 对应前端加密公钥 [REMOVED]==
-  privateKey: [REMOVED]=
+  privateKey: ${RSA_PRIVATE_KEY:[REMOVED]=}
 
 springdoc:
   api-docs:
