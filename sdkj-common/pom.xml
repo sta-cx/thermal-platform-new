@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>sdkj-thermal-platform</artifactId>
+        <groupId>org.sdkj</groupId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <modules>
+        <module>sdkj-common-bom</module>
+        <module>sdkj-common-social</module>
+        <module>sdkj-common-core</module>
+        <module>sdkj-common-doc</module>
+        <module>sdkj-common-excel</module>
+        <module>sdkj-common-idempotent</module>
+        <module>sdkj-common-job</module>
+        <module>sdkj-common-log</module>
+        <module>sdkj-common-mail</module>
+        <module>sdkj-common-mybatis</module>
+        <module>sdkj-common-oss</module>
+        <module>sdkj-common-ratelimiter</module>
+        <module>sdkj-common-redis</module>
+        <module>sdkj-common-satoken</module>
+        <module>sdkj-common-security</module>
+        <module>sdkj-common-sms</module>
+        <module>sdkj-common-web</module>
+        <module>sdkj-common-translation</module>
+        <module>sdkj-common-sensitive</module>
+        <module>sdkj-common-json</module>
+        <module>sdkj-common-encrypt</module>
+        <module>sdkj-common-tenant</module>
+        <module>sdkj-common-websocket</module>
+        <module>sdkj-common-sse</module>
+    </modules>
+
+    <artifactId>sdkj-common</artifactId>
+    <packaging>pom</packaging>
+
+    <description>
+        common 通用模块
+    </description>
+
+</project>

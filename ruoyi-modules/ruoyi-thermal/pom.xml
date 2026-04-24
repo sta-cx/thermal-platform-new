@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.dromara</groupId>
+        <groupId>org.sdkj</groupId>
         <artifactId>ruoyi-modules</artifactId>
         <version>${revision}</version>
     </parent>
@@ -18,64 +18,64 @@
     <dependencies>
         <!-- 通用工具-->
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-core</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-core</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-doc</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-doc</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-mybatis</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-mybatis</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-translation</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-translation</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-log</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-log</artifactId>
         </dependency>
 
         <!-- excel-->
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-excel</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-excel</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-tenant</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-tenant</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-security</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-security</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-web</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-web</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-idempotent</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-idempotent</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-sensitive</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-sensitive</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-encrypt</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-encrypt</artifactId>
         </dependency>
 
         <!-- Quartz 调度器 -->

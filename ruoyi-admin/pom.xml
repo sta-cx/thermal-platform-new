@@ -3,8 +3,8 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>ruoyi-vue-plus</artifactId>
-        <groupId>org.dromara</groupId>
+        <artifactId>sdkj-thermal-platform</artifactId>
+        <groupId>org.sdkj</groupId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -48,44 +48,44 @@
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-doc</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-doc</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-social</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-social</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-ratelimiter</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-ratelimiter</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
-            <artifactId>ruoyi-common-mail</artifactId>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-mail</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
+            <groupId>org.sdkj</groupId>
             <artifactId>ruoyi-system</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.dromara</groupId>
+            <groupId>org.sdkj</groupId>
             <artifactId>ruoyi-job</artifactId>
         </dependency>
 
         <!-- 仪表模块 -->
         <dependency>
-            <groupId>org.dromara</groupId>
+            <groupId>org.sdkj</groupId>
             <artifactId>ruoyi-meter</artifactId>
         </dependency>
 
         <!-- 热力调控模块 -->
         <dependency>
-            <groupId>org.dromara</groupId>
+            <groupId>org.sdkj</groupId>
             <artifactId>ruoyi-thermal</artifactId>
         </dependency>
 

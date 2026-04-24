@@ -3,24 +3,24 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>sdkj-thermal-platform</artifactId>
         <groupId>org.sdkj</groupId>
+        <artifactId>sdkj-common</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <modules>
-        <module>ruoyi-system</module>
-        <module>ruoyi-job</module>
-        <module>ruoyi-meter</module>
-        <module>ruoyi-thermal</module>
-    </modules>
-
-    <artifactId>ruoyi-modules</artifactId>
-    <packaging>pom</packaging>
+    <artifactId>sdkj-common-security</artifactId>
 
     <description>
-        ruoyi-modules 业务模块
+        sdkj-common-security 安全模块
     </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-satoken</artifactId>
+        </dependency>
+
+    </dependencies>
 
 </project>

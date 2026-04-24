@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.dromara</groupId>
-    <artifactId>ruoyi-vue-plus</artifactId>
+    <groupId>org.sdkj</groupId>
+    <artifactId>sdkj-thermal-platform</artifactId>
     <version>${revision}</version>
 
-    <name>Thermal-Balance-Platform</name>
+    <name>SDKJ Thermal Platform</name>
     <url>https://gitee.com/dromara/RuoYi-Vue-Plus</url>
     <description>智慧供热综合管理平台 - 二网热力平衡</description>
 
@@ -106,8 +106,8 @@
 
             <!-- common 的依赖配置-->
             <dependency>
-                <groupId>org.dromara</groupId>
-                <artifactId>ruoyi-common-bom</artifactId>
+                <groupId>org.sdkj</groupId>
+                <artifactId>sdkj-common-bom</artifactId>
                 <version>${revision}</version>
                 <type>pom</type>
                 <scope>import</scope>
@@ -271,27 +271,27 @@
             </dependency>
 
             <dependency>
-                <groupId>org.dromara</groupId>
+                <groupId>org.sdkj</groupId>
                 <artifactId>ruoyi-system</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.dromara</groupId>
+                <groupId>org.sdkj</groupId>
                 <artifactId>ruoyi-job</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!-- 仪表模块 -->
             <dependency>
-                <groupId>org.dromara</groupId>
+                <groupId>org.sdkj</groupId>
                 <artifactId>ruoyi-meter</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!-- 热力调控模块 -->
             <dependency>
-                <groupId>org.dromara</groupId>
+                <groupId>org.sdkj</groupId>
                 <artifactId>ruoyi-thermal</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -301,7 +301,7 @@
 
     <modules>
         <module>ruoyi-admin</module>
-        <module>ruoyi-common</module>
+        <module>sdkj-common</module>
         <module>ruoyi-modules</module>
     </modules>
     <packaging>pom</packaging>

@@ -4,20 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>org.sdkj</groupId>
-        <artifactId>ruoyi-modules</artifactId>
+        <artifactId>sdkj-common</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <packaging>jar</packaging>
-    <artifactId>ruoyi-job</artifactId>
+
+    <artifactId>sdkj-common-idempotent</artifactId>
 
     <description>
-        任务调度
+        sdkj-common-idempotent 幂等功能
     </description>
 
     <dependencies>
-
-        <!-- 通用工具-->
         <dependency>
             <groupId>org.sdkj</groupId>
             <artifactId>sdkj-common-json</artifactId>
@@ -25,10 +23,19 @@
 
         <dependency>
             <groupId>org.sdkj</groupId>
-            <artifactId>sdkj-common-job</artifactId>
+            <artifactId>sdkj-common-redis</artifactId>
         </dependency>
-        
+
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-crypto</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-core</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
-
