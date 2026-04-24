@@ -150,7 +150,7 @@ public class HtTasksController extends BaseController {
     // ==================== Phase 4c-3: 核心调控功能 ====================
 
     /**
-     * 启动/停止任务（TODO: Quartz/snail-job集成）
+     * 启动/停止任务
      */
     @SaCheckLogin
     @Log(title = "任务状态", businessType = BusinessType.UPDATE)
@@ -162,7 +162,7 @@ public class HtTasksController extends BaseController {
     }
 
     /**
-     * 立即运行任务（TODO: Quartz/snail-job集成）
+     * 立即运行任务
      */
     @SaCheckLogin
     @Log(title = "任务执行", businessType = BusinessType.UPDATE)
@@ -220,7 +220,7 @@ public class HtTasksController extends BaseController {
     }
 
     /**
-     * 保存设定开度（TODO: 指令生成管线）
+     * 保存设定开度
      */
     @SaCheckLogin
     @Log(title = "设定开度", businessType = BusinessType.UPDATE)
