@@ -84,7 +84,7 @@ public class HtTasksController extends BaseController {
     @PostMapping
     public R<Void> save(@Validated @RequestBody HtTasks task,
                         @RequestParam(required = false) List<String> scopeIds) {
-        task.setBeanClass("com.thermal.job.ControlJob");
+        task.setBeanClass("org.sdkj.job.ControlJob");
         if (task.getNumber() == null) task.setNumber(0);
         if (task.getStatus() == null) task.setStatus(0);
         if (task.getIsUseReportRate() == null) task.setIsUseReportRate(0);
@@ -101,6 +101,10 @@ public class HtTasksController extends BaseController {
     @PutMapping
     public R<Void> update(@Validated @RequestBody HtTasks task,
                           @RequestParam(required = false) List<String> scopeIds) {
+        HtTasks existing = tasksService.getById(task.getId());
+        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+            return R.fail("运行中的任务不允许修改，请先停止任务！");
+        }
         return toAjax(tasksService.updateWithScope(task, scopeIds));
     }
 
@@ -111,6 +115,10 @@ public class HtTasksController extends BaseController {
     @Log(title = "调控任务", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable Integer id) {
+        HtTasks existing = tasksService.getById(id);
+        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+            return R.fail("运行中的任务不允许删除，请先停止任务！");
+        }
         return toAjax(tasksService.removeById(id));
     }
 
