@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.HtTaskSettingLogMapper">
+
+    <select id="selectItemsByMainId" resultType="org.sdkj.thermal.domain.vo.HtTaskSettingLogItemVo">
+        SELECT id, main_id, scope_id, meter_num, old_angle, new_angle
+        FROM ht_task_setting_log_item
+        WHERE main_id = #{mainId}
+        ORDER BY id
+    </select>
+
+</mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrAccountBalanceMapper">
+
+    <select id="selectAccountList" resultType="org.sdkj.thermal.domain.vo.PrAccountBalanceVo">
+        SELECT b.id, b.user_id, b.house_id, b.item_group, b.item_code, b.balance,
+               b.org_id, b.company_id, h.room_num, u.user_name, ei.item_name
+        FROM pr_account_balance b
+        LEFT JOIN pr_house h ON b.house_id = h.id
+        LEFT JOIN pr_user u ON b.user_id = u.id
+        LEFT JOIN pr_expense_item ei ON b.item_code = ei.item_code
+        WHERE b.company_id = #{companyId} AND b.org_id = #{orgId}
+        <if test="buildingId != null and buildingId != ''">AND h.building_id = #{buildingId}</if>
+        <if test="unitCode != null and unitCode != ''">AND h.unit_code = #{unitCode}</if>
+        <if test="itemGroup != null and itemGroup != ''">AND b.item_group = #{itemGroup}</if>
+        <if test="itemCode != null and itemCode != ''">AND b.item_code = #{itemCode}</if>
+        <if test="search != null and search != ''">AND (h.room_num LIKE CONCAT('%', #{search}, '%') OR u.user_name LIKE CONCAT('%', #{search}, '%'))</if>
+        ORDER BY b.create_time DESC
+    </select>
+
+    <select id="selectNoAccountList" resultType="org.sdkj.thermal.domain.vo.PrAccountBalanceVo">
+        SELECT h.id AS house_id, h.room_num, u.user_name, u.id AS user_id,
+               h.org_id, h.company_id
+        FROM pr_house h
+        LEFT JOIN pr_user_house uh ON h.id = uh.house_id AND uh.is_deleted = 0
+        LEFT JOIN pr_user u ON uh.user_id = u.id
+        LEFT JOIN pr_account_balance b ON h.id = b.house_id AND b.item_code = #{itemCode}
+        WHERE h.company_id = #{companyId} AND h.org_id = #{orgId}
+          AND b.id IS NULL
+        <if test="buildingId != null and buildingId != ''">AND h.building_id = #{buildingId}</if>
+        <if test="unitCode != null and unitCode != ''">AND h.unit_code = #{unitCode}</if>
+        <if test="search != null and search != ''">AND (h.room_num LIKE CONCAT('%', #{search}, '%') OR u.user_name LIKE CONCAT('%', #{search}, '%'))</if>
+    </select>
+
+    <select id="selectBalanceByUser" resultType="java.math.BigDecimal">
+        SELECT COALESCE(SUM(balance), 0)
+        FROM pr_account_balance
+        WHERE company_id = #{companyId} AND org_id = #{orgId} AND user_id = #{userId}
+    </select>
+
+    <update id="updateBalance">
+        UPDATE pr_account_balance SET balance = balance + #{amount}, update_time = NOW()
+        WHERE user_id = #{userId} AND house_id = #{houseId}
+          AND item_group = #{itemGroup} AND item_code = #{itemCode}
+    </update>
+
+</mapper>

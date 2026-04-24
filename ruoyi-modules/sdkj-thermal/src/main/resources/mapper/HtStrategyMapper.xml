@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.HtStrategyMapper">
+
+    <!-- 查询所有策略列表 -->
+    <select id="selectAllList" resultType="org.sdkj.thermal.domain.HtStrategy">
+        SELECT id, name, type, company_id, create_by, create_time, remark
+        FROM ht_strategy
+    </select>
+
+</mapper>

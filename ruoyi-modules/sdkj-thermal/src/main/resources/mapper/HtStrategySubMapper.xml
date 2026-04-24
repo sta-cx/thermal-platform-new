@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.HtStrategySubMapper">
+
+    <!-- 根据策略ID查询子表记录 -->
+    <select id="selectByStrategyId" resultType="org.sdkj.thermal.domain.vo.HtStrategySubVo">
+        SELECT id, strategy_id, instruction_id, sort, valve_angle
+        FROM ht_strategy_sub
+        WHERE strategy_id = #{strategyId}
+        ORDER BY sort ASC
+    </select>
+
+    <!-- 根据策略ID删除子表记录 -->
+    <delete id="deleteByStrategyId">
+        DELETE FROM ht_strategy_sub WHERE strategy_id = #{strategyId}
+    </delete>
+
+</mapper>

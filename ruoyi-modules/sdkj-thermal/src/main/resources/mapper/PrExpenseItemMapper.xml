@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrExpenseItemMapper">
+
+    <select id="selectPageList" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
+        SELECT a.id, a.item_code, a.item_name, a.item_group,
+               a.is_show, a.is_printmonth, a.price_precision, a.qty_precision,
+               a.money_precision, a.is_integer, a.precision_type, a.start_pos,
+               a.sum_precision, a.change_cycle, a.org_id, a.company_id,
+               a.create_time,
+               COUNT(b.id) AS num
+        FROM pr_expense_item a
+        LEFT JOIN pr_standard b ON b.company_id = a.company_id
+            AND a.org_id = b.org_id
+            AND a.item_group = b.item_group
+            AND a.item_code = b.item_code
+        WHERE a.org_id = #{orgId}
+        <if test="itemGroup != null and itemGroup != ''">
+            AND a.item_group = #{itemGroup}
+        </if>
+        GROUP BY a.id, a.item_group, a.item_code
+        ORDER BY a.create_time
+    </select>
+
+    <select id="queryMaxItemCode" resultType="java.lang.String">
+        SELECT MAX(item_code) FROM pr_expense_item
+        WHERE item_group = #{itemGroup} AND org_id = #{orgId}
+    </select>
+
+    <select id="selectById" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
+        SELECT id, item_code, item_name, item_group,
+               is_show, is_printmonth, price_precision, qty_precision,
+               money_precision, is_integer, precision_type, start_pos,
+               sum_precision, change_cycle, org_id, company_id,
+               create_by, create_time
+        FROM pr_expense_item
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByItemCode" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
+        SELECT id, item_code, item_name, item_group,
+               is_show, is_printmonth, price_precision, qty_precision,
+               money_precision, is_integer, precision_type, start_pos,
+               sum_precision, change_cycle, org_id, company_id
+        FROM pr_expense_item
+        WHERE company_id = #{companyId}
+          AND org_id = #{orgId}
+          AND item_group = #{itemGroup}
+          AND item_code = #{itemCode}
+    </select>
+
+    <select id="selectByItemGroup" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
+        SELECT id, item_code, item_group, item_name, company_id, org_id
+        FROM pr_expense_item
+        WHERE company_id = #{companyId}
+          AND org_id = #{orgId}
+          AND item_group = #{itemGroup}
+        ORDER BY item_code
+    </select>
+
+    <select id="selectByCompanyAndOrg" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
+        SELECT id, item_code, item_group, item_name, company_id, org_id
+        FROM pr_expense_item
+        WHERE company_id = #{companyId}
+          AND org_id = #{orgId}
+        GROUP BY item_group, item_code
+        ORDER BY item_code
+    </select>
+
+    <select id="selectByItemGroupAndUserId" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
+        SELECT b.id, b.item_code, b.item_group, b.item_name,
+               a.company_id, a.org_id
+        FROM pr_account a
+        LEFT JOIN pr_expense_item b
+            ON b.item_group = a.item_group AND a.item_code = b.item_code
+        WHERE b.company_id = #{companyId}
+          AND b.org_id = #{orgId}
+          AND a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.item_group = #{itemGroup}
+          AND a.user_id = #{userId}
+    </select>
+
+    <select id="checkItemName" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
+        SELECT item_name
+        FROM pr_expense_item
+        WHERE company_id = #{companyId}
+          AND org_id = #{orgId}
+          AND item_name = #{itemName}
+        <if test="id != null and id != ''">
+            AND id != #{id}
+        </if>
+    </select>
+
+</mapper>

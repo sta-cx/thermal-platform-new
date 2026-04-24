@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrTransactionRecordMapper">
+
+    <select id="selectPageList" resultType="org.sdkj.thermal.domain.vo.PrTransactionRecordVo">
+        SELECT r.id, r.serial_num, r.transaction_type, r.payment_type, r.amount,
+               r.paid_amount, r.status, r.house_id, r.user_id, r.org_id, r.company_id,
+               r.item_group, r.item_code, r.transaction_time, r.operator_id, r.notes,
+               r.original_record_id, r.invoice_no,
+               b.room_num, u.user_name
+        FROM pr_transaction_record r
+        LEFT JOIN pr_house b ON r.house_id = b.id
+        LEFT JOIN pr_user u ON r.user_id = u.id
+        WHERE 1=1
+        <if test="companyId != null and companyId != ''">
+            AND r.company_id = #{companyId}
+        </if>
+        <if test="orgId != null and orgId != ''">
+            AND r.org_id = #{orgId}
+        </if>
+        <if test="buildingId != null and buildingId != ''">
+            AND b.building_id = #{buildingId}
+        </if>
+        <if test="unitCode != null and unitCode != ''">
+            AND b.unit_code = #{unitCode}
+        </if>
+        <if test="startTime != null and startTime != ''">
+            AND r.transaction_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND r.transaction_time &lt;= #{endTime}
+        </if>
+        <if test="status != null and status != ''">
+            AND r.status = #{status}
+        </if>
+        <if test="search != null and search != ''">
+            AND (b.room_num LIKE CONCAT('%', #{search}, '%')
+                 OR u.user_name LIKE CONCAT('%', #{search}, '%')
+                 OR r.serial_num LIKE CONCAT('%', #{search}, '%'))
+        </if>
+        ORDER BY r.transaction_time DESC
+    </select>
+
+    <select id="selectDetailByMainId" resultType="org.sdkj.thermal.domain.vo.PrTransactionRecordSubVo">
+        SELECT id, main_id, expense_id, amount, balance_before, balance_after,
+               item_name, notes
+        FROM pr_transaction_record_sub
+        WHERE main_id = #{mainId}
+        ORDER BY id
+    </select>
+
+    <update id="revokeRecord">
+        UPDATE pr_transaction_record SET status = 1, update_time = NOW()
+        WHERE id = #{recordId} AND status = 0
+          AND DATE_FORMAT(transaction_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
+    </update>
+
+    <update id="invalidRecord">
+        UPDATE pr_transaction_record SET status = 2, update_time = NOW()
+        WHERE id = #{recordId} AND status = 0
+    </update>
+
+    <select id="selectComprehensiveStats" resultType="java.util.HashMap">
+        SELECT
+            COUNT(*) AS totalTransactions,
+            SUM(CASE WHEN transaction_type = 1 THEN 1 ELSE 0 END) AS chargeCount,
+            SUM(CASE WHEN transaction_type = 2 THEN 1 ELSE 0 END) AS refundCount,
+            SUM(CASE WHEN transaction_type = 3 THEN 1 ELSE 0 END) AS transferCount,
+            SUM(CASE WHEN transaction_type = 1 THEN paid_amount ELSE 0 END) AS chargeAmount,
+            SUM(CASE WHEN transaction_type = 2 THEN amount ELSE 0 END) AS refundAmount,
+            SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS revokedCount,
+            SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS invalidCount
+        FROM pr_transaction_record
+        WHERE company_id = #{companyId} AND org_id = #{orgId}
+        <if test="startTime != null and startTime != ''">
+            AND transaction_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND transaction_time &lt;= #{endTime}
+        </if>
+    </select>
+
+    <select id="selectReceivedStats" resultType="java.util.HashMap">
+        SELECT
+            COUNT(*) AS receivedCount,
+            SUM(paid_amount) AS totalReceived,
+            SUM(CASE WHEN payment_type = 1 THEN paid_amount ELSE 0 END) AS cashAmount,
+            SUM(CASE WHEN payment_type = 2 THEN paid_amount ELSE 0 END) AS wechatAmount,
+            SUM(CASE WHEN payment_type = 3 THEN paid_amount ELSE 0 END) AS alipayAmount,
+            SUM(CASE WHEN payment_type = 4 THEN paid_amount ELSE 0 END) AS cardAmount
+        FROM pr_transaction_record
+        WHERE company_id = #{companyId} AND org_id = #{orgId}
+          AND transaction_type = 1 AND status = 0
+        <if test="startTime != null and startTime != ''">
+            AND transaction_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null and endTime != ''">
+            AND transaction_time &lt;= #{endTime}
+        </if>
+    </select>
+
+    <select id="selectArrearsStats" resultType="java.util.HashMap">
+        SELECT
+            COUNT(DISTINCT e.house_id) AS arrearsHouseCount,
+            COUNT(*) AS arrearsCount,
+            SUM(e.receivable - e.paid_in) AS totalArrears
+        FROM pr_expense e
+        WHERE e.company_id = #{companyId} AND e.org_id = #{orgId}
+          AND e.is_charged = 0 AND e.receivable > 0
+    </select>
+
+    <select id="selectDailyReport" resultType="org.sdkj.thermal.domain.vo.PrTransactionRecordVo">
+        SELECT r.id, r.serial_num, r.transaction_type, r.payment_type, r.amount,
+               r.paid_amount, r.status, r.transaction_time, r.operator_id, r.notes,
+               r.invoice_no, b.room_num, u.user_name
+        FROM pr_transaction_record r
+        LEFT JOIN pr_house b ON r.house_id = b.id
+        LEFT JOIN pr_user u ON r.user_id = u.id
+        WHERE r.company_id = #{companyId} AND r.org_id = #{orgId}
+          AND DATE(r.transaction_time) = #{date}
+          AND status = 0
+        ORDER BY r.transaction_time ASC
+    </select>
+
+</mapper>

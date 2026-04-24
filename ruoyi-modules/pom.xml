@@ -12,8 +12,8 @@
     <modules>
         <module>sdkj-system</module>
         <module>sdkj-job</module>
-        <module>ruoyi-meter</module>
-        <module>ruoyi-thermal</module>
+        <module>sdkj-meter</module>
+        <module>sdkj-thermal</module>
     </modules>
 
     <artifactId>ruoyi-modules</artifactId>

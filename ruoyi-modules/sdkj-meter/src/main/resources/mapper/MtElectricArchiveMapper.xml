@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.meter.mapper.MtElectricArchiveMapper">
+
+    <!-- 统计已分配给其他公司的仪表数量 -->
+    <select id="countAllocatedToOtherCompany" resultType="int">
+        SELECT COUNT(id) FROM mt_meter_match
+        WHERE archive_id = #{archiveId}
+          AND company_id != (SELECT id FROM sys_company WHERE nature = '1' AND code = 'XABL')
+    </select>
+
+    <!-- 删除仪表匹配记录 -->
+    <delete id="deleteMeterMatch">
+        DELETE FROM mt_meter_match WHERE archive_id = #{archiveId}
+    </delete>
+
+    <!-- 将仪表分配给代理商公司 -->
+    <insert id="insertMeterToAgent">
+        INSERT INTO mt_meter_match (id, archive_id, company_id, meter_type, create_by, create_time)
+        SELECT REPLACE(UUID(), '-', ''), #{entity.id}, id, '01', #{entity.createBy}, NOW()
+        FROM sys_company
+        WHERE code = 'XABL' AND nature = '1'
+    </insert>
+
+</mapper>

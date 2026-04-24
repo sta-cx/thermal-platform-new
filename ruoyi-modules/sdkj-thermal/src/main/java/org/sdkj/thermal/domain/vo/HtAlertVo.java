@@ -1,0 +1,68 @@
+package org.sdkj.thermal.domain.vo;
+
+import io.github.linpeilie.annotations.AutoMapper;
+import lombok.Data;
+import org.sdkj.thermal.domain.HtAlert;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+/**
+ * 报警记录视图对象
+ * 迁移自旧系统 HtAlert
+ */
+@Data
+@AutoMapper(target = HtAlert.class)
+public class HtAlertVo {
+
+    private String id;
+
+    /** 楼栋ID */
+    private String buildingId;
+
+    /** 单元ID */
+    private String unitId;
+
+    /** 户ID */
+    private String houseId;
+
+    /** 仪表ID */
+    private String meterId;
+
+    /** 是否收费 */
+    private Integer isCharged;
+
+    /** 阀门状态 */
+    private Integer valve;
+
+    /** 进水温度 */
+    private BigDecimal inTemp;
+
+    /** 回水温度 */
+    private BigDecimal outTemp;
+
+    /** 室温 */
+    private BigDecimal roomTemp;
+
+    /** 报警类型 */
+    private Integer alertType;
+
+    /** 报警时间 */
+    private Date alertTime;
+
+    /** 报警状态 */
+    private String alertStatus;
+
+    /** 组织ID */
+    private String orgId;
+
+    /** 公司ID */
+    private String companyId;
+
+    /** 是否在维修中 */
+    private Integer inMaintenance;
+
+    /** 创建人名称 */
+    private String createName;
+
+}
