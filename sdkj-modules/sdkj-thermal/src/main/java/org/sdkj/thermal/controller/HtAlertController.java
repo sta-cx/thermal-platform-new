@@ -8,8 +8,10 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtAlert;
+import org.sdkj.thermal.domain.bo.HtAlertBo;
 import org.sdkj.thermal.domain.vo.HtAlertVo;
 import org.sdkj.thermal.service.IHtAlertService;
 import org.springframework.validation.annotation.Validated;
@@ -63,7 +65,8 @@ public class HtAlertController extends BaseController {
     @SaCheckLogin
     @Log(title = "报警记录", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insert(@Validated @RequestBody HtAlert alert) {
+    public R<Void> insert(@Validated @RequestBody HtAlertBo bo) {
+        HtAlert alert = MapstructUtils.convert(bo, HtAlert.class);
         return toAjax(htAlertService.save(alert));
     }
 
@@ -75,7 +78,8 @@ public class HtAlertController extends BaseController {
     @SaCheckLogin
     @Log(title = "报警记录", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> update(@Validated @RequestBody HtAlert alert) {
+    public R<Void> update(@Validated @RequestBody HtAlertBo bo) {
+        HtAlert alert = MapstructUtils.convert(bo, HtAlert.class);
         return toAjax(htAlertService.updateById(alert));
     }
 

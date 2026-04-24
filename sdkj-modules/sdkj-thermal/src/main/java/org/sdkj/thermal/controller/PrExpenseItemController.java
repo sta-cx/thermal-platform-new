@@ -7,8 +7,10 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrExpenseItem;
+import org.sdkj.thermal.domain.bo.PrExpenseItemBo;
 import org.sdkj.thermal.domain.vo.PrExpenseItemVo;
 import org.sdkj.thermal.service.IPrExpenseItemService;
 import org.springframework.validation.annotation.Validated;
@@ -51,7 +53,8 @@ public class PrExpenseItemController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用项目", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insert(@Validated @RequestBody PrExpenseItem item) {
+    public R<Void> insert(@Validated @RequestBody PrExpenseItemBo bo) {
+        PrExpenseItem item = MapstructUtils.convert(bo, PrExpenseItem.class);
         return toAjax(expenseItemService.insertData(item));
     }
 
@@ -74,7 +77,8 @@ public class PrExpenseItemController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用项目", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> update(@Validated @RequestBody PrExpenseItem item) {
+    public R<Void> update(@Validated @RequestBody PrExpenseItemBo bo) {
+        PrExpenseItem item = MapstructUtils.convert(bo, PrExpenseItem.class);
         return toAjax(expenseItemService.updateById(item));
     }
 

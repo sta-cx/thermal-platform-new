@@ -9,8 +9,10 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtInstruction;
+import org.sdkj.thermal.domain.bo.HtInstructionBo;
 import org.sdkj.thermal.domain.vo.HtInstructionVo;
 import org.sdkj.thermal.service.IHtInstructionService;
 import org.springframework.validation.annotation.Validated;
@@ -55,7 +57,8 @@ public class HtInstructionController extends BaseController {
     @SaCheckLogin
     @Log(title = "控制指令", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insert(@Validated @RequestBody HtInstruction instruction) {
+    public R<Void> insert(@Validated @RequestBody HtInstructionBo bo) {
+        HtInstruction instruction = MapstructUtils.convert(bo, HtInstruction.class);
         return toAjax(htInstructionService.save(instruction));
     }
 
@@ -78,7 +81,8 @@ public class HtInstructionController extends BaseController {
     @SaCheckLogin
     @Log(title = "控制指令", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> update(@Validated @RequestBody HtInstruction instruction) {
+    public R<Void> update(@Validated @RequestBody HtInstructionBo bo) {
+        HtInstruction instruction = MapstructUtils.convert(bo, HtInstruction.class);
         return toAjax(htInstructionService.updateById(instruction));
     }
 

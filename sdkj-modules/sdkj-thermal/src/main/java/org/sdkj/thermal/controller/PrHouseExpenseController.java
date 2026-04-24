@@ -7,8 +7,10 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrHouseExpense;
+import org.sdkj.thermal.domain.bo.PrHouseExpenseBo;
 import org.sdkj.thermal.domain.vo.PrExpenseItemVo;
 import org.sdkj.thermal.domain.vo.PrHouseExpenseVo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
@@ -88,11 +90,12 @@ public class PrHouseExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "房屋费目绑定", businessType = BusinessType.INSERT)
     @PostMapping("/batch")
-    public R<Void> batchInsert(@RequestBody List<PrHouseExpense> list,
+    public R<Void> batchInsert(@RequestBody List<PrHouseExpenseBo> boList,
                                @RequestParam(required = false) String itemGroup,
                                @RequestParam(required = false) String itemCode,
                                @RequestParam(required = false) String orgId,
                                @RequestParam(required = false) String companyId) {
+        List<PrHouseExpense> list = MapstructUtils.convert(boList, PrHouseExpense.class);
         return toAjax(houseExpenseService.batchInsert(list, itemGroup, itemCode, orgId, companyId));
     }
 
@@ -104,7 +107,8 @@ public class PrHouseExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "房屋费目绑定", businessType = BusinessType.UPDATE)
     @PutMapping("/batch")
-    public R<Void> batchUpdate(@RequestBody List<PrHouseExpense> list) {
+    public R<Void> batchUpdate(@RequestBody List<PrHouseExpenseBo> boList) {
+        List<PrHouseExpense> list = MapstructUtils.convert(boList, PrHouseExpense.class);
         return toAjax(houseExpenseService.batchUpdate(list));
     }
 
@@ -116,7 +120,8 @@ public class PrHouseExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "房屋费目绑定", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
-    public R<Void> batchDelete(@RequestBody List<PrHouseExpense> list) {
+    public R<Void> batchDelete(@RequestBody List<PrHouseExpenseBo> boList) {
+        List<PrHouseExpense> list = MapstructUtils.convert(boList, PrHouseExpense.class);
         return toAjax(houseExpenseService.batchDelete(list));
     }
 }

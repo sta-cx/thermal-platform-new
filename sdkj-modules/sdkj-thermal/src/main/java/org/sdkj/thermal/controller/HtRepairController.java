@@ -9,8 +9,10 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtRepair;
+import org.sdkj.thermal.domain.bo.HtRepairBo;
 import org.sdkj.thermal.domain.vo.HtRepairVo;
 import org.sdkj.thermal.service.IHtRepairService;
 import org.springframework.validation.annotation.Validated;
@@ -68,7 +70,8 @@ public class HtRepairController extends BaseController {
     @SaCheckLogin
     @Log(title = "报修记录", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insert(@Validated @RequestBody HtRepair repair) {
+    public R<Void> insert(@Validated @RequestBody HtRepairBo bo) {
+        HtRepair repair = MapstructUtils.convert(bo, HtRepair.class);
         repair.setRepairNo("R" + java.util.UUID.randomUUID().toString().substring(0, 8));
         return toAjax(htRepairService.save(repair));
     }
@@ -81,7 +84,8 @@ public class HtRepairController extends BaseController {
     @SaCheckLogin
     @Log(title = "报修记录", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> update(@Validated @RequestBody HtRepair repair) {
+    public R<Void> update(@Validated @RequestBody HtRepairBo bo) {
+        HtRepair repair = MapstructUtils.convert(bo, HtRepair.class);
         return toAjax(htRepairService.updateById(repair));
     }
 

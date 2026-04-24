@@ -8,8 +8,10 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtStrategy;
+import org.sdkj.thermal.domain.bo.HtStrategyBo;
 import org.sdkj.thermal.domain.vo.HtStrategyVo;
 import org.sdkj.thermal.service.IHtStrategyService;
 import org.springframework.validation.annotation.Validated;
@@ -67,7 +69,8 @@ public class HtStrategyController extends BaseController {
     @SaCheckLogin
     @Log(title = "控制策略", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insert(@Validated @RequestBody HtStrategy strategy) {
+    public R<Void> insert(@Validated @RequestBody HtStrategyBo bo) {
+        HtStrategy strategy = MapstructUtils.convert(bo, HtStrategy.class);
         return toAjax(htStrategyService.save(strategy));
     }
 
@@ -79,7 +82,8 @@ public class HtStrategyController extends BaseController {
     @SaCheckLogin
     @Log(title = "控制策略", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> update(@Validated @RequestBody HtStrategy strategy) {
+    public R<Void> update(@Validated @RequestBody HtStrategyBo bo) {
+        HtStrategy strategy = MapstructUtils.convert(bo, HtStrategy.class);
         return toAjax(htStrategyService.updateById(strategy));
     }
 

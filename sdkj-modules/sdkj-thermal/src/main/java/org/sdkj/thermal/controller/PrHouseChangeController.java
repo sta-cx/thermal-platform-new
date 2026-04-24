@@ -9,8 +9,10 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrHouse;
+import org.sdkj.thermal.domain.bo.PrHouseBo;
 import org.sdkj.thermal.service.IPrHouseChangeService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -58,14 +60,16 @@ public class PrHouseChangeController extends BaseController {
     @SaCheckLogin
     @Log(title = "入住登记", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insertData(@RequestBody PrHouse house) {
+    public R<Void> insertData(@RequestBody PrHouseBo bo) {
+        PrHouse house = MapstructUtils.convert(bo, PrHouse.class);
         return toAjax(houseChangeService.save(house));
     }
 
     @SaCheckLogin
     @Log(title = "入住登记", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> updateData(@RequestBody PrHouse house) {
+    public R<Void> updateData(@RequestBody PrHouseBo bo) {
+        PrHouse house = MapstructUtils.convert(bo, PrHouse.class);
         return toAjax(houseChangeService.updateById(house));
     }
 
@@ -86,7 +90,8 @@ public class PrHouseChangeController extends BaseController {
     @SaCheckLogin
     @Log(title = "入住审核", businessType = BusinessType.UPDATE)
     @PutMapping("/audit")
-    public R<Void> changeData(@RequestBody PrHouse house) {
+    public R<Void> changeData(@RequestBody PrHouseBo bo) {
+        PrHouse house = MapstructUtils.convert(bo, PrHouse.class);
         return toAjax(houseChangeService.audit(house));
     }
 }

@@ -7,8 +7,10 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtHouseStrategy;
+import org.sdkj.thermal.domain.bo.HtHouseStrategyBo;
 import org.sdkj.thermal.domain.vo.HtHouseStrategyVo;
 import org.sdkj.thermal.service.IHtHouseStrategyService;
 import org.springframework.validation.annotation.Validated;
@@ -58,9 +60,10 @@ public class HtHouseStrategyController extends BaseController {
     @SaCheckLogin
     @Log(title = "房屋策略绑定", businessType = BusinessType.INSERT)
     @PostMapping("/batch")
-    public R<Void> insertBatch(@RequestBody List<HtHouseStrategy> list,
+    public R<Void> insertBatch(@RequestBody List<HtHouseStrategyBo> boList,
                                @RequestParam String orgId,
                                @RequestParam String companyId) {
+        List<HtHouseStrategy> list = MapstructUtils.convert(boList, HtHouseStrategy.class);
         return toAjax(houseStrategyService.insertBatch(list, orgId, companyId));
     }
 
@@ -70,7 +73,8 @@ public class HtHouseStrategyController extends BaseController {
     @SaCheckLogin
     @Log(title = "房屋策略绑定", businessType = BusinessType.UPDATE)
     @PutMapping("/batch")
-    public R<Void> updateBatch(@RequestBody List<HtHouseStrategy> list) {
+    public R<Void> updateBatch(@RequestBody List<HtHouseStrategyBo> boList) {
+        List<HtHouseStrategy> list = MapstructUtils.convert(boList, HtHouseStrategy.class);
         return toAjax(houseStrategyService.updateBatch(list));
     }
 
@@ -80,7 +84,8 @@ public class HtHouseStrategyController extends BaseController {
     @SaCheckLogin
     @Log(title = "房屋策略绑定", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
-    public R<Void> deleteBatch(@RequestBody List<HtHouseStrategy> list) {
+    public R<Void> deleteBatch(@RequestBody List<HtHouseStrategyBo> boList) {
+        List<HtHouseStrategy> list = MapstructUtils.convert(boList, HtHouseStrategy.class);
         return toAjax(houseStrategyService.deleteBatch(list));
     }
 }

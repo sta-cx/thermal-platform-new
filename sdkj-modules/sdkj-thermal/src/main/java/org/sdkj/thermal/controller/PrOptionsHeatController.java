@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrOptionsHeat;
+import org.sdkj.thermal.domain.bo.PrOptionsHeatBo;
 import org.sdkj.thermal.service.IPrOptionsHeatService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -43,20 +45,23 @@ public class PrOptionsHeatController extends BaseController {
     @SaCheckLogin
     @Log(title = "供热选项", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insertData(@RequestBody PrOptionsHeat options) {
+    public R<Void> insertData(@RequestBody PrOptionsHeatBo bo) {
+        PrOptionsHeat options = MapstructUtils.convert(bo, PrOptionsHeat.class);
         return toAjax(optionsHeatService.save(options));
     }
 
     @SaCheckLogin
     @Log(title = "供热选项", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> updateData(@RequestBody PrOptionsHeat options) {
+    public R<Void> updateData(@RequestBody PrOptionsHeatBo bo) {
+        PrOptionsHeat options = MapstructUtils.convert(bo, PrOptionsHeat.class);
         return toAjax(optionsHeatService.updateById(options));
     }
 
     @SaCheckLogin
     @PostMapping("/upsert")
-    public R<Void> upsertCompanyData(@RequestBody PrOptionsHeat options) {
+    public R<Void> upsertCompanyData(@RequestBody PrOptionsHeatBo bo) {
+        PrOptionsHeat options = MapstructUtils.convert(bo, PrOptionsHeat.class);
         PrOptionsHeat existing = optionsHeatService.getByOrgAndCompany(
                 options.getOrgId(), options.getCompanyId(), options.getLevel());
         if (existing != null) {

@@ -7,8 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrUseCardLog;
+import org.sdkj.thermal.domain.bo.PrUseCardLogBo;
 import org.sdkj.thermal.service.IPrUseCardLogService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -45,7 +47,8 @@ public class PrUseCardLogController extends BaseController {
     @SaCheckLogin
     @Log(title = "写卡日志", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insertWriteUseCardLog(@RequestBody PrUseCardLog log) {
+    public R<Void> insertWriteUseCardLog(@RequestBody PrUseCardLogBo bo) {
+        PrUseCardLog log = MapstructUtils.convert(bo, PrUseCardLog.class);
         return toAjax(useCardLogService.save(log));
     }
 
@@ -65,7 +68,8 @@ public class PrUseCardLogController extends BaseController {
     @SaCheckLogin
     @Log(title = "阀门状态日志", businessType = BusinessType.INSERT)
     @PostMapping("/valve-status")
-    public R<Void> insertValveOCStatusLog(@RequestBody PrUseCardLog log) {
+    public R<Void> insertValveOCStatusLog(@RequestBody PrUseCardLogBo bo) {
+        PrUseCardLog log = MapstructUtils.convert(bo, PrUseCardLog.class);
         return toAjax(useCardLogService.changeValveStatus(log.getMeterId(), log.getValveStatus()));
     }
 }

@@ -5,8 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrOptions;
+import org.sdkj.thermal.domain.bo.PrOptionsBo;
 import org.sdkj.thermal.service.IPrOptionsService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,7 +48,8 @@ public class PrOptionsController extends BaseController {
     @SaCheckLogin
     @Log(title = "系统选项", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insertData(@RequestBody PrOptions options) {
+    public R<Void> insertData(@RequestBody PrOptionsBo bo) {
+        PrOptions options = MapstructUtils.convert(bo, PrOptions.class);
         return toAjax(optionsService.save(options));
     }
 
@@ -58,7 +61,8 @@ public class PrOptionsController extends BaseController {
     @SaCheckLogin
     @Log(title = "系统选项", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> updateData(@RequestBody PrOptions options) {
+    public R<Void> updateData(@RequestBody PrOptionsBo bo) {
+        PrOptions options = MapstructUtils.convert(bo, PrOptions.class);
         return toAjax(optionsService.updateById(options));
     }
 

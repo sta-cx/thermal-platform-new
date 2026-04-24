@@ -7,9 +7,11 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrExpenseItem;
 import org.sdkj.thermal.domain.PrStandard;
+import org.sdkj.thermal.domain.bo.PrStandardBo;
 import org.sdkj.thermal.domain.vo.PrStandardVo;
 import org.sdkj.thermal.service.IPrStandardService;
 import org.springframework.validation.annotation.Validated;
@@ -53,7 +55,8 @@ public class PrStandardController extends BaseController {
     @SaCheckLogin
     @Log(title = "收费标准", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insert(@Validated @RequestBody PrStandard standard) {
+    public R<Void> insert(@Validated @RequestBody PrStandardBo bo) {
+        PrStandard standard = MapstructUtils.convert(bo, PrStandard.class);
         return toAjax(standardService.insertData(standard));
     }
 
@@ -65,7 +68,8 @@ public class PrStandardController extends BaseController {
     @SaCheckLogin
     @Log(title = "收费标准", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> update(@Validated @RequestBody PrStandard standard) {
+    public R<Void> update(@Validated @RequestBody PrStandardBo bo) {
+        PrStandard standard = MapstructUtils.convert(bo, PrStandard.class);
         return toAjax(standardService.updateData(standard));
     }
 

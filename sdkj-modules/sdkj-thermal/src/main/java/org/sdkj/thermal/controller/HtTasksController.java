@@ -9,9 +9,11 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtTasks;
 import org.sdkj.thermal.domain.HtTaskSettingLog;
+import org.sdkj.thermal.domain.bo.HtTasksBo;
 import org.sdkj.thermal.domain.vo.HtTaskSettingLogItemVo;
 import org.sdkj.thermal.domain.vo.HtTaskSettingLogVo;
 import org.sdkj.thermal.domain.vo.HtTasksVo;
@@ -82,8 +84,9 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "调控任务", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> save(@Validated @RequestBody HtTasks task,
+    public R<Void> save(@Validated @RequestBody HtTasksBo bo,
                         @RequestParam(required = false) List<String> scopeIds) {
+        HtTasks task = MapstructUtils.convert(bo, HtTasks.class);
         task.setBeanClass("org.sdkj.job.ControlJob");
         if (task.getNumber() == null) task.setNumber(0);
         if (task.getStatus() == null) task.setStatus(0);
@@ -99,8 +102,9 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "调控任务", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> update(@Validated @RequestBody HtTasks task,
+    public R<Void> update(@Validated @RequestBody HtTasksBo bo,
                           @RequestParam(required = false) List<String> scopeIds) {
+        HtTasks task = MapstructUtils.convert(bo, HtTasks.class);
         HtTasks existing = tasksService.getById(task.getId());
         if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
             return R.fail("运行中的任务不允许修改，请先停止任务！");

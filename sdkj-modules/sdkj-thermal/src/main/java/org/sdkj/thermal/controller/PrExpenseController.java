@@ -7,10 +7,14 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrExpense;
 import org.sdkj.thermal.domain.PrHouseExpense;
 import org.sdkj.thermal.domain.PmParkingSpace;
+import org.sdkj.thermal.domain.bo.PrExpenseBo;
+import org.sdkj.thermal.domain.bo.PrHouseExpenseBo;
+import org.sdkj.thermal.domain.bo.PmParkingSpaceBo;
 import org.sdkj.thermal.domain.vo.PrExpenseVo;
 import org.sdkj.thermal.service.IPrExpenseService;
 import org.springframework.validation.annotation.Validated;
@@ -94,7 +98,8 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "取暖费生成", businessType = BusinessType.INSERT)
     @PostMapping("/heat")
-    public R<Void> insertHeat(@RequestBody List<PrHouseExpense> list) {
+    public R<Void> insertHeat(@RequestBody List<PrHouseExpenseBo> boList) {
+        List<PrHouseExpense> list = MapstructUtils.convert(boList, PrHouseExpense.class);
         return toAjax(expenseService.insertData(list));
     }
 
@@ -106,7 +111,8 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "批量生成费用", businessType = BusinessType.INSERT)
     @PostMapping("/batch")
-    public R<Void> insertBatch(@RequestBody List<PrHouseExpense> list) {
+    public R<Void> insertBatch(@RequestBody List<PrHouseExpenseBo> boList) {
+        List<PrHouseExpense> list = MapstructUtils.convert(boList, PrHouseExpense.class);
         return toAjax(expenseService.insertDatall(list));
     }
 
@@ -118,7 +124,8 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "临时费用生成", businessType = BusinessType.INSERT)
     @PostMapping("/temporary")
-    public R<Void> insertTemporary(@RequestBody List<PrHouseExpense> list) {
+    public R<Void> insertTemporary(@RequestBody List<PrHouseExpenseBo> boList) {
+        List<PrHouseExpense> list = MapstructUtils.convert(boList, PrHouseExpense.class);
         return toAjax(expenseService.insertDataLs(list));
     }
 
@@ -130,7 +137,8 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "车位费用生成", businessType = BusinessType.INSERT)
     @PostMapping("/parking")
-    public R<Void> insertParking(@RequestBody List<PmParkingSpace> list) {
+    public R<Void> insertParking(@RequestBody List<PmParkingSpaceBo> boList) {
+        List<PmParkingSpace> list = MapstructUtils.convert(boList, PmParkingSpace.class);
         return toAjax(expenseService.insertDatallCw(list));
     }
 
@@ -142,12 +150,13 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用优惠", businessType = BusinessType.UPDATE)
     @PutMapping("/preferential")
-    public R<Void> setPreferential(@RequestBody List<PrExpense> list,
+    public R<Void> setPreferential(@RequestBody List<PrExpenseBo> boList,
                                    @RequestParam String type,
                                    @RequestParam(required = false) String scale,
                                    @RequestParam(required = false) String price,
                                    @RequestParam(required = false) String reason,
                                    @RequestParam(required = false) String times) {
+        List<PrExpense> list = MapstructUtils.convert(boList, PrExpense.class);
         return toAjax(expenseService.setPreferential(list, type, scale, price, reason, times));
     }
 
@@ -159,9 +168,10 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用免收", businessType = BusinessType.UPDATE)
     @PutMapping("/free")
-    public R<Void> setIsFree(@RequestBody List<PrExpense> list,
+    public R<Void> setIsFree(@RequestBody List<PrExpenseBo> boList,
                              @RequestParam String reason,
                              @RequestParam String times) {
+        List<PrExpense> list = MapstructUtils.convert(boList, PrExpense.class);
         return toAjax(expenseService.setIsFree(list, reason, times));
     }
 
@@ -173,9 +183,10 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用延期", businessType = BusinessType.UPDATE)
     @PutMapping("/delay")
-    public R<Void> setLastDate(@RequestBody List<PrExpense> list,
+    public R<Void> setLastDate(@RequestBody List<PrExpenseBo> boList,
                                @RequestParam String reason,
                                @RequestParam String days) {
+        List<PrExpense> list = MapstructUtils.convert(boList, PrExpense.class);
         return toAjax(expenseService.setLastDate(list, reason, days));
     }
 
@@ -187,11 +198,12 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用报停", businessType = BusinessType.UPDATE)
     @PutMapping("/suspend")
-    public R<Void> setBaotingDate(@RequestBody List<PrExpense> list,
+    public R<Void> setBaotingDate(@RequestBody List<PrExpenseBo> boList,
                                   @RequestParam String type,
                                   @RequestParam(required = false) String scale,
                                   @RequestParam(required = false) String price,
                                   @RequestParam(required = false) String reason) {
+        List<PrExpense> list = MapstructUtils.convert(boList, PrExpense.class);
         return toAjax(expenseService.setBaotingDate(list, type, scale, price, reason));
     }
 
@@ -203,9 +215,10 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用复供", businessType = BusinessType.UPDATE)
     @PutMapping("/resume")
-    public R<Void> setFugongDate(@RequestBody List<PrExpense> list,
+    public R<Void> setFugongDate(@RequestBody List<PrExpenseBo> boList,
                                  @RequestParam String reason,
                                  @RequestParam String days) {
+        List<PrExpense> list = MapstructUtils.convert(boList, PrExpense.class);
         return toAjax(expenseService.setFugongDate(list, reason, days));
     }
 
@@ -217,11 +230,12 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用退费", businessType = BusinessType.UPDATE)
     @PutMapping("/refund")
-    public R<Void> setTuifei(@RequestBody List<PrExpense> list,
+    public R<Void> setTuifei(@RequestBody List<PrExpenseBo> boList,
                              @RequestParam String type,
                              @RequestParam(required = false) String scale,
                              @RequestParam(required = false) String price,
                              @RequestParam(required = false) String reason) {
+        List<PrExpense> list = MapstructUtils.convert(boList, PrExpense.class);
         return toAjax(expenseService.setTuifei(list, type, scale, price, reason));
     }
 
@@ -233,7 +247,8 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用明细", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
-    public R<Void> deleteBatch(@RequestBody List<PrExpense> list) {
+    public R<Void> deleteBatch(@RequestBody List<PrExpenseBo> boList) {
+        List<PrExpense> list = MapstructUtils.convert(boList, PrExpense.class);
         return toAjax(expenseService.deleteDate(list));
     }
 
@@ -245,7 +260,8 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用标准", businessType = BusinessType.UPDATE)
     @PutMapping("/standard")
-    public R<Void> updateStandard(@RequestBody List<PrExpense> list) {
+    public R<Void> updateStandard(@RequestBody List<PrExpenseBo> boList) {
+        List<PrExpense> list = MapstructUtils.convert(boList, PrExpense.class);
         return toAjax(expenseService.updateDatall(list));
     }
 
