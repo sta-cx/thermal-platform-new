@@ -1,0 +1,109 @@
+package org.sdkj.thermal.controller;
+
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
+import lombok.RequiredArgsConstructor;
+import org.sdkj.common.core.domain.R;
+import org.sdkj.common.log.annotation.Log;
+import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.mybatis.core.page.PageQuery;
+import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.web.core.BaseController;
+import org.sdkj.thermal.domain.vo.PrHeatReadingVo;
+import org.sdkj.thermal.service.IPrHeatReadingService;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * 热表抄表记录管理
+ * 旧端点: /ht/heatReading/* -> 新端点: /thermal/ht/heat-reading/*
+ */
+@Validated
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/thermal/ht/heat-reading")
+public class PrHeatReadingController extends BaseController {
+
+    private final IPrHeatReadingService heatReadingService;
+
+    /**
+     * 分页查询抄表数据
+     * 旧端点: GET /ht/heatReading/pageList
+     * 新端点: GET /thermal/ht/heat-reading/list
+     */
+    @SaCheckPermission("thermal:ht:heat-reading:list")
+    @SaCheckLogin
+    @GetMapping("/list")
+    public TableDataInfo<PrHeatReadingVo> list(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String meterArcCode,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String valveType,
+            @RequestParam(required = false) String parentId,
+            PageQuery pageQuery) {
+        return heatReadingService.selectPageList(companyId, orgId, buildingId, unitCode, meterArcCode, search, startTime, endTime, type, valveType, parentId, pageQuery);
+    }
+
+    /**
+     * 查询抄表详情
+     * 旧端点: GET /ht/heatReading/getDataById/{id}
+     * 新端点: GET /thermal/ht/heat-reading/{id}
+     */
+    @SaCheckPermission("thermal:ht:heat-reading:query")
+    @SaCheckLogin
+    @GetMapping("/{id}")
+    public R<PrHeatReadingVo> getById(@PathVariable String id) {
+        return R.ok(heatReadingService.selectById(id));
+    }
+
+    /**
+     * 查询阀门趋势数据
+     * 旧端点: POST /ht/heatReading/trend
+     * 新端点: POST /thermal/ht/heat-reading/trend
+     */
+    @SaCheckPermission("thermal:ht:heat-reading:query")
+    @SaCheckLogin
+    @Log(title = "热表抄表-阀门趋势", businessType = BusinessType.OTHER)
+    @PostMapping("/trend")
+    public R<Void> trend(@RequestBody List<String> ids,
+                         @RequestParam(required = false) String startTime,
+                         @RequestParam(required = false) String endTime,
+                         @RequestParam(required = false) String companyId,
+                         @RequestParam(required = false) String orgId) {
+        // TODO: 阀门趋势数据查询逻辑待后续实现
+        return R.ok();
+    }
+
+    /**
+     * 导出抄表Excel
+     * 旧端点: GET /ht/heatReading/exportAll
+     * 新端点: GET /thermal/ht/heat-reading/exportAll
+     */
+    @SaCheckPermission("thermal:ht:heat-reading:list")
+    @SaCheckLogin
+    @Log(title = "热表抄表-导出", businessType = BusinessType.EXPORT)
+    @GetMapping("/exportAll")
+    public R<Void> exportAll(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String meterArcCode,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String valveType,
+            @RequestParam(required = false) String parentId) {
+        // TODO: 抄表导出逻辑待后续实现
+        return R.ok();
+    }
+}
