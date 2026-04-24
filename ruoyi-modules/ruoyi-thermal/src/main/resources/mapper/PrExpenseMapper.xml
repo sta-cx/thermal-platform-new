@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.dromara.thermal.mapper.PrExpenseMapper">
+
+    <select id="selectPageList" resultType="org.dromara.thermal.domain.vo.PrExpenseVo">
+        SELECT a.id, a.house_id, a.item_group, a.item_code, a.item_name, a.standard_id,
+               a.start_date, a.expire_date, a.last_date, a.last_reading, a.this_reading,
+               a.qty, a.money, a.standard_price, a.max_price, a.price_formula, a.trade_times,
+               a.max_money, a.money_formula, a.is_free, a.reason, a.preferential, a.deduction,
+               a.latefee, a.receivable, a.paid_in, a.final_money, a.overdue_day,
+               a.is_charged, a.charged_time, a.record_id, a.delay_date, a.heat_usage,
+               a.is_calc, a.is_closed, a.year, a.month, a.org_id, a.company_id,
+               a.parking_space_id,
+               b.room_num,
+               c.user_name,
+               d.building_name,
+               e.parking_code,
+               e.parkinglot_name
+        FROM pr_expense a
+        LEFT JOIN pr_house b ON a.house_id = b.id
+        LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.is_deleted = 0
+        LEFT JOIN pr_building d ON b.building_id = d.id
+        LEFT JOIN pm_parking_space e ON a.parking_space_id = e.id
+        WHERE a.is_deleted = 0
+        <if test="companyId != null and companyId != ''">
+            AND a.company_id = #{companyId}
+        </if>
+        <if test="orgId != null and orgId != ''">
+            AND a.org_id = #{orgId}
+        </if>
+        <if test="buildingId != null and buildingId != ''">
+            AND b.building_id = #{buildingId}
+        </if>
+        <if test="unitCode != null and unitCode != ''">
+            AND b.unit_code = #{unitCode}
+        </if>
+        <if test="itemGroup != null and itemGroup != ''">
+            AND a.item_group = #{itemGroup}
+        </if>
+        <if test="itemCode != null and itemCode != ''">
+            AND a.item_code = #{itemCode}
+        </if>
+        <if test="isCharged != null and isCharged != ''">
+            AND a.is_charged = #{isCharged}
+        </if>
+        <if test="parkingId != null and parkingId != ''">
+            AND a.parking_space_id = #{parkingId}
+        </if>
+        <if test="search != null and search != ''">
+            AND (b.room_num LIKE CONCAT('%', #{search}, '%') OR c.user_name LIKE CONCAT('%', #{search}, '%'))
+        </if>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectHouseExpenseList" resultType="org.dromara.thermal.domain.vo.PrExpenseVo">
+        SELECT a.id, a.house_id, a.item_group, a.item_code, a.item_name, a.standard_id,
+               a.start_date, a.expire_date, a.money, a.standard_price, a.is_charged,
+               b.room_num, c.user_name
+        FROM pr_expense a
+        LEFT JOIN pr_house b ON a.house_id = b.id
+        LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.is_deleted = 0
+        WHERE a.is_deleted = 0
+          AND a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+        <if test="buildingId != null and buildingId != ''">
+            AND b.building_id = #{buildingId}
+        </if>
+        <if test="unitCode != null and unitCode != ''">
+            AND b.unit_code = #{unitCode}
+        </if>
+        <if test="itemGroup != null and itemGroup != ''">
+            AND a.item_group = #{itemGroup}
+        </if>
+        <if test="itemCode != null and itemCode != ''">
+            AND a.item_code = #{itemCode}
+        </if>
+        <if test="search != null and search != ''">
+            AND (b.room_num LIKE CONCAT('%', #{search}, '%') OR c.user_name LIKE CONCAT('%', #{search}, '%'))
+        </if>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectHeatExpenseByHouseId" resultType="org.dromara.thermal.domain.vo.PrExpenseVo">
+        SELECT id, house_id, item_group, item_code, item_name, standard_id,
+               start_date, expire_date, last_date, money, standard_price, is_charged
+        FROM pr_expense
+        WHERE house_id = #{houseId} AND item_group = '6' AND is_deleted = 0
+        ORDER BY start_date DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectExistingExpenseHouseIds" resultType="java.lang.String">
+        SELECT DISTINCT house_id FROM pr_expense
+        WHERE item_group = #{itemGroup} AND item_code = #{itemCode} AND is_deleted = 0
+    </select>
+
+    <update id="updateStepPrice">
+        <!-- TODO: Phase 5b 完整实现 - 阶梯单价计算逻辑 -->
+        UPDATE pr_expense SET standard_price = standard_price
+        WHERE company_id = #{companyId} AND org_id = #{orgId} AND is_deleted = 0
+    </update>
+
+    <update id="updateMoney">
+        <!-- TODO: Phase 5b 完整实现 - 金额计算逻辑 -->
+        UPDATE pr_expense SET money = money
+        WHERE company_id = #{companyId} AND org_id = #{orgId} AND is_deleted = 0
+    </update>
+
+    <update id="updateFormula">
+        <!-- TODO: Phase 5b 完整实现 - 公式计算逻辑 -->
+        UPDATE pr_expense SET receivable = money
+        WHERE company_id = #{companyId} AND org_id = #{orgId} AND is_deleted = 0
+    </update>
+
+    <update id="updateFormulaCw">
+        <!-- TODO: Phase 5b 完整实现 - 车位公式计算逻辑 -->
+        UPDATE pr_expense SET receivable = money
+        WHERE company_id = #{companyId} AND org_id = #{orgId} AND is_deleted = 0
+    </update>
+
+    <update id="updateHousePayStatus">
+        UPDATE pr_house SET is_charged = 1
+        WHERE id IN
+        <foreach collection="houseIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="updateCalStatus">
+        UPDATE pr_house SET is_calc = '1'
+        WHERE id = #{houseId}
+    </update>
+
+    <select id="selectStandardById" resultType="org.dromara.thermal.domain.PrStandard">
+        SELECT id, name, item_code, item_group, cycles, generate_rule, step_type,
+               statistics_type, step_maxgrade, is_step2, step2_type, step2_maxgrade,
+               is_latefee, latefee_startdate, latefee_type, latefee_startdays, latefee_formula,
+               is_limited, limited_type, limited_cond, limited_times, limited_money,
+               limited_single_money, standard_price, money_formula, max_money,
+               org_id, company_id
+        FROM pr_standard
+        WHERE id = #{standardId}
+    </select>
+
+</mapper>

@@ -3,6 +3,7 @@ package org.dromara.thermal.mapper;
 import org.apache.ibatis.annotations.Param;
 import org.dromara.common.mybatis.core.mapper.BaseMapperPlus;
 import org.dromara.thermal.domain.HtTasks;
+import org.dromara.thermal.domain.HtTasksPerform;
 import org.dromara.thermal.domain.vo.HtTasksVo;
 
 import java.util.List;
@@ -81,4 +82,19 @@ public interface HtTasksMapper extends BaseMapperPlus<HtTasks, HtTasksVo> {
         @Param("buildingId") String buildingId,
         @Param("unitCode") String unitCode
     );
+
+    /**
+     * 查询户阀开度数据（关联策略子表）
+     */
+    List<Map<String, Object>> selectScopeForAngleH(@Param("taskId") String taskId);
+
+    /**
+     * 查询单元阀开度数据（关联策略子表）
+     */
+    List<Map<String, Object>> selectScopeForAngleD(@Param("taskId") String taskId);
+
+    /**
+     * 批量插入指令执行记录
+     */
+    int insertTasksPerformBatch(@Param("records") List<HtTasksPerform> records);
 }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 调控执行记录查询
@@ -49,5 +50,32 @@ public class HtTasksPerformController extends BaseController {
     @GetMapping("/byMeterIdDetail")
     public R<List<HtTasksPerformVo>> byMeterIdDetail(@RequestParam String meterId) {
         return R.ok(tasksPerformService.selectByMeterIdDetail(meterId));
+    }
+
+    /**
+     * 更新指令发送状态
+     */
+    @SaCheckLogin
+    @PutMapping("/status")
+    public R<Void> updateStatus(@RequestParam String performId, @RequestParam Integer status) {
+        return toAjax(tasksPerformService.updateInstructionStatus(performId, status));
+    }
+
+    /**
+     * 查询指定任务下待发送的指令
+     */
+    @SaCheckLogin
+    @GetMapping("/pending")
+    public R<List<HtTasksPerformVo>> pendingByTask(@RequestParam String taskId) {
+        return R.ok(tasksPerformService.selectPendingByTaskId(taskId));
+    }
+
+    /**
+     * 查询执行统计
+     */
+    @SaCheckLogin
+    @GetMapping("/stats")
+    public R<Map<String, Object>> stats(@RequestParam String taskId) {
+        return R.ok(tasksPerformService.selectPerformStats(taskId));
     }
 }

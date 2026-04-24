@@ -1,0 +1,71 @@
+package org.dromara.thermal.controller;
+
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.dromara.common.core.utils.StringUtils;
+import lombok.RequiredArgsConstructor;
+import org.dromara.common.core.domain.R;
+import org.dromara.common.log.annotation.Log;
+import org.dromara.common.log.enums.BusinessType;
+import org.dromara.common.web.core.BaseController;
+import org.dromara.thermal.domain.PrUseCardLog;
+import org.dromara.thermal.service.IPrUseCardLogService;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * 写卡日志管理
+ * 迁移自旧系统 PrUseCardLogController
+ * 旧端点: /property/prUseCardLog/* -> 新端点: /thermal/property/use-card-log/*
+ */
+@Validated
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/thermal/property/use-card-log")
+public class PrUseCardLogController extends BaseController {
+
+    private final IPrUseCardLogService useCardLogService;
+
+    @SaCheckLogin
+    @GetMapping("/list")
+    public R<List<PrUseCardLog>> list(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String meterNum) {
+        LambdaQueryWrapper<PrUseCardLog> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrUseCardLog::getCompanyId, companyId)
+                .eq(StringUtils.isNotBlank(orgId), PrUseCardLog::getOrgId, orgId)
+                .eq(StringUtils.isNotBlank(meterNum), PrUseCardLog::getMeterNum, meterNum)
+                .orderByDesc(PrUseCardLog::getOperationTime);
+        return R.ok(useCardLogService.list(lqw));
+    }
+
+    @SaCheckLogin
+    @Log(title = "写卡日志", businessType = BusinessType.INSERT)
+    @PostMapping
+    public R<Void> insertWriteUseCardLog(@RequestBody PrUseCardLog log) {
+        return toAjax(useCardLogService.save(log));
+    }
+
+    @SaCheckLogin
+    @GetMapping("/valve-status")
+    public R<List<PrUseCardLog>> pageListValveOCStatus(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId) {
+        LambdaQueryWrapper<PrUseCardLog> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrUseCardLog::getCompanyId, companyId)
+                .eq(StringUtils.isNotBlank(orgId), PrUseCardLog::getOrgId, orgId)
+                .isNotNull(PrUseCardLog::getValveStatus)
+                .orderByDesc(PrUseCardLog::getOperationTime);
+        return R.ok(useCardLogService.list(lqw));
+    }
+
+    @SaCheckLogin
+    @Log(title = "阀门状态日志", businessType = BusinessType.INSERT)
+    @PostMapping("/valve-status")
+    public R<Void> insertValveOCStatusLog(@RequestBody PrUseCardLog log) {
+        return toAjax(useCardLogService.changeValveStatus(log.getMeterId(), log.getValveStatus()));
+    }
+}

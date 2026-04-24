@@ -60,14 +60,69 @@
         SELECT ROUND(AVG(out_temp), 2) FROM ht_scope WHERE tasks_id = #{taskId}
     </select>
 
+    <!-- 户阀：查询该任务下所有 scope，关联策略子表生成指令记录 -->
+    <select id="selectScopeForAngleH" resultType="java.util.HashMap">
+        SELECT s.id AS scope_id, s.meter_num, s.device_id, s.imei,
+               s.meter_id, s.meter_arc_code, s.dtu_num, s.chan_num,
+               s.org_id, s.company_id, ss.valve_angle, ss.instruction_id,
+               ss.sort AS instruction_sort
+        FROM ht_scope s
+        INNER JOIN ht_strategy_sub ss ON ss.strategy_id = (
+            SELECT strategy_id FROM ht_tasks WHERE id = CAST(#{taskId} AS UNSIGNED)
+        )
+        WHERE s.tasks_id = #{taskId} AND s.status NOT IN (9)
+        ORDER BY s.id, ss.sort
+    </select>
+
+    <!-- 单元阀：同户阀但通过 unit_id 聚合 -->
+    <select id="selectScopeForAngleD" resultType="java.util.HashMap">
+        SELECT s.id AS scope_id, s.meter_num, s.device_id, s.imei,
+               s.meter_id, s.meter_arc_code, s.dtu_num, s.chan_num,
+               s.org_id, s.company_id, ss.valve_angle, ss.instruction_id,
+               ss.sort AS instruction_sort
+        FROM ht_scope s
+        INNER JOIN ht_strategy_sub ss ON ss.strategy_id = (
+            SELECT strategy_id FROM ht_tasks WHERE id = CAST(#{taskId} AS UNSIGNED)
+        )
+        WHERE s.tasks_id = #{taskId} AND s.status NOT IN (9)
+        GROUP BY s.unit_id
+        ORDER BY s.id, ss.sort
+    </select>
+
+    <!-- 批量插入指令执行记录 -->
+    <insert id="insertTasksPerformBatch">
+        INSERT INTO ht_tasks_perform (
+            id, instruction_id, group_id, strategy_id, command_index, orderr,
+            instruction_type, instruction, number, intervall, fore_start, unit,
+            duration, org_id, company_id, concentrator_code, device_id,
+            meter_num, meter_id, meter_arc_code, status, instruction_status,
+            send_time, tasks_id, in_temp, out_temp, room_temp, valve_open,
+            imei, dtu_num, chan_num, out_temp_pj, ref_heat,
+            create_by, create_time
+        ) VALUES
+        <foreach collection="records" item="r" separator=",">
+            (
+                #{r.id}, #{r.instructionId}, #{r.groupId}, #{r.strategyId},
+                #{r.commandIndex}, #{r.orderr}, #{r.instructionType}, #{r.instruction},
+                #{r.number}, #{r.intervall}, #{r.foreStart}, #{r.unit},
+                #{r.duration}, #{r.orgId}, #{r.companyId}, #{r.concentratorCode},
+                #{r.deviceId}, #{r.meterNum}, #{r.meterId}, #{r.meterArcCode},
+                #{r.status}, #{r.instructionStatus}, #{r.sendTime}, #{r.tasksId},
+                #{r.inTemp}, #{r.outTemp}, #{r.roomTemp}, #{r.valveOpen},
+                #{r.imei}, #{r.dtuNum}, #{r.chanNum}, #{r.outTempPj}, #{r.refHeat},
+                #{r.createBy}, #{r.createTime}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 保存设定开度（户阀）：更新 scope 状态为 9 -->
     <update id="updateValveAngleH">
-        -- 保存户阀设定开度（指令生成管线 - Phase 4c-3 实现）
-        UPDATE ht_scope SET status = 9 WHERE tasks_id = #{taskId}
+        UPDATE ht_scope SET status = 9 WHERE tasks_id = #{taskId} AND status NOT IN (9)
     </update>
 
+    <!-- 保存设定开度（单元阀）：按 unit_id 去重后更新 -->
     <update id="updateValveAngleD">
-        -- 保存单元阀设定开度（指令生成管线 - Phase 4c-3 实现）
-        UPDATE ht_scope SET status = 9 WHERE tasks_id = #{taskId}
+        UPDATE ht_scope SET status = 9 WHERE tasks_id = #{taskId} AND status NOT IN (9)
     </update>
 
     <update id="updateScopeStatus">
@@ -78,11 +133,21 @@
         SELECT
             COUNT(*) AS total,
             SUM(CASE WHEN is_special = 1 THEN 1 ELSE 0 END) AS specialCount,
-            SUM(CASE WHEN status = 9 THEN 1 ELSE 0 END) AS completedCount
+            SUM(CASE WHEN status = 9 THEN 1 ELSE 0 END) AS completedCount,
+            SUM(CASE WHEN status IN (0, 1, 9) THEN 1 ELSE 0 END) AS normalCount,
+            ROUND(
+                COUNT(CASE WHEN status IN (0, 1, 9) THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0), 2
+            ) AS balanceRate,
+            ROUND(AVG(out_temp), 2) AS avgReturnTemp,
+            SUM(CASE WHEN in_temp IS NOT NULL AND in_temp &lt; 40 THEN 1 ELSE 0 END) AS lowInTempCount,
+            SUM(CASE WHEN room_temp IS NOT NULL AND room_temp &lt; 18 THEN 1 ELSE 0 END) AS lowRoomTempCount
         FROM ht_scope
         WHERE org_id = #{orgId}
         <if test="buildingId != null and buildingId != ''">
             AND building_id = #{buildingId}
+        </if>
+        <if test="unitCode != null and unitCode != ''">
+            AND unit_id = #{unitCode}
         </if>
     </select>
 

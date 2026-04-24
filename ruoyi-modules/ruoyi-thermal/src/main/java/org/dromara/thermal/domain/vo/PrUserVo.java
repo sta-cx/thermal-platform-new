@@ -1,0 +1,53 @@
+package org.dromara.thermal.domain.vo;
+
+import io.github.linpeilie.annotations.AutoMapper;
+import lombok.Data;
+import org.dromara.thermal.domain.PrUser;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+
+/**
+ * 客户档案 View Object
+ */
+@Data
+@AutoMapper(target = PrUser.class)
+public class PrUserVo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    private String id;
+    private String phone;
+    private String name;
+    private Integer idType;
+    private String idNo;
+    private Integer sex;
+    private Integer isIdAuth;
+    private String nation;
+    private Date birthday;
+    private String idStartdate;
+    private String idEnddate;
+    private String idDepartment;
+    private String address;
+    private String employer;
+    private String openId;
+    private String wxNumber;
+    private String qqNumber;
+    private Integer occupation;
+    private Integer education;
+    private Integer hobby;
+    private String email;
+    private String emerContact;
+    private String emerPhone;
+    private String orgId;
+    private String companyId;
+    private String seq;
+    private String headPhoto;
+    private String frontPhoto;
+    private String backPhoto;
+    private Date createTime;
+    private Date updateTime;
+}

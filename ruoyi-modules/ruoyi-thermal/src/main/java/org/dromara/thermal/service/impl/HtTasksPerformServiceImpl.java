@@ -13,6 +13,7 @@ import org.dromara.thermal.service.IHtTasksPerformService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 调控执行记录服务实现
@@ -37,5 +38,59 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
     @Override
     public List<HtTasksPerformVo> selectByMeterIdDetail(String meterId) {
         return baseMapper.selectByMeterIdDetail(meterId);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
+    public boolean updateInstructionStatus(String performId, Integer status) {
+        HtTasksPerform perform = new HtTasksPerform();
+        perform.setId(performId);
+        perform.setStatus(status);
+        return updateById(perform);
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
+    public boolean batchUpdateInstructionStatus(List<String> performIds, Integer status) {
+        return lambdaUpdate()
+            .in(HtTasksPerform::getId, performIds)
+            .set(HtTasksPerform::getStatus, status)
+            .update();
+    }
+
+    @Override
+    public List<HtTasksPerformVo> selectPendingByTaskId(String taskId) {
+        return lambdaQuery()
+            .eq(HtTasksPerform::getTasksId, taskId)
+            .in(HtTasksPerform::getStatus, 0, 3)
+            .orderByAsc(HtTasksPerform::getOrderr)
+            .list()
+            .stream()
+            .map(perform -> {
+                HtTasksPerformVo vo = new HtTasksPerformVo();
+                org.springframework.beans.BeanUtils.copyProperties(perform, vo);
+                return vo;
+            })
+            .toList();
+    }
+
+    @Override
+    public Map<String, Object> selectPerformStats(String taskId) {
+        long total = lambdaQuery().eq(HtTasksPerform::getTasksId, taskId).count();
+        long pending = lambdaQuery().eq(HtTasksPerform::getTasksId, taskId)
+            .eq(HtTasksPerform::getStatus, 0).count();
+        long success = lambdaQuery().eq(HtTasksPerform::getTasksId, taskId)
+            .eq(HtTasksPerform::getStatus, 2).count();
+        long failed = lambdaQuery().eq(HtTasksPerform::getTasksId, taskId)
+            .eq(HtTasksPerform::getStatus, 3).count();
+
+        double rate = total > 0 ? Math.round(success * 10000.0 / total) / 100.0 : 0.0;
+        return Map.of(
+            "total", total,
+            "pending", pending,
+            "success", success,
+            "failed", failed,
+            "successRate", rate
+        );
     }
 }
