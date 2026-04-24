@@ -1,5 +1,5 @@
 {
-  "org.dromara.common.ratelimiter.annotation.RateLimiter@key": {
+  "org.sdkj.common.ratelimiter.annotation.RateLimiter@key": {
     "method": {
       "parameters": true
     }

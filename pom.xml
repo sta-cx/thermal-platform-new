@@ -308,7 +308,7 @@
     <modules>
         <module>sdkj-admin</module>
         <module>sdkj-common</module>
-        <module>ruoyi-modules</module>
+        <module>sdkj-modules</module>
     </modules>
     <packaging>pom</packaging>
 
