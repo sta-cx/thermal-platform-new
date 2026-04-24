@@ -36,12 +36,12 @@ public interface IHtTasksService extends IService<HtTasks> {
     boolean updateWithScope(HtTasks entity, List<String> scopeIds);
 
     /**
-     * 启动/停止任务（TODO: Quartz/snail-job集成）
+     * 启动/停止任务（TODO: Quartz集成）
      */
     boolean changeStatus(Integer id, Integer status);
 
     /**
-     * 立即运行任务（TODO: Quartz/snail-job集成）
+     * 立即运行任务（TODO: Quartz集成）
      */
     boolean runTask(Integer id);
 
