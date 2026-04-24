@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -38,6 +39,7 @@ public class PrHouseExpenseController extends BaseController {
      * 旧端点: POST /property/houseExpense/pageList
      * 新端点: GET /thermal/property/house-expense/list
      */
+    @SaCheckPermission("thermal:property:houseExpense:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHouseExpenseVo> list(
@@ -57,6 +59,7 @@ public class PrHouseExpenseController extends BaseController {
      * 旧端点: POST /property/houseExpense/queryPrHouse
      * 新端点: GET /thermal/property/house-expense/unbound-houses
      */
+    @SaCheckPermission("thermal:property:houseExpense:list")
     @SaCheckLogin
     @GetMapping("/unbound-houses")
     public R<List<PrHouseVo>> queryUnboundHouses(
@@ -74,6 +77,7 @@ public class PrHouseExpenseController extends BaseController {
      * 旧端点: POST /property/houseExpense/queryPrHouseD
      * 新端点: GET /thermal/property/house-expense/unbound-items
      */
+    @SaCheckPermission("thermal:property:houseExpense:list")
     @SaCheckLogin
     @GetMapping("/unbound-items")
     public R<List<PrExpenseItemVo>> queryUnboundItems(
@@ -87,6 +91,7 @@ public class PrHouseExpenseController extends BaseController {
      * 旧端点: POST /property/houseExpense/insertData
      * 新端点: POST /thermal/property/house-expense/batch
      */
+    @SaCheckPermission("thermal:property:houseExpense:add")
     @SaCheckLogin
     @Log(title = "房屋费目绑定", businessType = BusinessType.INSERT)
     @PostMapping("/batch")
@@ -104,6 +109,7 @@ public class PrHouseExpenseController extends BaseController {
      * 旧端点: POST /property/houseExpense/updateData
      * 新端点: PUT /thermal/property/house-expense/batch
      */
+    @SaCheckPermission("thermal:property:houseExpense:edit")
     @SaCheckLogin
     @Log(title = "房屋费目绑定", businessType = BusinessType.UPDATE)
     @PutMapping("/batch")
@@ -117,6 +123,7 @@ public class PrHouseExpenseController extends BaseController {
      * 旧端点: POST /property/houseExpense/deleteHouseExpense
      * 新端点: DELETE /thermal/property/house-expense/batch
      */
+    @SaCheckPermission("thermal:property:houseExpense:remove")
     @SaCheckLogin
     @Log(title = "房屋费目绑定", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")

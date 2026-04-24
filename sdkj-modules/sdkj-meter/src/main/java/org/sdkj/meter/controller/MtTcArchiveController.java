@@ -1,6 +1,7 @@
 package org.sdkj.meter.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class MtTcArchiveController extends BaseController {
      * 旧端点: GET /tcArchive/pageList
      * 新端点: GET /thermal/meter/tc/pageList
      */
+    @SaCheckPermission("thermal:meter:tc:list")
     @SaCheckLogin
     @GetMapping("/pageList")
     public TableDataInfo<MtTcArchiveVo> pageList(@RequestParam @NotBlank String sortId,
@@ -57,6 +59,7 @@ public class MtTcArchiveController extends BaseController {
      * 旧端点: GET /tcArchive/list
      * 新端点: GET /thermal/meter/tc/list
      */
+    @SaCheckPermission("thermal:meter:tc:list")
     @SaCheckLogin
     @GetMapping("/list")
     public R<List<MtTcArchiveVo>> list() {
@@ -70,6 +73,7 @@ public class MtTcArchiveController extends BaseController {
      * 旧端点: POST /tcArchive/insertData
      * 新端点: POST /thermal/meter/tc
      */
+    @SaCheckPermission("thermal:meter:tc:add")
     @SaCheckLogin
     @Log(title = "温控器档案", businessType = BusinessType.INSERT)
     @PostMapping
@@ -83,6 +87,7 @@ public class MtTcArchiveController extends BaseController {
      * 旧端点: POST /tcArchive/updateData
      * 新端点: PUT /thermal/meter/tc
      */
+    @SaCheckPermission("thermal:meter:tc:edit")
     @SaCheckLogin
     @Log(title = "温控器档案", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -96,6 +101,7 @@ public class MtTcArchiveController extends BaseController {
      * 旧端点: POST /tcArchive/deleteData
      * 新端点: DELETE /thermal/meter/tc/{id}
      */
+    @SaCheckPermission("thermal:meter:tc:remove")
     @SaCheckLogin
     @Log(title = "温控器档案", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -108,6 +114,7 @@ public class MtTcArchiveController extends BaseController {
      * 旧端点: GET /tcArchive/query
      * 新端点: GET /thermal/meter/tc/query
      */
+    @SaCheckPermission("thermal:meter:tc:query")
     @SaCheckLogin
     @GetMapping("/query")
     public R<List<MtTcArchiveVo>> query(@RequestParam(required = false) String id,

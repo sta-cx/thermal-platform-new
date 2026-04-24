@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class HtInstructionController extends BaseController {
      * 旧端点: GET /htInstruction/pageList
      * 新端点: GET /thermal/ht/instruction/list
      */
+    @SaCheckPermission("thermal:ht:instruction:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<HtInstructionVo> list(@RequestParam(required = false) String search, PageQuery pageQuery) {
@@ -54,6 +56,7 @@ public class HtInstructionController extends BaseController {
      * 旧端点: POST /htInstruction/insertData
      * 新端点: POST /thermal/ht/instruction
      */
+    @SaCheckPermission("thermal:ht:instruction:add")
     @SaCheckLogin
     @Log(title = "控制指令", businessType = BusinessType.INSERT)
     @PostMapping
@@ -67,6 +70,7 @@ public class HtInstructionController extends BaseController {
      * 旧端点: GET /htInstruction/queryHtInstruction
      * 新端点: GET /thermal/ht/instruction/{id}
      */
+    @SaCheckPermission("thermal:ht:instruction:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<HtInstruction> getInfo(@PathVariable @NotBlank String id) {
@@ -78,6 +82,7 @@ public class HtInstructionController extends BaseController {
      * 旧端点: POST /htInstruction/updateData
      * 新端点: PUT /thermal/ht/instruction
      */
+    @SaCheckPermission("thermal:ht:instruction:edit")
     @SaCheckLogin
     @Log(title = "控制指令", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -91,6 +96,7 @@ public class HtInstructionController extends BaseController {
      * 旧端点: POST /htInstruction/deleteData
      * 新端点: DELETE /thermal/ht/instruction/{id}
      */
+    @SaCheckPermission("thermal:ht:instruction:remove")
     @SaCheckLogin
     @Log(title = "控制指令", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -107,6 +113,7 @@ public class HtInstructionController extends BaseController {
      * 旧端点: GET /htInstruction/queryInstructionList
      * 新端点: GET /thermal/ht/instruction/all
      */
+    @SaCheckPermission("thermal:ht:instruction:list")
     @SaCheckLogin
     @GetMapping("/all")
     public R<List<HtInstruction>> all() {

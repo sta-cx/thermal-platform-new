@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
@@ -44,6 +45,7 @@ public class HtTasksController extends BaseController {
     /**
      * 分页查询任务列表
      */
+    @SaCheckPermission("thermal:ht:tasks:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<HtTasksVo> list(
@@ -63,6 +65,7 @@ public class HtTasksController extends BaseController {
     /**
      * 查询所有任务（按组织）
      */
+    @SaCheckPermission("thermal:ht:tasks:list")
     @SaCheckLogin
     @GetMapping("/all")
     public R<List<HtTasks>> all(@RequestParam(required = false) String orgId) {
@@ -72,6 +75,7 @@ public class HtTasksController extends BaseController {
     /**
      * 根据ID查询任务详情
      */
+    @SaCheckPermission("thermal:ht:tasks:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<HtTasks> getById(@PathVariable Integer id) {
@@ -81,6 +85,7 @@ public class HtTasksController extends BaseController {
     /**
      * 新增调控任务
      */
+    @SaCheckPermission("thermal:ht:tasks:add")
     @SaCheckLogin
     @Log(title = "调控任务", businessType = BusinessType.INSERT)
     @PostMapping
@@ -99,6 +104,7 @@ public class HtTasksController extends BaseController {
     /**
      * 修改调控任务
      */
+    @SaCheckPermission("thermal:ht:tasks:edit")
     @SaCheckLogin
     @Log(title = "调控任务", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -115,6 +121,7 @@ public class HtTasksController extends BaseController {
     /**
      * 删除调控任务
      */
+    @SaCheckPermission("thermal:ht:tasks:remove")
     @SaCheckLogin
     @Log(title = "调控任务", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -129,6 +136,7 @@ public class HtTasksController extends BaseController {
     /**
      * 批量删除调控任务
      */
+    @SaCheckPermission("thermal:ht:tasks:remove")
     @SaCheckLogin
     @Log(title = "调控任务", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
@@ -145,6 +153,7 @@ public class HtTasksController extends BaseController {
     /**
      * 分页查询设定日志
      */
+    @SaCheckPermission("thermal:ht:tasks:list")
     @SaCheckLogin
     @GetMapping("/settingLog")
     public TableDataInfo<HtTaskSettingLogVo> settingLog(
@@ -159,6 +168,7 @@ public class HtTasksController extends BaseController {
     /**
      * 根据主表ID查询设定日志子表明细
      */
+    @SaCheckPermission("thermal:ht:tasks:query")
     @SaCheckLogin
     @GetMapping("/settingLog/{mainId}")
     public R<List<HtTaskSettingLogItemVo>> getDetailByMainId(@PathVariable String mainId) {
@@ -170,6 +180,7 @@ public class HtTasksController extends BaseController {
     /**
      * 启动/停止任务
      */
+    @SaCheckPermission("thermal:ht:tasks:status")
     @SaCheckLogin
     @Log(title = "任务状态", businessType = BusinessType.UPDATE)
     @PutMapping("/status/{id}")
@@ -182,6 +193,7 @@ public class HtTasksController extends BaseController {
     /**
      * 立即运行任务
      */
+    @SaCheckPermission("thermal:ht:tasks:run")
     @SaCheckLogin
     @Log(title = "任务执行", businessType = BusinessType.UPDATE)
     @PostMapping("/run/{id}")
@@ -196,6 +208,7 @@ public class HtTasksController extends BaseController {
     /**
      * 标记特殊户
      */
+    @SaCheckPermission("thermal:ht:tasks:edit")
     @SaCheckLogin
     @Log(title = "特殊户标记", businessType = BusinessType.UPDATE)
     @PutMapping("/isSpecial")
@@ -208,6 +221,7 @@ public class HtTasksController extends BaseController {
     /**
      * 标记特殊单元
      */
+    @SaCheckPermission("thermal:ht:tasks:edit")
     @SaCheckLogin
     @Log(title = "特殊单元标记", businessType = BusinessType.UPDATE)
     @PutMapping("/isSpecialUnit")
@@ -220,6 +234,7 @@ public class HtTasksController extends BaseController {
     /**
      * 设置缴费状态
      */
+    @SaCheckPermission("thermal:ht:tasks:edit")
     @SaCheckLogin
     @Log(title = "缴费状态", businessType = BusinessType.UPDATE)
     @PutMapping("/payStatus")
@@ -231,6 +246,7 @@ public class HtTasksController extends BaseController {
     /**
      * 刷新平衡率
      */
+    @SaCheckPermission("thermal:ht:tasks:query")
     @SaCheckLogin
     @GetMapping("/balanceRate/{taskId}")
     public R<Double> refreshBalanceRate(@PathVariable String taskId) {
@@ -240,6 +256,7 @@ public class HtTasksController extends BaseController {
     /**
      * 保存设定开度
      */
+    @SaCheckPermission("thermal:ht:tasks:edit")
     @SaCheckLogin
     @Log(title = "设定开度", businessType = BusinessType.UPDATE)
     @PutMapping("/saveValveAngle")
@@ -251,6 +268,7 @@ public class HtTasksController extends BaseController {
     /**
      * 查询汇总统计
      */
+    @SaCheckPermission("thermal:ht:tasks:query")
     @SaCheckLogin
     @GetMapping("/summary")
     public R<Map<String, Object>> summary(

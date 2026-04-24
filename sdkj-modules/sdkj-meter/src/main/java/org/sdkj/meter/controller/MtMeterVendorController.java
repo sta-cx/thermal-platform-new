@@ -1,6 +1,7 @@
 package org.sdkj.meter.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
@@ -39,6 +40,7 @@ public class MtMeterVendorController extends BaseController {
      * 旧端点: GET /meterVendor/pageList
      * 新端点: GET /thermal/meter/vendor/list
      */
+    @SaCheckPermission("thermal:meter:vendor:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<MtMeterVendorVo> list(@RequestParam(required = false) String search, PageQuery pageQuery) {
@@ -57,6 +59,7 @@ public class MtMeterVendorController extends BaseController {
      * 旧端点: GET /meterVendor/verifyName
      * 新端点: GET /thermal/meter/vendor/verifyName
      */
+    @SaCheckPermission("thermal:meter:vendor:query")
     @SaCheckLogin
     @GetMapping("/verifyName")
     public R<Integer> verifyName(@RequestParam @NotBlank String name,
@@ -69,6 +72,7 @@ public class MtMeterVendorController extends BaseController {
      * 旧端点: POST /meterVendor/insertData
      * 新端点: POST /thermal/meter/vendor
      */
+    @SaCheckPermission("thermal:meter:vendor:add")
     @SaCheckLogin
     @Log(title = "仪表厂商", businessType = BusinessType.INSERT)
     @PostMapping
@@ -83,6 +87,7 @@ public class MtMeterVendorController extends BaseController {
      * 旧端点: POST /meterVendor/updateData
      * 新端点: PUT /thermal/meter/vendor
      */
+    @SaCheckPermission("thermal:meter:vendor:edit")
     @SaCheckLogin
     @Log(title = "仪表厂商", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -96,6 +101,7 @@ public class MtMeterVendorController extends BaseController {
      * 旧端点: POST /meterVendor/deleteData
      * 新端点: DELETE /thermal/meter/vendor/{id}
      */
+    @SaCheckPermission("thermal:meter:vendor:remove")
     @SaCheckLogin
     @Log(title = "仪表厂商", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -112,6 +118,7 @@ public class MtMeterVendorController extends BaseController {
      * 旧端点: GET /meterVendor/allVendor
      * 新端点: GET /thermal/meter/vendor/all
      */
+    @SaCheckPermission("thermal:meter:vendor:list")
     @SaCheckLogin
     @GetMapping("/all")
     public R<List<MtMeterVendorVo>> all() {

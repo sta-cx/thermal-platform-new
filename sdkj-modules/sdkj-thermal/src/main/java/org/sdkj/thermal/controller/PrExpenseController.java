@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -40,6 +41,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/pageList
      * 新端点: GET /thermal/property/expense/list
      */
+    @SaCheckPermission("thermal:property:expense:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrExpenseVo> list(
@@ -66,6 +68,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/queryHouseExpenseList
      * 新端点: GET /thermal/property/expense/house-list
      */
+    @SaCheckPermission("thermal:property:expense:list")
     @SaCheckLogin
     @GetMapping("/house-list")
     public R<List<PrExpenseVo>> queryHouseExpenseList(
@@ -84,6 +87,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/queryHeatExpenseByHouseId
      * 新端点: GET /thermal/property/expense/heat/{houseId}
      */
+    @SaCheckPermission("thermal:property:expense:query")
     @SaCheckLogin
     @GetMapping("/heat/{houseId}")
     public R<PrExpenseVo> queryHeatExpense(@PathVariable String houseId) {
@@ -95,6 +99,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/insertData
      * 新端点: POST /thermal/property/expense/heat
      */
+    @SaCheckPermission("thermal:property:expense:add")
     @SaCheckLogin
     @Log(title = "取暖费生成", businessType = BusinessType.INSERT)
     @PostMapping("/heat")
@@ -108,6 +113,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/insertDatall
      * 新端点: POST /thermal/property/expense/batch
      */
+    @SaCheckPermission("thermal:property:expense:add")
     @SaCheckLogin
     @Log(title = "批量生成费用", businessType = BusinessType.INSERT)
     @PostMapping("/batch")
@@ -121,6 +127,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/insertDataLs
      * 新端点: POST /thermal/property/expense/temporary
      */
+    @SaCheckPermission("thermal:property:expense:add")
     @SaCheckLogin
     @Log(title = "临时费用生成", businessType = BusinessType.INSERT)
     @PostMapping("/temporary")
@@ -134,6 +141,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/insertDatallCw
      * 新端点: POST /thermal/property/expense/parking
      */
+    @SaCheckPermission("thermal:property:expense:add")
     @SaCheckLogin
     @Log(title = "车位费用生成", businessType = BusinessType.INSERT)
     @PostMapping("/parking")
@@ -147,6 +155,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/setPreferential
      * 新端点: PUT /thermal/property/expense/preferential
      */
+    @SaCheckPermission("thermal:property:expense:edit")
     @SaCheckLogin
     @Log(title = "费用优惠", businessType = BusinessType.UPDATE)
     @PutMapping("/preferential")
@@ -165,6 +174,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/setIsFree
      * 新端点: PUT /thermal/property/expense/free
      */
+    @SaCheckPermission("thermal:property:expense:edit")
     @SaCheckLogin
     @Log(title = "费用免收", businessType = BusinessType.UPDATE)
     @PutMapping("/free")
@@ -180,6 +190,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/setLastDate
      * 新端点: PUT /thermal/property/expense/delay
      */
+    @SaCheckPermission("thermal:property:expense:edit")
     @SaCheckLogin
     @Log(title = "费用延期", businessType = BusinessType.UPDATE)
     @PutMapping("/delay")
@@ -195,6 +206,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/setBaotingDate
      * 新端点: PUT /thermal/property/expense/suspend
      */
+    @SaCheckPermission("thermal:property:expense:edit")
     @SaCheckLogin
     @Log(title = "费用报停", businessType = BusinessType.UPDATE)
     @PutMapping("/suspend")
@@ -212,6 +224,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/setFugongDate
      * 新端点: PUT /thermal/property/expense/resume
      */
+    @SaCheckPermission("thermal:property:expense:edit")
     @SaCheckLogin
     @Log(title = "费用复供", businessType = BusinessType.UPDATE)
     @PutMapping("/resume")
@@ -227,6 +240,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/setTuifei
      * 新端点: PUT /thermal/property/expense/refund
      */
+    @SaCheckPermission("thermal:property:expense:edit")
     @SaCheckLogin
     @Log(title = "费用退费", businessType = BusinessType.UPDATE)
     @PutMapping("/refund")
@@ -244,6 +258,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/deleteDate
      * 新端点: DELETE /thermal/property/expense/batch
      */
+    @SaCheckPermission("thermal:property:expense:remove")
     @SaCheckLogin
     @Log(title = "费用明细", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
@@ -257,6 +272,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/updateDatall
      * 新端点: PUT /thermal/property/expense/standard
      */
+    @SaCheckPermission("thermal:property:expense:edit")
     @SaCheckLogin
     @Log(title = "费用标准", businessType = BusinessType.UPDATE)
     @PutMapping("/standard")
@@ -270,6 +286,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/recalculate
      * 新端点: POST /thermal/property/expense/recalculate
      */
+    @SaCheckPermission("thermal:property:expense:recalculate")
     @SaCheckLogin
     @Log(title = "费用重算", businessType = BusinessType.UPDATE)
     @PostMapping("/recalculate")
@@ -282,6 +299,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/recalculateCw
      * 新端点: POST /thermal/property/expense/recalculate-parking
      */
+    @SaCheckPermission("thermal:property:expense:recalculate")
     @SaCheckLogin
     @Log(title = "车位费用重算", businessType = BusinessType.UPDATE)
     @PostMapping("/recalculate-parking")
@@ -294,6 +312,7 @@ public class PrExpenseController extends BaseController {
      * 旧端点: POST /property/expense/setCalStatus
      * 新端点: PUT /thermal/property/expense/calc-status
      */
+    @SaCheckPermission("thermal:property:expense:edit")
     @SaCheckLogin
     @PutMapping("/calc-status")
     public R<Void> setCalStatus(@RequestParam String houseId) {

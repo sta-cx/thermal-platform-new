@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
@@ -38,6 +39,7 @@ public class HtAlertController extends BaseController {
      * 旧端点: GET /htAlert/pageList
      * 新端点: GET /thermal/ht/alert/list
      */
+    @SaCheckPermission("thermal:ht:alert:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<HtAlertVo> list(
@@ -62,6 +64,7 @@ public class HtAlertController extends BaseController {
      * 旧端点: POST /htAlert/insertData
      * 新端点: POST /thermal/ht/alert
      */
+    @SaCheckPermission("thermal:ht:alert:add")
     @SaCheckLogin
     @Log(title = "报警记录", businessType = BusinessType.INSERT)
     @PostMapping
@@ -75,6 +78,7 @@ public class HtAlertController extends BaseController {
      * 旧端点: POST /htAlert/updateData
      * 新端点: PUT /thermal/ht/alert
      */
+    @SaCheckPermission("thermal:ht:alert:edit")
     @SaCheckLogin
     @Log(title = "报警记录", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -88,6 +92,7 @@ public class HtAlertController extends BaseController {
      * 旧端点: GET /htAlert/queryAbnormalAlarmList
      * 新端点: GET /thermal/ht/alert/abnormal
      */
+    @SaCheckPermission("thermal:ht:alert:query")
     @SaCheckLogin
     @GetMapping("/abnormal")
     public R<List<HtAlertVo>> abnormalAlarmList(@RequestParam String meterId) {
@@ -99,6 +104,7 @@ public class HtAlertController extends BaseController {
      * 旧端点: GET /htAlert/queryTypeCount
      * 新端点: GET /thermal/ht/alert/typeCount
      */
+    @SaCheckPermission("thermal:ht:alert:query")
     @SaCheckLogin
     @GetMapping("/typeCount")
     public R<List<Map<String, Object>>> typeCount(@RequestParam String companyId) {

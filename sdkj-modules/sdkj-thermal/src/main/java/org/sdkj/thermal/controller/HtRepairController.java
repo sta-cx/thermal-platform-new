@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
@@ -40,6 +41,7 @@ public class HtRepairController extends BaseController {
      * 旧端点: GET /htRepair/pageList
      * 新端点: GET /thermal/ht/repair/list
      */
+    @SaCheckPermission("thermal:ht:repair:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<HtRepairVo> list(
@@ -67,6 +69,7 @@ public class HtRepairController extends BaseController {
      * 旧端点: POST /htRepair/insertData
      * 新端点: POST /thermal/ht/repair
      */
+    @SaCheckPermission("thermal:ht:repair:add")
     @SaCheckLogin
     @Log(title = "报修记录", businessType = BusinessType.INSERT)
     @PostMapping
@@ -81,6 +84,7 @@ public class HtRepairController extends BaseController {
      * 旧端点: POST /htRepair/updateData
      * 新端点: PUT /thermal/ht/repair
      */
+    @SaCheckPermission("thermal:ht:repair:edit")
     @SaCheckLogin
     @Log(title = "报修记录", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -94,6 +98,7 @@ public class HtRepairController extends BaseController {
      * 旧端点: POST /htRepair/updateDispatchData
      * 新端点: PUT /thermal/ht/repair/dispatch
      */
+    @SaCheckPermission("thermal:ht:repair:edit")
     @SaCheckLogin
     @Log(title = "报修记录派单", businessType = BusinessType.UPDATE)
     @PutMapping("/dispatch")
@@ -115,6 +120,7 @@ public class HtRepairController extends BaseController {
      * 旧端点: POST /htRepair/deleteData
      * 新端点: DELETE /thermal/ht/repair/{repairNo}
      */
+    @SaCheckPermission("thermal:ht:repair:remove")
     @SaCheckLogin
     @Log(title = "报修记录", businessType = BusinessType.DELETE)
     @DeleteMapping("/{repairNo}")
@@ -132,6 +138,7 @@ public class HtRepairController extends BaseController {
      * 旧端点: POST /htRepair/updateStatusResultData
      * 新端点: PUT /thermal/ht/repair/status
      */
+    @SaCheckPermission("thermal:ht:repair:edit")
     @SaCheckLogin
     @Log(title = "报修记录状态", businessType = BusinessType.UPDATE)
     @PutMapping("/status")
@@ -152,6 +159,7 @@ public class HtRepairController extends BaseController {
      * 旧端点: GET /htRepair/queryTypeCount
      * 新端点: GET /thermal/ht/repair/typeCount
      */
+    @SaCheckPermission("thermal:ht:repair:query")
     @SaCheckLogin
     @GetMapping("/typeCount")
     public R<List<Map<String, Object>>> typeCount(@RequestParam String companyId) {
@@ -163,6 +171,7 @@ public class HtRepairController extends BaseController {
      * 旧端点: GET /htRepair/queryRoomId
      * 新端点: GET /thermal/ht/repair/room
      */
+    @SaCheckPermission("thermal:ht:repair:query")
     @SaCheckLogin
     @GetMapping("/room")
     public R<List<HtRepairVo>> getByRoom(@RequestParam String roomId) {

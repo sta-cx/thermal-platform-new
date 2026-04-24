@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -35,6 +36,7 @@ public class HtHouseStrategyController extends BaseController {
     /**
      * 分页查询房屋策略绑定
      */
+    @SaCheckPermission("thermal:ht:houseStrategy:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<HtHouseStrategyVo> list(
@@ -57,6 +59,7 @@ public class HtHouseStrategyController extends BaseController {
     /**
      * 批量保存房屋策略绑定
      */
+    @SaCheckPermission("thermal:ht:houseStrategy:add")
     @SaCheckLogin
     @Log(title = "房屋策略绑定", businessType = BusinessType.INSERT)
     @PostMapping("/batch")
@@ -70,6 +73,7 @@ public class HtHouseStrategyController extends BaseController {
     /**
      * 批量修改房屋策略绑定
      */
+    @SaCheckPermission("thermal:ht:houseStrategy:edit")
     @SaCheckLogin
     @Log(title = "房屋策略绑定", businessType = BusinessType.UPDATE)
     @PutMapping("/batch")
@@ -81,6 +85,7 @@ public class HtHouseStrategyController extends BaseController {
     /**
      * 批量删除房屋策略绑定
      */
+    @SaCheckPermission("thermal:ht:houseStrategy:remove")
     @SaCheckLogin
     @Log(title = "房屋策略绑定", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")

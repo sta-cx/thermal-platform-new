@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -38,6 +39,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/pageList
      * 新端点: GET /thermal/property/standard/list
      */
+    @SaCheckPermission("thermal:property:standard:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrStandardVo> list(
@@ -52,6 +54,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/insertData
      * 新端点: POST /thermal/property/standard
      */
+    @SaCheckPermission("thermal:property:standard:add")
     @SaCheckLogin
     @Log(title = "收费标准", businessType = BusinessType.INSERT)
     @PostMapping
@@ -65,6 +68,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/updateData
      * 新端点: PUT /thermal/property/standard
      */
+    @SaCheckPermission("thermal:property:standard:edit")
     @SaCheckLogin
     @Log(title = "收费标准", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -78,6 +82,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/deleteData
      * 新端点: DELETE /thermal/property/standard/{id}
      */
+    @SaCheckPermission("thermal:property:standard:remove")
     @SaCheckLogin
     @Log(title = "收费标准", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -90,6 +95,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/queryPrStandard
      * 新端点: GET /thermal/property/standard/{id}
      */
+    @SaCheckPermission("thermal:property:standard:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrStandard> getById(@PathVariable String id) {
@@ -101,6 +107,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/queryPrStandardByItemCode
      * 新端点: GET /thermal/property/standard/by-item-code
      */
+    @SaCheckPermission("thermal:property:standard:query")
     @SaCheckLogin
     @GetMapping("/by-item-code")
     public R<List<PrStandardVo>> getByItemCode(
@@ -114,6 +121,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/findEleStandard
      * 新端点: GET /thermal/property/standard/ele
      */
+    @SaCheckPermission("thermal:property:standard:list")
     @SaCheckLogin
     @GetMapping("/ele")
     public R<List<PrStandardVo>> findEle(
@@ -127,6 +135,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/findWaterStandard
      * 新端点: GET /thermal/property/standard/water
      */
+    @SaCheckPermission("thermal:property:standard:list")
     @SaCheckLogin
     @GetMapping("/water")
     public R<List<PrStandardVo>> findWater(
@@ -140,6 +149,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/findHeatStandard
      * 新端点: GET /thermal/property/standard/heat
      */
+    @SaCheckPermission("thermal:property:standard:list")
     @SaCheckLogin
     @GetMapping("/heat")
     public R<List<PrStandardVo>> findHeat(
@@ -153,6 +163,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/isName
      * 新端点: GET /thermal/property/standard/check-name
      */
+    @SaCheckPermission("thermal:property:standard:query")
     @SaCheckLogin
     @GetMapping("/check-name")
     public R<Boolean> checkName(
@@ -169,6 +180,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/purchase
      * 新端点: POST /thermal/property/standard/purchase
      */
+    @SaCheckPermission("thermal:property:standard:query")
     @SaCheckLogin
     @PostMapping("/purchase")
     public R<Boolean> purchase(
@@ -189,6 +201,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/getPrExpenseItemByStandardId
      * 新端点: GET /thermal/property/standard/expense-item
      */
+    @SaCheckPermission("thermal:property:standard:query")
     @SaCheckLogin
     @GetMapping("/expense-item")
     public R<PrExpenseItem> getExpenseItem(
@@ -203,6 +216,7 @@ public class PrStandardController extends BaseController {
      * 旧端点: POST /property/prStandard/pageListItem
      * 新端点: GET /thermal/property/standard/by-item-name
      */
+    @SaCheckPermission("thermal:property:standard:list")
     @SaCheckLogin
     @GetMapping("/by-item-name")
     public TableDataInfo<PrStandardVo> listByItemName(

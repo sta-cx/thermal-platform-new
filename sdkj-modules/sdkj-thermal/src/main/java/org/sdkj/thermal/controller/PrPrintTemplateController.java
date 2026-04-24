@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -26,6 +27,7 @@ public class PrPrintTemplateController extends BaseController {
 
     private final IPrPrintTemplateService printTemplateService;
 
+    @SaCheckPermission("thermal:property:printTemplate:list")
     @SaCheckLogin
     @GetMapping("/list")
     public R<List<PrPrintTemplate>> list(
@@ -35,6 +37,7 @@ public class PrPrintTemplateController extends BaseController {
         return R.ok(printTemplateService.listByOrgAndCompany(companyId, orgId, name));
     }
 
+    @SaCheckPermission("thermal:property:printTemplate:add")
     @SaCheckLogin
     @Log(title = "打印模板", businessType = BusinessType.INSERT)
     @PostMapping("/upload")
@@ -46,6 +49,7 @@ public class PrPrintTemplateController extends BaseController {
         return toAjax(printTemplateService.saveOrUpdateTemplate(companyId, orgId, name, templateContent));
     }
 
+    @SaCheckPermission("thermal:property:printTemplate:query")
     @SaCheckLogin
     @GetMapping("/find")
     public R<List<PrPrintTemplate>> findTemplate(
@@ -55,6 +59,7 @@ public class PrPrintTemplateController extends BaseController {
         return R.ok(printTemplateService.listByOrgAndCompany(companyId, orgId, name));
     }
 
+    @SaCheckPermission("thermal:property:printTemplate:query")
     @SaCheckLogin
     @GetMapping("/by-serial")
     public R<PrPrintTemplate> findTemplateBySerialNum(@RequestParam String serialNum) {

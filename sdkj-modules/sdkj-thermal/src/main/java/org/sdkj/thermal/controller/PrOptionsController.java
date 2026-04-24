@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -31,6 +32,7 @@ public class PrOptionsController extends BaseController {
      * 旧端点: POST /property/options/getDataById
      * 新端点: GET /thermal/property/options
      */
+    @SaCheckPermission("thermal:property:options:query")
     @SaCheckLogin
     @GetMapping
     public R<?> getDataById(
@@ -45,6 +47,7 @@ public class PrOptionsController extends BaseController {
      * 旧端点: POST /property/options/insertData
      * 新端点: POST /thermal/property/options
      */
+    @SaCheckPermission("thermal:property:options:add")
     @SaCheckLogin
     @Log(title = "系统选项", businessType = BusinessType.INSERT)
     @PostMapping
@@ -58,6 +61,7 @@ public class PrOptionsController extends BaseController {
      * 旧端点: POST /property/options/updateData
      * 新端点: PUT /thermal/property/options
      */
+    @SaCheckPermission("thermal:property:options:edit")
     @SaCheckLogin
     @Log(title = "系统选项", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -71,6 +75,7 @@ public class PrOptionsController extends BaseController {
      * 旧端点: POST /property/options/initData
      * 新端点: POST /thermal/property/options/init
      */
+    @SaCheckPermission("thermal:property:options:add")
     @SaCheckLogin
     @PostMapping("/init")
     public R<Void> initData(@RequestParam String orgId, @RequestParam String companyId) {
@@ -82,6 +87,7 @@ public class PrOptionsController extends BaseController {
      * 旧端点: POST /property/options/forbiddenToBuy
      * 新端点: GET /thermal/property/options/forbidden
      */
+    @SaCheckPermission("thermal:property:options:query")
     @SaCheckLogin
     @GetMapping("/forbidden")
     public R<?> forbiddenToBuy(

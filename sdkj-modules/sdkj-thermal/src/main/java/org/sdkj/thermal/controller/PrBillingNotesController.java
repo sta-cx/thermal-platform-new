@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -28,6 +29,7 @@ public class PrBillingNotesController extends BaseController {
      * 旧端点: POST /property/prBillingNotes/saveSerialNum
      * 新端点: POST /thermal/property/billing-notes/serial
      */
+    @SaCheckPermission("thermal:property:billingNotes:edit")
     @SaCheckLogin
     @Log(title = "票据备注", businessType = BusinessType.UPDATE)
     @PostMapping("/serial")
@@ -42,6 +44,7 @@ public class PrBillingNotesController extends BaseController {
      * 旧端点: POST /property/prBillingNotes/reprint
      * 新端点: POST /thermal/property/billing-notes/reprint
      */
+    @SaCheckPermission("thermal:property:billingNotes:edit")
     @SaCheckLogin
     @Log(title = "票据重开", businessType = BusinessType.UPDATE)
     @PostMapping("/reprint")

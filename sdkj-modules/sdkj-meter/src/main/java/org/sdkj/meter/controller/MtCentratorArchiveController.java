@@ -1,6 +1,7 @@
 package org.sdkj.meter.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class MtCentratorArchiveController extends BaseController {
      * 旧端点: GET /centratorArchive/pageList
      * 新端点: GET /thermal/meter/centrator/pageList
      */
+    @SaCheckPermission("thermal:meter:centrator:list")
     @SaCheckLogin
     @GetMapping("/pageList")
     public TableDataInfo<MtCentratorArchiveVo> pageList(@RequestParam @NotBlank String sortId,
@@ -56,6 +58,7 @@ public class MtCentratorArchiveController extends BaseController {
      * 旧端点: POST /centratorArchive/insertData
      * 新端点: POST /thermal/meter/centrator
      */
+    @SaCheckPermission("thermal:meter:centrator:add")
     @SaCheckLogin
     @Log(title = "集中器档案", businessType = BusinessType.INSERT)
     @PostMapping
@@ -69,6 +72,7 @@ public class MtCentratorArchiveController extends BaseController {
      * 旧端点: POST /centratorArchive/updateData
      * 新端点: PUT /thermal/meter/centrator
      */
+    @SaCheckPermission("thermal:meter:centrator:edit")
     @SaCheckLogin
     @Log(title = "集中器档案", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -82,6 +86,7 @@ public class MtCentratorArchiveController extends BaseController {
      * 旧端点: POST /centratorArchive/deleteData
      * 新端点: DELETE /thermal/meter/centrator/{id}
      */
+    @SaCheckPermission("thermal:meter:centrator:remove")
     @SaCheckLogin
     @Log(title = "集中器档案", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")

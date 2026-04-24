@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -31,6 +32,7 @@ public class PrUserController extends BaseController {
      * 旧端点: POST /property/user/pageList
      * 新端点: GET /thermal/property/user/list
      */
+    @SaCheckPermission("thermal:property:user:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrUserVo> list(
@@ -44,6 +46,7 @@ public class PrUserController extends BaseController {
      * 旧端点: POST /property/user/insertData
      * 新端点: POST /thermal/property/user
      */
+    @SaCheckPermission("thermal:property:user:add")
     @SaCheckLogin
     @Log(title = "客户", businessType = BusinessType.INSERT)
     @PostMapping
@@ -56,6 +59,7 @@ public class PrUserController extends BaseController {
      * 旧端点: POST /property/user/updateData
      * 新端点: PUT /thermal/property/user
      */
+    @SaCheckPermission("thermal:property:user:edit")
     @SaCheckLogin
     @Log(title = "客户", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -68,6 +72,7 @@ public class PrUserController extends BaseController {
      * 旧端点: POST /property/user/deleteData
      * 新端点: DELETE /thermal/property/user/{id}
      */
+    @SaCheckPermission("thermal:property:user:remove")
     @SaCheckLogin
     @Log(title = "客户", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -81,6 +86,7 @@ public class PrUserController extends BaseController {
      * 旧端点: POST /property/user/queryPrUserVo
      * 新端点: GET /thermal/property/user/{userId}
      */
+    @SaCheckPermission("thermal:property:user:query")
     @SaCheckLogin
     @GetMapping("/{userId}")
     public R<PrUserVo> getById(@PathVariable String userId) {
@@ -92,6 +98,7 @@ public class PrUserController extends BaseController {
      * 旧端点: POST /property/user/hasUser
      * 新端点: GET /thermal/property/user/has-user
      */
+    @SaCheckPermission("thermal:property:user:query")
     @SaCheckLogin
     @GetMapping("/has-user")
     public R<Boolean> hasUser(@RequestParam String houseId) {
@@ -103,6 +110,7 @@ public class PrUserController extends BaseController {
      * 旧端点: POST /property/user/getUserByPhone
      * 新端点: GET /thermal/property/user/by-phone
      */
+    @SaCheckPermission("thermal:property:user:query")
     @SaCheckLogin
     @GetMapping("/by-phone")
     public R<PrUserVo> getByPhone(@RequestParam String phone) {

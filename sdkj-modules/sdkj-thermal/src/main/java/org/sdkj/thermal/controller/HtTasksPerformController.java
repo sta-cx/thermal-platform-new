@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.mybatis.core.page.PageQuery;
@@ -32,6 +33,7 @@ public class HtTasksPerformController extends BaseController {
     /**
      * 根据仪表ID分页查询执行记录
      */
+    @SaCheckPermission("thermal:ht:tasksPerform:list")
     @SaCheckLogin
     @GetMapping("/byMeterId")
     public TableDataInfo<HtTasksPerformVo> byMeterId(
@@ -46,6 +48,7 @@ public class HtTasksPerformController extends BaseController {
     /**
      * 根据仪表ID查询执行记录详情
      */
+    @SaCheckPermission("thermal:ht:tasksPerform:query")
     @SaCheckLogin
     @GetMapping("/byMeterIdDetail")
     public R<List<HtTasksPerformVo>> byMeterIdDetail(@RequestParam String meterId) {
@@ -55,6 +58,7 @@ public class HtTasksPerformController extends BaseController {
     /**
      * 更新指令发送状态
      */
+    @SaCheckPermission("thermal:ht:tasksPerform:edit")
     @SaCheckLogin
     @PutMapping("/status")
     public R<Void> updateStatus(@RequestParam String performId, @RequestParam Integer status) {
@@ -64,6 +68,7 @@ public class HtTasksPerformController extends BaseController {
     /**
      * 查询指定任务下待发送的指令
      */
+    @SaCheckPermission("thermal:ht:tasksPerform:list")
     @SaCheckLogin
     @GetMapping("/pending")
     public R<List<HtTasksPerformVo>> pendingByTask(@RequestParam String taskId) {
@@ -73,6 +78,7 @@ public class HtTasksPerformController extends BaseController {
     /**
      * 查询执行统计
      */
+    @SaCheckPermission("thermal:ht:tasksPerform:query")
     @SaCheckLogin
     @GetMapping("/stats")
     public R<Map<String, Object>> stats(@RequestParam String taskId) {

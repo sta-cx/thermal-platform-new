@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.mybatis.core.page.PageQuery;
@@ -23,6 +24,7 @@ public class PrTransactionRecordController extends BaseController {
 
     private final IPrTransactionRecordService transactionRecordService;
 
+    @SaCheckPermission("thermal:property:transaction:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrTransactionRecordVo> list(
@@ -39,24 +41,28 @@ public class PrTransactionRecordController extends BaseController {
             search, companyId, orgId, buildingId, unitCode, startTime, endTime, status, pageQuery);
     }
 
+    @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/detail/{mainId}")
     public R<List<PrTransactionRecordSubVo>> getDetail(@PathVariable String mainId) {
         return R.ok(transactionRecordService.getDetailByMainId(mainId));
     }
 
+    @SaCheckPermission("thermal:property:transaction:edit")
     @SaCheckLogin
     @PutMapping("/revocation")
     public R<Void> revocation(@RequestParam String recordId) {
         return toAjax(transactionRecordService.revocation(recordId));
     }
 
+    @SaCheckPermission("thermal:property:transaction:edit")
     @SaCheckLogin
     @PutMapping("/invalid")
     public R<Void> invalid(@RequestParam String recordId) {
         return toAjax(transactionRecordService.invalid(recordId));
     }
 
+    @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/comprehensive")
     public R<Map<String, Object>> comprehensive(
@@ -67,6 +73,7 @@ public class PrTransactionRecordController extends BaseController {
         return R.ok(transactionRecordService.comprehensive(companyId, orgId, startTime, endTime));
     }
 
+    @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/received")
     public R<Map<String, Object>> received(
@@ -77,6 +84,7 @@ public class PrTransactionRecordController extends BaseController {
         return R.ok(transactionRecordService.received(companyId, orgId, startTime, endTime));
     }
 
+    @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/arrears")
     public R<Map<String, Object>> arrears(
@@ -85,6 +93,7 @@ public class PrTransactionRecordController extends BaseController {
         return R.ok(transactionRecordService.arrears(companyId, orgId));
     }
 
+    @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/daily")
     public R<List<PrTransactionRecordVo>> daily(

@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -36,6 +37,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/pageList
      * 新端点: GET /thermal/property/expense-item/list
      */
+    @SaCheckPermission("thermal:property:expenseItem:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrExpenseItemVo> list(
@@ -50,6 +52,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/insertData
      * 新端点: POST /thermal/property/expense-item
      */
+    @SaCheckPermission("thermal:property:expenseItem:add")
     @SaCheckLogin
     @Log(title = "费用项目", businessType = BusinessType.INSERT)
     @PostMapping
@@ -63,6 +66,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/querypPrExpenseItem
      * 新端点: GET /thermal/property/expense-item/{id}
      */
+    @SaCheckPermission("thermal:property:expenseItem:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrExpenseItemVo> getById(@PathVariable String id) {
@@ -74,6 +78,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/updateData
      * 新端点: PUT /thermal/property/expense-item
      */
+    @SaCheckPermission("thermal:property:expenseItem:edit")
     @SaCheckLogin
     @Log(title = "费用项目", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -87,6 +92,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/getDataByItemCode
      * 新端点: GET /thermal/property/expense-item/by-code
      */
+    @SaCheckPermission("thermal:property:expenseItem:list")
     @SaCheckLogin
     @GetMapping("/by-code")
     public R<List<PrExpenseItemVo>> getByItemCode(
@@ -102,6 +108,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/getDataByItemGroup
      * 新端点: GET /thermal/property/expense-item/by-group
      */
+    @SaCheckPermission("thermal:property:expenseItem:list")
     @SaCheckLogin
     @GetMapping("/by-group")
     public R<List<PrExpenseItemVo>> getByItemGroup(
@@ -117,6 +124,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/getItemCodesByItemGroup
      * 新端点: GET /thermal/property/expense-item/codes
      */
+    @SaCheckPermission("thermal:property:expenseItem:list")
     @SaCheckLogin
     @GetMapping("/codes")
     public R<List<PrExpenseItemVo>> getItemCodes(
@@ -131,6 +139,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/getDataByCompanyIdOrgId
      * 新端点: GET /thermal/property/expense-item/by-org
      */
+    @SaCheckPermission("thermal:property:expenseItem:list")
     @SaCheckLogin
     @GetMapping("/by-org")
     public R<List<PrExpenseItemVo>> getByOrg(
@@ -144,6 +153,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/deleteData
      * 新端点: DELETE /thermal/property/expense-item/{id}
      */
+    @SaCheckPermission("thermal:property:expenseItem:remove")
     @SaCheckLogin
     @Log(title = "费用项目", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -158,6 +168,7 @@ public class PrExpenseItemController extends BaseController {
      * 旧端点: POST /property/expenseItem/isItemName
      * 新端点: GET /thermal/property/expense-item/check-name
      */
+    @SaCheckPermission("thermal:property:expenseItem:query")
     @SaCheckLogin
     @GetMapping("/check-name")
     public R<Boolean> checkName(

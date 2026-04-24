@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -33,6 +34,7 @@ public class PrAccountController extends BaseController {
      * 旧端点: POST /property/prAccount/pageList
      * 新端点: GET /thermal/property/account/list
      */
+    @SaCheckPermission("thermal:property:account:list")
     @SaCheckLogin
     @GetMapping("/list")
     public R<List<PrAccountBalanceVo>> list(
@@ -51,6 +53,7 @@ public class PrAccountController extends BaseController {
      * 旧端点: POST /property/prAccount/insertData
      * 新端点: POST /thermal/property/account/open
      */
+    @SaCheckPermission("thermal:property:account:add")
     @SaCheckLogin
     @Log(title = "开户", businessType = BusinessType.INSERT)
     @PostMapping("/open")
@@ -66,6 +69,7 @@ public class PrAccountController extends BaseController {
      * 旧端点: POST /property/prAccount/noAccount
      * 新端点: GET /thermal/property/account/no-account
      */
+    @SaCheckPermission("thermal:property:account:list")
     @SaCheckLogin
     @GetMapping("/no-account")
     public R<List<PrAccountBalanceVo>> noAccount(
@@ -84,6 +88,7 @@ public class PrAccountController extends BaseController {
      * 旧端点: POST /property/prAccount/getAccount
      * 新端点: GET /thermal/property/account/recharge-query
      */
+    @SaCheckPermission("thermal:property:account:query")
     @SaCheckLogin
     @GetMapping("/recharge-query")
     public R<List<PrAccountBalanceVo>> getAccount(
@@ -103,6 +108,7 @@ public class PrAccountController extends BaseController {
      * 旧端点: POST /property/prAccount/updateData
      * 新端点: POST /thermal/property/account/recharge
      */
+    @SaCheckPermission("thermal:property:account:edit")
     @SaCheckLogin
     @Log(title = "充值", businessType = BusinessType.UPDATE)
     @PostMapping("/recharge")
@@ -118,6 +124,7 @@ public class PrAccountController extends BaseController {
      * 旧端点: POST /property/prAccount/refundData
      * 新端点: POST /thermal/property/account/refund
      */
+    @SaCheckPermission("thermal:property:account:edit")
     @SaCheckLogin
     @Log(title = "账户退费", businessType = BusinessType.UPDATE)
     @PostMapping("/refund")
@@ -137,6 +144,7 @@ public class PrAccountController extends BaseController {
      * 旧端点: POST /property/prAccount/transfer
      * 新端点: POST /thermal/property/account/transfer
      */
+    @SaCheckPermission("thermal:property:account:edit")
     @SaCheckLogin
     @Log(title = "转存", businessType = BusinessType.UPDATE)
     @PostMapping("/transfer")
@@ -154,6 +162,7 @@ public class PrAccountController extends BaseController {
      * 旧端点: POST /property/prAccount/getPersonAccount
      * 新端点: GET /thermal/property/account/balance
      */
+    @SaCheckPermission("thermal:property:account:query")
     @SaCheckLogin
     @GetMapping("/balance")
     public R<BigDecimal> getPersonAccount(
@@ -168,6 +177,7 @@ public class PrAccountController extends BaseController {
      * 旧端点: POST /property/prAccount/pageAccountStatementList
      * 新端点: GET /thermal/property/account/statement
      */
+    @SaCheckPermission("thermal:property:account:list")
     @SaCheckLogin
     @GetMapping("/statement")
     public R<List<PrAccountBalanceVo>> statementList(

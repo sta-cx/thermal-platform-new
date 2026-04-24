@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
@@ -29,6 +30,7 @@ public class PrOptionsHeatController extends BaseController {
 
     private final IPrOptionsHeatService optionsHeatService;
 
+    @SaCheckPermission("thermal:property:optionsHeat:query")
     @SaCheckLogin
     @GetMapping
     public R<PrOptionsHeat> getDataById(
@@ -42,6 +44,7 @@ public class PrOptionsHeatController extends BaseController {
         return R.ok(result);
     }
 
+    @SaCheckPermission("thermal:property:optionsHeat:add")
     @SaCheckLogin
     @Log(title = "供热选项", businessType = BusinessType.INSERT)
     @PostMapping
@@ -50,6 +53,7 @@ public class PrOptionsHeatController extends BaseController {
         return toAjax(optionsHeatService.save(options));
     }
 
+    @SaCheckPermission("thermal:property:optionsHeat:edit")
     @SaCheckLogin
     @Log(title = "供热选项", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -58,6 +62,7 @@ public class PrOptionsHeatController extends BaseController {
         return toAjax(optionsHeatService.updateById(options));
     }
 
+    @SaCheckPermission("thermal:property:optionsHeat:edit")
     @SaCheckLogin
     @PostMapping("/upsert")
     public R<Void> upsertCompanyData(@RequestBody PrOptionsHeatBo bo) {
@@ -71,6 +76,7 @@ public class PrOptionsHeatController extends BaseController {
         return toAjax(optionsHeatService.save(options));
     }
 
+    @SaCheckPermission("thermal:property:optionsHeat:add")
     @SaCheckLogin
     @PostMapping("/init")
     public R<Void> initData(@RequestParam String orgId, @RequestParam String companyId) {

@@ -1,6 +1,7 @@
 package org.sdkj.meter.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -35,6 +36,7 @@ public class MtMeterSortController extends BaseController {
     /**
      * 分页查询仪表分类
      */
+    @SaCheckPermission("thermal:meter:sort:list")
     @SaCheckLogin
     @GetMapping("/pageList")
     public TableDataInfo<MtMeterSortVo> pageList(MtMeterSortBo sort, PageQuery pageQuery) {
@@ -49,6 +51,7 @@ public class MtMeterSortController extends BaseController {
     /**
      * 校验名称是否重复
      */
+    @SaCheckPermission("thermal:meter:sort:query")
     @SaCheckLogin
     @PostMapping("/verifyName")
     public R<Integer> verifyName(
@@ -60,6 +63,7 @@ public class MtMeterSortController extends BaseController {
     /**
      * 新增仪表分类
      */
+    @SaCheckPermission("thermal:meter:sort:add")
     @SaCheckLogin
     @Log(title = "仪表分类", businessType = BusinessType.INSERT)
     @PostMapping
@@ -71,6 +75,7 @@ public class MtMeterSortController extends BaseController {
     /**
      * 修改仪表分类
      */
+    @SaCheckPermission("thermal:meter:sort:edit")
     @SaCheckLogin
     @Log(title = "仪表分类", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -82,6 +87,7 @@ public class MtMeterSortController extends BaseController {
     /**
      * 删除仪表分类（检查是否被档案表引用）
      */
+    @SaCheckPermission("thermal:meter:sort:remove")
     @SaCheckLogin
     @Log(title = "仪表分类", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -99,6 +105,7 @@ public class MtMeterSortController extends BaseController {
     /**
      * 条件查询仪表分类
      */
+    @SaCheckPermission("thermal:meter:sort:list")
     @SaCheckLogin
     @GetMapping("/queryMeterSort")
     public R<List<MtMeterSortVo>> queryMeterSort(MtMeterSortBo sort) {

@@ -1,6 +1,7 @@
 package org.sdkj.meter.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class MtWaterArchiveController extends BaseController {
      * 旧端点: GET /waterArchive/pageList
      * 新端点: GET /thermal/meter/water/pageList
      */
+    @SaCheckPermission("thermal:meter:water:list")
     @SaCheckLogin
     @GetMapping("/pageList")
     public TableDataInfo<MtWaterArchiveVo> pageList(@RequestParam @NotBlank String sortId,
@@ -56,6 +58,7 @@ public class MtWaterArchiveController extends BaseController {
      * 旧端点: POST /waterArchive/insertData
      * 新端点: POST /thermal/meter/water
      */
+    @SaCheckPermission("thermal:meter:water:add")
     @SaCheckLogin
     @Log(title = "水表档案", businessType = BusinessType.INSERT)
     @PostMapping
@@ -69,6 +72,7 @@ public class MtWaterArchiveController extends BaseController {
      * 旧端点: POST /waterArchive/updateData
      * 新端点: PUT /thermal/meter/water
      */
+    @SaCheckPermission("thermal:meter:water:edit")
     @SaCheckLogin
     @Log(title = "水表档案", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -82,6 +86,7 @@ public class MtWaterArchiveController extends BaseController {
      * 旧端点: POST /waterArchive/deleteData
      * 新端点: DELETE /thermal/meter/water/{id}
      */
+    @SaCheckPermission("thermal:meter:water:remove")
     @SaCheckLogin
     @Log(title = "水表档案", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")

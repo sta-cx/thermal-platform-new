@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
@@ -37,6 +38,7 @@ public class HtStrategyController extends BaseController {
      * 旧端点: GET /htStrategy/pageList
      * 新端点: GET /thermal/ht/strategy/list
      */
+    @SaCheckPermission("thermal:ht:strategy:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<HtStrategyVo> list(
@@ -55,6 +57,7 @@ public class HtStrategyController extends BaseController {
      * 旧端点: GET /htStrategy/queryHtStrategy
      * 新端点: GET /thermal/ht/strategy/{id}
      */
+    @SaCheckPermission("thermal:ht:strategy:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<HtStrategyVo> getInfo(@PathVariable String id) {
@@ -66,6 +69,7 @@ public class HtStrategyController extends BaseController {
      * 旧端点: POST /htStrategy/insertData
      * 新端点: POST /thermal/ht/strategy
      */
+    @SaCheckPermission("thermal:ht:strategy:add")
     @SaCheckLogin
     @Log(title = "控制策略", businessType = BusinessType.INSERT)
     @PostMapping
@@ -79,6 +83,7 @@ public class HtStrategyController extends BaseController {
      * 旧端点: POST /htStrategy/updateData
      * 新端点: PUT /thermal/ht/strategy
      */
+    @SaCheckPermission("thermal:ht:strategy:edit")
     @SaCheckLogin
     @Log(title = "控制策略", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -92,6 +97,7 @@ public class HtStrategyController extends BaseController {
      * 旧端点: POST /htStrategy/deleteData
      * 新端点: DELETE /thermal/ht/strategy/{id}
      */
+    @SaCheckPermission("thermal:ht:strategy:remove")
     @SaCheckLogin
     @Log(title = "控制策略", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -104,6 +110,7 @@ public class HtStrategyController extends BaseController {
      * 旧端点: GET /htStrategy/queryHtStrategyList
      * 新端点: GET /thermal/ht/strategy/all
      */
+    @SaCheckPermission("thermal:ht:strategy:list")
     @SaCheckLogin
     @GetMapping("/all")
     public R<List<HtStrategy>> all() {

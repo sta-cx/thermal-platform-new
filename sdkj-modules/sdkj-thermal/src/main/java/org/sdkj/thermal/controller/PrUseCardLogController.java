@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.sdkj.common.core.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class PrUseCardLogController extends BaseController {
 
     private final IPrUseCardLogService useCardLogService;
 
+    @SaCheckPermission("thermal:property:useCardLog:list")
     @SaCheckLogin
     @GetMapping("/list")
     public R<List<PrUseCardLog>> list(
@@ -44,6 +46,7 @@ public class PrUseCardLogController extends BaseController {
         return R.ok(useCardLogService.list(lqw));
     }
 
+    @SaCheckPermission("thermal:property:useCardLog:add")
     @SaCheckLogin
     @Log(title = "写卡日志", businessType = BusinessType.INSERT)
     @PostMapping
@@ -52,6 +55,7 @@ public class PrUseCardLogController extends BaseController {
         return toAjax(useCardLogService.save(log));
     }
 
+    @SaCheckPermission("thermal:property:useCardLog:list")
     @SaCheckLogin
     @GetMapping("/valve-status")
     public R<List<PrUseCardLog>> pageListValveOCStatus(
@@ -65,6 +69,7 @@ public class PrUseCardLogController extends BaseController {
         return R.ok(useCardLogService.list(lqw));
     }
 
+    @SaCheckPermission("thermal:property:useCardLog:add")
     @SaCheckLogin
     @Log(title = "阀门状态日志", businessType = BusinessType.INSERT)
     @PostMapping("/valve-status")

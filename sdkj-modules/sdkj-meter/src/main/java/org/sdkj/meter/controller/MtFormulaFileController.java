@@ -1,6 +1,7 @@
 package org.sdkj.meter.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
@@ -37,6 +38,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 分页查询公式档案
      */
+    @SaCheckPermission("thermal:meter:formula:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<MtFormulaFileVo> list(@RequestParam(required = false) String name, PageQuery pageQuery) {
@@ -50,6 +52,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 根据ID查询公式详情
      */
+    @SaCheckPermission("thermal:meter:formula:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<MtFormulaFile> getById(@PathVariable String id) {
@@ -59,6 +62,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 新增公式档案
      */
+    @SaCheckPermission("thermal:meter:formula:add")
     @SaCheckLogin
     @Log(title = "公式档案", businessType = BusinessType.INSERT)
     @PostMapping
@@ -71,6 +75,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 修改公式档案
      */
+    @SaCheckPermission("thermal:meter:formula:edit")
     @SaCheckLogin
     @Log(title = "公式档案", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -82,6 +87,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 删除公式档案
      */
+    @SaCheckPermission("thermal:meter:formula:remove")
     @SaCheckLogin
     @Log(title = "公式档案", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -92,6 +98,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 启用公式
      */
+    @SaCheckPermission("thermal:meter:formula:edit")
     @SaCheckLogin
     @Log(title = "公式档案", businessType = BusinessType.UPDATE)
     @PutMapping("/enable/{id}")
@@ -102,6 +109,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 禁用公式
      */
+    @SaCheckPermission("thermal:meter:formula:edit")
     @SaCheckLogin
     @Log(title = "公式档案", businessType = BusinessType.UPDATE)
     @PutMapping("/disable/{id}")
@@ -112,6 +120,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 获取公式类型列表
      */
+    @SaCheckPermission("thermal:meter:formula:list")
     @SaCheckLogin
     @GetMapping("/types")
     public R<List<Map<String, Object>>> types() {
@@ -121,6 +130,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 校验名称是否重复
      */
+    @SaCheckPermission("thermal:meter:formula:query")
     @SaCheckLogin
     @GetMapping("/validateName")
     public R<Boolean> validateName(@RequestParam @NotBlank String name,
@@ -131,6 +141,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 获取公式元素列表
      */
+    @SaCheckPermission("thermal:meter:formula:list")
     @SaCheckLogin
     @GetMapping("/elements")
     public R<List<Map<String, Object>>> elements() {
@@ -140,6 +151,7 @@ public class MtFormulaFileController extends BaseController {
     /**
      * 根据类型查询启用的公式
      */
+    @SaCheckPermission("thermal:meter:formula:list")
     @SaCheckLogin
     @GetMapping("/byType")
     public R<List<MtFormulaFileVo>> getByType(@RequestParam String type) {

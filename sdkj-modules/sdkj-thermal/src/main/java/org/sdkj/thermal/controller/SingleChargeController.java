@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -29,6 +30,7 @@ public class SingleChargeController extends BaseController {
      * 旧端点: POST /property/singleCharge/getHouse
      * 新端点: GET /thermal/property/single-charge/house
      */
+    @SaCheckPermission("thermal:property:singleCharge:query")
     @SaCheckLogin
     @GetMapping("/house")
     public R<?> getHouse(
@@ -44,6 +46,7 @@ public class SingleChargeController extends BaseController {
      * 旧端点: POST /property/singleCharge/getHouseRoomId
      * 新端点: GET /thermal/property/single-charge/house-room
      */
+    @SaCheckPermission("thermal:property:singleCharge:query")
     @SaCheckLogin
     @GetMapping("/house-room")
     public R<?> getHouseRoomId(
@@ -61,6 +64,7 @@ public class SingleChargeController extends BaseController {
      * 旧端点: GET /property/singleCharge/pageList/{id}
      * 新端点: GET /thermal/property/single-charge/detail/{houseId}
      */
+    @SaCheckPermission("thermal:property:singleCharge:query")
     @SaCheckLogin
     @GetMapping("/detail/{houseId}")
     public R<?> pageList(@PathVariable String houseId) {
@@ -72,6 +76,7 @@ public class SingleChargeController extends BaseController {
      * 旧端点: GET /property/singleCharge/getDetail/{houseId}/{code}/{group}/{isFree}
      * 新端点: GET /thermal/property/single-charge/get-detail
      */
+    @SaCheckPermission("thermal:property:singleCharge:query")
     @SaCheckLogin
     @GetMapping("/get-detail")
     public R<?> getDetail(
@@ -87,6 +92,7 @@ public class SingleChargeController extends BaseController {
      * 旧端点: POST /property/singleCharge/selectCycle/{houseId}/{sums}/{group}/{code}/{isFree}/{index}
      * 新端点: POST /thermal/property/single-charge/select-cycle
      */
+    @SaCheckPermission("thermal:property:singleCharge:query")
     @SaCheckLogin
     @PostMapping("/select-cycle")
     public R<?> selectCycle(
@@ -105,6 +111,7 @@ public class SingleChargeController extends BaseController {
      * 旧端点: POST /property/singleCharge/selectYear/{houseId}/{year}/{index}
      * 新端点: POST /thermal/property/single-charge/select-year
      */
+    @SaCheckPermission("thermal:property:singleCharge:query")
     @SaCheckLogin
     @PostMapping("/select-year")
     public R<?> selectYear(
@@ -120,6 +127,7 @@ public class SingleChargeController extends BaseController {
      * 旧端点: POST /property/singleCharge/singleCharge
      * 新端点: POST /thermal/property/single-charge
      */
+    @SaCheckPermission("thermal:property:singleCharge:add")
     @SaCheckLogin
     @Log(title = "单笔收费", businessType = BusinessType.INSERT)
     @PostMapping
@@ -132,6 +140,7 @@ public class SingleChargeController extends BaseController {
      * 旧端点: GET /property/singleCharge/queryPayByHouseId/{id}
      * 新端点: GET /thermal/property/single-charge/pay-record/{houseId}
      */
+    @SaCheckPermission("thermal:property:singleCharge:query")
     @SaCheckLogin
     @GetMapping("/pay-record/{houseId}")
     public R<?> queryPayByHouseId(@PathVariable String houseId) {

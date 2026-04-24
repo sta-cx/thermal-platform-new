@@ -1,6 +1,7 @@
 package org.sdkj.meter.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class MtTcValveController extends BaseController {
      * 旧端点: GET /tcValve/pageList
      * 新端点: GET /thermal/meter/valve/pageList
      */
+    @SaCheckPermission("thermal:meter:valve:list")
     @SaCheckLogin
     @GetMapping("/pageList")
     public TableDataInfo<MtTcValveVo> pageList(@RequestParam @NotBlank String sortId,
@@ -57,6 +59,7 @@ public class MtTcValveController extends BaseController {
      * 旧端点: GET /tcValve/list
      * 新端点: GET /thermal/meter/valve/list
      */
+    @SaCheckPermission("thermal:meter:valve:list")
     @SaCheckLogin
     @GetMapping("/list")
     public R<List<MtTcValveVo>> listByUserCompany() {
@@ -68,6 +71,7 @@ public class MtTcValveController extends BaseController {
      * 旧端点: POST /tcValve/insertData
      * 新端点: POST /thermal/meter/valve
      */
+    @SaCheckPermission("thermal:meter:valve:add")
     @SaCheckLogin
     @Log(title = "阀门档案", businessType = BusinessType.INSERT)
     @PostMapping
@@ -81,6 +85,7 @@ public class MtTcValveController extends BaseController {
      * 旧端点: POST /tcValve/updateData
      * 新端点: PUT /thermal/meter/valve
      */
+    @SaCheckPermission("thermal:meter:valve:edit")
     @SaCheckLogin
     @Log(title = "阀门档案", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -94,6 +99,7 @@ public class MtTcValveController extends BaseController {
      * 旧端点: POST /tcValve/deleteData
      * 新端点: DELETE /thermal/meter/valve/{id}
      */
+    @SaCheckPermission("thermal:meter:valve:remove")
     @SaCheckLogin
     @Log(title = "阀门档案", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -106,6 +112,7 @@ public class MtTcValveController extends BaseController {
      * 旧端点: GET /tcValve/query
      * 新端点: GET /thermal/meter/valve/query
      */
+    @SaCheckPermission("thermal:meter:valve:query")
     @SaCheckLogin
     @GetMapping("/query")
     public R<List<MtTcValveVo>> query(@RequestParam(required = false) String id,

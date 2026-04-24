@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
@@ -42,6 +43,7 @@ public class PrHeatControlController extends BaseController {
     /**
      * 手动控制阀门开度
      */
+    @SaCheckPermission("thermal:ht:control:edit")
     @SaCheckLogin
     @PostMapping("/manual")
     public R<Void> handControl(@RequestParam String meterNum,
@@ -54,6 +56,7 @@ public class PrHeatControlController extends BaseController {
     /**
      * 查询仪表状态
      */
+    @SaCheckPermission("thermal:ht:control:query")
     @SaCheckLogin
     @GetMapping("/query")
     public R<String> selectMeter(@RequestParam String meterNum) {
@@ -65,6 +68,7 @@ public class PrHeatControlController extends BaseController {
     /**
      * 开阀（开度100）
      */
+    @SaCheckPermission("thermal:ht:control:edit")
     @SaCheckLogin
     @PostMapping("/openValve")
     public R<Void> openValve(@RequestParam String meterNum) {
@@ -76,6 +80,7 @@ public class PrHeatControlController extends BaseController {
     /**
      * 关阀（开度0）
      */
+    @SaCheckPermission("thermal:ht:control:edit")
     @SaCheckLogin
     @PostMapping("/closeValve")
     public R<Void> closeValve(@RequestParam String meterNum) {
@@ -87,6 +92,7 @@ public class PrHeatControlController extends BaseController {
     /**
      * 增加阀门开度
      */
+    @SaCheckPermission("thermal:ht:control:edit")
     @SaCheckLogin
     @PostMapping("/add")
     public R<Void> add(@RequestParam String meterNum,
@@ -102,6 +108,7 @@ public class PrHeatControlController extends BaseController {
     /**
      * 减少阀门开度
      */
+    @SaCheckPermission("thermal:ht:control:edit")
     @SaCheckLogin
     @PostMapping("/sub")
     public R<Void> sub(@RequestParam String meterNum,
@@ -117,6 +124,7 @@ public class PrHeatControlController extends BaseController {
     /**
      * 生成十六进制控制指令（用于调试）
      */
+    @SaCheckPermission("thermal:ht:control:query")
     @SaCheckLogin
     @GetMapping("/generateCommand")
     public R<String> generateCommand(@RequestParam String meterNum,

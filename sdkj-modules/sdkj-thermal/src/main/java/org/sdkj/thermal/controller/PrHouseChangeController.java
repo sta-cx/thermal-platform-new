@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.sdkj.common.core.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,7 @@ public class PrHouseChangeController extends BaseController {
 
     private final IPrHouseChangeService houseChangeService;
 
+    @SaCheckPermission("thermal:property:houseChange:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHouse> list(
@@ -51,12 +53,14 @@ public class PrHouseChangeController extends BaseController {
         return houseChangeService.selectPageList(lqw, pageQuery);
     }
 
+    @SaCheckPermission("thermal:property:houseChange:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHouse> getById(@PathVariable String id) {
         return R.ok(houseChangeService.getById(id));
     }
 
+    @SaCheckPermission("thermal:property:houseChange:add")
     @SaCheckLogin
     @Log(title = "入住登记", businessType = BusinessType.INSERT)
     @PostMapping
@@ -65,6 +69,7 @@ public class PrHouseChangeController extends BaseController {
         return toAjax(houseChangeService.save(house));
     }
 
+    @SaCheckPermission("thermal:property:houseChange:edit")
     @SaCheckLogin
     @Log(title = "入住登记", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -73,6 +78,7 @@ public class PrHouseChangeController extends BaseController {
         return toAjax(houseChangeService.updateById(house));
     }
 
+    @SaCheckPermission("thermal:property:houseChange:remove")
     @SaCheckLogin
     @Log(title = "迁出", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -80,6 +86,7 @@ public class PrHouseChangeController extends BaseController {
         return toAjax(houseChangeService.removeById(id));
     }
 
+    @SaCheckPermission("thermal:property:houseChange:remove")
     @SaCheckLogin
     @Log(title = "批量迁出", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
@@ -87,6 +94,7 @@ public class PrHouseChangeController extends BaseController {
         return toAjax(houseChangeService.removeByIds(ids));
     }
 
+    @SaCheckPermission("thermal:property:houseChange:edit")
     @SaCheckLogin
     @Log(title = "入住审核", businessType = BusinessType.UPDATE)
     @PutMapping("/audit")

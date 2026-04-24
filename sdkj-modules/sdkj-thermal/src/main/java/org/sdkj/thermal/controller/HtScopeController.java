@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.web.core.BaseController;
@@ -26,6 +27,7 @@ public class HtScopeController extends BaseController {
     /**
      * 根据任务ID获取控制范围内的房屋列表
      */
+    @SaCheckPermission("thermal:ht:scope:list")
     @SaCheckLogin
     @GetMapping("/houseList")
     public R<List<HtScopeVo>> getHouseListByTaskId(
