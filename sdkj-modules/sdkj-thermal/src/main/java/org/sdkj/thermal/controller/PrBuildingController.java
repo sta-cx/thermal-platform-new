@@ -57,7 +57,7 @@ public class PrBuildingController extends BaseController {
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrBuildingVo> getById(@PathVariable String id) {
-        return R.ok(buildingService.selectVoById(id));
+        return R.ok(buildingService.selectById(id));
     }
 
     /**

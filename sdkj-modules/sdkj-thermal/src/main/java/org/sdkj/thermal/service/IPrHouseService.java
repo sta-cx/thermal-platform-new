@@ -6,6 +6,7 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -14,6 +15,11 @@ import java.util.List;
  * 迁移自旧系统 PrHouseService
  */
 public interface IPrHouseService extends IService<PrHouse> {
+
+    /**
+     * 根据ID查询房屋详情
+     */
+    PrHouseVo selectById(Serializable id);
 
     /**
      * 分页查询房屋列表

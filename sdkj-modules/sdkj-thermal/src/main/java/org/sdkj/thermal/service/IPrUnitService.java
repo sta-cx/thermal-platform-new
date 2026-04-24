@@ -6,6 +6,7 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrUnit;
 import org.sdkj.thermal.domain.vo.PrUnitVo;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -13,6 +14,11 @@ import java.util.List;
  * 迁移自旧系统 PrUnitService
  */
 public interface IPrUnitService extends IService<PrUnit> {
+
+    /**
+     * 根据ID查询单元详情
+     */
+    PrUnitVo selectById(Serializable id);
 
     /**
      * 分页查询单元列表

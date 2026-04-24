@@ -6,6 +6,7 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrBuilding;
 import org.sdkj.thermal.domain.vo.PrBuildingVo;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -13,6 +14,11 @@ import java.util.List;
  * 迁移自旧系统 PrBuildingService
  */
 public interface IPrBuildingService extends IService<PrBuilding> {
+
+    /**
+     * 根据ID查询楼宇详情
+     */
+    PrBuildingVo selectById(Serializable id);
 
     /**
      * 分页查询楼宇列表

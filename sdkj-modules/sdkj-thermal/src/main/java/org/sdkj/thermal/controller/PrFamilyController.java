@@ -54,7 +54,7 @@ public class PrFamilyController extends BaseController {
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrFamilyVo> getById(@PathVariable String id) {
-        return R.ok(familyService.selectVoById(id));
+        return R.ok(familyService.selectById(id));
     }
 
     /**

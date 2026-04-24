@@ -26,6 +26,11 @@ public class PrUnitServiceImpl extends ServiceImpl<PrUnitMapper, PrUnit> impleme
     private final PrUnitMapper baseMapper;
 
     @Override
+    public PrUnitVo selectById(java.io.Serializable id) {
+        return baseMapper.selectVoById(id);
+    }
+
+    @Override
     public TableDataInfo<PrUnitVo> selectPageList(String search, String buildingId, String orgId, PageQuery pageQuery) {
         LambdaQueryWrapper<PrUnit> lqw = new LambdaQueryWrapper<>();
         if (search != null && !search.trim().isEmpty()) {

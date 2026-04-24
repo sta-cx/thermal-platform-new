@@ -6,11 +6,18 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrFamily;
 import org.sdkj.thermal.domain.vo.PrFamilyVo;
 
+import java.io.Serializable;
+
 /**
  * 家庭成员信息 Service 接口
  * 迁移自旧系统 PrFamilyService
  */
 public interface IPrFamilyService extends IService<PrFamily> {
+
+    /**
+     * 根据ID查询家庭成员详情
+     */
+    PrFamilyVo selectById(Serializable id);
 
     /**
      * 分页查询家庭成员列表

@@ -24,6 +24,11 @@ public class PrFamilyServiceImpl extends ServiceImpl<PrFamilyMapper, PrFamily> i
     private final PrFamilyMapper baseMapper;
 
     @Override
+    public PrFamilyVo selectById(java.io.Serializable id) {
+        return baseMapper.selectVoById(id);
+    }
+
+    @Override
     public TableDataInfo<PrFamilyVo> selectPageList(String search, String houseId, PageQuery pageQuery) {
         LambdaQueryWrapper<PrFamily> lqw = new LambdaQueryWrapper<>();
         if (search != null && !search.trim().isEmpty()) {

@@ -60,7 +60,7 @@ public class PrHouseController extends BaseController {
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHouseVo> getById(@PathVariable String id) {
-        return R.ok(houseService.selectVoById(id));
+        return R.ok(houseService.selectById(id));
     }
 
     /**

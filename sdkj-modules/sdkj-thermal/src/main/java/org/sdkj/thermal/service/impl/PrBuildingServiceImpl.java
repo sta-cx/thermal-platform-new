@@ -33,6 +33,11 @@ public class PrBuildingServiceImpl extends ServiceImpl<PrBuildingMapper, PrBuild
     private final PrHouseMapper houseMapper;
 
     @Override
+    public PrBuildingVo selectById(java.io.Serializable id) {
+        return baseMapper.selectVoById(id);
+    }
+
+    @Override
     public TableDataInfo<PrBuildingVo> selectPageList(String search, String used, String orgId, PageQuery pageQuery) {
         LambdaQueryWrapper<PrBuilding> lqw = new LambdaQueryWrapper<>();
         if (search != null && !search.trim().isEmpty()) {

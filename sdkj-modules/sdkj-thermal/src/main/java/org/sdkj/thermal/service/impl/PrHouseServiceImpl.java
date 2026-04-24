@@ -28,6 +28,11 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     private final PrHouseMapper baseMapper;
 
     @Override
+    public PrHouseVo selectById(java.io.Serializable id) {
+        return baseMapper.selectVoById(id);
+    }
+
+    @Override
     public TableDataInfo<PrHouseVo> selectPageList(String search, String buildingId, String orgId,
                                                    String status, String companyId, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
