@@ -1,7 +1,10 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaIgnore;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
@@ -17,6 +20,9 @@ import org.springframework.web.bind.annotation.*;
  * 注意：非支付端点已迁移骨架；支付端点（二维码生成、微信/支付宝回调）
  * 需要 Phase 6 第三方支付集成后方可完整实现。
  */
+@Deprecated
+@Hidden
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -108,10 +114,12 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/callback
      * 新端点: POST /thermal/property/auto-machine/callback/wechat-heat
      */
+    @SaIgnore
     @PostMapping("/callback/wechat-heat")
     public String wechatCallback(@RequestBody String xmlData) {
-        // TODO: Phase 6 - 微信支付回调处理
-        return "<xml><return_code><![CDATA[FAIL]]></return_code></xml>";
+        // TODO: 微信支付回调签名校验，验证通过后再处理业务
+        log.warn("微信回调未实现签名校验，收到请求: {}", xmlData);
+        return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[签名校验未实现]]></return_msg></xml>";
     }
 
     /**
@@ -119,10 +127,12 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/aliCallBack
      * 新端点: POST /thermal/property/auto-machine/callback/ali-heat
      */
+    @SaIgnore
     @PostMapping("/callback/ali-heat")
     public String aliCallback(@RequestBody Object data) {
-        // TODO: Phase 6 - 支付宝回调处理
-        return "success";
+        // TODO: 支付宝回调签名校验，验证通过后再处理业务
+        log.warn("支付宝回调未实现签名校验，收到请求: {}", data);
+        return "fail";
     }
 
     /**
