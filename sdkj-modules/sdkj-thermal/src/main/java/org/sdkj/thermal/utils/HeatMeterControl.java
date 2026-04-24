@@ -42,10 +42,10 @@ public class HeatMeterControl {
             log.info("MBus 发送: {}", payload);
 
             RestTemplate restTemplate = new RestTemplate();
-            org.springframework.http.HttpEntity<String> request =
-                new org.springframework.http.HttpEntity<>(payload);
             org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
             headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            org.springframework.http.HttpEntity<String> request =
+                new org.springframework.http.HttpEntity<>(payload, headers);
 
             org.springframework.http.ResponseEntity<String> response =
                 restTemplate.postForEntity(mbusUrl, request, String.class);

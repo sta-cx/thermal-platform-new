@@ -11,6 +11,7 @@ import org.sdkj.thermal.domain.vo.PrUseCardLogVo;
 import org.sdkj.thermal.mapper.PrUseCardLogMapper;
 import org.sdkj.thermal.service.IPrUseCardLogService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 写卡日志 Service 实现
@@ -29,6 +30,7 @@ public class PrUseCardLogServiceImpl extends ServiceImpl<PrUseCardLogMapper, PrU
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean changeValveStatus(String meterId, Integer valveStatus) {
         // TODO: 实际阀门状态变更需要通过 MBus 通信
         PrUseCardLog log = new PrUseCardLog();
