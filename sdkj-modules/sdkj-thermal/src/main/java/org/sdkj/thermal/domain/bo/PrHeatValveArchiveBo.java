@@ -102,10 +102,10 @@ public class PrHeatValveArchiveBo extends BaseEntity {
     private BigDecimal residueDegree;
 
     /** 是否变更 */
-    private String isChanged;
+    private Integer isChanged;
 
     /** 是否停用 */
-    private String isStop;
+    private Integer isStop;
 
     /** 通道号更新时间 */
     private Date chanNumUpdateTime;
@@ -135,7 +135,7 @@ public class PrHeatValveArchiveBo extends BaseEntity {
     private Integer tradeTimes;
 
     /** 是否开启 */
-    private String isOpen;
+    private Integer isOpen;
 
     /** 口径 */
     private String caliber;

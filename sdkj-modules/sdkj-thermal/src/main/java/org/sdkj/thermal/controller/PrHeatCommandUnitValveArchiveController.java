@@ -120,6 +120,7 @@ public class PrHeatCommandUnitValveArchiveController extends BaseController {
      */
     @SaCheckPermission("thermal:ht:command-unit-valve-archive:edit")
     @SaCheckLogin
+    @Log(title = "单元控制阀门配表-开阀", businessType = BusinessType.UPDATE)
     @PostMapping("/openValve")
     public R<Void> openValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
         List<PrHeatCommandUnitValveArchive> archives = commandUnitValveArchiveService.listByIds(ids);
@@ -151,6 +152,7 @@ public class PrHeatCommandUnitValveArchiveController extends BaseController {
      */
     @SaCheckPermission("thermal:ht:command-unit-valve-archive:edit")
     @SaCheckLogin
+    @Log(title = "单元控制阀门配表-关阀", businessType = BusinessType.UPDATE)
     @PostMapping("/closeValve")
     public R<Void> closeValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
         List<PrHeatCommandUnitValveArchive> archives = commandUnitValveArchiveService.listByIds(ids);

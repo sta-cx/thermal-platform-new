@@ -106,7 +106,7 @@ public class PrHeatArchive extends BaseEntity {
     private BigDecimal settingTemperature;
 
     /** 设定状态 */
-    private String settingStatus;
+    private Integer settingStatus;
 
     /** 阀门状态 */
     private String valveStatus;
@@ -120,10 +120,12 @@ public class PrHeatArchive extends BaseEntity {
     /** 开户时间 */
     private Date openedTime;
 
-    /** 开始时间 */
+    /** 开始时间（查询参数，非持久化） */
+    @TableField(exist = false)
     private Date startTime;
 
-    /** 结束时间 */
+    /** 结束时间（查询参数，非持久化） */
+    @TableField(exist = false)
     private Date endTime;
 
     /** 是否计费 */

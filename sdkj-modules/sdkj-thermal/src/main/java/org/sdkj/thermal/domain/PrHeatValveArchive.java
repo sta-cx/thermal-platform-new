@@ -104,10 +104,10 @@ public class PrHeatValveArchive extends BaseEntity {
     private Integer residueDegree;
 
     /** 是否变更 */
-    private int isChanged;
+    private Integer isChanged;
 
     /** 是否停用 */
-    private int isStop;
+    private Integer isStop;
 
     /** 通道号更新时间 */
     private Date chanNumUpdateTime;

@@ -56,12 +56,12 @@ public class PrHeatHotArchiveVo implements Serializable {
     private BigDecimal voltage;
     private int signalStrength;
     private String cellStatus;
-    private int isOpened;
+    private Integer isOpened;
     private Date openedTime;
     private int isExpense;
     private int isNotify;
-    private int isChanged;
-    private int isStop;
+    private Integer isChanged;
+    private Integer isStop;
     private String houseId;
     private String companyId;
     private String orgId;

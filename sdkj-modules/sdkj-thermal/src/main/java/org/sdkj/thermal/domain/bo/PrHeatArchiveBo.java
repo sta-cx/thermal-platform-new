@@ -109,7 +109,7 @@ public class PrHeatArchiveBo extends BaseEntity {
     private String valveStatus;
 
     /** 是否已开阀 */
-    private String isOpened;
+    private Integer isOpened;
 
     /** 历史金额 */
     private BigDecimal hisMoney;
@@ -124,16 +124,16 @@ public class PrHeatArchiveBo extends BaseEntity {
     private Date endTime;
 
     /** 是否计费 */
-    private String isExpense;
+    private Integer isExpense;
 
     /** 是否通知 */
-    private String isNotify;
+    private Integer isNotify;
 
     /** 是否变更 */
-    private String isChanged;
+    private Integer isChanged;
 
     /** 是否停用 */
-    private String isStop;
+    private Integer isStop;
 
     /** 起始读数 */
     private BigDecimal startReading;
@@ -178,7 +178,7 @@ public class PrHeatArchiveBo extends BaseEntity {
     private BigDecimal closeValue;
 
     /** 是否阶梯 */
-    private String isSteps;
+    private Integer isSteps;
 
     /** 计量方式 */
     private String measurement;

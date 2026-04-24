@@ -102,10 +102,10 @@ public class PrHeatCommandUnitValveArchiveBo extends BaseEntity {
     private BigDecimal residueDegree;
 
     /** 是否变更 */
-    private String isChanged;
+    private Integer isChanged;
 
     /** 是否停用 */
-    private String isStop;
+    private Integer isStop;
 
     /** DTU编号 */
     private String dtuNum;

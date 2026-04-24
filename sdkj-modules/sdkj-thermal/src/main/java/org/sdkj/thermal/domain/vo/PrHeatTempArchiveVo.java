@@ -38,8 +38,8 @@ public class PrHeatTempArchiveVo implements Serializable {
     private Integer reportNumber;
     private Integer reportSuccNum;
     private Date reportTime;
-    private int isChanged;
-    private int isStop;
+    private Integer isChanged;
+    private Integer isStop;
     private String houseId;
     private String orgId;
     private String companyId;

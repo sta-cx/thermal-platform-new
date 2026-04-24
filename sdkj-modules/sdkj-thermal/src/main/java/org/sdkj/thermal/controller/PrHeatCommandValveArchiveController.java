@@ -139,7 +139,6 @@ public class PrHeatCommandValveArchiveController extends BaseController {
         if (archives.isEmpty()) {
             return R.fail("未找到配表记录");
         }
-        String userId = LoginHelper.getUserIdStr();
         List<HtTasksPerform> tasks = new LinkedList<>();
         for (PrHeatCommandValveArchive archive : archives) {
             HtTasksPerform task = new HtTasksPerform();
@@ -176,7 +175,6 @@ public class PrHeatCommandValveArchiveController extends BaseController {
         if (archives.isEmpty()) {
             return R.fail("未找到配表记录");
         }
-        String userId = LoginHelper.getUserIdStr();
         List<HtTasksPerform> tasks = new LinkedList<>();
         for (PrHeatCommandValveArchive archive : archives) {
             HtTasksPerform task = new HtTasksPerform();

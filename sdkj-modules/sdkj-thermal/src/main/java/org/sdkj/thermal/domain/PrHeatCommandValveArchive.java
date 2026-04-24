@@ -104,10 +104,10 @@ public class PrHeatCommandValveArchive extends BaseEntity {
     private Integer residueDegree;
 
     /** 是否变更 */
-    private int isChanged;
+    private Integer isChanged;
 
     /** 是否停用 */
-    private int isStop;
+    private Integer isStop;
 
     /** DTU编号 */
     private String dtuNum;

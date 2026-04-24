@@ -43,8 +43,8 @@ public class PrHeatValveArchiveVo implements Serializable {
     private Integer validTime;
     private Integer totalDegree;
     private Integer residueDegree;
-    private int isChanged;
-    private int isStop;
+    private Integer isChanged;
+    private Integer isStop;
     private Date chanNumUpdateTime;
     private Date chanNumSyncTime;
     private String lastPerformId;

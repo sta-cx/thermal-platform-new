@@ -89,10 +89,10 @@ public class PrHeatTempArchive extends BaseEntity {
     private Date reportTime;
 
     /** 是否变更 */
-    private int isChanged;
+    private Integer isChanged;
 
     /** 是否停用 */
-    private int isStop;
+    private Integer isStop;
 
     /** 房屋ID */
     private String houseId;

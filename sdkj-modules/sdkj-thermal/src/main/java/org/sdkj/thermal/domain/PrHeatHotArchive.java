@@ -143,7 +143,7 @@ public class PrHeatHotArchive extends BaseEntity {
     private String cellStatus;
 
     /** 是否已开户 */
-    private int isOpened;
+    private Integer isOpened;
 
     /** 开户时间 */
     private Date openedTime;
@@ -155,10 +155,10 @@ public class PrHeatHotArchive extends BaseEntity {
     private int isNotify;
 
     /** 是否变更 */
-    private int isChanged;
+    private Integer isChanged;
 
     /** 是否停用 */
-    private int isStop;
+    private Integer isStop;
 
     /** 房屋ID */
     private String houseId;

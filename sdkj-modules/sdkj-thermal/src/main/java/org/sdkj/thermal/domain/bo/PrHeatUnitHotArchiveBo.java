@@ -72,7 +72,7 @@ public class PrHeatUnitHotArchiveBo extends BaseEntity {
     private BigDecimal standardPrice;
 
     /** 是否阶梯 */
-    private String isSteps;
+    private Integer isSteps;
 
     /** 起始读数 */
     private BigDecimal startReading;
@@ -141,22 +141,22 @@ public class PrHeatUnitHotArchiveBo extends BaseEntity {
     private String cellStatus;
 
     /** 是否已开阀 */
-    private String isOpened;
+    private Integer isOpened;
 
     /** 开阀时间 */
     private Date openedTime;
 
     /** 是否计费 */
-    private String isExpense;
+    private Integer isExpense;
 
     /** 是否通知 */
-    private String isNotify;
+    private Integer isNotify;
 
     /** 是否变更 */
-    private String isChanged;
+    private Integer isChanged;
 
     /** 是否停用 */
-    private String isStop;
+    private Integer isStop;
 
     /** 单元ID */
     private String unitId;
