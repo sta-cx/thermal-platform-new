@@ -46,6 +46,16 @@ public interface IHtTasksService extends IService<HtTasks> {
     boolean runTask(Integer id);
 
     /**
+     * 添加调度任务
+     */
+    boolean addToScheduler(Integer id);
+
+    /**
+     * 移除调度任务
+     */
+    boolean removeFromScheduler(Integer id);
+
+    /**
      * 标记特殊户
      */
     boolean markSpecial(List<String> scopeIds, String val, String remark);
