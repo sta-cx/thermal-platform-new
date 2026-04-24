@@ -1,4 +1,4 @@
-org.dromara.common.core.config.ApplicationConfig
-org.dromara.common.core.config.ThreadPoolConfig
-org.dromara.common.core.config.ValidatorConfig
-org.dromara.common.core.utils.SpringUtils
+org.sdkj.common.core.config.ApplicationConfig
+org.sdkj.common.core.config.ThreadPoolConfig
+org.sdkj.common.core.config.ValidatorConfig
+org.sdkj.common.core.utils.SpringUtils
