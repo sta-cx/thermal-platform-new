@@ -10,8 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <modules>
-        <module>ruoyi-system</module>
-        <module>ruoyi-job</module>
+        <module>sdkj-system</module>
+        <module>sdkj-job</module>
         <module>ruoyi-meter</module>
         <module>ruoyi-thermal</module>
     </modules>

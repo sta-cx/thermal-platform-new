@@ -272,27 +272,33 @@
 
             <dependency>
                 <groupId>org.sdkj</groupId>
-                <artifactId>ruoyi-system</artifactId>
+                <artifactId>sdkj-admin</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.sdkj</groupId>
-                <artifactId>ruoyi-job</artifactId>
+                <artifactId>sdkj-system</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.sdkj</groupId>
+                <artifactId>sdkj-job</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!-- 仪表模块 -->
             <dependency>
                 <groupId>org.sdkj</groupId>
-                <artifactId>ruoyi-meter</artifactId>
+                <artifactId>sdkj-meter</artifactId>
                 <version>${revision}</version>
             </dependency>
 
             <!-- 热力调控模块 -->
             <dependency>
                 <groupId>org.sdkj</groupId>
-                <artifactId>ruoyi-thermal</artifactId>
+                <artifactId>sdkj-thermal</artifactId>
                 <version>${revision}</version>
             </dependency>
 
@@ -300,7 +306,7 @@
     </dependencyManagement>
 
     <modules>
-        <module>ruoyi-admin</module>
+        <module>sdkj-admin</module>
         <module>sdkj-common</module>
         <module>ruoyi-modules</module>
     </modules>
