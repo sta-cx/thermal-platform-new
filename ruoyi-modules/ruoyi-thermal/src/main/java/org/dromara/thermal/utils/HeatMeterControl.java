@@ -3,6 +3,7 @@ package org.dromara.thermal.utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * MBus阀门控制
@@ -37,10 +38,25 @@ public class HeatMeterControl {
                 sb.append(array[i]);
             }
             sb.append("]}");
-            log.info("MBus 发送: {}", sb);
-            // TODO: 实现 HTTP POST 到 mbusUrl
-            log.warn("MBus 中间件未配置，命令已记录但未发送");
-            return true;
+            String payload = sb.toString();
+            log.info("MBus 发送: {}", payload);
+
+            RestTemplate restTemplate = new RestTemplate();
+            org.springframework.http.HttpEntity<String> request =
+                new org.springframework.http.HttpEntity<>(payload);
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+
+            org.springframework.http.ResponseEntity<String> response =
+                restTemplate.postForEntity(mbusUrl, request, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("MBus 发送成功: {}", response.getBody());
+                return true;
+            } else {
+                log.error("MBus 发送失败, HTTP状态: {}", response.getStatusCode());
+                return false;
+            }
         } catch (Exception e) {
             log.error("MBus 发送失败", e);
             return false;
