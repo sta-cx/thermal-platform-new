@@ -129,6 +129,12 @@ public class HtTasksController extends BaseController {
     @Log(title = "调控任务", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
     public R<Void> removeBatch(@RequestParam List<Integer> ids) {
+        List<HtTasks> tasks = tasksService.listByIds(ids);
+        for (HtTasks t : tasks) {
+            if (t.getStatus() != null && t.getStatus() == 1) {
+                return R.fail("任务「" + t.getName() + "」正在运行，不允许删除，请先停止任务！");
+            }
+        }
         return toAjax(tasksService.removeByIds(ids));
     }
 
