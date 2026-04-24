@@ -1,0 +1,204 @@
+package org.sdkj.thermal.domain;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.github.linpeilie.annotations.AutoMapper;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.sdkj.common.mybatis.core.domain.BaseEntity;
+import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+/**
+ * 户间阀门配表
+ */
+@Data
+@EqualsAndHashCode(callSuper = true)
+@TableName("pr_heat_valve_archive")
+@AutoMapper(target = PrHeatValveArchiveVo.class)
+public class PrHeatValveArchive extends BaseEntity {
+
+    @TableId(value = "id", type = IdType.ASSIGN_UUID)
+    private String id;
+
+    /** 档案ID */
+    private String archiveId;
+
+    /** 仪表编号 */
+    private String meterNum;
+
+    /** 卡号 */
+    private String cardNum;
+
+    /** 仪表档案编码 */
+    private String meterArcCode;
+
+    /** 仪表档案名称 */
+    private String meterArcName;
+
+    /** 集中器编码 */
+    private String concentratorCode;
+
+    /** IMEI号 */
+    private String imeiNum;
+
+    /** 产品ID */
+    private String productId;
+
+    /** 设备ID */
+    private String deviceId;
+
+    /** 仪表序列号 */
+    private Integer meterSerial;
+
+    /** 房屋ID */
+    private String houseId;
+
+    /** 小区ID */
+    private String orgId;
+
+    /** 公司ID */
+    private String companyId;
+
+    /** 阀门状态 */
+    private String valveStatus;
+
+    /** 设置状态 */
+    private Integer settingStatus;
+
+    /** 实际状态 */
+    private Integer actualStatus;
+
+    /** 进水温度 */
+    private BigDecimal inTemperature;
+
+    /** 出水温度 */
+    private BigDecimal outTemperature;
+
+    /** 电压 */
+    private String voltage;
+
+    /** 阀门时间 */
+    private Date valveTime;
+
+    /** 信号强度 */
+    private Integer signalStrength;
+
+    /** 上报间隔 */
+    private Integer reportingInterval;
+
+    /** 间隔单位 */
+    private String intervalUnit;
+
+    /** 有效时间 */
+    private Integer validTime;
+
+    /** 总开度 */
+    private Integer totalDegree;
+
+    /** 剩余开度 */
+    private Integer residueDegree;
+
+    /** 是否变更 */
+    private int isChanged;
+
+    /** 是否停用 */
+    private int isStop;
+
+    /** 通道号更新时间 */
+    private Date chanNumUpdateTime;
+
+    /** 通道号同步时间 */
+    private Date chanNumSyncTime;
+
+    /** 最后执行ID */
+    private String lastPerformId;
+
+    /** DTU编号 */
+    private String dtuNum;
+
+    /** DTU编号状态 */
+    private String dtuNumStatus;
+
+    /** 通道号 */
+    private String chanNum;
+
+    /** 安装位置 */
+    private String installSite;
+
+    /** DTU状态 */
+    private String dtuStatus;
+
+    /** 交易次数 */
+    private Integer tradeTimes;
+
+    /** 是否开启 */
+    private Integer isOpen;
+
+    /** 口径 */
+    private String caliber;
+
+    /** 安装类型 */
+    private String installType;
+
+    /** 分组编号25 */
+    private String groupNum25;
+
+    /** 用户设定温度 */
+    private BigDecimal userSetTemp;
+
+    /** 室温 */
+    private BigDecimal roomTemp;
+
+    /** 平均温度 */
+    private BigDecimal avgTemp;
+
+    /** 阀门型号 */
+    private String valveModel;
+
+    /** 冷态标志 */
+    private Integer coldFlg;
+
+    /** 温控器锁定 */
+    private Integer wkqLock;
+
+    /** 温度下限 */
+    private Integer tempLow;
+
+    /** 温度上限 */
+    private Integer tempHigh;
+
+    /** 工作时间 */
+    private Integer workTime;
+
+    /** 总开启时间 */
+    private Integer totalOpenTime;
+
+    /** DTU类型 */
+    private Integer dtuType;
+
+    /** 瞬时流量 */
+    private BigDecimal insFlow;
+
+    // ========== 非数据库字段 ==========
+
+    /** 关联房屋 */
+    @TableField(exist = false)
+    private PrHouse prHouse;
+
+    /** 范围状态 */
+    @TableField(exist = false)
+    private String scopeStatus;
+
+    /** 状态名称 */
+    @TableField(exist = false)
+    private String statusName;
+
+    /** 是否已收费 */
+    @TableField(exist = false)
+    private Integer isCharged;
+}
