@@ -10,7 +10,9 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.meter.domain.MtMeterSort;
+import org.sdkj.meter.domain.bo.MtMeterSortBo;
 import org.sdkj.meter.domain.vo.MtMeterSortVo;
 import org.sdkj.meter.service.IMtMeterSortService;
 import org.springframework.validation.annotation.Validated;
@@ -35,7 +37,7 @@ public class MtMeterSortController extends BaseController {
      */
     @SaCheckLogin
     @GetMapping("/pageList")
-    public TableDataInfo<MtMeterSortVo> pageList(MtMeterSort sort, PageQuery pageQuery) {
+    public TableDataInfo<MtMeterSortVo> pageList(MtMeterSortBo sort, PageQuery pageQuery) {
         LambdaQueryWrapper<MtMeterSort> lqw = new LambdaQueryWrapper<>();
         lqw.like(sort.getName() != null && !sort.getName().isEmpty(), MtMeterSort::getName, sort.getName());
         lqw.eq(sort.getMeterType() != null && !sort.getMeterType().isEmpty(), MtMeterSort::getMeterType, sort.getMeterType());
@@ -61,7 +63,8 @@ public class MtMeterSortController extends BaseController {
     @SaCheckLogin
     @Log(title = "仪表分类", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> add(@Validated @RequestBody MtMeterSort sort) {
+    public R<Void> add(@Validated @RequestBody MtMeterSortBo bo) {
+        MtMeterSort sort = MapstructUtils.convert(bo, MtMeterSort.class);
         return toAjax(sortService.save(sort));
     }
 
@@ -71,7 +74,8 @@ public class MtMeterSortController extends BaseController {
     @SaCheckLogin
     @Log(title = "仪表分类", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> edit(@Validated @RequestBody MtMeterSort sort) {
+    public R<Void> edit(@Validated @RequestBody MtMeterSortBo bo) {
+        MtMeterSort sort = MapstructUtils.convert(bo, MtMeterSort.class);
         return toAjax(sortService.updateById(sort));
     }
 
@@ -97,7 +101,7 @@ public class MtMeterSortController extends BaseController {
      */
     @SaCheckLogin
     @GetMapping("/queryMeterSort")
-    public R<List<MtMeterSortVo>> queryMeterSort(MtMeterSort sort) {
+    public R<List<MtMeterSortVo>> queryMeterSort(MtMeterSortBo sort) {
         LambdaQueryWrapper<MtMeterSort> lqw = new LambdaQueryWrapper<>();
         lqw.like(sort.getName() != null && !sort.getName().isEmpty(), MtMeterSort::getName, sort.getName());
         lqw.eq(sort.getMeterType() != null && !sort.getMeterType().isEmpty(), MtMeterSort::getMeterType, sort.getMeterType());

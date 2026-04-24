@@ -10,7 +10,9 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.meter.domain.MtTcArchive;
+import org.sdkj.meter.domain.bo.MtTcArchiveBo;
 import org.sdkj.meter.domain.vo.MtTcArchiveVo;
 import org.sdkj.meter.service.IMtTcArchiveService;
 import org.springframework.validation.annotation.Validated;
@@ -71,7 +73,8 @@ public class MtTcArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "温控器档案", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> add(@Validated @RequestBody MtTcArchive archive) {
+    public R<Void> add(@Validated @RequestBody MtTcArchiveBo bo) {
+        MtTcArchive archive = MapstructUtils.convert(bo, MtTcArchive.class);
         return toAjax(tcService.save(archive));
     }
 
@@ -83,7 +86,8 @@ public class MtTcArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "温控器档案", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> edit(@Validated @RequestBody MtTcArchive archive) {
+    public R<Void> edit(@Validated @RequestBody MtTcArchiveBo bo) {
+        MtTcArchive archive = MapstructUtils.convert(bo, MtTcArchive.class);
         return toAjax(tcService.updateById(archive));
     }
 

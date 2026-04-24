@@ -10,7 +10,9 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.meter.domain.MtGasArchive;
+import org.sdkj.meter.domain.bo.MtGasArchiveBo;
 import org.sdkj.meter.domain.vo.MtGasArchiveVo;
 import org.sdkj.meter.service.IMtGasArchiveService;
 import org.springframework.validation.annotation.Validated;
@@ -57,7 +59,8 @@ public class MtGasArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "燃气表档案", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> add(@Validated @RequestBody MtGasArchive archive) {
+    public R<Void> add(@Validated @RequestBody MtGasArchiveBo bo) {
+        MtGasArchive archive = MapstructUtils.convert(bo, MtGasArchive.class);
         return toAjax(gasArchiveService.save(archive));
     }
 
@@ -69,7 +72,8 @@ public class MtGasArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "燃气表档案", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> edit(@Validated @RequestBody MtGasArchive archive) {
+    public R<Void> edit(@Validated @RequestBody MtGasArchiveBo bo) {
+        MtGasArchive archive = MapstructUtils.convert(bo, MtGasArchive.class);
         return toAjax(gasArchiveService.updateById(archive));
     }
 

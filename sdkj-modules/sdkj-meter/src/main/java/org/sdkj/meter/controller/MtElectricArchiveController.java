@@ -10,7 +10,9 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.meter.domain.MtElectricArchive;
+import org.sdkj.meter.domain.bo.MtElectricArchiveBo;
 import org.sdkj.meter.domain.vo.MtElectricArchiveVo;
 import org.sdkj.meter.service.IMtElectricArchiveService;
 import org.springframework.validation.annotation.Validated;
@@ -57,7 +59,8 @@ public class MtElectricArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "电表档案", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> add(@Validated @RequestBody MtElectricArchive archive) {
+    public R<Void> add(@Validated @RequestBody MtElectricArchiveBo bo) {
+        MtElectricArchive archive = MapstructUtils.convert(bo, MtElectricArchive.class);
         return toAjax(electricArchiveService.save(archive));
     }
 
@@ -69,7 +72,8 @@ public class MtElectricArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "电表档案", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> edit(@Validated @RequestBody MtElectricArchive archive) {
+    public R<Void> edit(@Validated @RequestBody MtElectricArchiveBo bo) {
+        MtElectricArchive archive = MapstructUtils.convert(bo, MtElectricArchive.class);
         return toAjax(electricArchiveService.updateById(archive));
     }
 

@@ -9,7 +9,9 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.meter.domain.MtFormulaFile;
+import org.sdkj.meter.domain.bo.MtFormulaFileBo;
 import org.sdkj.meter.domain.vo.MtFormulaFileVo;
 import org.sdkj.meter.service.IMtFormulaFileService;
 import org.springframework.validation.annotation.Validated;
@@ -60,7 +62,8 @@ public class MtFormulaFileController extends BaseController {
     @SaCheckLogin
     @Log(title = "公式档案", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> add(@Validated @RequestBody MtFormulaFile formula) {
+    public R<Void> add(@Validated @RequestBody MtFormulaFileBo bo) {
+        MtFormulaFile formula = MapstructUtils.convert(bo, MtFormulaFile.class);
         formula.setIsEnabled("1");
         return toAjax(formulaService.save(formula));
     }
@@ -71,7 +74,8 @@ public class MtFormulaFileController extends BaseController {
     @SaCheckLogin
     @Log(title = "公式档案", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> edit(@Validated @RequestBody MtFormulaFile formula) {
+    public R<Void> edit(@Validated @RequestBody MtFormulaFileBo bo) {
+        MtFormulaFile formula = MapstructUtils.convert(bo, MtFormulaFile.class);
         return toAjax(formulaService.updateById(formula));
     }
 

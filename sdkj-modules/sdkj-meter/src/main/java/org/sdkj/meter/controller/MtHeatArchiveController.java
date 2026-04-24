@@ -10,7 +10,9 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.meter.domain.MtHeatArchive;
+import org.sdkj.meter.domain.bo.MtHeatArchiveBo;
 import org.sdkj.meter.domain.vo.MtHeatArchiveVo;
 import org.sdkj.meter.service.IMtHeatArchiveService;
 import org.springframework.validation.annotation.Validated;
@@ -58,7 +60,8 @@ public class MtHeatArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "热力表档案", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> add(@Validated @RequestBody MtHeatArchive archive) {
+    public R<Void> add(@Validated @RequestBody MtHeatArchiveBo bo) {
+        MtHeatArchive archive = MapstructUtils.convert(bo, MtHeatArchive.class);
         return toAjax(heatArchiveService.save(archive));
     }
 
@@ -70,7 +73,8 @@ public class MtHeatArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "热力表档案", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> edit(@Validated @RequestBody MtHeatArchive archive) {
+    public R<Void> edit(@Validated @RequestBody MtHeatArchiveBo bo) {
+        MtHeatArchive archive = MapstructUtils.convert(bo, MtHeatArchive.class);
         return toAjax(heatArchiveService.updateById(archive));
     }
 

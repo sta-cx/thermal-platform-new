@@ -9,7 +9,9 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.meter.domain.MtMeterVendor;
+import org.sdkj.meter.domain.bo.MtMeterVendorBo;
 import org.sdkj.meter.domain.vo.MtMeterVendorVo;
 import org.sdkj.meter.service.IMtMeterVendorService;
 import org.springframework.validation.annotation.Validated;
@@ -70,7 +72,8 @@ public class MtMeterVendorController extends BaseController {
     @SaCheckLogin
     @Log(title = "仪表厂商", businessType = BusinessType.INSERT)
     @PostMapping
-    public R<Void> insert(@Validated @RequestBody MtMeterVendor vendor) {
+    public R<Void> insert(@Validated @RequestBody MtMeterVendorBo bo) {
+        MtMeterVendor vendor = MapstructUtils.convert(bo, MtMeterVendor.class);
         vendor.setIsEnabled(1);
         return toAjax(mtMeterVendorService.save(vendor));
     }
@@ -83,7 +86,8 @@ public class MtMeterVendorController extends BaseController {
     @SaCheckLogin
     @Log(title = "仪表厂商", businessType = BusinessType.UPDATE)
     @PutMapping
-    public R<Void> update(@Validated @RequestBody MtMeterVendor vendor) {
+    public R<Void> update(@Validated @RequestBody MtMeterVendorBo bo) {
+        MtMeterVendor vendor = MapstructUtils.convert(bo, MtMeterVendor.class);
         return toAjax(mtMeterVendorService.updateById(vendor));
     }
 
