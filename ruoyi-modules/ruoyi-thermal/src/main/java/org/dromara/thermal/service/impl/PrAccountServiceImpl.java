@@ -16,6 +16,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+
 /**
  * 个人账户 Service 实现
  * 迁移自旧系统 PrAccountServiceImpl
@@ -160,7 +162,95 @@ public class PrAccountServiceImpl implements IPrAccountService {
     @Transactional(rollbackFor = Exception.class)
     public boolean transfer(List<String> houseIds, String payment, String itemGroup, String itemCode,
             String makeInvoice, String invoice) {
-        return false;
+        if (houseIds == null || houseIds.isEmpty()) return false;
+        Date now = new Date();
+        Long userId = LoginHelper.getUserId();
+        int paymentType = payment != null ? Integer.parseInt(payment) : 1;
+
+        for (String houseId : houseIds) {
+            // Query existing balance records for this house
+            LambdaQueryWrapper<PrAccountBalance> qw = new LambdaQueryWrapper<>();
+            qw.eq(PrAccountBalance::getHouseId, houseId);
+            List<PrAccountBalance> balances = balanceMapper.selectList(qw);
+
+            for (PrAccountBalance source : balances) {
+                BigDecimal balance = source.getBalance();
+                if (balance == null || balance.compareTo(BigDecimal.ZERO) <= 0) {
+                    continue;
+                }
+
+                // Cannot transfer to same item
+                if (source.getItemGroup().equals(itemGroup) && source.getItemCode().equals(itemCode)) {
+                    continue;
+                }
+
+                // Deduct from source
+                balanceMapper.updateBalance(source.getUserId(), houseId,
+                    source.getItemGroup(), source.getItemCode(), balance.negate());
+
+                // Create transaction record for source deduction (type 3 = 转移/转存)
+                PrTransactionRecord sourceRecord = new PrTransactionRecord();
+                sourceRecord.setSerialNum("TFR" + System.currentTimeMillis() + "-S");
+                sourceRecord.setTransactionType(3);
+                sourceRecord.setPaymentType(paymentType);
+                sourceRecord.setAmount(balance.negate());
+                sourceRecord.setPaidAmount(balance.negate());
+                sourceRecord.setStatus(0);
+                sourceRecord.setHouseId(houseId);
+                sourceRecord.setUserId(source.getUserId());
+                sourceRecord.setItemGroup(source.getItemGroup());
+                sourceRecord.setItemCode(source.getItemCode());
+                sourceRecord.setTransactionTime(now);
+                sourceRecord.setOperatorId(String.valueOf(userId));
+                sourceRecord.setNotes("转存-转出");
+                transactionMapper.insert(sourceRecord);
+
+                // Add to target item
+                LambdaQueryWrapper<PrAccountBalance> targetQw = new LambdaQueryWrapper<>();
+                targetQw.eq(PrAccountBalance::getHouseId, houseId)
+                    .eq(PrAccountBalance::getUserId, source.getUserId())
+                    .eq(PrAccountBalance::getItemGroup, itemGroup)
+                    .eq(PrAccountBalance::getItemCode, itemCode);
+                PrAccountBalance target = balanceMapper.selectOne(targetQw);
+
+                if (target != null) {
+                    balanceMapper.updateBalance(source.getUserId(), houseId,
+                        itemGroup, itemCode, balance);
+                } else {
+                    // Create new target balance record
+                    PrAccountBalance newBalance = new PrAccountBalance();
+                    newBalance.setHouseId(houseId);
+                    newBalance.setUserId(source.getUserId());
+                    newBalance.setItemGroup(itemGroup);
+                    newBalance.setItemCode(itemCode);
+                    newBalance.setBalance(balance);
+                    newBalance.setOrgId(source.getOrgId());
+                    newBalance.setCompanyId(source.getCompanyId());
+                    newBalance.setCreateBy(userId);
+                    newBalance.setCreateTime(now);
+                    balanceMapper.insert(newBalance);
+                }
+
+                // Create transaction record for target addition
+                PrTransactionRecord targetRecord = new PrTransactionRecord();
+                targetRecord.setSerialNum("TFR" + System.currentTimeMillis() + "-T");
+                targetRecord.setTransactionType(3);
+                targetRecord.setPaymentType(paymentType);
+                targetRecord.setAmount(balance);
+                targetRecord.setPaidAmount(balance);
+                targetRecord.setStatus(0);
+                targetRecord.setHouseId(houseId);
+                targetRecord.setUserId(source.getUserId());
+                targetRecord.setItemGroup(itemGroup);
+                targetRecord.setItemCode(itemCode);
+                targetRecord.setTransactionTime(now);
+                targetRecord.setOperatorId(String.valueOf(userId));
+                targetRecord.setNotes("转存-转入");
+                targetRecord.setOriginalRecordId(sourceRecord.getId());
+                transactionMapper.insert(targetRecord);
+            }
+        }
+        return true;
     }
 
     @Override
