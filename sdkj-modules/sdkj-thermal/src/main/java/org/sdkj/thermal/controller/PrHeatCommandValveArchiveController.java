@@ -15,8 +15,14 @@ import org.sdkj.thermal.domain.PrHeatCommandValveArchive;
 import org.sdkj.thermal.domain.bo.PrHeatCommandValveArchiveBo;
 import org.sdkj.thermal.domain.vo.PrHeatCommandValveArchiveVo;
 import org.sdkj.thermal.service.IPrHeatCommandValveArchiveService;
+import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.thermal.domain.HtTasksPerform;
+import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 户间控制阀门配表管理
@@ -30,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 public class PrHeatCommandValveArchiveController extends BaseController {
 
     private final IPrHeatCommandValveArchiveService commandValveArchiveService;
+    private final IHtTasksPerformService tasksPerformService;
 
     /**
      * 分页查询户间控制阀门配表列表
@@ -127,9 +134,32 @@ public class PrHeatCommandValveArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "户间控制阀门配表-开阀", businessType = BusinessType.UPDATE)
     @PostMapping("/openValve")
-    public R<Void> openValve(@RequestParam String meterNum) {
-        // TODO: 待后续批次实现
-        return R.ok();
+    public R<Void> openValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
+        List<PrHeatCommandValveArchive> archives = commandValveArchiveService.listByIds(ids);
+        if (archives.isEmpty()) {
+            return R.fail("未找到配表记录");
+        }
+        String userId = LoginHelper.getUserIdStr();
+        List<HtTasksPerform> tasks = new LinkedList<>();
+        for (PrHeatCommandValveArchive archive : archives) {
+            HtTasksPerform task = new HtTasksPerform();
+            task.setId(java.util.UUID.randomUUID().toString().replace("-", ""));
+            task.setInstructionType(3);
+            task.setInstruction(100);
+            task.setNumber(0);
+            task.setOrgId(orgId);
+            task.setCompanyId(companyId);
+            task.setDeviceId(archive.getDeviceId());
+            task.setMeterArcCode(archive.getMeterArcCode());
+            task.setMeterId(archive.getId());
+            task.setMeterNum(archive.getMeterNum());
+            task.setStatus(0);
+            task.setInstructionStatus(0);
+            task.setImei(archive.getImeiNum());
+            task.setConcentratorCode(archive.getConcentratorCode());
+            tasks.add(task);
+        }
+        return toAjax(tasksPerformService.saveBatch(tasks));
     }
 
     /**
@@ -141,9 +171,32 @@ public class PrHeatCommandValveArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "户间控制阀门配表-关阀", businessType = BusinessType.UPDATE)
     @PostMapping("/closeValve")
-    public R<Void> closeValve(@RequestParam String meterNum) {
-        // TODO: 待后续批次实现
-        return R.ok();
+    public R<Void> closeValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
+        List<PrHeatCommandValveArchive> archives = commandValveArchiveService.listByIds(ids);
+        if (archives.isEmpty()) {
+            return R.fail("未找到配表记录");
+        }
+        String userId = LoginHelper.getUserIdStr();
+        List<HtTasksPerform> tasks = new LinkedList<>();
+        for (PrHeatCommandValveArchive archive : archives) {
+            HtTasksPerform task = new HtTasksPerform();
+            task.setId(java.util.UUID.randomUUID().toString().replace("-", ""));
+            task.setInstructionType(3);
+            task.setInstruction(0);
+            task.setNumber(0);
+            task.setOrgId(orgId);
+            task.setCompanyId(companyId);
+            task.setDeviceId(archive.getDeviceId());
+            task.setMeterArcCode(archive.getMeterArcCode());
+            task.setMeterId(archive.getId());
+            task.setMeterNum(archive.getMeterNum());
+            task.setStatus(0);
+            task.setInstructionStatus(0);
+            task.setImei(archive.getImeiNum());
+            task.setConcentratorCode(archive.getConcentratorCode());
+            tasks.add(task);
+        }
+        return toAjax(tasksPerformService.saveBatch(tasks));
     }
 
     /**
@@ -154,9 +207,18 @@ public class PrHeatCommandValveArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:command-valve-archive:edit")
     @SaCheckLogin
     @Log(title = "户间控制阀门配表-换表", businessType = BusinessType.UPDATE)
-    @PostMapping("/exchangeMeter")
-    public R<Void> exchangeMeter(@Validated @RequestBody PrHeatCommandValveArchiveBo bo) {
-        // TODO: 待后续批次实现
-        return R.ok();
+    @PostMapping("/exchangeMeter/{oldId}")
+    public R<Void> exchangeMeter(@Validated @RequestBody PrHeatCommandValveArchiveBo bo, @PathVariable String oldId) {
+        PrHeatCommandValveArchive oldArchive = commandValveArchiveService.getById(oldId);
+        if (oldArchive == null) {
+            return R.fail("未找到旧配表记录");
+        }
+        oldArchive.setIsChanged(1);
+        commandValveArchiveService.updateById(oldArchive);
+
+        PrHeatCommandValveArchive newArchive = MapstructUtils.convert(bo, PrHeatCommandValveArchive.class);
+        newArchive.setIsChanged(0);
+        newArchive.setIsOpen(0);
+        return toAjax(commandValveArchiveService.save(newArchive));
     }
 }

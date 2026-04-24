@@ -10,13 +10,19 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.bo.PrHeatValveArchiveBo;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
+import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * 户间阀门配表管理
@@ -30,6 +36,7 @@ import org.springframework.web.bind.annotation.*;
 public class PrHeatValveArchiveController extends BaseController {
 
     private final IPrHeatValveArchiveService valveArchiveService;
+    private final IHtTasksPerformService tasksPerformService;
 
     /**
      * 分页查询户间阀门配表列表
@@ -127,9 +134,32 @@ public class PrHeatValveArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "户间阀门配表-开阀", businessType = BusinessType.UPDATE)
     @PostMapping("/openValve")
-    public R<Void> openValve(@RequestParam String meterNum) {
-        // TODO: 待后续批次实现
-        return R.ok();
+    public R<Void> openValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
+        List<PrHeatValveArchive> archives = valveArchiveService.listByIds(ids);
+        if (archives.isEmpty()) {
+            return R.fail("未找到对应的阀门配表记录");
+        }
+        List<HtTasksPerform> tasks = new LinkedList<>();
+        for (PrHeatValveArchive archive : archives) {
+            HtTasksPerform task = new HtTasksPerform();
+            task.setInstructionType(3);
+            task.setInstruction(100);
+            task.setNumber(1);
+            task.setOrgId(orgId);
+            task.setCompanyId(companyId);
+            task.setConcentratorCode(archive.getConcentratorCode());
+            task.setDeviceId(archive.getDeviceId());
+            task.setMeterNum(archive.getMeterNum());
+            task.setMeterId(archive.getId());
+            task.setMeterArcCode(archive.getMeterArcCode());
+            task.setStatus(0);
+            task.setInstructionStatus(0);
+            task.setImei(archive.getImeiNum());
+            task.setDtuNum(archive.getDtuNum());
+            task.setChanNum(archive.getChanNum());
+            tasks.add(task);
+        }
+        return toAjax(tasksPerformService.saveBatch(tasks));
     }
 
     /**
@@ -141,23 +171,56 @@ public class PrHeatValveArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "户间阀门配表-关阀", businessType = BusinessType.UPDATE)
     @PostMapping("/closeValve")
-    public R<Void> closeValve(@RequestParam String meterNum) {
-        // TODO: 待后续批次实现
-        return R.ok();
+    public R<Void> closeValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
+        List<PrHeatValveArchive> archives = valveArchiveService.listByIds(ids);
+        if (archives.isEmpty()) {
+            return R.fail("未找到对应的阀门配表记录");
+        }
+        List<HtTasksPerform> tasks = new LinkedList<>();
+        for (PrHeatValveArchive archive : archives) {
+            HtTasksPerform task = new HtTasksPerform();
+            task.setInstructionType(3);
+            task.setInstruction(0);
+            task.setNumber(1);
+            task.setOrgId(orgId);
+            task.setCompanyId(companyId);
+            task.setConcentratorCode(archive.getConcentratorCode());
+            task.setDeviceId(archive.getDeviceId());
+            task.setMeterNum(archive.getMeterNum());
+            task.setMeterId(archive.getId());
+            task.setMeterArcCode(archive.getMeterArcCode());
+            task.setStatus(0);
+            task.setInstructionStatus(0);
+            task.setImei(archive.getImeiNum());
+            task.setDtuNum(archive.getDtuNum());
+            task.setChanNum(archive.getChanNum());
+            tasks.add(task);
+        }
+        return toAjax(tasksPerformService.saveBatch(tasks));
     }
 
     /**
      * 换表
      * 旧端点: POST /ht/valveArchive/exchangeMeter
-     * 新端点: POST /thermal/ht/valve-archive/exchangeMeter
+     * 新端点: POST /thermal/ht/valve-archive/exchangeMeter/{oldId}
      */
     @SaCheckPermission("thermal:ht:valve-archive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-换表", businessType = BusinessType.UPDATE)
-    @PostMapping("/exchangeMeter")
-    public R<Void> exchangeMeter(@Validated @RequestBody PrHeatValveArchiveBo bo) {
-        // TODO: 待后续批次实现
-        return R.ok();
+    @PostMapping("/exchangeMeter/{oldId}")
+    public R<Void> exchangeMeter(@Validated @RequestBody PrHeatValveArchiveBo bo, @PathVariable String oldId) {
+        // 1. 查出旧记录，标记为已变更
+        PrHeatValveArchive oldArchive = valveArchiveService.getById(oldId);
+        if (oldArchive == null) {
+            return R.fail("未找到原阀门配表记录");
+        }
+        oldArchive.setIsChanged(1);
+        valveArchiveService.updateById(oldArchive);
+        // 2. 创建新记录
+        PrHeatValveArchive newArchive = MapstructUtils.convert(bo, PrHeatValveArchive.class);
+        newArchive.setIsChanged(0);
+        newArchive.setIsOpen(0);
+        return toAjax(valveArchiveService.save(newArchive));
     }
 
     /**

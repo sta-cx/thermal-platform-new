@@ -1,5 +1,11 @@
 --- # 供热平台专属配置
 thermal:
+  # 采集平台配置
+  collect:
+    ipPort: 127.0.0.1:8081
+    username: admin
+    password: admin123
+
   # MBus 阀门控制中间件地址
   mbus:
     url: http://127.0.0.1/middle/property/heatreading/operation
