@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrHeatDtuArchiveMapper">
+
+    <!-- 生成户阀查询指令 -->
+    <insert id="setTasksPerformValve">
+        INSERT INTO ht_tasks_perform(
+            id,
+            instruction_type,
+            instruction,
+            number,
+            org_id,
+            company_id,
+            concentrator_code,
+            device_id,
+            meter_num,
+            meter_id,
+            meter_arc_code,
+            status,
+            instruction_status,
+            create_time,
+            create_by,
+            dtu_num,
+            chan_num
+        )
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            4,
+            0,
+            0,
+            a.org_id,
+            a.company_id,
+            a.concentrator_code,
+            a.id,
+            a.meter_num,
+            a.archive_id,
+            a.meter_arc_code,
+            0,
+            0,
+            NOW(),
+            #{createBy},
+            a.dtu_num,
+            a.chan_num
+        FROM pr_heat_valve_archive a
+        LEFT JOIN pr_options_heat b ON b.org_id = a.org_id
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.dtu_num = #{dtuNum}
+          AND a.is_changed = '0'
+    </insert>
+
+    <!-- 生成单元阀查询指令 -->
+    <insert id="setTasksPerformUnitValve">
+        INSERT INTO ht_tasks_perform(
+            id,
+            instruction_type,
+            instruction,
+            number,
+            org_id,
+            company_id,
+            concentrator_code,
+            device_id,
+            meter_num,
+            meter_id,
+            meter_arc_code,
+            status,
+            instruction_status,
+            create_time,
+            create_by,
+            dtu_num,
+            chan_num
+        )
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            4,
+            0,
+            0,
+            a.org_id,
+            a.company_id,
+            a.concentrator_code,
+            a.id,
+            a.meter_num,
+            a.archive_id,
+            a.meter_arc_code,
+            0,
+            0,
+            NOW(),
+            #{createBy},
+            a.dtu_num,
+            a.chan_num
+        FROM pr_heat_unit_valve_archive a
+        LEFT JOIN pr_options_heat b ON b.org_id = a.org_id
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.dtu_num = #{dtuNum}
+          AND a.is_changed = '0'
+    </insert>
+
+    <!-- 生成热表查询指令 -->
+    <insert id="setTasksPerformHot">
+        INSERT INTO ht_tasks_perform(
+            id,
+            instruction_type,
+            instruction,
+            number,
+            org_id,
+            company_id,
+            concentrator_code,
+            device_id,
+            meter_num,
+            meter_id,
+            meter_arc_code,
+            status,
+            instruction_status,
+            create_time,
+            create_by,
+            imei,
+            dtu_num,
+            chan_num
+        )
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            4,
+            0,
+            0,
+            a.org_id,
+            a.company_id,
+            a.concentrator_code,
+            a.id,
+            a.meter_num,
+            a.archive_id,
+            a.meter_arc_code,
+            0,
+            0,
+            NOW(),
+            #{createBy},
+            a.imei_num,
+            a.dtu_num,
+            a.chan_num
+        FROM pr_heat_hot_archive a
+        LEFT JOIN pr_options_heat b ON b.org_id = a.org_id
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.dtu_num = #{dtuNum}
+          AND a.is_changed = '0'
+    </insert>
+
+    <!-- 生成单元热表查询指令 -->
+    <insert id="setTasksPerformUnitHot">
+        INSERT INTO ht_tasks_perform(
+            id,
+            instruction_type,
+            instruction,
+            number,
+            org_id,
+            company_id,
+            concentrator_code,
+            device_id,
+            meter_num,
+            meter_id,
+            meter_arc_code,
+            status,
+            instruction_status,
+            create_time,
+            create_by,
+            imei,
+            dtu_num,
+            chan_num
+        )
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            4,
+            0,
+            0,
+            a.org_id,
+            a.company_id,
+            a.concentrator_code,
+            a.id,
+            a.meter_num,
+            a.archive_id,
+            a.meter_arc_code,
+            0,
+            0,
+            NOW(),
+            #{createBy},
+            a.imei_num,
+            a.dtu_num,
+            a.chan_num
+        FROM pr_heat_unit_hot_archive a
+        LEFT JOIN pr_options_heat b ON b.org_id = a.org_id
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.dtu_num = #{dtuNum}
+          AND a.is_changed = '0'
+    </insert>
+
+</mapper>

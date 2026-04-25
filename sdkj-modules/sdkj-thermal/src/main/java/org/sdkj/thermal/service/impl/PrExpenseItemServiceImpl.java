@@ -31,14 +31,8 @@ public class PrExpenseItemServiceImpl extends ServiceImpl<PrExpenseItemMapper, P
 
     @Override
     public TableDataInfo<PrExpenseItemVo> selectPageList(String orgId, String itemGroup, PageQuery pageQuery) {
-        List<PrExpenseItemVo> list = baseMapper.selectPageList(orgId, itemGroup);
-        // 手动分页
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<PrExpenseItemVo> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<PrExpenseItemVo> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
+        Page<PrExpenseItemVo> page = pageQuery.build();
+        baseMapper.selectPageList(page, orgId, itemGroup);
         return TableDataInfo.build(page);
     }
 

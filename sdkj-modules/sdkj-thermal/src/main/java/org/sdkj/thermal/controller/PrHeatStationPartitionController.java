@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.mybatis.core.page.PageQuery;
+import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrHeatStationPartition;
 import org.sdkj.thermal.service.IPrHeatStationPartitionService;
@@ -27,19 +29,19 @@ public class PrHeatStationPartitionController extends BaseController {
     @SaCheckPermission("thermal:ht:station:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<Page<PrHeatStationPartition>> list(
+    public TableDataInfo<PrHeatStationPartition> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String stationId,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<PrHeatStationPartition> page = new Page<>(pageNum, pageSize);
+            PageQuery pageQuery) {
+        Page<PrHeatStationPartition> page = pageQuery.build();
         LambdaQueryWrapper<PrHeatStationPartition> lqw = new LambdaQueryWrapper<>();
         lqw.like(search != null && !search.isEmpty(), PrHeatStationPartition::getName, search);
         lqw.eq(companyId != null && !companyId.isEmpty(), PrHeatStationPartition::getCompanyId, companyId);
         lqw.eq(stationId != null && !stationId.isEmpty(), PrHeatStationPartition::getStationId, stationId);
         lqw.orderByAsc(PrHeatStationPartition::getSeq);
-        return R.ok(partitionService.page(page, lqw));
+        partitionService.page(page, lqw);
+        return TableDataInfo.build(page);
     }
 
     @SaCheckPermission("thermal:ht:station:query")

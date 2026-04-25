@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.mybatis.core.page.PageQuery;
+import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrNotice;
 import org.sdkj.thermal.service.IPrNoticeService;
@@ -25,17 +27,17 @@ public class PrNoticeController extends BaseController {
     @SaCheckPermission("thermal:property:notice:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<Page<PrNotice>> list(
+    public TableDataInfo<PrNotice> list(
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String type,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<PrNotice> page = new Page<>(pageNum, pageSize);
+            PageQuery pageQuery) {
+        Page<PrNotice> page = pageQuery.build();
         LambdaQueryWrapper<PrNotice> lqw = new LambdaQueryWrapper<>();
         lqw.eq(orgId != null && !orgId.isEmpty(), PrNotice::getOrgId, orgId);
         lqw.eq(type != null && !type.isEmpty(), PrNotice::getType, type);
         lqw.orderByDesc(PrNotice::getCreateTime);
-        return R.ok(noticeService.page(page, lqw));
+        noticeService.page(page, lqw);
+        return TableDataInfo.build(page);
     }
 
     @SaCheckPermission("thermal:property:notice:query")

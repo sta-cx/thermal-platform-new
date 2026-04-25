@@ -33,13 +33,8 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
 
     @Override
     public TableDataInfo<PrStandardVo> selectPageList(String orgId, String type, PageQuery pageQuery) {
-        List<PrStandardVo> list = baseMapper.selectPageList(orgId, type);
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<PrStandardVo> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<PrStandardVo> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
+        Page<PrStandardVo> page = pageQuery.build();
+        baseMapper.selectPageList(page, orgId, type);
         return TableDataInfo.build(page);
     }
 
@@ -194,13 +189,8 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
 
     @Override
     public TableDataInfo<PrStandardVo> selectByItemName(String orgIdCopy, String itemName, PageQuery pageQuery) {
-        List<PrStandardVo> list = baseMapper.selectByItemName(orgIdCopy, itemName);
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<PrStandardVo> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<PrStandardVo> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
+        Page<PrStandardVo> page = pageQuery.build();
+        baseMapper.selectByItemName(page, orgIdCopy, itemName);
         return TableDataInfo.build(page);
     }
 }

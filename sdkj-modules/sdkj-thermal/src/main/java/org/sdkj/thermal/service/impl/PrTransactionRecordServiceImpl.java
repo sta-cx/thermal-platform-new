@@ -26,14 +26,8 @@ public class PrTransactionRecordServiceImpl extends ServiceImpl<PrTransactionRec
     @Override
     public TableDataInfo<PrTransactionRecordVo> pageList(String search, String companyId, String orgId,
             String buildingId, String unitCode, String startTime, String endTime, String status, PageQuery pageQuery) {
-        List<PrTransactionRecordVo> list = baseMapper.selectPageList(
-            search, companyId, orgId, buildingId, unitCode, startTime, endTime, status);
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<PrTransactionRecordVo> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<PrTransactionRecordVo> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
+        Page<PrTransactionRecordVo> page = pageQuery.build();
+        baseMapper.selectPageList(page, search, companyId, orgId, buildingId, unitCode, startTime, endTime, status);
         return TableDataInfo.build(page);
     }
 

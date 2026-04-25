@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service;
 
+import org.sdkj.thermal.domain.bo.RefundDataBo;
 import org.sdkj.thermal.domain.vo.PrAccountBalanceVo;
 
 import java.math.BigDecimal;
@@ -31,7 +32,7 @@ public interface IPrAccountService {
     boolean updateData(List<Map<String, String>> houses, String itemGroup, String itemCode, String payment);
 
     /** 账户退费 */
-    void refundData(Map<String, String> houses, Map<String, String> record, Map<String, String> info);
+    void refundData(RefundDataBo bo);
 
     /** 转存 */
     boolean transfer(List<String> houseIds, String payment, String itemGroup, String itemCode,

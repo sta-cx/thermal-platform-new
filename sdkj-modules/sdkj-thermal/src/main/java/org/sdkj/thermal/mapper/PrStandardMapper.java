@@ -1,5 +1,6 @@
 package org.sdkj.thermal.mapper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrExpenseItem;
@@ -19,7 +20,7 @@ public interface PrStandardMapper extends BaseMapperPlus<PrStandard, PrStandardV
     /**
      * 分页查询收费标准列表（关联费目名称和单价公式）
      */
-    List<PrStandardVo> selectPageList(@Param("orgId") String orgId, @Param("type") String type);
+    List<PrStandardVo> selectPageList(Page<PrStandardVo> page, @Param("orgId") String orgId, @Param("type") String type);
 
     /**
      * 按 itemCode 统计收费标准数量
@@ -105,7 +106,7 @@ public interface PrStandardMapper extends BaseMapperPlus<PrStandard, PrStandardV
     /**
      * 按项目名称查询收费标准列表
      */
-    List<PrStandardVo> selectByItemName(@Param("orgIdCopy") String orgIdCopy, @Param("itemName") String itemName);
+    List<PrStandardVo> selectByItemName(Page<PrStandardVo> page, @Param("orgIdCopy") String orgIdCopy, @Param("itemName") String itemName);
 
     /**
      * 检查收费标准是否被房屋关联

@@ -67,4 +67,44 @@ public interface IHtTasksPerformService extends IService<HtTasksPerform> {
      * @param instruction 指令值 (100=开阀, 0=关阀)
      */
     boolean batchCreateValveControlTasks(List<ValveArchiveInfo> archives, String orgId, String companyId, int instruction);
+
+    /**
+     * 批量保存任务执行记录
+     * @param htTasksPerformList 任务执行记录列表
+     * @return 是否成功
+     */
+    boolean saveBatchTasks(List<HtTasksPerform> htTasksPerformList);
+
+    /**
+     * 立即执行阀门调控指令
+     * @param htTasksPerformList 任务执行记录列表
+     * @throws Exception 执行异常
+     */
+    void executeValveControlTasks(List<HtTasksPerform> htTasksPerformList) throws Exception;
+
+    /**
+     * 立即执行热表调控指令
+     * @param htTasksPerformList 任务执行记录列表
+     * @throws Exception 执行异常
+     */
+    void executeHeatMeterTasks(List<HtTasksPerform> htTasksPerformList) throws Exception;
+
+    /**
+     * 立即执行 DTU 调控指令
+     * @param htTasksPerformList 任务执行记录列表
+     * @throws Exception 执行异常
+     */
+    void executeDtuControlTasks(List<HtTasksPerform> htTasksPerformList) throws Exception;
+
+    /**
+     * 更新阀门开度状态列表
+     * @param htTasksPerformList 任务执行记录列表
+     */
+    void updateValveScopeStatusList(List<HtTasksPerform> htTasksPerformList);
+
+    /**
+     * 插入阀门开关日志
+     * @param htTasksPerformList 任务执行记录列表
+     */
+    void insertValveOCLog(List<HtTasksPerform> htTasksPerformList);
 }

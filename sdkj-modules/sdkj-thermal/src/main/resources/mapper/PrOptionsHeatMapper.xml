@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrOptionsHeatMapper">
+
+    <!-- 根据公司ID查询公司级别的配置 -->
+    <select id="selectByCompanyId" resultType="org.sdkj.thermal.domain.PrOptionsHeat">
+        SELECT * FROM pr_options_heat
+        WHERE company_id = #{companyId}
+          AND (org_id IS NULL OR org_id = '')
+        LIMIT 1
+    </select>
+
+    <!-- 根据小区ID和公司ID查询配置 -->
+    <select id="selectByOrgAndCompany" resultType="org.sdkj.thermal.domain.PrOptionsHeat">
+        SELECT * FROM pr_options_heat
+        WHERE company_id = #{companyId}
+          AND org_id = #{orgId}
+        LIMIT 1
+    </select>
+
+    <!-- 删除指定小区和公司的配置 -->
+    <delete id="deleteByOrgAndCompany">
+        DELETE FROM pr_options_heat
+        WHERE company_id = #{companyId}
+          AND org_id = #{orgId}
+    </delete>
+
+</mapper>

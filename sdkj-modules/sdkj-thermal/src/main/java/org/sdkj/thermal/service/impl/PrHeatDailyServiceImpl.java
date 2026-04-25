@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.Calendar;
 
 /**
  * 热表日记录 Service 实现
@@ -47,6 +48,23 @@ public class PrHeatDailyServiceImpl extends ServiceImpl<PrHeatDailyMapper, PrHea
         lqw.orderByDesc(PrHeatDaily::getCreateTime);
         Page<PrHeatDailyVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean generateHeatDaily(String companyId, String orgId) {
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.DAY_OF_MONTH, -1);
+        java.util.Date targetDate = now.getTime();
+
+        boolean result = true;
+        result = result && baseMapper.setIsValid(targetDate, companyId, orgId);
+        result = result && baseMapper.deleteDaily(targetDate, companyId, orgId);
+        result = result && baseMapper.setHeatDaily(targetDate, companyId, orgId);
+        result = result && baseMapper.setSteps(targetDate, companyId, orgId);
+        result = result && baseMapper.setQtyStepsN(targetDate, companyId, orgId);
+        result = result && baseMapper.setCurrentReading(targetDate, companyId, orgId);
+        return result;
     }
 
     @Override

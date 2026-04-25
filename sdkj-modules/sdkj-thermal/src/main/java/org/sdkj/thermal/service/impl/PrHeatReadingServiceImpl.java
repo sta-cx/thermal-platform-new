@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +59,17 @@ public class PrHeatReadingServiceImpl extends ServiceImpl<PrHeatReadingMapper, P
         lqw.orderByDesc(PrHeatReading::getReadTime);
         Page<PrHeatReadingVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
+    }
+
+    @Override
+    public List<PrHeatReadingVo> selectTrendList(List<String> meterNums, String startTime, String endTime,
+                                                  String companyId, String status, String orgId, String parentId) {
+        return baseMapper.selectTrendList(meterNums, startTime, endTime, companyId, status, orgId, parentId);
+    }
+
+    @Override
+    public List<PrHeatReadingVo> selectHomeTrendList(String stationId, String stationPartitionId, String companyId) {
+        return baseMapper.selectHomeTrendList(stationId, stationPartitionId, companyId);
     }
 
     @Override

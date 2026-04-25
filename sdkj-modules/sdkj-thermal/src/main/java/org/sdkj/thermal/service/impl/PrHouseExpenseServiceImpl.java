@@ -31,13 +31,8 @@ public class PrHouseExpenseServiceImpl extends ServiceImpl<PrHouseExpenseMapper,
     public TableDataInfo<PrHouseExpenseVo> selectPageList(String companyId, String orgId, String buildingId,
                                                           String unitCode, String itemGroup, String itemCode,
                                                           String search, PageQuery pageQuery) {
-        List<PrHouseExpenseVo> list = baseMapper.selectPageList(companyId, orgId, buildingId, unitCode, itemGroup, itemCode, search);
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<PrHouseExpenseVo> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<PrHouseExpenseVo> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
+        Page<PrHouseExpenseVo> page = pageQuery.build();
+        baseMapper.selectPageList(page, companyId, orgId, buildingId, unitCode, itemGroup, itemCode, search);
         return TableDataInfo.build(page);
     }
 

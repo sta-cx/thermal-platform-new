@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -72,7 +71,15 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
     @Override
     public String generateRepairNo() {
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        String seq = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
-        return "WX" + date + seq;
+        String prefix = "WX" + date;
+        String maxNo = baseMapper.selectMaxRepairNoByPrefix(prefix);
+        int nextSeq = 1;
+        if (maxNo != null && maxNo.length() > prefix.length()) {
+            try {
+                nextSeq = Integer.parseInt(maxNo.substring(prefix.length())) + 1;
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return prefix + String.format("%04d", nextSeq);
     }
 }

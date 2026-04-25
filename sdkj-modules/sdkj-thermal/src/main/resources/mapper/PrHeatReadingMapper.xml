@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrHeatReadingMapper">
+
+    <!-- 查询阀门趋势数据 -->
+    <select id="selectTrendList" resultType="org.sdkj.thermal.domain.vo.PrHeatReadingVo">
+        SELECT
+            GROUP_CONCAT(IF(h.out_temperature > 0, h.out_temperature, NULL) ORDER BY h.create_time) AS 'nowTemperatureString',
+            GROUP_CONCAT(IF(h.out_temperature > 0, h.valve_status, NULL) ORDER BY h.create_time) AS 'nowValveStatusString',
+            GROUP_CONCAT(IF(h.out_temperature > 0, DATE_FORMAT(h.create_time, '%Y-%m-%d %H:%i:00'), NULL) ORDER BY h.create_time) AS 'nowTimeString',
+            h.meter_num,
+            h.out_temperature,
+            h.valve_status,
+            h.create_time,
+            h.read_time,
+            d.room_num AS 'roomNum'
+        FROM pr_heat_reading h
+        LEFT JOIN pr_heat_valve_archive b ON h.meter_num = b.meter_num
+        LEFT JOIN pr_house d ON b.house_id = d.id AND b.company_id = d.company_id AND b.org_id = d.org_id
+        LEFT JOIN sys_organization F ON b.ORG_ID = F.ID
+        WHERE b.company_id = #{companyId}
+        <if test="meterNums != null and meterNums.size() > 0">
+            AND h.meter_num IN
+            <foreach item="item" collection="meterNums" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+            AND h.create_time BETWEEN #{startTime} AND #{endTime}
+        </if>
+        <if test="orgId != null and orgId != ''">
+            AND b.org_id = #{orgId}
+        </if>
+        <if test="parentId != null and parentId != ''">
+            AND F.parent_id = #{parentId}
+        </if>
+        AND h.out_temperature != 0
+        GROUP BY b.meter_num
+        ORDER BY h.create_time
+    </select>
+
+    <!-- 查询首页户间阀门趋势图 -->
+    <select id="selectHomeTrendList" resultType="org.sdkj.thermal.domain.vo.PrHeatReadingVo">
+        SELECT
+            GROUP_CONCAT(IF(aa.out_temperature > 0, aa.out_temperature, NULL) ORDER BY aa.create_time) AS 'nowTemperatureString',
+            GROUP_CONCAT(IF(aa.out_temperature > 0, aa.valve_status, NULL) ORDER BY aa.create_time) AS 'nowValveStatusString',
+            GROUP_CONCAT(IF(aa.out_temperature > 0, DATE_FORMAT(aa.create_time, '%Y-%m-%d'), NULL) ORDER BY aa.create_time) AS 'nowTimeString',
+            aa.*
+        FROM (
+            SELECT
+                h.meter_num,
+                h.out_temperature,
+                h.create_time,
+                h.read_time,
+                h.valve_status,
+                hhh.meter_num AS 'meterNumA',
+                hhh.room_num AS 'roomNum'
+            FROM pr_heat_reading h
+            INNER JOIN (
+                SELECT
+                    b.meter_num,
+                    d.room_num,
+                    hh.open_time,
+                    hh.close_time
+                FROM pr_heat_valve_archive b
+                INNER JOIN pr_house d ON b.house_id = d.id AND b.company_id = #{companyId} AND b.org_id = d.org_id
+                INNER JOIN pr_heat_station_partition f ON f.id = d.station_type
+                <if test="stationPartitionId != null and stationPartitionId != ''">
+                    AND f.id = #{stationPartitionId}
+                </if>
+                INNER JOIN pr_heat_station g ON g.id = f.station_id
+                <if test="stationId != null and stationId != ''">
+                    AND g.id = #{stationId}
+                </if>
+                INNER JOIN pr_options_heat hh ON hh.company_id = b.company_id AND hh.org_id IS NULL
+                WHERE d.pay_status = 1 AND b.out_temperature > 0 AND b.valve_time > hh.open_time AND d.is_special = '0'
+                LIMIT 50
+            ) hhh ON h.meter_num = hhh.meter_num
+            WHERE h.out_temperature > 0
+              AND DATE_FORMAT(h.create_time, '%Y-%m-%d') BETWEEN DATE_FORMAT(hhh.open_time, '%Y-%m-%d') AND DATE_FORMAT(hhh.close_time, '%Y-%m-%d')
+            GROUP BY h.meter_num, DATE_FORMAT(h.create_time, '%Y-%m-%d')
+            ORDER BY h.create_time DESC
+        ) aa
+        GROUP BY aa.meterNumA
+        LIMIT 50
+    </select>
+
+</mapper>

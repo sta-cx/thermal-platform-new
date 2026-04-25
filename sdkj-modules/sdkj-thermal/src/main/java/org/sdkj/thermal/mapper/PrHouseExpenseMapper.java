@@ -1,5 +1,6 @@
 package org.sdkj.thermal.mapper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrHouseExpense;
@@ -20,7 +21,8 @@ public interface PrHouseExpenseMapper extends BaseMapperPlus<PrHouseExpense, PrH
     /**
      * 分页查询房屋-费目绑定列表
      */
-    List<PrHouseExpenseVo> selectPageList(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    List<PrHouseExpenseVo> selectPageList(Page<PrHouseExpenseVo> page,
+                                          @Param("companyId") String companyId, @Param("orgId") String orgId,
                                           @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
                                           @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode,
                                           @Param("search") String search);

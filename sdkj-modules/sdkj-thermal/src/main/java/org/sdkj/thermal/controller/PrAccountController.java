@@ -7,6 +7,7 @@ import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.thermal.domain.bo.RefundDataBo;
 import org.sdkj.thermal.domain.vo.PrAccountBalanceVo;
 import org.sdkj.thermal.service.IPrAccountService;
 import org.springframework.validation.annotation.Validated;
@@ -129,14 +130,8 @@ public class PrAccountController extends BaseController {
     @SaCheckLogin
     @Log(title = "账户退费", businessType = BusinessType.UPDATE)
     @PostMapping("/refund")
-    public R<Void> refundData(@RequestBody Map<String, Object> args) {
-        @SuppressWarnings("unchecked")
-        Map<String, String> houses = (Map<String, String>) args.get("houses");
-        @SuppressWarnings("unchecked")
-        Map<String, String> record = (Map<String, String>) args.get("record");
-        @SuppressWarnings("unchecked")
-        Map<String, String> info = (Map<String, String>) args.get("info");
-        accountService.refundData(houses, record, info);
+    public R<Void> refundData(@Validated @RequestBody RefundDataBo bo) {
+        accountService.refundData(bo);
         return R.ok();
     }
 

@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -8,6 +9,7 @@ import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHeatDtuArchive;
+import org.sdkj.thermal.domain.bo.PrHeatDtuArchiveBo;
 import org.sdkj.thermal.domain.vo.PrHeatDtuArchiveVo;
 import org.sdkj.thermal.mapper.PrHeatDtuArchiveMapper;
 import org.sdkj.thermal.service.IPrHeatDtuArchiveService;
@@ -42,6 +44,31 @@ public class PrHeatDtuArchiveServiceImpl extends ServiceImpl<PrHeatDtuArchiveMap
         lqw.orderByDesc(PrHeatDtuArchive::getCreateTime);
         Page<PrHeatDtuArchiveVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean queryMeter(PrHeatDtuArchiveBo bo) {
+        String createBy = StpUtil.getLoginIdAsString();
+        String companyId = bo.getCompanyId();
+        String orgId = bo.getOrgId();
+        String dtuNum = bo.getDtuNum();
+
+        boolean result = true;
+
+        // 生成户阀查询指令
+        result = baseMapper.setTasksPerformValve(companyId, orgId, dtuNum, createBy) && result;
+
+        // 生成单元阀查询指令
+        result = baseMapper.setTasksPerformUnitValve(companyId, orgId, dtuNum, createBy) && result;
+
+        // 生成热表查询指令
+        result = baseMapper.setTasksPerformHot(companyId, orgId, dtuNum, createBy) && result;
+
+        // 生成单元热表查询指令
+        result = baseMapper.setTasksPerformUnitHot(companyId, orgId, dtuNum, createBy) && result;
+
+        return result;
     }
 
     @Override

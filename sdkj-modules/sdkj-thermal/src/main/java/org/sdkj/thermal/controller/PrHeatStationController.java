@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.mybatis.core.page.PageQuery;
+import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrHeatStation;
 import org.sdkj.thermal.service.IPrHeatStationService;
@@ -27,17 +29,17 @@ public class PrHeatStationController extends BaseController {
     @SaCheckPermission("thermal:ht:station:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<Page<PrHeatStation>> list(
+    public TableDataInfo<PrHeatStation> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String companyId,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<PrHeatStation> page = new Page<>(pageNum, pageSize);
+            PageQuery pageQuery) {
+        Page<PrHeatStation> page = pageQuery.build();
         LambdaQueryWrapper<PrHeatStation> lqw = new LambdaQueryWrapper<>();
         lqw.like(search != null && !search.isEmpty(), PrHeatStation::getName, search);
         lqw.eq(companyId != null && !companyId.isEmpty(), PrHeatStation::getCompanyId, companyId);
         lqw.orderByAsc(PrHeatStation::getSeq);
-        return R.ok(stationService.page(page, lqw));
+        stationService.page(page, lqw);
+        return TableDataInfo.build(page);
     }
 
     @SaCheckPermission("thermal:ht:station:query")

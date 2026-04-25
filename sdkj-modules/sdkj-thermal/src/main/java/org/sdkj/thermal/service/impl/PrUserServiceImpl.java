@@ -27,13 +27,8 @@ public class PrUserServiceImpl extends ServiceImpl<PrUserMapper, PrUser> impleme
 
     @Override
     public TableDataInfo<PrUserVo> selectPageList(String companyId, PageQuery pageQuery) {
-        List<PrUserVo> list = baseMapper.selectPageList(companyId);
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<PrUserVo> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<PrUserVo> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
+        Page<PrUserVo> page = pageQuery.build();
+        baseMapper.selectPageList(page, companyId);
         return TableDataInfo.build(page);
     }
 

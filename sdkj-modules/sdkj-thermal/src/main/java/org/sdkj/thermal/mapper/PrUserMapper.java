@@ -1,5 +1,6 @@
 package org.sdkj.thermal.mapper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrUser;
@@ -16,7 +17,7 @@ public interface PrUserMapper extends BaseMapperPlus<PrUser, PrUserVo> {
     /**
      * 分页查询客户列表（按公司）
      */
-    List<PrUserVo> selectPageList(@Param("companyId") String companyId);
+    List<PrUserVo> selectPageList(Page<PrUserVo> page, @Param("companyId") String companyId);
 
     /**
      * 查询客户详情（含房屋关联信息）

@@ -39,14 +39,9 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                                                      String itemGroup, String itemCode, String search, String isCharged,
                                                      String parkingId, String startTime, String endTime,
                                                      String startDate, String endDate, PageQuery pageQuery) {
-        List<PrExpenseVo> list = baseMapper.selectPageList(companyId, orgId, buildingId, unitCode,
+        Page<PrExpenseVo> page = pageQuery.build();
+        baseMapper.selectPageList(page, companyId, orgId, buildingId, unitCode,
             itemGroup, itemCode, search, isCharged, parkingId, startTime, endTime);
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<PrExpenseVo> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<PrExpenseVo> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
         return TableDataInfo.build(page);
     }
 
@@ -377,14 +372,9 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     public TableDataInfo<PrExpenseVo> parkingList(String companyId, String orgId, String buildingId,
             String unitCode, String itemGroup, String itemCode, String search, String isCharged,
             String parkingId, String startTime, String endTime, PageQuery pageQuery) {
-        List<PrExpenseVo> list = baseMapper.selectParkingPageList(companyId, orgId, buildingId, unitCode,
+        Page<PrExpenseVo> page = pageQuery.build();
+        baseMapper.selectParkingPageList(page, companyId, orgId, buildingId, unitCode,
             itemGroup, itemCode, search, isCharged, parkingId, startTime, endTime);
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<PrExpenseVo> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<PrExpenseVo> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
         return TableDataInfo.build(page);
     }
 
@@ -404,14 +394,9 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     public TableDataInfo<Map<String, Object>> expenseLog(String companyId, String orgId, String buildingId,
             String unitCode, String parentId, String type, String startTime, String endTime, String search,
             PageQuery pageQuery) {
-        List<Map<String, Object>> list = baseMapper.selectExpenseLog(companyId, orgId, buildingId,
+        Page<Map<String, Object>> page = pageQuery.build();
+        baseMapper.selectExpenseLog(page, companyId, orgId, buildingId,
             unitCode, parentId, type, startTime, endTime, search);
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<Map<String, Object>> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<Map<String, Object>> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
         return TableDataInfo.build(page);
     }
 
@@ -419,14 +404,9 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     public TableDataInfo<Map<String, Object>> wechatOrderList(String companyId, String orgId, String buildingId,
             String unitCode, String parentId, String type, String startTime, String endTime, String search,
             PageQuery pageQuery) {
-        List<Map<String, Object>> list = baseMapper.selectWechatOrderList(companyId, orgId, buildingId,
+        Page<Map<String, Object>> page = pageQuery.build();
+        baseMapper.selectWechatOrderList(page, companyId, orgId, buildingId,
             unitCode, parentId, type, startTime, endTime, search);
-        int total = list.size();
-        int fromIndex = (int) ((pageQuery.getPageNum() - 1) * pageQuery.getPageSize());
-        int toIndex = Math.min(fromIndex + (int) pageQuery.getPageSize(), total);
-        List<Map<String, Object>> pagedList = fromIndex < total ? list.subList(fromIndex, toIndex) : List.of();
-        Page<Map<String, Object>> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize(), total);
-        page.setRecords(pagedList);
         return TableDataInfo.build(page);
     }
 }

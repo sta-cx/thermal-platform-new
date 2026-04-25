@@ -1,9 +1,11 @@
 package org.sdkj.thermal.service.impl;
 
+import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.HtTasksPerform;
@@ -11,8 +13,11 @@ import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.vo.HtTasksPerformVo;
 import org.sdkj.thermal.mapper.HtTasksPerformMapper;
 import org.sdkj.thermal.service.IHtTasksPerformService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,11 +25,19 @@ import java.util.UUID;
 /**
  * 调控执行记录服务实现
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper, HtTasksPerform> implements IHtTasksPerformService {
 
     private final HtTasksPerformMapper baseMapper;
+
+    @Value("${collect.ipPort:}")
+    private String ipPort;
+    @Value("${collect.username:}")
+    private String username;
+    @Value("${collect.password:}")
+    private String password;
 
     @Override
     public TableDataInfo<HtTasksPerformVo> selectPageList(LambdaQueryWrapper<HtTasksPerform> lqw, PageQuery pageQuery) {
@@ -43,7 +56,7 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public boolean updateInstructionStatus(String performId, Integer status) {
         HtTasksPerform perform = new HtTasksPerform();
         perform.setId(performId);
@@ -52,7 +65,7 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public boolean batchUpdateInstructionStatus(List<String> performIds, Integer status) {
         return lambdaUpdate()
             .in(HtTasksPerform::getId, performIds)
@@ -119,7 +132,7 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
     }
 
     @Override
-    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class)
     public boolean batchCreateValveControlTasks(List<ValveArchiveInfo> archives, String orgId, String companyId, int instruction) {
         List<HtTasksPerform> tasks = archives.stream().map(info -> {
             HtTasksPerform task = new HtTasksPerform();
@@ -142,5 +155,44 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
             return task;
         }).toList();
         return saveBatch(tasks);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean saveBatchTasks(List<HtTasksPerform> htTasksPerformList) {
+        return saveBatch(htTasksPerformList);
+    }
+
+    @Override
+    public void executeValveControlTasks(List<HtTasksPerform> htTasksPerformList) throws Exception {
+        // TODO: 实现阀门调控指令执行逻辑
+        // 需要调用采集平台接口发送指令
+        log.info("执行阀门调控指令，数量：{}", htTasksPerformList.size());
+    }
+
+    @Override
+    public void executeHeatMeterTasks(List<HtTasksPerform> htTasksPerformList) throws Exception {
+        // TODO: 实现热表调控指令执行逻辑
+        // 需要调用采集平台接口发送指令
+        log.info("执行热表调控指令，数量：{}", htTasksPerformList.size());
+    }
+
+    @Override
+    public void executeDtuControlTasks(List<HtTasksPerform> htTasksPerformList) throws Exception {
+        // TODO: 实现 DTU 调控指令执行逻辑
+        // 需要调用采集平台接口发送指令
+        log.info("执行 DTU 调控指令，数量：{}", htTasksPerformList.size());
+    }
+
+    @Override
+    public void updateValveScopeStatusList(List<HtTasksPerform> htTasksPerformList) {
+        // TODO: 实现更新阀门开度状态列表
+        log.info("更新阀门开度状态，数量：{}", htTasksPerformList.size());
+    }
+
+    @Override
+    public void insertValveOCLog(List<HtTasksPerform> htTasksPerformList) {
+        // TODO: 实现插入阀门开关日志
+        log.info("插入阀门开关日志，数量：{}", htTasksPerformList.size());
     }
 }

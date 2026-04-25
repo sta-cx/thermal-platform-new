@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.domain.PrAccountBalance;
 import org.sdkj.thermal.domain.PrTransactionRecord;
+import org.sdkj.thermal.domain.bo.RefundDataBo;
 import org.sdkj.thermal.domain.vo.PrAccountBalanceVo;
 import org.sdkj.thermal.mapper.PrAccountBalanceMapper;
 import org.sdkj.thermal.mapper.PrTransactionRecordMapper;
@@ -125,21 +126,18 @@ public class PrAccountServiceImpl implements IPrAccountService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void refundData(Map<String, String> houses, Map<String, String> record, Map<String, String> info) {
-        if (houses == null) return;
+    public void refundData(RefundDataBo bo) {
+        if (bo.getHouses() == null) return;
         Date now = new Date();
         Long userId = LoginHelper.getUserId();
-        BigDecimal amount = info != null && info.get("amount") != null
-            ? new BigDecimal(info.get("amount")) : BigDecimal.ZERO;
+        BigDecimal amount = bo.getAmount() != null ? bo.getAmount() : BigDecimal.ZERO;
 
-        for (Map.Entry<String, String> entry : houses.entrySet()) {
+        for (Map.Entry<String, String> entry : bo.getHouses().entrySet()) {
             String houseId = entry.getKey();
             String houseUserId = entry.getValue();
 
             balanceMapper.updateBalance(houseUserId, houseId,
-                record != null ? record.get("itemGroup") : null,
-                record != null ? record.get("itemCode") : null,
-                amount.negate());
+                bo.getItemGroup(), bo.getItemCode(), amount.negate());
 
             PrTransactionRecord refundRecord = new PrTransactionRecord();
             refundRecord.setSerialNum("REF" + System.currentTimeMillis());
@@ -149,8 +147,8 @@ public class PrAccountServiceImpl implements IPrAccountService {
             refundRecord.setStatus(0);
             refundRecord.setHouseId(houseId);
             refundRecord.setUserId(houseUserId);
-            refundRecord.setItemGroup(record != null ? record.get("itemGroup") : null);
-            refundRecord.setItemCode(record != null ? record.get("itemCode") : null);
+            refundRecord.setItemGroup(bo.getItemGroup());
+            refundRecord.setItemCode(bo.getItemCode());
             refundRecord.setTransactionTime(now);
             refundRecord.setOperatorId(String.valueOf(userId));
             refundRecord.setNotes("退费");

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHeatDtuArchive;
+import org.sdkj.thermal.domain.bo.PrHeatDtuArchiveBo;
 import org.sdkj.thermal.domain.vo.PrHeatDtuArchiveVo;
 
 import java.io.Serializable;
@@ -29,4 +30,11 @@ public interface IPrHeatDtuArchiveService extends IService<PrHeatDtuArchive> {
      */
     TableDataInfo<PrHeatDtuArchiveVo> selectPageList(String companyId, String orgId, String search,
                                                       String status, PageQuery pageQuery);
+
+    /**
+     * 查询DTU下所有仪表信息并生成查询指令
+     * @param bo DTU档案信息
+     * @return 是否成功
+     */
+    Boolean queryMeter(PrHeatDtuArchiveBo bo);
 }

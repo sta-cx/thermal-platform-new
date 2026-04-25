@@ -1,5 +1,6 @@
 package org.sdkj.thermal.mapper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrExpense;
@@ -18,7 +19,8 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
     /**
      * 分页查询费用明细列表
      */
-    List<PrExpenseVo> selectPageList(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    List<PrExpenseVo> selectPageList(Page<PrExpenseVo> page,
+                                     @Param("companyId") String companyId, @Param("orgId") String orgId,
                                      @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
                                      @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode,
                                      @Param("search") String search, @Param("isCharged") String isCharged,
@@ -80,6 +82,7 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
 
     /** 车位费用分页查询 */
     List<PrExpenseVo> selectParkingPageList(
+        Page<PrExpenseVo> page,
         @Param("companyId") String companyId, @Param("orgId") String orgId,
         @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
         @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode,
@@ -101,6 +104,7 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
 
     /** 费用操作日志 */
     List<Map<String, Object>> selectExpenseLog(
+        Page<Map<String, Object>> page,
         @Param("companyId") String companyId, @Param("orgId") String orgId,
         @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
         @Param("parentId") String parentId, @Param("type") String type,
@@ -109,6 +113,7 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
 
     /** 微信费用订单 */
     List<Map<String, Object>> selectWechatOrderList(
+        Page<Map<String, Object>> page,
         @Param("companyId") String companyId, @Param("orgId") String orgId,
         @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
         @Param("parentId") String parentId, @Param("type") String type,

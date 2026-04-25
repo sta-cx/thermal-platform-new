@@ -1,0 +1,56 @@
+package org.sdkj.thermal.domain.dto;
+
+import lombok.Data;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.Date;
+
+/**
+ * 热表档案 DTO
+ * 迁移自旧系统 PrHeatHotArchive
+ */
+@Data
+public class PrHeatHotArchiveDto implements Serializable {
+
+    private String id;
+    private String archiveId;
+    private String meterNum;
+    private String cardNum;
+    private String meterArcCode;
+    private String meterArcName;
+    private String concentratorCode;
+    private String imeiNum;
+    private String productId;
+    private String deviceId;
+    private Integer meterSerial;
+    private String houseId;
+    private String orgId;
+    private String companyId;
+    private String valveStatus;
+    private Integer settingStatus;
+    private Integer actualStatus;
+    private BigDecimal inTemperature;
+    private BigDecimal outTemperature;
+    private String voltage;
+    private Date valveTime;
+    private Integer signalStrength;
+    private Integer reportingInterval;
+    private String intervalUnit;
+    private Integer validTime;
+    private Integer totalDegree;
+    private Integer residueDegree;
+    private int isChanged;
+    private int isStop;
+    private Date createTime;
+    private Date updateTime;
+    private String dtuNum;
+    private String dtuNumStatus;
+    private String chanNum;
+    private String installSite;
+    private String dtuStatus;
+    private String remark;
+    private Integer tradeTimes;
+    private Integer isOpen;
+    private String caliber;
+}

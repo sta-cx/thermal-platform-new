@@ -1,5 +1,6 @@
 package org.sdkj.thermal.mapper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrTransactionRecord;
@@ -18,6 +19,7 @@ public interface PrTransactionRecordMapper extends BaseMapperPlus<PrTransactionR
      * 分页查询交易记录
      */
     List<PrTransactionRecordVo> selectPageList(
+        Page<PrTransactionRecordVo> page,
         @Param("search") String search,
         @Param("companyId") String companyId,
         @Param("orgId") String orgId,

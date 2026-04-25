@@ -13,11 +13,13 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrHeatArchive;
 import org.sdkj.thermal.domain.bo.PrHeatArchiveBo;
+import org.sdkj.thermal.domain.dto.PrHeatVo;
 import org.sdkj.thermal.domain.vo.PrHeatArchiveVo;
 import org.sdkj.thermal.service.IPrHeatArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -173,7 +175,195 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:heat-archive:query")
     @SaCheckLogin
     @GetMapping("/calculate/{id}")
-    public R<Void> calculate(@PathVariable String id) {
-        return R.fail("计算平衡功能尚未实现，请等待后续版本");
+    public R<BigDecimal> calculate(@PathVariable String id) {
+        return R.ok(heatArchiveService.calculate(id));
+    }
+
+    /**
+     * 更换仪表
+     * 旧端点: POST /ht/heatArchive/replaceHeatMeter
+     * 新端点: POST /thermal/ht/heat-archive/replace
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:edit")
+    @SaCheckLogin
+    @Log(title = "房屋热表配表-更换仪表", businessType = BusinessType.UPDATE)
+    @PostMapping("/replace")
+    public R<Void> replaceHeatMeter(@RequestBody PrHeatArchive prHeatArchive) {
+        return toAjax(heatArchiveService.replaceHeatMeter(prHeatArchive));
+    }
+
+    /**
+     * 仪表充值
+     * 旧端点: POST /ht/heatArchive/recharge
+     * 新端点: POST /thermal/ht/heat-archive/recharge
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:recharge")
+    @SaCheckLogin
+    @Log(title = "房屋热表配表-仪表充值", businessType = BusinessType.INSERT)
+    @PostMapping("/recharge")
+    public R<Object> recharge(@RequestBody PrHeatArchive prHeatArchive,
+                              @RequestParam String paymentMethod) {
+        Object result = heatArchiveService.recharge(prHeatArchive, paymentMethod);
+        if (result != null) {
+            return R.ok(result);
+        }
+        return R.fail("充值失败");
+    }
+
+    /**
+     * 手动调控
+     * 旧端点: POST /ht/heatArchive/manualControl
+     * 新端点: POST /thermal/ht/heat-archive/manualControl
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:control")
+    @SaCheckLogin
+    @Log(title = "房屋热表配表-手动调控", businessType = BusinessType.UPDATE)
+    @PostMapping("/manualControl")
+    public R<Void> manualControl(
+            @RequestBody List<PrHeatVo> prHeatVoList,
+            @RequestParam boolean switch1,
+            @RequestParam(required = false) Integer scale,
+            @RequestParam String adjust,
+            @RequestParam String orgId,
+            @RequestParam String companyId,
+            @RequestParam(required = false) String intervall,
+            @RequestParam(required = false) String unit,
+            @RequestParam(required = false) String duration) {
+        return toAjax(heatArchiveService.manualControl(prHeatVoList, switch1, scale, adjust,
+                orgId, companyId, intervall, unit, duration));
+    }
+
+    /**
+     * 实时数据查询
+     * 旧端点: POST /ht/heatArchive/realTimeData
+     * 新端点: POST /thermal/ht/heat-archive/realTimeData
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckLogin
+    @PostMapping("/realTimeData")
+    public TableDataInfo<PrHeatArchiveVo> realTimeData(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String search,
+            PageQuery pageQuery) {
+        return heatArchiveService.realTimeData(companyId, orgId, buildingId, unitCode, search, pageQuery);
+    }
+
+    /**
+     * 综合查询
+     * 旧端点: POST /ht/heatArchive/zonghe
+     * 新端点: POST /thermal/ht/heat-archive/zonghe
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckLogin
+    @PostMapping("/zonghe")
+    public TableDataInfo<PrHeatArchiveVo> zonghe(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String moneyType,
+            @RequestParam(required = false) String valveStatus,
+            PageQuery pageQuery) {
+        return heatArchiveService.zonghe(companyId, orgId, buildingId, unitCode, search, moneyType, valveStatus, pageQuery);
+    }
+
+    /**
+     * 巡测
+     * 旧端点: POST /ht/heatArchive/xunce
+     * 新端点: POST /thermal/ht/heat-archive/xunce
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:control")
+    @SaCheckLogin
+    @Log(title = "房屋热表配表-巡测", businessType = BusinessType.UPDATE)
+    @PostMapping("/xunce")
+    public R<Void> xunce(@RequestBody List<PrHeatVo> prHeatVoList,
+                         @RequestParam String orgId,
+                         @RequestParam String companyId) {
+        return toAjax(heatArchiveService.xunce(prHeatVoList, orgId, companyId));
+    }
+
+    /**
+     * 设置阀门组号
+     * 旧端点: POST /ht/heatArchive/setValveGroupParam
+     * 新端点: POST /thermal/ht/heat-archive/setValveGroupParam
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:control")
+    @SaCheckLogin
+    @Log(title = "房屋热表配表-设置阀门组号", businessType = BusinessType.UPDATE)
+    @PostMapping("/setValveGroupParam")
+    public R<Void> setValveGroupParam(@RequestBody List<PrHeatVo> prHeatVoList,
+                                      @RequestParam String commandParam,
+                                      @RequestParam String orgId,
+                                      @RequestParam String companyId) {
+        return toAjax(heatArchiveService.setValveGroupParam(prHeatVoList, commandParam, orgId, companyId));
+    }
+
+    /**
+     * 查询仪表
+     * 旧端点: GET /ht/heatArchive/findMeter
+     * 新端点: GET /thermal/ht/heat-archive/findMeter
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckLogin
+    @GetMapping("/findMeter")
+    public R<List<PrHeatArchiveVo>> findMeter(@RequestParam String search,
+                                              @RequestParam String companyId) {
+        return R.ok(heatArchiveService.findMeter(search, companyId));
+    }
+
+    /**
+     * 导出全部配表数据
+     * 旧端点: GET /ht/heatArchive/exportAll
+     * 新端点: GET /thermal/ht/heat-archive/export
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:export")
+    @SaCheckLogin
+    @Log(title = "房屋热表配表", businessType = BusinessType.EXPORT)
+    @GetMapping("/export")
+    public R<List<PrHeatArchiveVo>> exportAll(@RequestParam(required = false) String companyId,
+                                              @RequestParam(required = false) String orgId) {
+        return R.ok(heatArchiveService.exportAll(companyId, orgId));
+    }
+
+    /**
+     * 收费明细报表
+     * 旧端点: POST /ht/heatArchive/selectReport
+     * 新端点: POST /thermal/ht/heat-archive/selectReport
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckLogin
+    @PostMapping("/selectReport")
+    public R<List<PrHeatArchiveVo>> selectReport(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String search) {
+        return R.ok(heatArchiveService.selectReport(companyId, orgId, buildingId, unitCode, startTime, endTime, search));
+    }
+
+    /**
+     * 仪表历史数据查询报表
+     * 旧端点: POST /ht/heatArchive/selectMeterReport
+     * 新端点: POST /thermal/ht/heat-archive/selectMeterReport
+     */
+    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckLogin
+    @PostMapping("/selectMeterReport")
+    public R<List<PrHeatArchiveVo>> selectMeterReport(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String search) {
+        return R.ok(heatArchiveService.selectMeterReport(companyId, orgId, buildingId, unitCode, startTime, endTime, search));
     }
 }

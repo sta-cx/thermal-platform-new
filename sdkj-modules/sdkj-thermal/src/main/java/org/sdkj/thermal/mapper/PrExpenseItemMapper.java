@@ -1,5 +1,6 @@
 package org.sdkj.thermal.mapper;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrExpenseItem;
@@ -16,7 +17,7 @@ public interface PrExpenseItemMapper extends BaseMapperPlus<PrExpenseItem, PrExp
     /**
      * 查询小区收费项目列表（关联收费标准数量）
      */
-    List<PrExpenseItemVo> selectPageList(@Param("orgId") String orgId, @Param("itemGroup") String itemGroup);
+    List<PrExpenseItemVo> selectPageList(Page<PrExpenseItemVo> page, @Param("orgId") String orgId, @Param("itemGroup") String itemGroup);
 
     /**
      * 查询项目类别最大 itemCode

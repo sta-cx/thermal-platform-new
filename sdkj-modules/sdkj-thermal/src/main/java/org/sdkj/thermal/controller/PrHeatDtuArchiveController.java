@@ -87,4 +87,15 @@ public class PrHeatDtuArchiveController extends BaseController {
     public R<Void> remove(@PathVariable String id) {
         return toAjax(dtuArchiveService.removeById(id));
     }
+
+    /**
+     * 查询DTU下所有仪表信息并生成查询指令
+     */
+    @SaCheckPermission("thermal:ht:dtu-archive:query")
+    @SaCheckLogin
+    @Log(title = "查询DTU仪表", businessType = BusinessType.OTHER)
+    @PostMapping("/query-meter")
+    public R<Void> queryMeter(@Validated @RequestBody PrHeatDtuArchiveBo bo) {
+        return toAjax(dtuArchiveService.queryMeter(bo));
+    }
 }

@@ -1,7 +1,7 @@
 package org.sdkj.thermal.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrHeatStationPartition;
 
-public interface PrHeatStationPartitionMapper extends BaseMapper<PrHeatStationPartition> {
+public interface PrHeatStationPartitionMapper extends BaseMapperPlus<PrHeatStationPartition, PrHeatStationPartition> {
 }

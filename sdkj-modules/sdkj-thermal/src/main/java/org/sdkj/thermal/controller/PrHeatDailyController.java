@@ -63,13 +63,15 @@ public class PrHeatDailyController extends BaseController {
      * 生成日表数据
      * 旧端点: POST /ht/heatDaily/setHeat
      * 新端点: POST /thermal/ht/heat-daily/setHeat
+     * 5步流程：setIsValid -> setHeatDaily -> setSteps -> setQtyStepsN -> setCurrentReading
      */
     @SaCheckPermission("thermal:ht:heat-daily:edit")
     @SaCheckLogin
     @Log(title = "热表日表-生成", businessType = BusinessType.UPDATE)
     @PostMapping("/setHeat")
     public R<Void> setHeat(@RequestParam String companyId, @RequestParam String orgId) {
-        return R.fail("日表生成功能尚未实现，依赖配表和抄表数据完整性");
+        boolean result = heatDailyService.generateHeatDaily(companyId, orgId);
+        return result ? R.ok() : R.fail("日表生成失败");
     }
 
     /**

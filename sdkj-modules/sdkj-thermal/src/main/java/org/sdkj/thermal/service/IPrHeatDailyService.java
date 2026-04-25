@@ -34,4 +34,17 @@ public interface IPrHeatDailyService extends IService<PrHeatDaily> {
     TableDataInfo<PrHeatDailyVo> selectPageList(String companyId, String orgId, String buildingId,
                                                  String unitCode, String search, Integer isCharged,
                                                  String startTime, String endTime, PageQuery pageQuery);
+
+    /**
+     * 生成热表日表数据（5步流程）
+     * 1. setIsValid - 标记有效的抄表记录
+     * 2. setHeatDaily - 生成日表记录
+     * 3. setSteps - 更新日表单价及金额
+     * 4. setQtyStepsN - 计算日表用量和金额
+     * 5. setCurrentReading - 更新配表档案的当前读数
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @return 是否成功
+     */
+    boolean generateHeatDaily(String companyId, String orgId);
 }

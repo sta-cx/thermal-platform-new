@@ -66,20 +66,35 @@ public class PrHeatReadingController extends BaseController {
 
     /**
      * 查询阀门趋势数据
-     * 旧端点: POST /ht/heatReading/trend
+     * 旧端点: POST /ht/heatReading/pageListTrend
      * 新端点: POST /thermal/ht/heat-reading/trend
      */
     @SaCheckPermission("thermal:ht:heat-reading:query")
     @SaCheckLogin
     @Log(title = "热表抄表-阀门趋势", businessType = BusinessType.OTHER)
     @PostMapping("/trend")
-    public R<Void> trend(@RequestBody List<String> ids,
-                         @RequestParam(required = false) String startTime,
-                         @RequestParam(required = false) String endTime,
-                         @RequestParam(required = false) String companyId,
-                         @RequestParam(required = false) String orgId) {
-        // TODO: 阀门趋势数据查询逻辑待后续实现
-        return R.ok();
+    public R<List<PrHeatReadingVo>> trend(@RequestBody List<String> meterNums,
+                                          @RequestParam(required = false) String startTime,
+                                          @RequestParam(required = false) String endTime,
+                                          @RequestParam(required = false) String companyId,
+                                          @RequestParam(required = false) String status,
+                                          @RequestParam(required = false) String orgId,
+                                          @RequestParam(required = false) String parentId) {
+        return R.ok(heatReadingService.selectTrendList(meterNums, startTime, endTime, companyId, status, orgId, parentId));
+    }
+
+    /**
+     * 首页户间阀门趋势图
+     * 旧端点: POST /ht/heatReading/pageListTrendS
+     * 新端点: GET /thermal/ht/heat-reading/trend-home
+     */
+    @SaCheckPermission("thermal:ht:heat-reading:query")
+    @SaCheckLogin
+    @GetMapping("/trend-home")
+    public R<List<PrHeatReadingVo>> trendHome(@RequestParam(required = false) String stationId,
+                                              @RequestParam(required = false) String stationPartitionId,
+                                              @RequestParam(required = false) String companyId) {
+        return R.ok(heatReadingService.selectHomeTrendList(stationId, stationPartitionId, companyId));
     }
 
     /**
