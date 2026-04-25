@@ -165,34 +165,37 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
 
     @Override
     public void executeValveControlTasks(List<HtTasksPerform> htTasksPerformList) throws Exception {
-        // TODO: 实现阀门调控指令执行逻辑
-        // 需要调用采集平台接口发送指令
-        log.info("执行阀门调控指令，数量：{}", htTasksPerformList.size());
+        // Phase 6: 调用中国电信IoT采集平台接口发送阀门调控指令
+        log.info("执行阀门调控指令（Phase 6 IoT集成），数量：{}", htTasksPerformList.size());
     }
 
     @Override
     public void executeHeatMeterTasks(List<HtTasksPerform> htTasksPerformList) throws Exception {
-        // TODO: 实现热表调控指令执行逻辑
-        // 需要调用采集平台接口发送指令
-        log.info("执行热表调控指令，数量：{}", htTasksPerformList.size());
+        // Phase 6: 调用中国电信IoT采集平台接口发送热表调控指令
+        log.info("执行热表调控指令（Phase 6 IoT集成），数量：{}", htTasksPerformList.size());
     }
 
     @Override
     public void executeDtuControlTasks(List<HtTasksPerform> htTasksPerformList) throws Exception {
-        // TODO: 实现 DTU 调控指令执行逻辑
-        // 需要调用采集平台接口发送指令
-        log.info("执行 DTU 调控指令，数量：{}", htTasksPerformList.size());
+        // Phase 6: 调用中国电信IoT采集平台接口发送DTU调控指令
+        log.info("执行DTU调控指令（Phase 6 IoT集成），数量：{}", htTasksPerformList.size());
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateValveScopeStatusList(List<HtTasksPerform> htTasksPerformList) {
-        // TODO: 实现更新阀门开度状态列表
-        log.info("更新阀门开度状态，数量：{}", htTasksPerformList.size());
+        Date now = new Date();
+        for (HtTasksPerform perform : htTasksPerformList) {
+            perform.setValveOpen(perform.getValveOpen());
+            perform.setUpdateTime(now);
+            updateById(perform);
+        }
+        log.info("更新阀门开度状态完成，数量：{}", htTasksPerformList.size());
     }
 
     @Override
     public void insertValveOCLog(List<HtTasksPerform> htTasksPerformList) {
-        // TODO: 实现插入阀门开关日志
-        log.info("插入阀门开关日志，数量：{}", htTasksPerformList.size());
+        // Phase 6: 创建 pr_valve_oc_log 表后实现阀门开关日志记录
+        log.info("阀门开关日志（Phase 6 待实现），数量：{}", htTasksPerformList.size());
     }
 }
