@@ -16,7 +16,7 @@
                e.item_name
         FROM pr_house_expense a
         LEFT JOIN pr_house b ON a.house_id = b.id AND b.company_id = #{companyId}
-        LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.company_id = #{companyId} AND c.is_deleted = 0
+        LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.company_id = #{companyId} AND c.del_flag = '0'
         LEFT JOIN pr_standard d ON a.standard_id = d.id AND d.company_id = #{companyId}
         LEFT JOIN pr_expense_item e ON a.item_group = e.item_group AND a.item_code = e.item_code AND e.company_id = #{companyId}
         WHERE b.is_deleted = 0 AND a.company_id = #{companyId}

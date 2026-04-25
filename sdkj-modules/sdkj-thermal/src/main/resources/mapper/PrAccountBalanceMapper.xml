@@ -22,7 +22,7 @@
         SELECT h.id AS house_id, h.room_num, u.user_name, u.id AS user_id,
                h.org_id, h.company_id
         FROM pr_house h
-        LEFT JOIN pr_user_house uh ON h.id = uh.house_id AND uh.is_deleted = 0
+        LEFT JOIN pr_user_house uh ON h.id = uh.house_id AND uh.del_flag = '0'
         LEFT JOIN pr_user u ON uh.user_id = u.id
         LEFT JOIN pr_account_balance b ON h.id = b.house_id AND b.item_code = #{itemCode}
         WHERE h.company_id = #{companyId} AND h.org_id = #{orgId}
@@ -43,5 +43,31 @@
         WHERE user_id = #{userId} AND house_id = #{houseId}
           AND item_group = #{itemGroup} AND item_code = #{itemCode}
     </update>
+
+    <select id="selectHouseDeposit" resultType="java.util.LinkedHashMap">
+        SELECT h.id AS house_id, h.room_num, h.org_name, h.building_name, h.unit_code,
+               he.id AS expense_id, he.item_code, he.item_group,
+               s.name AS standard_name, s.standard_price,
+               ei.item_name
+        FROM pr_house h
+        LEFT JOIN pr_user_house uh ON h.id = uh.house_id AND uh.del_flag = '0' AND uh.relation_type = '1'
+        LEFT JOIN pr_house_expense he ON h.id = he.house_id AND he.item_group = '4'
+        LEFT JOIN pr_standard s ON he.standard_id = s.id
+        LEFT JOIN pr_expense_item ei ON he.item_code = ei.item_code AND he.item_group = ei.item_group
+        WHERE h.is_deleted = 0
+        <if test="companyId != null and companyId != ''">AND h.company_id = #{companyId}</if>
+        <if test="orgId != null and orgId != ''">AND h.org_id = #{orgId}</if>
+        <if test="buildingId != null and buildingId != ''">AND h.building_id = #{buildingId}</if>
+        <if test="unitCode != null and unitCode != ''">AND h.unit_code = #{unitCode}</if>
+        <if test="search != null and search != ''">AND h.room_num = TRIM(#{search})</if>
+    </select>
+
+    <select id="saveDepositTransaction" resultType="java.util.LinkedHashMap">
+        SELECT 1
+    </select>
+
+    <delete id="deleteImportStagingData">
+        DELETE FROM pr_import_account WHERE type = 0
+    </delete>
 
 </mapper>

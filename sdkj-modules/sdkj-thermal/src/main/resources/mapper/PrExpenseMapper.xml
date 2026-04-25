@@ -18,10 +18,10 @@
                e.parkinglot_name
         FROM pr_expense a
         LEFT JOIN pr_house b ON a.house_id = b.id
-        LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.is_deleted = 0
+        LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.del_flag = '0'
         LEFT JOIN pr_building d ON b.building_id = d.id
         LEFT JOIN pm_parking_space e ON a.parking_space_id = e.id
-        WHERE a.is_deleted = 0
+        WHERE a.del_flag = '0'
         <if test="companyId != null and companyId != ''">
             AND a.company_id = #{companyId}
         </if>
@@ -58,8 +58,8 @@
                b.room_num, c.user_name
         FROM pr_expense a
         LEFT JOIN pr_house b ON a.house_id = b.id
-        LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.is_deleted = 0
-        WHERE a.is_deleted = 0
+        LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.del_flag = '0'
+        WHERE a.del_flag = '0'
           AND a.company_id = #{companyId}
           AND a.org_id = #{orgId}
         <if test="buildingId != null and buildingId != ''">
@@ -84,38 +84,38 @@
         SELECT id, house_id, item_group, item_code, item_name, standard_id,
                start_date, expire_date, last_date, money, standard_price, is_charged
         FROM pr_expense
-        WHERE house_id = #{houseId} AND item_group = '6' AND is_deleted = 0
+        WHERE house_id = #{houseId} AND item_group = '6' AND del_flag = '0'
         ORDER BY start_date DESC
         LIMIT 1
     </select>
 
     <select id="selectExistingExpenseHouseIds" resultType="java.lang.String">
         SELECT DISTINCT house_id FROM pr_expense
-        WHERE item_group = #{itemGroup} AND item_code = #{itemCode} AND is_deleted = 0
+        WHERE item_group = #{itemGroup} AND item_code = #{itemCode} AND del_flag = '0'
     </select>
 
     <update id="updateStepPrice">
         <!-- TODO: Phase 5b 完整实现 - 阶梯单价计算逻辑 -->
         UPDATE pr_expense SET standard_price = standard_price
-        WHERE company_id = #{companyId} AND org_id = #{orgId} AND is_deleted = 0
+        WHERE company_id = #{companyId} AND org_id = #{orgId} AND del_flag = '0'
     </update>
 
     <update id="updateMoney">
         <!-- TODO: Phase 5b 完整实现 - 金额计算逻辑 -->
         UPDATE pr_expense SET money = money
-        WHERE company_id = #{companyId} AND org_id = #{orgId} AND is_deleted = 0
+        WHERE company_id = #{companyId} AND org_id = #{orgId} AND del_flag = '0'
     </update>
 
     <update id="updateFormula">
         <!-- TODO: Phase 5b 完整实现 - 公式计算逻辑 -->
         UPDATE pr_expense SET receivable = money
-        WHERE company_id = #{companyId} AND org_id = #{orgId} AND is_deleted = 0
+        WHERE company_id = #{companyId} AND org_id = #{orgId} AND del_flag = '0'
     </update>
 
     <update id="updateFormulaCw">
         <!-- TODO: Phase 5b 完整实现 - 车位公式计算逻辑 -->
         UPDATE pr_expense SET receivable = money
-        WHERE company_id = #{companyId} AND org_id = #{orgId} AND is_deleted = 0
+        WHERE company_id = #{companyId} AND org_id = #{orgId} AND del_flag = '0'
     </update>
 
     <update id="updateHousePayStatus">
@@ -140,6 +140,105 @@
                org_id, company_id
         FROM pr_standard
         WHERE id = #{standardId}
+    </select>
+
+    <select id="selectParkingPageList" resultType="org.sdkj.thermal.domain.vo.PrExpenseVo">
+        SELECT a.id, a.house_id, a.item_group, a.item_code, a.item_name, a.standard_id,
+               a.start_date, a.expire_date, a.money, a.standard_price, a.is_free,
+               a.preferential, a.deduction, a.receivable, a.paid_in, a.final_money,
+               a.is_charged, a.charged_time, a.parking_space_id, a.qty, a.year, a.month,
+               b.room_num, c.user_name, d.building_name,
+               e.parking_code, e.parkinglot_name
+        FROM pr_expense a
+        LEFT JOIN pr_house b ON a.house_id = b.id
+        LEFT JOIN pr_user_house uh ON uh.house_id = b.id AND uh.del_flag = '0'
+        LEFT JOIN pr_user c ON uh.user_id = c.id
+        LEFT JOIN pr_building d ON b.building_id = d.id
+        LEFT JOIN pm_parking_space e ON a.parking_space_id = e.id
+        WHERE a.del_flag = '0'
+          AND a.org_id = #{orgId} AND a.company_id = #{companyId}
+        <if test="buildingId != null and buildingId != ''">AND b.building_id = #{buildingId}</if>
+        <if test="unitCode != null and unitCode != ''">AND b.unit_code = #{unitCode}</if>
+        <if test="itemGroup != null and itemGroup != ''">AND a.item_group = #{itemGroup}</if>
+        <if test="itemCode != null and itemCode != ''">AND a.item_code = #{itemCode}</if>
+        <if test="isCharged != null and isCharged != ''">AND a.is_charged = #{isCharged}</if>
+        <if test="parkingId != null and parkingId != ''">AND e.parking_id = #{parkingId}</if>
+        <if test="search != null and search != ''">AND (b.room_num LIKE CONCAT('%', #{search}, '%') OR e.parking_code LIKE CONCAT('%', #{search}, '%'))</if>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectParkingSpaceExpenseList" resultType="java.util.LinkedHashMap">
+        SELECT a.id, a.code AS parkingCode, a.house_id,
+               e.user_name AS userName, '7' AS itemGroup, '701' AS itemCode,
+               a.standard_id, a.org_id, a.company_id,
+               b.room_num AS roomNum,
+               IFNULL(g.expire_date, a.establish_time) AS openTime,
+               c.name AS standardName, c.standard_price AS standardPrice
+        FROM pm_parking_space a
+        LEFT JOIN pr_house b ON b.id = a.house_id
+        LEFT JOIN pm_standard c ON c.id = a.standard_id
+        LEFT JOIN pr_user_house uh ON uh.house_id = a.house_id AND uh.del_flag = '0'
+        LEFT JOIN pr_user e ON uh.user_id = e.id
+        LEFT JOIN (
+            SELECT parking_space_id, MAX(expire_date) AS expire_date
+            FROM pr_expense WHERE del_flag = '0' GROUP BY parking_space_id
+        ) g ON g.parking_space_id = a.id
+        WHERE a.company_id = #{companyId} AND a.org_id = #{orgId}
+        <if test="buildingId != null and buildingId != ''">AND b.building_id = #{buildingId}</if>
+        <if test="unitCode != null and unitCode != ''">AND b.unit_code = #{unitCode}</if>
+        <if test="itemGroup != null and itemGroup != ''">AND '7' = #{itemGroup}</if>
+        <if test="parkingId != null and parkingId != ''">AND a.parking_id = #{parkingId}</if>
+        <if test="search != null and search != ''">AND (b.room_num LIKE CONCAT('%', #{search}, '%') OR a.code LIKE CONCAT('%', #{search}, '%'))</if>
+    </select>
+
+    <select id="selectHouseExpenseAllList" resultType="java.util.LinkedHashMap">
+        SELECT a.id, a.house_id, a.item_group, a.item_code, a.standard_id,
+               b.building_id AS buildingId, b.unit_code AS unitCode
+        FROM pr_house_expense a
+        LEFT JOIN pr_house b ON b.id = a.house_id
+        WHERE a.company_id = #{companyId} AND a.org_id = #{orgId}
+        <if test="search != null and search != ''">AND b.room_num = TRIM(#{search})</if>
+    </select>
+
+    <select id="selectExpenseLog" resultType="java.util.LinkedHashMap">
+        SELECT a.*, b.org_id, b.org_name, b.building_id, b.building_name, b.unit_code, b.room_num,
+               b.other_code, c.user_name, c.phone, d.user_name AS create_by_name
+        FROM pr_expense_log a
+        LEFT JOIN pr_house b ON b.id = a.house_id
+        LEFT JOIN pr_user_house uh ON uh.house_id = b.id AND uh.del_flag = '0'
+        LEFT JOIN pr_user c ON uh.user_id = c.id
+        LEFT JOIN sys_user d ON d.id = a.create_by
+        LEFT JOIN sys_organization e ON e.id = b.org_id
+        WHERE a.company_id = #{companyId}
+        <if test="orgId != null and orgId != ''">AND b.org_id = #{orgId}</if>
+        <if test="buildingId != null and buildingId != ''">AND b.building_id = #{buildingId}</if>
+        <if test="unitCode != null and unitCode != ''">AND b.unit_code = #{unitCode}</if>
+        <if test="parentId != null and parentId != ''">AND e.parent_id = #{parentId}</if>
+        <if test="type != null and type != ''">AND a.log_type = #{type}</if>
+        <if test="startTime != null and startTime != ''">AND a.create_time &gt;= #{startTime}</if>
+        <if test="endTime != null and endTime != ''">AND a.create_time &lt;= #{endTime}</if>
+        <if test="search != null and search != ''">AND (b.room_num LIKE CONCAT('%', #{search}, '%') OR b.other_code LIKE CONCAT('%', #{search}, '%') OR c.phone LIKE CONCAT('%', #{search}, '%'))</if>
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="selectWechatOrderList" resultType="java.util.LinkedHashMap">
+        SELECT a.*, b.org_id, b.org_name, b.building_id, b.building_name, b.unit_code, b.room_num,
+               c.user_name, c.phone
+        FROM pr_wechat_order a
+        LEFT JOIN pr_house b ON b.id = a.house_id
+        LEFT JOIN pr_user_house uh ON uh.house_id = b.id AND uh.del_flag = '0'
+        LEFT JOIN pr_user c ON uh.user_id = c.id
+        LEFT JOIN sys_organization e ON e.id = b.org_id
+        WHERE b.company_id = #{companyId}
+        <if test="orgId != null and orgId != ''">AND b.org_id = #{orgId}</if>
+        <if test="buildingId != null and buildingId != ''">AND b.building_id = #{buildingId}</if>
+        <if test="unitCode != null and unitCode != ''">AND b.unit_code = #{unitCode}</if>
+        <if test="parentId != null and parentId != ''">AND e.parent_id = #{parentId}</if>
+        <if test="type != null and type != ''">AND a.order_status = #{type}</if>
+        <if test="startTime != null and startTime != ''">AND a.create_time &gt;= #{startTime}</if>
+        <if test="endTime != null and endTime != ''">AND a.create_time &lt;= #{endTime}</if>
+        <if test="search != null and search != ''">AND (b.room_num LIKE CONCAT('%', #{search}, '%') OR b.other_code LIKE CONCAT('%', #{search}, '%') OR c.phone LIKE CONCAT('%', #{search}, '%'))</if>
+        ORDER BY a.create_time DESC
     </select>
 
 </mapper>

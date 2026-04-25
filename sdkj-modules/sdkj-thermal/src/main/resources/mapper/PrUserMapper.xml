@@ -24,7 +24,7 @@
                b.room_num,
                c.org_name
         FROM pr_user a
-        LEFT JOIN pr_user_house uh ON uh.user_id = a.id AND uh.is_deleted = 0
+        LEFT JOIN pr_user_house uh ON uh.user_id = a.id AND uh.del_flag = '0'
         LEFT JOIN pr_house b ON b.id = uh.house_id
         LEFT JOIN sys_organization c ON c.org_id = a.org_id
         WHERE a.id = #{userId}

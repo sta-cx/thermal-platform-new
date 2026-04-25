@@ -14,12 +14,14 @@ import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtTasks;
 import org.sdkj.thermal.domain.HtTaskSettingLog;
+import org.sdkj.thermal.domain.PrHouseLog;
 import org.sdkj.thermal.domain.bo.HtTasksBo;
 import org.sdkj.thermal.domain.vo.HtTaskSettingLogItemVo;
 import org.sdkj.thermal.domain.vo.HtTaskSettingLogVo;
 import org.sdkj.thermal.domain.vo.HtTasksVo;
 import org.sdkj.thermal.service.IHtTaskSettingLogService;
 import org.sdkj.thermal.service.IHtTasksService;
+import org.sdkj.thermal.service.IPrHouseLogService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,6 +43,7 @@ public class HtTasksController extends BaseController {
 
     private final IHtTasksService tasksService;
     private final IHtTaskSettingLogService settingLogService;
+    private final IPrHouseLogService houseLogService;
 
     /**
      * 分页查询任务列表
@@ -51,13 +54,25 @@ public class HtTasksController extends BaseController {
     public TableDataInfo<HtTasksVo> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Integer type,
+            @RequestParam(required = false) Integer scopeType,
+            @RequestParam(required = false) Integer adjustBasis,
+            @RequestParam(required = false) String strategyId,
+            @RequestParam(required = false) Integer priority,
             PageQuery pageQuery) {
         String keyword = search != null ? search.trim() : null;
         LambdaQueryWrapper<HtTasks> lqw = new LambdaQueryWrapper<>();
         lqw.like(keyword != null && !keyword.isEmpty(), HtTasks::getName, keyword);
         lqw.eq(orgId != null && !orgId.isEmpty(), HtTasks::getOrgId, orgId);
+        lqw.eq(companyId != null && !companyId.isEmpty(), HtTasks::getCompanyId, companyId);
         lqw.eq(status != null, HtTasks::getStatus, status);
+        lqw.eq(type != null, HtTasks::getType, type);
+        lqw.eq(scopeType != null, HtTasks::getScopeType, scopeType);
+        lqw.eq(adjustBasis != null, HtTasks::getAdjustBasis, adjustBasis);
+        lqw.eq(strategyId != null && !strategyId.isEmpty(), HtTasks::getStrategyId, strategyId);
+        lqw.eq(priority != null, HtTasks::getPriority, priority);
         lqw.orderByDesc(HtTasks::getCreateTime);
         return tasksService.selectPageList(lqw, pageQuery);
     }
@@ -276,5 +291,48 @@ public class HtTasksController extends BaseController {
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode) {
         return R.ok(tasksService.querySummary(orgId, buildingId, unitCode));
+    }
+
+    /**
+     * 查询房屋变更记录
+     * 旧端点: POST /property/htTasks/getHouseChangeDataList
+     * 新端点: GET /thermal/ht/tasks/houseChangeData
+     */
+    @SaCheckPermission("thermal:ht:tasks:query")
+    @SaCheckLogin
+    @GetMapping("/houseChangeData")
+    public R<List<PrHouseLog>> houseChangeData(@RequestParam(required = false) String changeType) {
+        return R.ok(houseLogService.selectHouseChangeData(changeType));
+    }
+
+    /**
+     * 查询单元变更记录
+     * 旧端点: POST /property/htTasks/getUnitChangeDataList
+     * 新端点: GET /thermal/ht/tasks/unitChangeData
+     */
+    @SaCheckPermission("thermal:ht:tasks:query")
+    @SaCheckLogin
+    @GetMapping("/unitChangeData")
+    public R<List<PrHouseLog>> unitChangeData(@RequestParam(required = false) String changeType) {
+        return R.ok(houseLogService.selectUnitChangeData(changeType));
+    }
+
+    /**
+     * 按设备类型查询阀门配表列表（任务视角）
+     * 旧端点: POST /property/htTasks/pageDeviceList
+     * 新端点: GET /thermal/ht/tasks/deviceList
+     */
+    @SaCheckPermission("thermal:ht:tasks:list")
+    @SaCheckLogin
+    @GetMapping("/deviceList")
+    public TableDataInfo<HtTasksVo> deviceList(
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String companyId,
+            PageQuery pageQuery) {
+        LambdaQueryWrapper<HtTasks> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(orgId != null && !orgId.isEmpty(), HtTasks::getOrgId, orgId);
+        lqw.eq(companyId != null && !companyId.isEmpty(), HtTasks::getCompanyId, companyId);
+        lqw.orderByDesc(HtTasks::getCreateTime);
+        return tasksService.selectPageList(lqw, pageQuery);
     }
 }
