@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrImportHistoryMapper">
+
+    <insert id="insert">
+        insert into pr_import_history
+        (org_name, building_name, room_num, item_name, standard_name, standard_price,
+         qty, receivable, deduction, paid_in, payment_balance, status, user_name,
+         company_id, create_by, create_time, type)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.orgName}, #{item.buildingName}, #{item.roomNum}, #{item.itemName},
+             #{item.standardName}, #{item.standardPrice}, #{item.qty}, #{item.receivable},
+             #{item.deduction}, #{item.paidIn}, #{item.paymentBalance}, #{item.status},
+             #{item.userName}, #{item.companyId}, #{item.createBy}, #{item.createTime}, #{item.type})
+        </foreach>
+    </insert>
+
+    <update id="updateHouseId">
+        update pr_import_history a
+            left join pr_house b on a.room_num = b.room_num and a.org_name = b.org_name
+        set a.house_id = b.id, a.org_id = b.org_id
+        where a.company_id = #{companyId} and a.type = '0' and a.create_by = #{create}
+          and b.company_id = #{companyId}
+    </update>
+
+    <update id="updateStandardId">
+        update pr_import_history a
+            left join pr_standard b on a.standard_name = b.name
+                and a.standard_price = b.standard_price and a.company_id = b.company_id
+        set a.standard_id = b.id
+        where a.company_id = #{companyId} and a.type = '0' and a.create_by = #{create}
+          and length(a.standard_name) &gt; 0
+    </update>
+
+    <select id="selectNoHouseId" resultType="org.sdkj.thermal.domain.PrImportHistory">
+        select * from pr_import_history
+        where company_id = #{companyId} and type = '0' and create_by = #{create}
+          and (house_id is null or org_id is null) limit 500
+    </select>
+
+    <select id="selectNoStandardId" resultType="org.sdkj.thermal.domain.PrImportHistory">
+        select * from pr_import_history
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+          and standard_id is null and length(standard_name) &gt; 0 limit 500
+    </select>
+
+    <select id="select" resultType="int">
+        select count(1) from pr_import_history
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+    </select>
+
+    <delete id="deleteData">
+        delete from pr_import_history
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+    </delete>
+
+    <insert id="submitData">
+        insert into pr_transaction_record
+        (id, company_id, org_id, house_id, standard_id, standard_price,
+         qty, receivable, deduction, paid_in, payment_balance, create_by, create_time)
+        select replace(uuid(), '-', ''), company_id, org_id, house_id, standard_id,
+               standard_price, qty, receivable, deduction, paid_in, payment_balance,
+               create_by, now()
+        from pr_import_history
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+    </insert>
+
+    <delete id="deleteImportHistoryData">
+        delete from pr_import_history
+        where company_id = #{companyId} and create_by = #{create}
+    </delete>
+
+</mapper>

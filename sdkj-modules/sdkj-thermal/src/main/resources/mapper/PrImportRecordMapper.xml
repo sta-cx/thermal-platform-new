@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrImportRecordMapper">
+
+    <insert id="insertList">
+        insert into pr_import_record
+        (org_name, room_num, item_name, standard_price, card_num, trade_times, qty,
+         receivable, payment_balance, paid_in, trade_time, allow_amount, deduction,
+         company_id, create_by, create_time, type)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.orgName}, #{item.roomNum}, #{item.itemName}, #{item.standardPrice},
+             #{item.cardNum}, #{item.tradeTimes}, #{item.qty}, #{item.receivable},
+             #{item.paymentBalance}, #{item.paidIn}, #{item.tradeTime}, #{item.allowAmount},
+             #{item.deduction}, #{item.companyId}, #{item.createBy}, #{item.createTime}, #{item.type})
+        </foreach>
+    </insert>
+
+    <update id="updateHouseId">
+        update pr_import_record a
+            left join pr_house b on a.room_num = b.room_num and a.org_name = b.org_name
+        set a.house_id = b.id, a.org_id = b.org_id
+        where a.company_id = #{companyId} and a.create_by = #{create}
+          and a.type = '0' and b.company_id = #{companyId}
+    </update>
+
+    <update id="updateItemId">
+        update pr_import_record a
+            left join pr_expense_item b on a.item_name = b.name and a.company_id = b.company_id
+        set a.item_id = b.id
+        where a.company_id = #{companyId} and a.create_by = #{create}
+          and a.type = '0'
+    </update>
+
+    <update id="updateMeterInfo">
+        update pr_import_record a
+            left join pr_heat_hot_archive b on a.house_id = b.house_id
+                and a.card_num = b.card_num and b.is_changed = '0'
+        set a.archive_id = b.archive_id, a.meter_num = b.meter_num,
+            a.meter_arc_code = b.meter_arc_code, a.meter_serial = b.meter_serial,
+            a.total_used = b.total_used, a.total_money = b.total_money,
+            a.total_recharge = b.total_recharge, a.current_balance = b.current_balance
+        where a.company_id = #{companyId} and a.create_by = #{create} and a.type = '0'
+    </update>
+
+    <select id="selectNoOrgId" resultType="org.sdkj.thermal.domain.PrImportRecord">
+        select * from pr_import_record
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+          and (org_id is null or org_id = '') limit 500
+    </select>
+
+    <select id="selectNoHouseId" resultType="org.sdkj.thermal.domain.PrImportRecord">
+        select * from pr_import_record
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+          and (house_id is null or house_id = '') limit 500
+    </select>
+
+    <select id="selectNoItemId" resultType="org.sdkj.thermal.domain.PrImportRecord">
+        select * from pr_import_record
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+          and (item_id is null or item_id = '') limit 500
+    </select>
+
+    <select id="selectNoMeterNum" resultType="org.sdkj.thermal.domain.PrImportRecord">
+        select * from pr_import_record
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+          and (archive_id is null) limit 500
+    </select>
+
+    <select id="checkAmountError" resultType="org.sdkj.thermal.domain.PrImportRecord">
+        select * from pr_import_record
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+          and receivable != paid_in + payment_balance
+    </select>
+
+    <delete id="deleteData">
+        delete from pr_import_record
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+    </delete>
+
+    <insert id="submitData">
+        insert into pr_transaction_record
+        (id, company_id, org_id, house_id, item_id, standard_price, card_num,
+         trade_times, qty, receivable, payment_balance, paid_in, trade_time,
+         allow_amount, deduction, create_by, create_time)
+        select replace(uuid(), '-', ''), company_id, org_id, house_id, item_id,
+               standard_price, card_num, trade_times, qty, receivable,
+               payment_balance, paid_in, trade_time, allow_amount, deduction,
+               create_by, now()
+        from pr_import_record
+        where company_id = #{companyId} and create_by = #{create} and type = '0'
+    </insert>
+
+    <delete id="deleteImportRecordData">
+        delete from pr_import_record
+        where company_id = #{companyId} and create_by = #{create}
+    </delete>
+
+</mapper>
