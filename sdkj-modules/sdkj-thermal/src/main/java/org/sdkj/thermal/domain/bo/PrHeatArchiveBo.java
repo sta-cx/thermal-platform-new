@@ -136,7 +136,7 @@ public class PrHeatArchiveBo extends BaseEntity {
     private Integer isStop;
 
     /** 起始读数 */
-    private BigDecimal startReading;
+    private Integer startReading;
 
     /** 总热量 */
     private BigDecimal totalHeat;

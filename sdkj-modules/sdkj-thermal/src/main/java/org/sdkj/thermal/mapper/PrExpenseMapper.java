@@ -7,6 +7,7 @@ import org.sdkj.thermal.domain.PrStandard;
 import org.sdkj.thermal.domain.vo.PrExpenseVo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 费用明细 Mapper
@@ -76,4 +77,41 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
      * 根据ID查询收费标准
      */
     PrStandard selectStandardById(@Param("standardId") String standardId);
+
+    /** 车位费用分页查询 */
+    List<PrExpenseVo> selectParkingPageList(
+        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
+        @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode,
+        @Param("search") String search, @Param("isCharged") String isCharged,
+        @Param("parkingId") String parkingId,
+        @Param("startTime") String startTime, @Param("endTime") String endTime);
+
+    /** 车位空间费用查询 */
+    List<Map<String, Object>> selectParkingSpaceExpenseList(
+        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
+        @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode,
+        @Param("parkingId") String parkingId, @Param("search") String search);
+
+    /** 全部房屋费用查询 */
+    List<Map<String, Object>> selectHouseExpenseAllList(
+        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("search") String search);
+
+    /** 费用操作日志 */
+    List<Map<String, Object>> selectExpenseLog(
+        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
+        @Param("parentId") String parentId, @Param("type") String type,
+        @Param("startTime") String startTime, @Param("endTime") String endTime,
+        @Param("search") String search);
+
+    /** 微信费用订单 */
+    List<Map<String, Object>> selectWechatOrderList(
+        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
+        @Param("parentId") String parentId, @Param("type") String type,
+        @Param("startTime") String startTime, @Param("endTime") String endTime,
+        @Param("search") String search);
 }

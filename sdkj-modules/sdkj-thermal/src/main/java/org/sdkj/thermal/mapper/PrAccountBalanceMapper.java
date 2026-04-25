@@ -7,6 +7,7 @@ import org.sdkj.thermal.domain.vo.PrAccountBalanceVo;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 个人账户余额 Mapper
@@ -46,4 +47,18 @@ public interface PrAccountBalanceMapper extends BaseMapperPlus<PrAccountBalance,
         @Param("itemGroup") String itemGroup,
         @Param("itemCode") String itemCode,
         @Param("amount") BigDecimal amount);
+
+    /** 查询房屋押金信息 */
+    Map<String, Object> selectHouseDeposit(
+        @Param("companyId") String companyId,
+        @Param("orgId") String orgId,
+        @Param("buildingId") String buildingId,
+        @Param("unitCode") String unitCode,
+        @Param("search") String search);
+
+    /** 保存押金交易 */
+    Map<String, Object> saveDepositTransaction(@Param("depositVo") Map<String, Object> depositVo);
+
+    /** 删除导入临时数据 */
+    int deleteImportStagingData();
 }

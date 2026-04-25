@@ -10,6 +10,7 @@ import org.sdkj.thermal.domain.PmParkingSpace;
 import org.sdkj.thermal.domain.vo.PrExpenseVo;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 费用明细 Service 接口
@@ -130,4 +131,26 @@ public interface IPrExpenseService extends IService<PrExpense> {
      * 批量计算公式（车位）
      */
     boolean updateFormulaCw(String companyId, String orgId);
+
+    /** 车位费用列表查询 */
+    TableDataInfo<PrExpenseVo> parkingList(String companyId, String orgId, String buildingId, String unitCode,
+        String itemGroup, String itemCode, String search, String isCharged,
+        String parkingId, String startTime, String endTime, PageQuery pageQuery);
+
+    /** 车位空间费用查询 */
+    List<Map<String, Object>> parkingExpenseList(String companyId, String orgId, String buildingId,
+        String unitCode, String itemGroup, String itemCode, String parkingId, String search);
+
+    /** 全部房屋费用查询 */
+    List<Map<String, Object>> houseExpenseAllList(String companyId, String orgId, String search);
+
+    /** 费用操作日志 */
+    TableDataInfo<Map<String, Object>> expenseLog(String companyId, String orgId, String buildingId,
+        String unitCode, String parentId, String type, String startTime, String endTime, String search,
+        PageQuery pageQuery);
+
+    /** 微信费用订单 */
+    TableDataInfo<Map<String, Object>> wechatOrderList(String companyId, String orgId, String buildingId,
+        String unitCode, String parentId, String type, String startTime, String endTime, String search,
+        PageQuery pageQuery);
 }

@@ -12,16 +12,15 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.web.core.BaseController;
-import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.bo.PrHeatValveArchiveBo;
+import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -139,27 +138,10 @@ public class PrHeatValveArchiveController extends BaseController {
         if (archives.isEmpty()) {
             return R.fail("未找到对应的阀门配表记录");
         }
-        List<HtTasksPerform> tasks = new LinkedList<>();
-        for (PrHeatValveArchive archive : archives) {
-            HtTasksPerform task = new HtTasksPerform();
-            task.setInstructionType(3);
-            task.setInstruction(100);
-            task.setNumber(1);
-            task.setOrgId(orgId);
-            task.setCompanyId(companyId);
-            task.setConcentratorCode(archive.getConcentratorCode());
-            task.setDeviceId(archive.getDeviceId());
-            task.setMeterNum(archive.getMeterNum());
-            task.setMeterId(archive.getId());
-            task.setMeterArcCode(archive.getMeterArcCode());
-            task.setStatus(0);
-            task.setInstructionStatus(0);
-            task.setImei(archive.getImeiNum());
-            task.setDtuNum(archive.getDtuNum());
-            task.setChanNum(archive.getChanNum());
-            tasks.add(task);
-        }
-        return toAjax(tasksPerformService.saveBatch(tasks));
+        var infos = archives.stream()
+            .map(a -> new ValveArchiveInfo(a.getId(), a.getMeterArcCode(), a.getMeterNum(), a.getDeviceId(), a.getConcentratorCode(), a.getImeiNum(), a.getDtuNum(), a.getChanNum()))
+            .toList();
+        return toAjax(tasksPerformService.batchCreateValveControlTasks(infos, orgId, companyId, 100));
     }
 
     /**
@@ -176,27 +158,10 @@ public class PrHeatValveArchiveController extends BaseController {
         if (archives.isEmpty()) {
             return R.fail("未找到对应的阀门配表记录");
         }
-        List<HtTasksPerform> tasks = new LinkedList<>();
-        for (PrHeatValveArchive archive : archives) {
-            HtTasksPerform task = new HtTasksPerform();
-            task.setInstructionType(3);
-            task.setInstruction(0);
-            task.setNumber(1);
-            task.setOrgId(orgId);
-            task.setCompanyId(companyId);
-            task.setConcentratorCode(archive.getConcentratorCode());
-            task.setDeviceId(archive.getDeviceId());
-            task.setMeterNum(archive.getMeterNum());
-            task.setMeterId(archive.getId());
-            task.setMeterArcCode(archive.getMeterArcCode());
-            task.setStatus(0);
-            task.setInstructionStatus(0);
-            task.setImei(archive.getImeiNum());
-            task.setDtuNum(archive.getDtuNum());
-            task.setChanNum(archive.getChanNum());
-            tasks.add(task);
-        }
-        return toAjax(tasksPerformService.saveBatch(tasks));
+        var infos = archives.stream()
+            .map(a -> new ValveArchiveInfo(a.getId(), a.getMeterArcCode(), a.getMeterNum(), a.getDeviceId(), a.getConcentratorCode(), a.getImeiNum(), a.getDtuNum(), a.getChanNum()))
+            .toList();
+        return toAjax(tasksPerformService.batchCreateValveControlTasks(infos, orgId, companyId, 0));
     }
 
     /**

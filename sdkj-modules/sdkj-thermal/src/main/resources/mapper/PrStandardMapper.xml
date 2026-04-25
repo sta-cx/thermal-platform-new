@@ -122,7 +122,7 @@
         WHERE meter_id = #{meterId}
           AND company_id = #{companyId}
           AND org_id = #{orgId}
-          AND is_deleted = '0'
+          AND del_flag = '0'
           AND DATE_FORMAT(record_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
     </select>
 
@@ -131,7 +131,7 @@
         WHERE meter_id = #{meterId}
           AND company_id = #{companyId}
           AND org_id = #{orgId}
-          AND is_deleted = '0'
+          AND del_flag = '0'
           AND DATE_FORMAT(record_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
     </select>
 
@@ -140,7 +140,7 @@
         WHERE meter_id = #{meterId}
           AND company_id = #{companyId}
           AND org_id = #{orgId}
-          AND is_deleted = '0'
+          AND del_flag = '0'
           AND YEAR(record_time) = YEAR(NOW())
           AND QUARTER(record_time) = QUARTER(NOW())
     </select>
@@ -150,7 +150,7 @@
         WHERE meter_id = #{meterId}
           AND company_id = #{companyId}
           AND org_id = #{orgId}
-          AND is_deleted = '0'
+          AND del_flag = '0'
           AND YEAR(record_time) = YEAR(NOW())
           AND QUARTER(record_time) = QUARTER(NOW())
     </select>
@@ -160,7 +160,7 @@
         WHERE meter_id = #{meterId}
           AND company_id = #{companyId}
           AND org_id = #{orgId}
-          AND is_deleted = '0'
+          AND del_flag = '0'
           AND YEAR(record_time) = YEAR(NOW())
     </select>
 
@@ -169,7 +169,7 @@
         WHERE meter_id = #{meterId}
           AND company_id = #{companyId}
           AND org_id = #{orgId}
-          AND is_deleted = '0'
+          AND del_flag = '0'
           AND YEAR(record_time) = YEAR(NOW())
     </select>
 

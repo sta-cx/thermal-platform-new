@@ -19,7 +19,7 @@
         LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.company_id = #{companyId} AND c.del_flag = '0'
         LEFT JOIN pr_standard d ON a.standard_id = d.id AND d.company_id = #{companyId}
         LEFT JOIN pr_expense_item e ON a.item_group = e.item_group AND a.item_code = e.item_code AND e.company_id = #{companyId}
-        WHERE b.is_deleted = 0 AND a.company_id = #{companyId}
+        WHERE b.del_flag = '0' AND a.company_id = #{companyId}
         <if test="orgId != null and orgId != ''">
             AND a.org_id = #{orgId} AND e.org_id = #{orgId}
         </if>
@@ -51,10 +51,10 @@
         WHERE id NOT IN (
             SELECT a.id FROM pr_house a
             LEFT JOIN pr_house_expense c ON c.house_id = a.id
-            WHERE a.is_deleted = 0 AND a.org_id = #{orgId} AND c.org_id = #{orgId}
+            WHERE a.del_flag = '0' AND a.org_id = #{orgId} AND c.org_id = #{orgId}
               AND c.item_group = #{itemGroup} AND c.item_code = #{itemCode}
         )
-        AND org_id = #{orgId} AND is_deleted = 0
+        AND org_id = #{orgId} AND del_flag = '0'
         <if test="buildingId != null and buildingId != ''">
             AND building_id = #{buildingId}
         </if>
@@ -72,7 +72,7 @@
         WHERE item_code NOT IN (
             SELECT item_code FROM pr_house_expense
             WHERE org_id = #{orgId}
-              AND house_id = (SELECT id FROM pr_house WHERE room_num = #{roomNum} AND org_id = #{orgId} AND is_deleted = 0)
+              AND house_id = (SELECT id FROM pr_house WHERE room_num = #{roomNum} AND org_id = #{orgId} AND del_flag = '0')
         )
         AND org_id = #{orgId} AND item_group != '5'
         ORDER BY item_group, item_code

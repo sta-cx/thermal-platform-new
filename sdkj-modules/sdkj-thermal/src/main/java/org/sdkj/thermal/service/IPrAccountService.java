@@ -43,4 +43,20 @@ public interface IPrAccountService {
     /** 查询账户对账单列表 */
     List<PrAccountBalanceVo> pageAccountStatementList(String companyId, String orgId, String buildingId,
         String unitCode, String itemGroup, String itemCode, String searchPhone);
+
+    /** 查询房屋押金信息 */
+    Map<String, Object> getHouseDeposit(String companyId, String orgId, String buildingId,
+        String unitCode, String search);
+
+    /** 保存押金缴费 */
+    Map<String, Object> saveDeposit(Map<String, Object> depositVo);
+
+    /** 导入账户数据预览 */
+    Map<String, Object> pageListImportData(int pageNum, int pageSize);
+
+    /** 导入Excel数据 */
+    Map<String, Object> importExcelData(Object file);
+
+    /** 删除导入的临时数据 */
+    boolean deleteImportData();
 }

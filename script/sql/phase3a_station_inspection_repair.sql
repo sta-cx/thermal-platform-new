@@ -83,8 +83,8 @@ CREATE TABLE IF NOT EXISTS pr_inspection_plan (
     `id` varchar(32) NOT NULL COMMENT '主键',
     `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
     `name` varchar(128) DEFAULT NULL COMMENT '计划名称',
-    `start_time` time DEFAULT NULL COMMENT '开始时间',
-    `end_time` time DEFAULT NULL COMMENT '结束时间',
+    `start_time` datetime DEFAULT NULL COMMENT '开始时间',
+    `end_time` datetime DEFAULT NULL COMMENT '结束时间',
     `equipment_id` text DEFAULT NULL COMMENT '设备ID集合',
     `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
     `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS pr_repair_person (
     `name` varchar(64) DEFAULT NULL COMMENT '维修人姓名',
     `phone` varchar(32) DEFAULT NULL COMMENT '维修人手机号',
     `type` varchar(32) DEFAULT NULL COMMENT '工种',
+    `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
     `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
     `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
     `create_by` varchar(40) DEFAULT NULL COMMENT '创建者',
@@ -145,7 +146,8 @@ CREATE TABLE IF NOT EXISTS pr_repair_person (
     `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
     `remark` varchar(500) DEFAULT NULL COMMENT '备注',
     PRIMARY KEY (`id`),
-    KEY `idx_company_id` (`company_id`)
+    KEY `idx_company_id` (`company_id`),
+    KEY `idx_org_id` (`org_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='维修人员表';
 
 -- ----------------------------

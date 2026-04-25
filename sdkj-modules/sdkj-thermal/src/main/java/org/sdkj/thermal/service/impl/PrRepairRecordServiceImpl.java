@@ -69,7 +69,8 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
         return result;
     }
 
-    public static String generateRepairNo() {
+    @Override
+    public String generateRepairNo() {
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         String seq = String.format("%04d", ThreadLocalRandom.current().nextInt(10000));
         return "WX" + date + seq;

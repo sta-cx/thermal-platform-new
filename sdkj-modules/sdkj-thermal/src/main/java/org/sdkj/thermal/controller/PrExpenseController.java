@@ -22,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 费用明细管理
@@ -317,5 +318,112 @@ public class PrExpenseController extends BaseController {
     @PutMapping("/calc-status")
     public R<Void> setCalStatus(@RequestParam String houseId) {
         return toAjax(expenseService.setCalStatus(houseId));
+    }
+
+    /**
+     * 车位费用分页查询
+     * 旧端点: POST /property/expense/pageListCw
+     * 新端点: GET /thermal/property/expense/parking-list
+     */
+    @SaCheckPermission("thermal:property:expense:list")
+    @SaCheckLogin
+    @GetMapping("/parking-list")
+    public TableDataInfo<PrExpenseVo> parkingList(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String itemGroup,
+            @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String isCharged,
+            @RequestParam(required = false) String parkingId,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            PageQuery pageQuery) {
+        return expenseService.parkingList(companyId, orgId, buildingId, unitCode, itemGroup, itemCode,
+            search, isCharged, parkingId, startTime, endTime, pageQuery);
+    }
+
+    /**
+     * 车位空间费用查询
+     * 旧端点: POST /property/expense/queryParkinglotExpenseList
+     * 新端点: GET /thermal/property/expense/parking-expense
+     */
+    @SaCheckPermission("thermal:property:expense:query")
+    @SaCheckLogin
+    @GetMapping("/parking-expense")
+    public R<List<Map<String, Object>>> parkingExpenseList(
+            @RequestParam String companyId,
+            @RequestParam String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String itemGroup,
+            @RequestParam(required = false) String itemCode,
+            @RequestParam(required = false) String parkingId,
+            @RequestParam(required = false) String search) {
+        return R.ok(expenseService.parkingExpenseList(companyId, orgId, buildingId, unitCode,
+            itemGroup, itemCode, parkingId, search));
+    }
+
+    /**
+     * 全部房屋费用查询
+     * 旧端点: POST /property/expense/queryHouseExpenseAllList
+     * 新端点: GET /thermal/property/expense/house-expense-all
+     */
+    @SaCheckPermission("thermal:property:expense:query")
+    @SaCheckLogin
+    @GetMapping("/house-expense-all")
+    public R<List<Map<String, Object>>> houseExpenseAllList(
+            @RequestParam String companyId,
+            @RequestParam String orgId,
+            @RequestParam(required = false) String search) {
+        return R.ok(expenseService.houseExpenseAllList(companyId, orgId, search));
+    }
+
+    /**
+     * 费用操作日志
+     * 旧端点: POST /property/expense/pageListLog
+     * 新端点: GET /thermal/property/expense/log
+     */
+    @SaCheckPermission("thermal:property:expense:list")
+    @SaCheckLogin
+    @GetMapping("/log")
+    public TableDataInfo<Map<String, Object>> expenseLog(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String parentId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String search,
+            PageQuery pageQuery) {
+        return expenseService.expenseLog(companyId, orgId, buildingId, unitCode,
+            parentId, type, startTime, endTime, search, pageQuery);
+    }
+
+    /**
+     * 微信费用订单查询
+     * 旧端点: POST /property/expense/pageListWechat
+     * 新端点: GET /thermal/property/expense/wechat
+     */
+    @SaCheckPermission("thermal:property:expense:list")
+    @SaCheckLogin
+    @GetMapping("/wechat")
+    public TableDataInfo<Map<String, Object>> wechatOrderList(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String parentId,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String search,
+            PageQuery pageQuery) {
+        return expenseService.wechatOrderList(companyId, orgId, buildingId, unitCode,
+            parentId, type, startTime, endTime, search, pageQuery);
     }
 }

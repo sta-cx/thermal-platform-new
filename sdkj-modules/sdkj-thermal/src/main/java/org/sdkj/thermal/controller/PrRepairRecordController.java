@@ -13,7 +13,6 @@ import org.sdkj.thermal.domain.PrRepairPerson;
 import org.sdkj.thermal.domain.PrRepairRecord;
 import org.sdkj.thermal.service.IPrRepairPersonService;
 import org.sdkj.thermal.service.IPrRepairRecordService;
-import org.sdkj.thermal.service.impl.PrRepairRecordServiceImpl;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,7 +59,7 @@ public class PrRepairRecordController extends BaseController {
     @Log(title = "报修记录", businessType = BusinessType.INSERT)
     @PostMapping
     public R<Void> add(@Validated @RequestBody PrRepairRecord record) {
-        record.setRepairNo(PrRepairRecordServiceImpl.generateRepairNo());
+        record.setRepairNo(repairRecordService.generateRepairNo());
         return toAjax(repairRecordService.save(record));
     }
 

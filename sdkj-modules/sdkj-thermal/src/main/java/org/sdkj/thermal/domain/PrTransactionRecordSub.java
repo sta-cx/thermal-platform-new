@@ -38,6 +38,15 @@ public class PrTransactionRecordSub extends BaseEntity {
     /** 交易后余额 */
     private BigDecimal balanceAfter;
 
+    /** 费项分组 */
+    private String itemGroup;
+
+    /** 费项编码 */
+    private String itemCode;
+
+    /** 房屋ID */
+    private String houseId;
+
     /** 费用名称 */
     private String itemName;
 

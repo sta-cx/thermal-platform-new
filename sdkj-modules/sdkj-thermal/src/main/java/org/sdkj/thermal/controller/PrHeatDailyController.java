@@ -69,8 +69,7 @@ public class PrHeatDailyController extends BaseController {
     @Log(title = "热表日表-生成", businessType = BusinessType.UPDATE)
     @PostMapping("/setHeat")
     public R<Void> setHeat(@RequestParam String companyId, @RequestParam String orgId) {
-        // TODO: 日表生成逻辑待后续实现（依赖配表数据和抄表数据完整性）
-        return R.ok();
+        return R.fail("日表生成功能尚未实现，依赖配表和抄表数据完整性");
     }
 
     /**

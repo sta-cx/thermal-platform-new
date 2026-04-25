@@ -12,16 +12,15 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.common.satoken.utils.LoginHelper;
-import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrHeatUnitValveArchive;
 import org.sdkj.thermal.domain.bo.PrHeatUnitValveArchiveBo;
+import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.vo.PrHeatUnitValveArchiveVo;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatUnitValveArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -125,26 +124,10 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     public R<Void> openValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
         List<PrHeatUnitValveArchive> archives = unitValveArchiveService.listByIds(ids);
         if (archives.isEmpty()) { return R.fail("未找到配表记录"); }
-        List<HtTasksPerform> tasks = new LinkedList<>();
-        for (PrHeatUnitValveArchive archive : archives) {
-            HtTasksPerform task = new HtTasksPerform();
-            task.setId(java.util.UUID.randomUUID().toString().replace("-", ""));
-            task.setInstructionType(3);
-            task.setInstruction(100);
-            task.setNumber(0);
-            task.setOrgId(orgId);
-            task.setCompanyId(companyId);
-            task.setDeviceId(archive.getDeviceId());
-            task.setMeterArcCode(archive.getMeterArcCode());
-            task.setMeterId(archive.getId());
-            task.setMeterNum(archive.getMeterNum());
-            task.setStatus(0);
-            task.setInstructionStatus(0);
-            task.setImei(archive.getImeiNum());
-            task.setConcentratorCode(archive.getConcentratorCode());
-            tasks.add(task);
-        }
-        return toAjax(tasksPerformService.saveBatch(tasks));
+        var infos = archives.stream()
+            .map(a -> new ValveArchiveInfo(a.getId(), a.getMeterArcCode(), a.getMeterNum(), a.getDeviceId(), a.getConcentratorCode(), a.getImeiNum(), null, null))
+            .toList();
+        return toAjax(tasksPerformService.batchCreateValveControlTasks(infos, orgId, companyId, 100));
     }
 
     /**
@@ -157,25 +140,9 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     public R<Void> closeValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
         List<PrHeatUnitValveArchive> archives = unitValveArchiveService.listByIds(ids);
         if (archives.isEmpty()) { return R.fail("未找到配表记录"); }
-        List<HtTasksPerform> tasks = new LinkedList<>();
-        for (PrHeatUnitValveArchive archive : archives) {
-            HtTasksPerform task = new HtTasksPerform();
-            task.setId(java.util.UUID.randomUUID().toString().replace("-", ""));
-            task.setInstructionType(3);
-            task.setInstruction(0);
-            task.setNumber(0);
-            task.setOrgId(orgId);
-            task.setCompanyId(companyId);
-            task.setDeviceId(archive.getDeviceId());
-            task.setMeterArcCode(archive.getMeterArcCode());
-            task.setMeterId(archive.getId());
-            task.setMeterNum(archive.getMeterNum());
-            task.setStatus(0);
-            task.setInstructionStatus(0);
-            task.setImei(archive.getImeiNum());
-            task.setConcentratorCode(archive.getConcentratorCode());
-            tasks.add(task);
-        }
-        return toAjax(tasksPerformService.saveBatch(tasks));
+        var infos = archives.stream()
+            .map(a -> new ValveArchiveInfo(a.getId(), a.getMeterArcCode(), a.getMeterNum(), a.getDeviceId(), a.getConcentratorCode(), a.getImeiNum(), null, null))
+            .toList();
+        return toAjax(tasksPerformService.batchCreateValveControlTasks(infos, orgId, companyId, 0));
     }
 }

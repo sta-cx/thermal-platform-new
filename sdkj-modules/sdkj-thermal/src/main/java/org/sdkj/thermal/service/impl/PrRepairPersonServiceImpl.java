@@ -28,6 +28,7 @@ public class PrRepairPersonServiceImpl extends ServiceImpl<PrRepairPersonMapper,
     public List<PrRepairPerson> selectByOrgId(String orgId, String companyId) {
         return baseMapper.selectList(
             new LambdaQueryWrapper<PrRepairPerson>()
+                .eq(PrRepairPerson::getOrgId, orgId)
                 .eq(PrRepairPerson::getCompanyId, companyId));
     }
 }

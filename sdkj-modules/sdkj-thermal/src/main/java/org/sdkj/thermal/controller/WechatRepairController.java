@@ -10,12 +10,10 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrRepairRecord;
 import org.sdkj.thermal.service.IPrRepairRecordService;
-import org.sdkj.thermal.service.impl.PrRepairRecordServiceImpl;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.List;
 
 @Validated
 @RequiredArgsConstructor
@@ -48,7 +46,7 @@ public class WechatRepairController extends BaseController {
     @Log(title = "微信报修", businessType = BusinessType.INSERT)
     @PostMapping
     public R<Void> insertData(@RequestBody PrRepairRecord record) {
-        record.setRepairNo(PrRepairRecordServiceImpl.generateRepairNo());
+        record.setRepairNo(repairRecordService.generateRepairNo());
         record.setCreateByName(record.getPhone());
         record.setRepairName(record.getUserName());
         record.setRepairPhone(record.getPhone());
@@ -58,7 +56,6 @@ public class WechatRepairController extends BaseController {
         record.setAppointTime(record.getRepairTime());
         record.setRepairType("01");
         record.setRepairStatus(1);
-        record.setCreateBy(Long.valueOf(record.getUserId()));
         record.setCreateTime(new Date());
         return toAjax(repairRecordService.save(record));
     }
@@ -75,7 +72,6 @@ public class WechatRepairController extends BaseController {
         record.setInPhone(record.getPhone());
         record.setAppointTime(record.getRepairTime());
         record.setRepairStatus(2);
-        record.setUpdateBy(Long.valueOf(record.getUserId()));
         return toAjax(repairRecordService.updateById(record));
     }
 

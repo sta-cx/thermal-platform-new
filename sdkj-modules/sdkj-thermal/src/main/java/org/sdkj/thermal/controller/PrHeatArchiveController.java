@@ -174,7 +174,6 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckLogin
     @GetMapping("/calculate/{id}")
     public R<Void> calculate(@PathVariable String id) {
-        // TODO: 待后续批次实现
-        return R.ok();
+        return R.fail("计算平衡功能尚未实现，请等待后续版本");
     }
 }

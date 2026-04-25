@@ -10,6 +10,7 @@ import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.vo.PrAccountBalanceVo;
 import org.sdkj.thermal.service.IPrAccountService;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -189,5 +190,87 @@ public class PrAccountController extends BaseController {
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) String searchPhone) {
         return R.ok(accountService.pageAccountStatementList(companyId, orgId, buildingId, unitCode, itemGroup, itemCode, searchPhone));
+    }
+
+    /**
+     * 查询房屋押金信息
+     * 旧端点: POST /property/prAccount/getHouseDeposit
+     * 新端点: GET /thermal/property/account/deposit
+     */
+    @SaCheckPermission("thermal:property:account:query")
+    @SaCheckLogin
+    @GetMapping("/deposit")
+    public R<Map<String, Object>> getHouseDeposit(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String search) {
+        return R.ok(accountService.getHouseDeposit(companyId, orgId, buildingId, unitCode, search));
+    }
+
+    /**
+     * 保存押金缴费
+     * 旧端点: POST /property/prAccount/saveDeposit
+     * 新端点: POST /thermal/property/account/deposit
+     */
+    @SaCheckPermission("thermal:property:account:edit")
+    @SaCheckLogin
+    @Log(title = "押金缴费", businessType = BusinessType.INSERT)
+    @PostMapping("/deposit")
+    public R<Map<String, Object>> saveDeposit(@RequestBody Map<String, Object> depositVo) {
+        return R.fail("押金缴费功能尚未实现，需要完整的交易记录创建逻辑");
+    }
+
+    /**
+     * 导入数据预览（含校验）
+     * 旧端点: POST /property/prAccount/pageListImportData
+     * 新端点: GET /thermal/property/account/import-preview
+     */
+    @SaCheckPermission("thermal:property:account:list")
+    @SaCheckLogin
+    @GetMapping("/import-preview")
+    public R<Map<String, Object>> pageListImportData(
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        return R.ok(accountService.pageListImportData(pageNum, pageSize));
+    }
+
+    /**
+     * 导入Excel数据
+     * 旧端点: POST /property/prAccount/importData
+     * 新端点: POST /thermal/property/account/import
+     */
+    @SaCheckPermission("thermal:property:account:add")
+    @SaCheckLogin
+    @Log(title = "账户数据导入", businessType = BusinessType.IMPORT)
+    @PostMapping("/import")
+    public R<Map<String, Object>> importData(@RequestParam("file") MultipartFile file) {
+        return R.ok(accountService.importExcelData(file));
+    }
+
+    /**
+     * 删除导入的临时数据
+     * 旧端点: POST /property/prAccount/deleteImportData
+     * 新端点: DELETE /thermal/property/account/import
+     */
+    @SaCheckPermission("thermal:property:account:remove")
+    @SaCheckLogin
+    @Log(title = "删除导入数据", businessType = BusinessType.DELETE)
+    @DeleteMapping("/import")
+    public R<Void> deleteImportData() {
+        return toAjax(accountService.deleteImportData());
+    }
+
+    /**
+     * 下载押金导入模板
+     * 旧端点: POST /property/prAccount/downloadExcel
+     * 新端点: GET /thermal/property/account/import-template
+     */
+    @SaCheckPermission("thermal:property:account:list")
+    @SaCheckLogin
+    @GetMapping("/import-template")
+    public R<String> downloadExcel() {
+        return R.ok("请使用 /thermal/property/account/import 端点上传Excel文件，模板列: 小区/楼宇/房号/业主名称/手机号/押金名称/金额");
     }
 }

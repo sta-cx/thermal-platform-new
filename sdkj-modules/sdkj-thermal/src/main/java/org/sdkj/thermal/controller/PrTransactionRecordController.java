@@ -102,4 +102,138 @@ public class PrTransactionRecordController extends BaseController {
             @RequestParam String date) {
         return R.ok(transactionRecordService.daily(companyId, orgId, date));
     }
+
+    /**
+     * 退费记录查询
+     * 旧端点: POST /property/prTransactionRecord/refund
+     * 新端点: GET /thermal/property/transaction/refund
+     */
+    @SaCheckPermission("thermal:property:transaction:query")
+    @SaCheckLogin
+    @GetMapping("/refund")
+    public R<Map<String, Object>> refund(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String search) {
+        return R.ok(transactionRecordService.refund(companyId, orgId, buildingId, startTime, endTime, search));
+    }
+
+    /**
+     * 水费交易查询
+     * 旧端点: POST /property/prTransactionRecord/getWater
+     * 新端点: GET /thermal/property/transaction/water
+     */
+    @SaCheckPermission("thermal:property:transaction:query")
+    @SaCheckLogin
+    @GetMapping("/water")
+    public R<Map<String, Object>> getWater(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String search) {
+        return R.ok(transactionRecordService.getWater(companyId, orgId, buildingId, startTime, endTime, search));
+    }
+
+    /**
+     * 电费交易查询
+     * 旧端点: POST /property/prTransactionRecord/getEle
+     * 新端点: GET /thermal/property/transaction/ele
+     */
+    @SaCheckPermission("thermal:property:transaction:query")
+    @SaCheckLogin
+    @GetMapping("/ele")
+    public R<Map<String, Object>> getEle(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String search) {
+        return R.ok(transactionRecordService.getEle(companyId, orgId, buildingId, startTime, endTime, search));
+    }
+
+    /**
+     * 写卡日志查询
+     * 旧端点: POST /property/prTransactionRecord/cardLog
+     * 新端点: GET /thermal/property/transaction/card-log
+     */
+    @SaCheckPermission("thermal:property:transaction:query")
+    @SaCheckLogin
+    @GetMapping("/card-log")
+    public R<Map<String, Object>> cardLog(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String createBy) {
+        return R.ok(transactionRecordService.cardLog(companyId, orgId, buildingId, startTime, endTime, search, type, createBy));
+    }
+
+    /**
+     * 写卡操作人列表
+     * 旧端点: POST /property/prTransactionRecord/getCardLogCreateByName
+     * 新端点: GET /thermal/property/transaction/card-log-operators
+     */
+    @SaCheckPermission("thermal:property:transaction:query")
+    @SaCheckLogin
+    @GetMapping("/card-log-operators")
+    public R<List<Map<String, Object>>> cardLogCreateByName(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String orgId) {
+        return R.ok(transactionRecordService.cardLogCreateByName(companyId, orgId));
+    }
+
+    /**
+     * 未收款查询
+     * 旧端点: POST /property/prTransactionRecord/uncoll
+     * 新端点: GET /thermal/property/transaction/uncoll
+     */
+    @SaCheckPermission("thermal:property:transaction:query")
+    @SaCheckLogin
+    @GetMapping("/uncoll")
+    public R<Map<String, Object>> uncoll(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime,
+            @RequestParam(required = false) String search) {
+        return R.ok(transactionRecordService.uncoll(companyId, orgId, buildingId, startTime, endTime, search));
+    }
+
+    /**
+     * 本月收款统计
+     * 旧端点: POST /property/prTransactionRecord/getThisMonth
+     * 新端点: GET /thermal/property/transaction/monthly
+     */
+    @SaCheckPermission("thermal:property:transaction:query")
+    @SaCheckLogin
+    @GetMapping("/monthly")
+    public R<Map<String, Object>> getThisMonth(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String userId) {
+        return R.ok(transactionRecordService.getThisMonth(companyId, userId));
+    }
+
+    /**
+     * 本月分类统计
+     * 旧端点: POST /property/prTransactionRecord/getThisMonthVarious
+     * 新端点: GET /thermal/property/transaction/monthly-various
+     */
+    @SaCheckPermission("thermal:property:transaction:query")
+    @SaCheckLogin
+    @GetMapping("/monthly-various")
+    public R<Map<String, Object>> getThisMonthVarious(
+            @RequestParam String companyId,
+            @RequestParam(required = false) String userId) {
+        return R.ok(transactionRecordService.getThisMonthVarious(companyId, userId));
+    }
 }

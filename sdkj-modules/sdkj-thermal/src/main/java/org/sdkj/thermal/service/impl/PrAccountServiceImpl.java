@@ -264,4 +264,31 @@ public class PrAccountServiceImpl implements IPrAccountService {
         return balanceMapper.selectAccountList(
             companyId, orgId, buildingId, unitCode, searchPhone, itemGroup, itemCode);
     }
+
+    @Override
+    public Map<String, Object> getHouseDeposit(String companyId, String orgId, String buildingId,
+            String unitCode, String search) {
+        return balanceMapper.selectHouseDeposit(companyId, orgId, buildingId, unitCode, search);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Map<String, Object> saveDeposit(Map<String, Object> depositVo) {
+        return balanceMapper.saveDepositTransaction(depositVo);
+    }
+
+    @Override
+    public Map<String, Object> pageListImportData(int pageNum, int pageSize) {
+        return Map.of("msg", "导入预览功能尚未实现，需要 pr_import_account 临时表支持");
+    }
+
+    @Override
+    public Map<String, Object> importExcelData(Object file) {
+        return Map.of("msg", "数据导入功能尚未实现，需要 EasyExcel 集成");
+    }
+
+    @Override
+    public boolean deleteImportData() {
+        return balanceMapper.deleteImportStagingData() > 0;
+    }
 }

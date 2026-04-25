@@ -69,8 +69,7 @@ public class PrHeatMonthController extends BaseController {
     @Log(title = "热表月表-生成", businessType = BusinessType.UPDATE)
     @PostMapping("/setHeat")
     public R<Void> setHeat(@RequestParam String companyId, @RequestParam String orgId) {
-        // TODO: 月表生成逻辑待后续实现（依赖日表数据完整性）
-        return R.ok();
+        return R.fail("月表生成功能尚未实现，依赖日表数据完整性");
     }
 
     /**

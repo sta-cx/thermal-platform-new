@@ -11,7 +11,7 @@
         FROM pr_house_log a
         LEFT JOIN pr_house b ON a.house_id = b.id AND b.del_flag = '0'
         LEFT JOIN sys_user c ON c.id = a.create_by
-        WHERE a.is_deleted = 0
+        WHERE a.del_flag = '0'
         <if test="changeType != null and changeType != ''">
             AND a.change_type = #{changeType}
         </if>
@@ -28,7 +28,7 @@
         LEFT JOIN pr_building e ON e.id = b.building_id
         LEFT JOIN sys_organization d ON d.id = b.org_id
         LEFT JOIN sys_user c ON c.id = a.create_by
-        WHERE a.is_deleted = 0
+        WHERE a.del_flag = '0'
         <if test="changeType != null and changeType != ''">
             AND a.change_type = #{changeType}
         </if>

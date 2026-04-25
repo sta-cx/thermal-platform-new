@@ -7,6 +7,8 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.vo.HtTasksPerformVo;
 
+import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
+
 import java.util.List;
 import java.util.Map;
 
@@ -51,4 +53,13 @@ public interface IHtTasksPerformService extends IService<HtTasksPerform> {
      * 查询执行统计
      */
     Map<String, Object> selectPerformStats(String taskId);
+
+    /**
+     * 批量创建阀门控制任务并保存
+     * @param archives 阀门配表信息列表
+     * @param orgId 组织ID
+     * @param companyId 公司ID
+     * @param instruction 指令值 (100=开阀, 0=关阀)
+     */
+    boolean batchCreateValveControlTasks(List<ValveArchiveInfo> archives, String orgId, String companyId, int instruction);
 }

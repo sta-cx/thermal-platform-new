@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.HtTasksPerform;
+import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.vo.HtTasksPerformVo;
 import org.sdkj.thermal.mapper.HtTasksPerformMapper;
 import org.sdkj.thermal.service.IHtTasksPerformService;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 调控执行记录服务实现
@@ -92,5 +94,31 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
             "failed", failed,
             "successRate", rate
         );
+    }
+
+    @Override
+    @org.springframework.transaction.annotation.Transactional(rollbackFor = Exception.class)
+    public boolean batchCreateValveControlTasks(List<ValveArchiveInfo> archives, String orgId, String companyId, int instruction) {
+        List<HtTasksPerform> tasks = archives.stream().map(info -> {
+            HtTasksPerform task = new HtTasksPerform();
+            task.setId(UUID.randomUUID().toString().replace("-", ""));
+            task.setInstructionType(3);
+            task.setInstruction(instruction);
+            task.setNumber(0);
+            task.setOrgId(orgId);
+            task.setCompanyId(companyId);
+            task.setDeviceId(info.deviceId());
+            task.setMeterArcCode(info.meterArcCode());
+            task.setMeterId(info.meterId());
+            task.setMeterNum(info.meterNum());
+            task.setStatus(0);
+            task.setInstructionStatus(0);
+            task.setImei(info.imei());
+            task.setConcentratorCode(info.concentratorCode());
+            task.setDtuNum(info.dtuNum());
+            task.setChanNum(info.chanNum());
+            return task;
+        }).toList();
+        return saveBatch(tasks);
     }
 }

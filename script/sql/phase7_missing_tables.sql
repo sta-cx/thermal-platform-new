@@ -133,3 +133,92 @@ CREATE TABLE IF NOT EXISTS pr_user_house (
     KEY `idx_house_id` (`house_id`),
     KEY `idx_company_id` (`company_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户-房屋关联表';
+
+-- ----------------------------
+-- 房屋变更日志表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS pr_house_log (
+    `id` varchar(32) NOT NULL COMMENT '主键',
+    `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
+    `house_id` varchar(32) DEFAULT NULL COMMENT '房屋ID',
+    `change_type` varchar(32) DEFAULT NULL COMMENT '变更类型',
+    `change_val` int DEFAULT NULL COMMENT '变更值',
+    `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
+    `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
+    `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
+    `create_by` varchar(40) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+    `update_by` varchar(40) DEFAULT NULL COMMENT '修改者',
+    `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+    `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
+    `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+    PRIMARY KEY (`id`),
+    KEY `idx_house_id` (`house_id`),
+    KEY `idx_company_org` (`company_id`, `org_id`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='房屋变更日志表';
+
+-- ----------------------------
+-- 交易明细表（采购充值等）
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS pr_transaction_detail (
+    `id` varchar(32) NOT NULL COMMENT '主键',
+    `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
+    `meter_id` varchar(32) DEFAULT NULL COMMENT '仪表ID',
+    `house_id` varchar(32) DEFAULT NULL COMMENT '房屋ID',
+    `user_id` varchar(32) DEFAULT NULL COMMENT '用户ID',
+    `transaction_type` varchar(32) DEFAULT NULL COMMENT '交易类型',
+    `receivable` decimal(18,4) DEFAULT 0.0000 COMMENT '应收金额',
+    `paid_in` decimal(18,4) DEFAULT 0.0000 COMMENT '实收金额',
+    `qty` decimal(18,4) DEFAULT 0.0000 COMMENT '用量',
+    `item_group` varchar(32) DEFAULT NULL COMMENT '费项分组',
+    `item_code` varchar(32) DEFAULT NULL COMMENT '费项编码',
+    `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
+    `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
+    `record_time` datetime DEFAULT NULL COMMENT '交易时间',
+    `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
+    `create_by` varchar(40) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+    `update_by` varchar(40) DEFAULT NULL COMMENT '修改者',
+    `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+    `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
+    `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+    PRIMARY KEY (`id`),
+    KEY `idx_meter_id` (`meter_id`),
+    KEY `idx_company_org` (`company_id`, `org_id`),
+    KEY `idx_record_time` (`record_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='交易明细表';
+
+-- ----------------------------
+-- 导入暂存表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS pr_import_account (
+    `id` varchar(32) NOT NULL COMMENT '主键',
+    `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
+    `type` tinyint DEFAULT NULL COMMENT '导入类型(0账户/1交易)',
+    `user_id` varchar(32) DEFAULT NULL COMMENT '用户ID',
+    `house_id` varchar(32) DEFAULT NULL COMMENT '房屋ID',
+    `item_group` varchar(32) DEFAULT NULL COMMENT '费项分组',
+    `item_code` varchar(32) DEFAULT NULL COMMENT '费项编码',
+    `amount` decimal(18,4) DEFAULT NULL COMMENT '金额',
+    `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
+    `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
+    `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
+    `create_by` varchar(40) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+    `update_by` varchar(40) DEFAULT NULL COMMENT '修改者',
+    `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+    `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
+    `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+    PRIMARY KEY (`id`),
+    KEY `idx_type` (`type`),
+    KEY `idx_company_org` (`company_id`, `org_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='导入暂存表';
+
+-- ----------------------------
+-- pr_transaction_record_sub 补充字段
+-- ----------------------------
+ALTER TABLE pr_transaction_record_sub
+    ADD COLUMN `item_group` varchar(32) DEFAULT NULL COMMENT '费项分组' AFTER `notes`,
+    ADD COLUMN `item_code` varchar(32) DEFAULT NULL COMMENT '费项编码' AFTER `item_group`,
+    ADD COLUMN `house_id` varchar(32) DEFAULT NULL COMMENT '房屋ID' AFTER `item_code`;

@@ -10,7 +10,7 @@
                a.org_id, a.company_id, a.seq, a.head_photo, a.front_photo, a.back_photo,
                a.create_time
         FROM pr_user a
-        WHERE a.company_id = #{companyId} AND a.is_deleted = 0
+        WHERE a.company_id = #{companyId} AND a.del_flag = '0'
         ORDER BY a.create_time DESC
     </select>
 
@@ -32,7 +32,7 @@
 
     <select id="countByHouseId" resultType="int">
         SELECT COUNT(1) FROM pr_user_house
-        WHERE house_id = #{houseId} AND is_deleted = 0
+        WHERE house_id = #{houseId} AND del_flag = '0'
     </select>
 
     <select id="selectByPhone" resultType="org.sdkj.thermal.domain.vo.PrUserVo">
@@ -43,7 +43,7 @@
                org_id, company_id, seq, head_photo, front_photo, back_photo,
                create_time
         FROM pr_user
-        WHERE phone = #{phone} AND is_deleted = 0
+        WHERE phone = #{phone} AND del_flag = '0'
         LIMIT 1
     </select>
 
