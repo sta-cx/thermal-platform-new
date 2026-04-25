@@ -3,17 +3,13 @@ package org.sdkj.thermal.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.idev.excel.EasyExcel;
-import cn.idev.excel.metadata.data.WriteCellData;
-import cn.idev.excel.write.handler.CellWriteHandler;
-import cn.idev.excel.write.handler.context.CellWriteHandlerContext;
-import cn.idev.excel.write.metadata.style.WriteCellStyle;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.*;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrImportValve;
+import org.sdkj.thermal.excel.ExcelStyleUtils;
 import org.sdkj.thermal.service.IPrImportValveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -62,7 +58,7 @@ public class PrImportValveController extends BaseController {
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
 
         EasyExcel.write(response.getOutputStream(), PrImportValve.class)
-            .registerWriteHandler(new ValveImportHandler())
+            .registerWriteHandler(ExcelStyleUtils.fullStyleHandler(150))
             .sheet("阀门数据导入")
             .doWrite(lists);
     }
@@ -118,43 +114,4 @@ public class PrImportValveController extends BaseController {
         return result ? R.ok() : R.fail("提交失败");
     }
 
-    static class ValveImportHandler implements CellWriteHandler {
-
-        @Override
-        public void afterCellDispose(CellWriteHandlerContext context) {
-            WriteCellData<?> cellData = context.getFirstCellData();
-            if (cellData == null || context.getRow() == null) {
-                return;
-            }
-            Row row = context.getRow();
-            WriteCellStyle cellStyle = cellData.getOrCreateStyle();
-
-            if (row.getRowNum() == 0) {
-                row.setHeight((short) (150 * 20));
-            }
-
-            if (row.getRowNum() == 1) {
-                cellStyle.setFillPatternType(FillPatternType.SOLID_FOREGROUND);
-                cellStyle.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
-                cellStyle.setBorderBottom(BorderStyle.THIN);
-                cellStyle.setBorderLeft(BorderStyle.THIN);
-                cellStyle.setBorderRight(BorderStyle.THIN);
-                cellStyle.setBorderTop(BorderStyle.THIN);
-                cellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
-                cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-                row.setHeight((short) (20 * 20));
-            }
-            if (row.getRowNum() > 1) {
-                cellStyle.setFillPatternType(FillPatternType.SOLID_FOREGROUND);
-                cellStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
-                cellStyle.setBorderBottom(BorderStyle.THIN);
-                cellStyle.setBorderLeft(BorderStyle.THIN);
-                cellStyle.setBorderRight(BorderStyle.THIN);
-                cellStyle.setBorderTop(BorderStyle.THIN);
-                cellStyle.setHorizontalAlignment(HorizontalAlignment.CENTER);
-                cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-                row.setHeight((short) (15 * 20));
-            }
-        }
-    }
 }

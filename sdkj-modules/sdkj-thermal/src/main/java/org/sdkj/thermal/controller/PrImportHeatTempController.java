@@ -3,17 +3,13 @@ package org.sdkj.thermal.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.idev.excel.EasyExcel;
-import cn.idev.excel.metadata.data.WriteCellData;
-import cn.idev.excel.write.handler.CellWriteHandler;
-import cn.idev.excel.write.handler.context.CellWriteHandlerContext;
-import cn.idev.excel.write.metadata.style.WriteCellStyle;
 import lombok.RequiredArgsConstructor;
-import org.apache.poi.ss.usermodel.*;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrImportHeatTemp;
+import org.sdkj.thermal.excel.ExcelStyleUtils;
 import org.sdkj.thermal.service.IPrImportHeatTempService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +50,7 @@ public class PrImportHeatTempController extends BaseController {
         String fileName = URLEncoder.encode("温度采集器导入", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
         EasyExcel.write(response.getOutputStream(), PrImportHeatTemp.class)
-            .registerWriteHandler(new HeatTempHandler()).sheet("温度采集器导入").doWrite(lists);
+            .registerWriteHandler(ExcelStyleUtils.headerOnlyStyleHandler(150)).sheet("温度采集器导入").doWrite(lists);
     }
 
     @SaCheckPermission("thermal:property:import:import")
@@ -95,23 +91,4 @@ public class PrImportHeatTempController extends BaseController {
         return service.submitData() ? R.ok() : R.fail("提交失败");
     }
 
-    static class HeatTempHandler implements CellWriteHandler {
-        @Override
-        public void afterCellDispose(CellWriteHandlerContext context) {
-            WriteCellData<?> cellData = context.getFirstCellData();
-            if (cellData == null || context.getRow() == null) return;
-            Row row = context.getRow();
-            WriteCellStyle style = cellData.getOrCreateStyle();
-            if (row.getRowNum() == 0) row.setHeight((short) (150 * 20));
-            if (row.getRowNum() == 1) {
-                style.setFillPatternType(FillPatternType.SOLID_FOREGROUND);
-                style.setFillForegroundColor(IndexedColors.ORANGE.getIndex());
-                style.setBorderBottom(BorderStyle.THIN);
-                style.setBorderLeft(BorderStyle.THIN);
-                style.setBorderRight(BorderStyle.THIN);
-                style.setBorderTop(BorderStyle.THIN);
-                row.setHeight((short) (20 * 20));
-            }
-        }
-    }
 }
