@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrImportValveMapper">
+
+    <sql id="Base_Column_List">
+        id, org_name, org_id, building_name, house_id, room_num, meter_name,
+        specification, model, meter_serial, meter_num, card_num, concentrator_code,
+        hoard_limit, alarm_value, close_value, install_site, opened_time, standard_id,
+        standard_name, standard_price, start_reading, current_reading, total_used,
+        trade_times, total_money, total_recharge, current_balance, company_id,
+        create_by, type, create_time, imei, product_id, device_id
+    </sql>
+
+    <insert id="insert">
+        insert into pr_import_valve
+        (org_name, building_name, room_num, meter_name, meter_serial, meter_num,
+         card_num, concentrator_code, caliber, company_id, create_by, type, create_time,
+         imei, dtu_num, dtu_type, chan_num, device_id, install_type, is_command, command_meter_name)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.orgName}, #{item.buildingName}, trim(#{item.roomNum}),
+             #{item.meterName}, #{item.meterSerial}, trim(#{item.meterNum}),
+             trim(#{item.cardNum}), #{item.concentratorCode}, #{item.caliber},
+             #{item.companyId}, #{item.createBy}, #{item.type}, #{item.createTime},
+             #{item.imei}, #{item.dtuNum}, #{item.dtuType}, #{item.chanNum},
+             #{item.deviceId}, #{item.installType}, #{item.isCommand}, #{item.commandMeterName})
+        </foreach>
+    </insert>
+
+    <update id="updateHouseId">
+        update pr_import_valve a
+            left join pr_house b on a.room_num = b.room_num
+        set a.house_id = b.id,
+            a.org_id = b.org_id
+        where a.company_id = #{companyId}
+          and a.type = '0'
+          and a.create_by = #{create}
+          and b.company_id = #{companyId}
+          and b.is_deleted = '0'
+          and a.room_num = b.room_num
+          and a.building_name = b.building_name
+          and a.org_name = b.org_name
+    </update>
+
+    <update id="updateMeter">
+        update pr_import_valve a
+            left join mt_meter_match b on a.company_id = b.company_id
+            left join mt_tc_valve mha on b.archive_id = mha.id
+        set a.meter_arc_code = mha.code,
+            a.archive_id = mha.id
+        where a.company_id = #{companyId}
+          and a.create_by = #{create}
+          and a.type = '0'
+          and b.meter_type = '31'
+          and a.meter_name = mha.name
+    </update>
+
+    <update id="updateCommandMeter">
+        update pr_import_valve a
+            left join mt_meter_match b on a.company_id = b.company_id
+            left join mt_tc_valve mha on b.archive_id = mha.id
+        set a.command_meter_arc_code = mha.code,
+            a.command_archive_id = mha.id
+        where a.company_id = #{companyId}
+          and a.create_by = #{create}
+          and a.type = '0'
+          and b.meter_type = '31'
+          and a.command_meter_name = mha.name
+          and a.is_command = '是'
+    </update>
+
+    <select id="selectNoHouseId" resultType="org.sdkj.thermal.domain.PrImportValve">
+        select <include refid="Base_Column_List"/>
+        from pr_import_valve
+        where company_id = #{companyId}
+          and type = '0'
+          and create_by = #{create}
+          and (house_id is null or org_id is null)
+        limit 500
+    </select>
+
+    <select id="selectNoMeterNum" resultType="org.sdkj.thermal.domain.PrImportValve">
+        select *
+        from pr_import_valve
+        where company_id = #{companyId}
+          and create_by = #{create}
+          and type = '0'
+          and (meter_num is null or meter_num = '')
+        limit 500
+    </select>
+
+    <select id="getRepateMeter2" resultType="org.sdkj.thermal.domain.PrImportValve">
+        select t.*
+        from pr_import_valve t
+                 inner join (
+            select meter_num
+            from pr_import_valve
+            where company_id = #{companyId}
+              and type = '0'
+              and create_by = #{create}
+            group by meter_num
+            having count(1) > 1
+        ) dup on t.meter_num = dup.meter_num
+        where t.company_id = #{companyId}
+          and t.type = '0'
+          and t.create_by = #{create}
+        limit 500
+    </select>
+
+    <select id="findNoArchiveId" resultType="org.sdkj.thermal.domain.PrImportValve">
+        select <include refid="Base_Column_List"/>
+        from pr_import_valve
+        where company_id = #{companyId}
+          and create_by = #{create}
+          and type = '0'
+          and archive_id is null
+        limit 500
+    </select>
+
+    <select id="selectHasAllHouse" resultType="org.sdkj.thermal.domain.PrImportValve">
+        select a.*
+        from pr_import_valve a
+                 left join pr_heat_valve_archive b on a.house_id = b.house_id
+        where a.company_id = #{companyId}
+          and a.create_by = #{create}
+          and a.type = '0'
+          and a.house_id = b.house_id
+          and b.is_changed = '0'
+        limit 500
+    </select>
+
+    <select id="selectHasAllReadly" resultType="org.sdkj.thermal.domain.PrImportValve">
+        select a.*
+        from pr_import_valve a
+                 left join pr_heat_valve_archive b
+                           on a.meter_arc_code = b.meter_arc_code and a.meter_num = b.meter_num
+        where a.company_id = #{companyId}
+          and a.create_by = #{create}
+          and a.type = '0'
+          and a.meter_arc_code = b.meter_arc_code
+          and a.meter_num = b.meter_num
+          and b.is_changed = '0'
+        limit 500
+    </select>
+
+    <select id="select" resultType="int">
+        select count(1)
+        from pr_import_valve
+        where company_id = #{companyId}
+          and create_by = #{create}
+          and type = '0'
+    </select>
+
+    <select id="selectByCompanyIdOrgId" resultType="org.sdkj.thermal.domain.PrImportValve">
+        select org_name, building_name, room_num, '否' as 'isCommand'
+        from pr_house
+        where company_id = #{companyId}
+          and org_id = #{orgId}
+          and is_deleted = '0'
+    </select>
+
+    <delete id="deleteData">
+        delete
+        from pr_import_valve
+        where company_id = #{companyId}
+          and create_by = #{create}
+          and type = '0'
+    </delete>
+
+    <insert id="submitData">
+        insert into pr_heat_valve_archive
+        (id, company_id, org_id, house_id, archive_id, meter_arc_code, meter_arc_name,
+         meter_num, card_num, dtu_num, dtu_type, chan_num, device_id, meter_serial,
+         concentrator_code, caliber, install_type, imei_num, create_by, create_time)
+        select replace(uuid(), '-', ''),
+               company_id,
+               org_id,
+               house_id,
+               archive_id,
+               meter_arc_code,
+               meter_name,
+               meter_num,
+               card_num,
+               dtu_num,
+               dtu_type,
+               chan_num,
+               device_id,
+               meter_serial,
+               concentrator_code,
+               caliber,
+               install_type,
+               imei,
+               create_by,
+               create_time
+        from pr_import_valve
+        where company_id = #{companyId}
+          and create_by = #{create}
+          and type = '0'
+          and house_id is not null
+          and archive_id is not null
+    </insert>
+
+    <delete id="deleteImportValveData">
+        delete
+        from pr_import_valve
+        where company_id = #{companyId}
+          and create_by = #{create}
+    </delete>
+
+    <delete id="deleteHeatValveByNoHouseId">
+        delete a
+        from pr_heat_valve_archive a
+                 left join pr_house b on b.id = a.house_id
+            and b.company_id = #{companyId}
+            and b.org_id in (
+            select distinct org_id
+            from pr_import_valve
+            where company_id = #{companyId}
+              and create_by = #{create}
+              and type = '0'
+        )
+        where a.company_id = #{companyId}
+          and a.org_id in (
+            select distinct org_id
+            from pr_import_valve
+            where company_id = #{companyId}
+              and create_by = #{create}
+              and type = '0'
+        )
+          and a.house_id is not null
+          and b.id is null
+    </delete>
+
+</mapper>
