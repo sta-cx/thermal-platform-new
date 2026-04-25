@@ -22,12 +22,11 @@ public class PrImportHistoryServiceImpl extends ServiceImpl<PrImportHistoryMappe
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer importData(List<Object> objects) {
+    public Integer importData(List<PrImportHistory> objects) {
         String create = LoginHelper.getUserIdStr();
         String companyId = LoginHelper.getTenantId();
         List<PrImportHistory> lists = new ArrayList<>();
-        for (Object obj : objects) {
-            PrImportHistory item = (PrImportHistory) obj;
+        for (PrImportHistory item : objects) {
             item.setCreateBy(create);
             item.setCompanyId(companyId);
             item.setCreateTime(new Date());

@@ -56,9 +56,9 @@ public class PrImportRecordController extends BaseController {
     @PostMapping("/import")
     public R<String> importData(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) return R.fail("文件为空");
-        List<Object> objects;
+        List<PrImportRecord> objects;
         try {
-            objects = EasyExcel.read(file.getInputStream()).head(PrImportRecord.class)
+            objects = (List<PrImportRecord>) (List<?>) EasyExcel.read(file.getInputStream()).head(PrImportRecord.class)
                 .sheet(0).headRowNumber(2).doReadSync();
         } catch (Exception e) {
             return R.fail("文件解析失败: " + e.getMessage());

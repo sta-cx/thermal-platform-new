@@ -23,14 +23,13 @@ public class PrImportUnitHeatServiceImpl extends ServiceImpl<PrImportUnitHeatMap
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer importData(List<Object> objects) {
+    public Integer importData(List<PrImportUnitHeat> objects) {
         String create = LoginHelper.getUserIdStr();
         String companyId = LoginHelper.getTenantId();
         Date date = new Date();
         List<PrImportUnitHeat> lists = new ArrayList<>();
         if (!objects.isEmpty()) {
-            for (Object object : objects) {
-                PrImportUnitHeat item = (PrImportUnitHeat) object;
+            for (PrImportUnitHeat item : objects) {
                 item.setCreateBy(create);
                 item.setCompanyId(companyId);
                 item.setCreateTime(date);

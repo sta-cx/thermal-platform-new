@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface IPrImportValveService extends IService<PrImportValve> {
 
-    Integer importData(List<Object> objects);
+    Integer importData(List<PrImportValve> objects);
 
     void updateHouseId();
 

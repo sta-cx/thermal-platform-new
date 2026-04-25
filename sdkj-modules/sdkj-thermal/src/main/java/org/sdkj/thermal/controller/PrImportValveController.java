@@ -71,9 +71,9 @@ public class PrImportValveController extends BaseController {
         if (file.isEmpty()) {
             return R.fail("文件为空");
         }
-        List<Object> objects;
+        List<PrImportValve> objects;
         try {
-            objects = EasyExcel.read(file.getInputStream())
+            objects = (List<PrImportValve>) (List<?>) EasyExcel.read(file.getInputStream())
                 .head(PrImportValve.class)
                 .sheet(0)
                 .headRowNumber(2)

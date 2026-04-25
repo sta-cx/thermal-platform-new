@@ -26,25 +26,22 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
     private final PrImportBasicDataMapper mapper;
 
     @Override
-    public Integer importData(List<Object> objects) {
+    public Integer importData(List<PrImportBasicData> objects) {
         String create = LoginHelper.getUserIdStr();
         String companyId = LoginHelper.getTenantId();
         Date date = new Date();
         List<PrImportBasicData> lists = new ArrayList<>(objects.size());
-        for (Object object : objects) {
-            if (object instanceof PrImportBasicData) {
-                PrImportBasicData item = (PrImportBasicData) object;
-                if (item.getOrgName() != null) {
-                    item.setOrgName(item.getOrgName().trim());
-                }
-                item.setCreateTime(date);
-                item.setCreateBy(create);
-                item.setCompanyId(companyId);
-                if (item.getUserName() != null && !item.getUserName().isEmpty()) {
-                    item.setUserId(UUID.randomUUID().toString().replace("-", ""));
-                }
-                lists.add(item);
+        for (PrImportBasicData item : objects) {
+            if (item.getOrgName() != null) {
+                item.setOrgName(item.getOrgName().trim());
             }
+            item.setCreateTime(date);
+            item.setCreateBy(create);
+            item.setCompanyId(companyId);
+            if (item.getUserName() != null && !item.getUserName().isEmpty()) {
+                item.setUserId(UUID.randomUUID().toString().replace("-", ""));
+            }
+            lists.add(item);
         }
         mapper.insertList(lists);
         mapper.updateOrgId(companyId, create);

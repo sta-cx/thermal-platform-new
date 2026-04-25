@@ -68,9 +68,9 @@ public class PrImportUnitHeatController extends BaseController {
         if (file.isEmpty()) {
             return R.fail("文件为空");
         }
-        List<Object> objects;
+        List<PrImportUnitHeat> objects;
         try {
-            objects = EasyExcel.read(file.getInputStream())
+            objects = (List<PrImportUnitHeat>) (List<?>) EasyExcel.read(file.getInputStream())
                 .head(PrImportUnitHeat.class)
                 .sheet(0)
                 .headRowNumber(2)

@@ -22,19 +22,16 @@ public class PrImportRecordServiceImpl extends ServiceImpl<PrImportRecordMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer importData(List<Object> objects) {
+    public Integer importData(List<PrImportRecord> objects) {
         String create = LoginHelper.getUserIdStr();
         String companyId = LoginHelper.getTenantId();
         List<PrImportRecord> lists = new ArrayList<>();
-        for (Object obj : objects) {
-            if (obj instanceof PrImportRecord) {
-                PrImportRecord item = (PrImportRecord) obj;
-                item.setCreateBy(create);
-                item.setCompanyId(companyId);
-                item.setCreateTime(new Date());
-                item.setType(0);
-                lists.add(item);
-            }
+        for (PrImportRecord item : objects) {
+            item.setCreateBy(create);
+            item.setCompanyId(companyId);
+            item.setCreateTime(new Date());
+            item.setType(0);
+            lists.add(item);
         }
         if (!lists.isEmpty()) {
             mapper.insertList(lists);

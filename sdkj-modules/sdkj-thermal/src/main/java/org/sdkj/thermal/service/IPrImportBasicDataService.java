@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface IPrImportBasicDataService extends IService<PrImportBasicData> {
 
-    Integer importData(List<Object> objects);
+    Integer importData(List<PrImportBasicData> objects);
 
     R check(long size);
 

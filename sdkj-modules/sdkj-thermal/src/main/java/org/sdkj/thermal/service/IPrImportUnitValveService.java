@@ -14,7 +14,7 @@ public interface IPrImportUnitValveService extends IService<PrImportUnitValve> {
     /**
      * 导入数据
      */
-    Integer importData(List<Object> objects);
+    Integer importData(List<PrImportUnitValve> objects);
 
     /**
      * 更新单元/小区ID

@@ -26,14 +26,13 @@ public class PrImportValveServiceImpl extends ServiceImpl<PrImportValveMapper, P
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Integer importData(List<Object> objects) {
+    public Integer importData(List<PrImportValve> objects) {
         String create = LoginHelper.getUserIdStr();
         String companyId = LoginHelper.getTenantId();
         Date date = new Date();
         List<PrImportValve> lists = new ArrayList<>();
         if (!objects.isEmpty()) {
-            for (Object object : objects) {
-                PrImportValve valve = (PrImportValve) object;
+            for (PrImportValve valve : objects) {
                 valve.setCreateBy(create);
                 valve.setCompanyId(companyId);
                 valve.setCreateTime(date);

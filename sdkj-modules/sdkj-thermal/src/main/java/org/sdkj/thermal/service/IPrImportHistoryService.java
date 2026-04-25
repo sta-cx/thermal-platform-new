@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface IPrImportHistoryService extends IService<PrImportHistory> {
 
-    Integer importData(List<Object> objects);
+    Integer importData(List<PrImportHistory> objects);
 
     void updateIds();
 

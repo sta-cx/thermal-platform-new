@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface IPrImportUnitHeatService extends IService<PrImportUnitHeat> {
 
-    Integer importData(List<Object> objects);
+    Integer importData(List<PrImportUnitHeat> objects);
 
     void updateIds();
 
