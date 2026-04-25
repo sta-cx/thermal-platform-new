@@ -9,11 +9,16 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import cn.idev.excel.EasyExcel;
+import jakarta.servlet.http.HttpServletResponse;
 import org.sdkj.thermal.domain.vo.PrHeatReadingVo;
 import org.sdkj.thermal.service.IPrHeatReadingService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -106,7 +111,7 @@ public class PrHeatReadingController extends BaseController {
     @SaCheckLogin
     @Log(title = "热表抄表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/exportAll")
-    public R<Void> exportAll(
+    public void exportAll(HttpServletResponse response,
             @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
@@ -117,8 +122,12 @@ public class PrHeatReadingController extends BaseController {
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String valveType,
-            @RequestParam(required = false) String parentId) {
-        // TODO: 抄表导出逻辑待后续实现
-        return R.ok();
+            @RequestParam(required = false) String parentId) throws IOException {
+        var list = heatReadingService.selectPageList(companyId, orgId, buildingId, unitCode, meterArcCode, search, startTime, endTime, type, valveType, parentId, null).getRows();
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("热表抄表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatReadingVo.class).sheet("抄表").doWrite(list);
     }
 }

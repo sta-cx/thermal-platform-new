@@ -9,10 +9,16 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import cn.idev.excel.EasyExcel;
+import jakarta.servlet.http.HttpServletResponse;
 import org.sdkj.thermal.domain.vo.PrHeatDailyVo;
 import org.sdkj.thermal.service.IPrHeatDailyService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /**
  * 热表日表管理
@@ -83,7 +89,7 @@ public class PrHeatDailyController extends BaseController {
     @SaCheckLogin
     @Log(title = "热表日表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/exportAll")
-    public R<Void> exportAll(
+    public void exportAll(HttpServletResponse response,
             @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
@@ -91,8 +97,12 @@ public class PrHeatDailyController extends BaseController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) Integer isCharged,
             @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime) {
-        // TODO: 日表导出逻辑待后续实现
-        return R.ok();
+            @RequestParam(required = false) String endTime) throws IOException {
+        var list = heatDailyService.selectPageList(companyId, orgId, buildingId, unitCode, search, isCharged, startTime, endTime, null).getRows();
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("热表日表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatDailyVo.class).sheet("日表").doWrite(list);
     }
 }
