@@ -81,6 +81,8 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
         long total = lambdaQuery().eq(HtTasksPerform::getTasksId, taskId).count();
         long pending = lambdaQuery().eq(HtTasksPerform::getTasksId, taskId)
             .eq(HtTasksPerform::getStatus, 0).count();
+        long sending = lambdaQuery().eq(HtTasksPerform::getTasksId, taskId)
+            .eq(HtTasksPerform::getStatus, 1).count();
         long success = lambdaQuery().eq(HtTasksPerform::getTasksId, taskId)
             .eq(HtTasksPerform::getStatus, 2).count();
         long failed = lambdaQuery().eq(HtTasksPerform::getTasksId, taskId)
@@ -90,6 +92,26 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
         return Map.of(
             "total", total,
             "pending", pending,
+            "sending", sending,
+            "success", success,
+            "failed", failed,
+            "successRate", rate
+        );
+    }
+
+    @Override
+    public Map<String, Object> selectGlobalStatusSummary() {
+        long total = lambdaQuery().count();
+        long pending = lambdaQuery().eq(HtTasksPerform::getStatus, 0).count();
+        long sending = lambdaQuery().eq(HtTasksPerform::getStatus, 1).count();
+        long success = lambdaQuery().eq(HtTasksPerform::getStatus, 2).count();
+        long failed = lambdaQuery().eq(HtTasksPerform::getStatus, 3).count();
+
+        double rate = total > 0 ? Math.round(success * 10000.0 / total) / 100.0 : 0.0;
+        return Map.of(
+            "total", total,
+            "pending", pending,
+            "sending", sending,
             "success", success,
             "failed", failed,
             "successRate", rate

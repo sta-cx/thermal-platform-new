@@ -328,11 +328,47 @@ public class HtTasksController extends BaseController {
     public TableDataInfo<HtTasksVo> deviceList(
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String deviceType,
             PageQuery pageQuery) {
-        LambdaQueryWrapper<HtTasks> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(orgId != null && !orgId.isEmpty(), HtTasks::getOrgId, orgId);
-        lqw.eq(companyId != null && !companyId.isEmpty(), HtTasks::getCompanyId, companyId);
-        lqw.orderByDesc(HtTasks::getCreateTime);
-        return tasksService.selectPageList(lqw, pageQuery);
+        return tasksService.selectDeviceList(orgId, companyId, deviceType, pageQuery);
+    }
+
+    /**
+     * 查询房屋其他编码
+     * 旧端点: GET /property/htTasks/getHouseOtherCode
+     * 新端点: GET /thermal/ht/tasks/otherCode/{id}
+     */
+    @SaCheckPermission("thermal:ht:tasks:query")
+    @SaCheckLogin
+    @GetMapping("/otherCode/{id}")
+    public R<String> getOtherCode(@PathVariable String id) {
+        String otherCode = tasksService.getHouseOtherCode(id);
+        return R.ok(otherCode);
+    }
+
+    /**
+     * 更新房屋其他编码
+     * 旧端点: POST /property/htTasks/updateOtherCode
+     * 新端点: PUT /thermal/ht/tasks/otherCode
+     */
+    @SaCheckPermission("thermal:ht:tasks:edit")
+    @SaCheckLogin
+    @Log(title = "房屋其他编码", businessType = BusinessType.UPDATE)
+    @PutMapping("/otherCode")
+    public R<Void> updateOtherCode(@RequestParam String id, @RequestParam String otherCode) {
+        return toAjax(tasksService.updateHouseOtherCode(id, otherCode));
+    }
+
+    /**
+     * 重新设定开度日志
+     * 旧端点: POST /property/htTasks/updateSdkdLog
+     * 新端点: PUT /thermal/ht/tasks/valveAngleLog
+     */
+    @SaCheckPermission("thermal:ht:tasks:edit")
+    @SaCheckLogin
+    @Log(title = "重新设定开度日志", businessType = BusinessType.UPDATE)
+    @PutMapping("/valveAngleLog")
+    public R<Void> updateValveAngleLog(@RequestParam String id, @RequestParam String scopeType) {
+        return toAjax(tasksService.updateValveAngleLog(id, scopeType));
     }
 }

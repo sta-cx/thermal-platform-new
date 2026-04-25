@@ -151,4 +151,48 @@
         </if>
     </select>
 
+    <!-- 重新设定开度日志 - 插入主表（户阀） -->
+    <insert id="insertSettingLogMainH">
+        INSERT INTO ht_task_setting_log (id, task_id, create_by, create_time, scope_type)
+        SELECT #{newMainId}, a.task_id, #{createBy}, NOW(), '1'
+        FROM ht_task_setting_log a WHERE a.id = #{logId}
+    </insert>
+
+    <!-- 重新设定开度日志 - 插入主表（单元阀） -->
+    <insert id="insertSettingLogMainD">
+        INSERT INTO ht_task_setting_log (id, task_id, create_by, create_time, scope_type)
+        SELECT #{newMainId}, a.task_id, #{createBy}, NOW(), '2'
+        FROM ht_task_setting_log a WHERE a.id = #{logId}
+    </insert>
+
+    <!-- 重新设定开度日志 - 插入子表（户阀） -->
+    <insert id="insertSettingLogItemH">
+        INSERT INTO ht_task_setting_log_item (id, main_id, scope_type, meter_num, meter_id, old_angle, new_angle)
+        SELECT REPLACE(UUID(), '-', ''), #{newMainId}, '1', a.meter_num, a.meter_id, a.old_angle, a.new_angle
+        FROM ht_task_setting_log_item a WHERE a.main_id = #{oldMainId}
+    </insert>
+
+    <!-- 重新设定开度日志 - 插入子表（单元阀） -->
+    <insert id="insertSettingLogItemD">
+        INSERT INTO ht_task_setting_log_item (id, main_id, scope_type, meter_num, meter_id, old_angle, new_angle)
+        SELECT REPLACE(UUID(), '-', ''), #{newMainId}, '2', a.meter_num, a.meter_id, a.old_angle, a.new_angle
+        FROM ht_task_setting_log_item a WHERE a.main_id = #{oldMainId}
+    </insert>
+
+    <!-- 重新设定开度日志 - 更新户阀设定状态 -->
+    <update id="updateValveSettingStatusH">
+        UPDATE pr_heat_valve_archive a
+        INNER JOIN ht_task_setting_log_item b ON b.meter_id = a.id
+        SET a.valve_open = b.new_angle
+        WHERE b.main_id = #{newMainId}
+    </update>
+
+    <!-- 重新设定开度日志 - 更新单元阀设定状态 -->
+    <update id="updateValveSettingStatusD">
+        UPDATE pr_heat_unit_valve_archive a
+        INNER JOIN ht_task_setting_log_item b ON b.meter_id = a.id
+        SET a.valve_open = b.new_angle
+        WHERE b.main_id = #{newMainId}
+    </update>
+
 </mapper>

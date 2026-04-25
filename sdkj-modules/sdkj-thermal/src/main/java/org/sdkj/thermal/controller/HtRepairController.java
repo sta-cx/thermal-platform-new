@@ -75,7 +75,7 @@ public class HtRepairController extends BaseController {
     @PostMapping
     public R<Void> insert(@Validated @RequestBody HtRepairBo bo) {
         HtRepair repair = MapstructUtils.convert(bo, HtRepair.class);
-        repair.setRepairNo("R" + java.util.UUID.randomUUID().toString().substring(0, 8));
+        repair.setRepairNo(htRepairService.generateRepairNo());
         return toAjax(htRepairService.save(repair));
     }
 

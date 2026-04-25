@@ -16,6 +16,7 @@ import org.sdkj.thermal.mapper.HtTasksMapper;
 import org.sdkj.thermal.mapper.HtScopeMapper;
 import org.sdkj.thermal.mapper.HtStrategySubMapper;
 import org.sdkj.thermal.mapper.HtInstructionMapper;
+import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.service.IHtTasksService;
 import org.sdkj.thermal.quartz.ThermalJobManager;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 调控任务服务实现
@@ -39,6 +41,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     private final HtScopeMapper scopeMapper;
     private final HtStrategySubMapper strategySubMapper;
     private final HtInstructionMapper instructionMapper;
+    private final PrHouseMapper prHouseMapper;
     private final ThermalJobManager jobManager;
 
     @Override
@@ -288,5 +291,45 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
         } catch (Exception e) {
             throw new RuntimeException("删除调度任务失败: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public TableDataInfo<HtTasksVo> selectDeviceList(String orgId, String companyId, String deviceType, PageQuery pageQuery) {
+        LambdaQueryWrapper<HtTasks> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(orgId != null && !orgId.isEmpty(), HtTasks::getOrgId, orgId);
+        lqw.eq(companyId != null && !companyId.isEmpty(), HtTasks::getCompanyId, companyId);
+        lqw.orderByDesc(HtTasks::getCreateTime);
+        Page<HtTasksVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateValveAngleLog(String logId, String scopeType) {
+        String newMainId = UUID.randomUUID().toString().replace("-", "");
+        Long userId = LoginHelper.getUserId();
+        String createBy = userId != null ? userId.toString() : null;
+
+        if ("1".equals(scopeType)) {
+            baseMapper.insertSettingLogMainH(logId, newMainId, createBy);
+            baseMapper.insertSettingLogItemH(logId, newMainId);
+            return baseMapper.updateValveSettingStatusH(newMainId) > 0;
+        } else if ("2".equals(scopeType)) {
+            baseMapper.insertSettingLogMainD(logId, newMainId, createBy);
+            baseMapper.insertSettingLogItemD(logId, newMainId);
+            return baseMapper.updateValveSettingStatusD(newMainId) > 0;
+        }
+        return false;
+    }
+
+    @Override
+    public String getHouseOtherCode(String houseId) {
+        return prHouseMapper.selectOtherCodeById(houseId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateHouseOtherCode(String houseId, String otherCode) {
+        return prHouseMapper.updateOtherCodeById(houseId, otherCode) > 0;
     }
 }

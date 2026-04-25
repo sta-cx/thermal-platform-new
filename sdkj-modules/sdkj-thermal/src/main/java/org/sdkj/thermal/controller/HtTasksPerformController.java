@@ -84,4 +84,24 @@ public class HtTasksPerformController extends BaseController {
     public R<Map<String, Object>> stats(@RequestParam String taskId) {
         return R.ok(tasksPerformService.selectPerformStats(taskId));
     }
+
+    /**
+     * 按任务ID统计执行状态（各状态数量）
+     */
+    @SaCheckPermission("thermal:ht:tasksPerform:query")
+    @SaCheckLogin
+    @GetMapping("/statistics/{taskId}")
+    public R<Map<String, Object>> statisticsByTaskId(@PathVariable String taskId) {
+        return R.ok(tasksPerformService.selectPerformStats(taskId));
+    }
+
+    /**
+     * 全局状态汇总
+     */
+    @SaCheckPermission("thermal:ht:tasksPerform:list")
+    @SaCheckLogin
+    @GetMapping("/statusSummary")
+    public R<Map<String, Object>> statusSummary() {
+        return R.ok(tasksPerformService.selectGlobalStatusSummary());
+    }
 }

@@ -97,4 +97,34 @@ public interface HtTasksMapper extends BaseMapperPlus<HtTasks, HtTasksVo> {
      * 批量插入指令执行记录
      */
     int insertTasksPerformBatch(@Param("records") List<HtTasksPerform> records);
+
+    /**
+     * 重新设定开度日志 - 插入主表（户阀）
+     */
+    int insertSettingLogMainH(@Param("logId") String logId, @Param("newMainId") String newMainId, @Param("createBy") String createBy);
+
+    /**
+     * 重新设定开度日志 - 插入主表（单元阀）
+     */
+    int insertSettingLogMainD(@Param("logId") String logId, @Param("newMainId") String newMainId, @Param("createBy") String createBy);
+
+    /**
+     * 重新设定开度日志 - 插入子表（户阀）
+     */
+    int insertSettingLogItemH(@Param("oldMainId") String oldMainId, @Param("newMainId") String newMainId);
+
+    /**
+     * 重新设定开度日志 - 插入子表（单元阀）
+     */
+    int insertSettingLogItemD(@Param("oldMainId") String oldMainId, @Param("newMainId") String newMainId);
+
+    /**
+     * 重新设定开度日志 - 更新户阀设定状态
+     */
+    int updateValveSettingStatusH(@Param("newMainId") String newMainId);
+
+    /**
+     * 重新设定开度日志 - 更新单元阀设定状态
+     */
+    int updateValveSettingStatusD(@Param("newMainId") String newMainId);
 }

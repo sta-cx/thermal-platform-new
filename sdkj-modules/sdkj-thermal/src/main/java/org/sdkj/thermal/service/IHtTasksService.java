@@ -84,4 +84,24 @@ public interface IHtTasksService extends IService<HtTasks> {
      * 查询汇总统计
      */
     Map<String, Object> querySummary(String orgId, String buildingId, String unitCode);
+
+    /**
+     * 按设备类型分页查询阀门配表列表
+     */
+    TableDataInfo<HtTasksVo> selectDeviceList(String orgId, String companyId, String deviceType, PageQuery pageQuery);
+
+    /**
+     * 重新设定开度日志
+     */
+    boolean updateValveAngleLog(String logId, String scopeType);
+
+    /**
+     * 查询房屋其他编码
+     */
+    String getHouseOtherCode(String houseId);
+
+    /**
+     * 更新房屋其他编码
+     */
+    boolean updateHouseOtherCode(String houseId, String otherCode);
 }

@@ -55,6 +55,11 @@ public interface IHtTasksPerformService extends IService<HtTasksPerform> {
     Map<String, Object> selectPerformStats(String taskId);
 
     /**
+     * 查询全局状态汇总
+     */
+    Map<String, Object> selectGlobalStatusSummary();
+
+    /**
      * 批量创建阀门控制任务并保存
      * @param archives 阀门配表信息列表
      * @param orgId 组织ID

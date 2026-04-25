@@ -12,6 +12,8 @@ import org.sdkj.thermal.mapper.HtRepairMapper;
 import org.sdkj.thermal.service.IHtRepairService;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +46,12 @@ public class HtRepairServiceImpl extends ServiceImpl<HtRepairMapper, HtRepair> i
     @Override
     public int markAsDeleted(String repairNo, String companyId) {
         return baseMapper.markAsDeleted(repairNo, companyId);
+    }
+
+    @Override
+    public String generateRepairNo() {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+        return formatter.format(new Date());
     }
 
 }

@@ -46,4 +46,11 @@ public interface IHtRepairService extends IService<HtRepair> {
      */
     int markAsDeleted(String repairNo, String companyId);
 
+    /**
+     * 生成报修编号
+     * 格式: yyyyMMddHHmmss (14位时间戳)
+     * @return 报修编号
+     */
+    String generateRepairNo();
+
 }
