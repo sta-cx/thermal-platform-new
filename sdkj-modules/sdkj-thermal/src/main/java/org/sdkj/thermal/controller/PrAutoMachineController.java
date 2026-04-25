@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
+import org.sdkj.common.core.exception.ServiceException;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.web.core.BaseController;
@@ -113,26 +114,30 @@ public class PrAutoMachineController extends BaseController {
      * 微信支付回调（供暖）
      * 旧端点: POST /property/autoMachine/callback
      * 新端点: POST /thermal/property/auto-machine/callback/wechat-heat
+     *
+     * @deprecated 支付回调功能尚未实现，存在安全风险，请勿调用此端点
      */
+    @Deprecated
+    @Hidden
     @SaIgnore
     @PostMapping("/callback/wechat-heat")
     public String wechatCallback(@RequestBody String xmlData) {
-        // TODO: 微信支付回调签名校验，验证通过后再处理业务
-        log.warn("微信回调未实现签名校验，收到请求: {}", xmlData);
-        return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[签名校验未实现]]></return_msg></xml>";
+        throw new ServiceException("支付回调功能尚未实现，请勿调用此端点");
     }
 
     /**
      * 支付宝回调（供暖）
      * 旧端点: POST /property/autoMachine/aliCallBack
      * 新端点: POST /thermal/property/auto-machine/callback/ali-heat
+     *
+     * @deprecated 支付回调功能尚未实现，存在安全风险，请勿调用此端点
      */
+    @Deprecated
+    @Hidden
     @SaIgnore
     @PostMapping("/callback/ali-heat")
     public String aliCallback(@RequestBody Object data) {
-        // TODO: 支付宝回调签名校验，验证通过后再处理业务
-        log.warn("支付宝回调未实现签名校验，收到请求: {}", data);
-        return "fail";
+        throw new ServiceException("支付回调功能尚未实现，请勿调用此端点");
     }
 
     /**

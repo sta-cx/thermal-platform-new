@@ -19,6 +19,8 @@ import org.sdkj.meter.service.IMtHeatArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * 热力表档案管理
  * 迁移自旧系统 MtHeatArchiveController
@@ -93,6 +95,29 @@ public class MtHeatArchiveController extends BaseController {
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable String id) {
         return toAjax(heatArchiveService.removeById(id));
+    }
+
+    /**
+     * 获取所有热力表列表（不分页）
+     * 旧端点: GET /heat/getHeatList
+     * 新端点: GET /thermal/meter/heat/list
+     */
+    @SaCheckLogin
+    @GetMapping("/list")
+    public R<List<MtHeatArchiveVo>> getHeatList() {
+        return R.ok(heatArchiveService.getHeatList());
+    }
+
+    /**
+     * 按条件查询热力表
+     * 旧端点: POST /heat/queryMtHeatArchive
+     * 新端点: POST /thermal/meter/heat/query
+     */
+    @SaCheckLogin
+    @PostMapping("/query")
+    public R<List<MtHeatArchiveVo>> queryMtHeatArchive(@RequestBody MtHeatArchiveBo bo) {
+        MtHeatArchive entity = MapstructUtils.convert(bo, MtHeatArchive.class);
+        return R.ok(heatArchiveService.queryMtHeatArchive(entity));
     }
 
 }

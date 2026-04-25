@@ -21,4 +21,1090 @@
         ORDER BY create_time DESC
     </select>
 
+    <!-- ==================== 设备档案更新方法 ==================== -->
+
+    <update id="updateValveArchive">
+        UPDATE pr_heat_valve_archive
+        SET valve_status = #{valveStatus},
+            setting_status = #{settingStatus},
+            actual_status = #{actualStatus},
+            in_temperature = #{inTemp},
+            out_temperature = #{outTemp},
+            voltage = #{voltage},
+            valve_time = IFNULL(#{valveTime}, NOW()),
+            signal_strength = #{csq},
+            reporting_interval = #{reportInterval},
+            interval_unit = #{reportingUnit},
+            valid_time = #{validTime},
+            total_degree = #{totalDegree},
+            dtu_status = #{dtuStatus},
+            ins_flow = #{insFlow},
+            update_time = NOW(),
+            scope_status = 9
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <update id="updateValveArchiveBatch">
+        <foreach collection="meterInfos" item="meterInfo" separator=";">
+            UPDATE pr_heat_valve_archive
+            SET valve_status = #{meterInfo.valveStatus},
+                setting_status = #{meterInfo.settingStatus},
+                actual_status = #{meterInfo.actualStatus},
+                in_temperature = #{meterInfo.inTemp},
+                out_temperature = #{meterInfo.outTemp},
+                voltage = #{meterInfo.voltage},
+                valve_time = IFNULL(#{meterInfo.valveTime}, NOW()),
+                signal_strength = #{meterInfo.csq},
+                reporting_interval = #{meterInfo.reportInterval},
+                interval_unit = #{meterInfo.reportingUnit},
+                valid_time = #{meterInfo.validTime},
+                total_degree = #{meterInfo.totalDegree},
+                dtu_status = #{meterInfo.dtuStatus},
+                update_time = NOW(),
+                scope_status = 9
+            WHERE meter_num = #{meterInfo.meterNum}
+            <if test="meterInfo.meterArcName != null and meterInfo.meterArcName != ''">
+                AND meter_arc_name = #{meterInfo.meterArcName}
+            </if>
+        </foreach>
+    </update>
+
+    <update id="updateUnitiValveArchive">
+        UPDATE pr_heat_unit_valve_archive
+        SET valve_status = #{valveStatus},
+            setting_status = #{settingStatus},
+            actual_status = #{actualStatus},
+            in_temperature = #{inTemp},
+            out_temperature = #{outTemp},
+            voltage = #{voltage},
+            valve_time = IFNULL(#{valveTime}, NOW()),
+            signal_strength = #{csq},
+            reporting_interval = #{reportInterval},
+            interval_unit = #{reportingUnit},
+            valid_time = #{validTime},
+            total_degree = #{totalDegree},
+            dtu_status = #{dtuStatus},
+            update_time = NOW()
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <update id="updateUnitiValveArchiveBatch">
+        <foreach collection="meterDataList" item="meterData" separator=";">
+            UPDATE pr_heat_unit_valve_archive
+            SET valve_status = #{meterData.valveStatus},
+                setting_status = #{meterData.settingStatus},
+                actual_status = #{meterData.actualStatus},
+                in_temperature = #{meterData.inTemp},
+                out_temperature = #{meterData.outTemp},
+                voltage = #{meterData.voltage},
+                valve_time = IFNULL(#{meterData.valveTime}, NOW()),
+                signal_strength = #{meterData.csq},
+                reporting_interval = #{meterData.reportInterval},
+                interval_unit = #{meterData.reportingUnit},
+                valid_time = #{meterData.validTime},
+                total_degree = #{meterData.totalDegree},
+                dtu_status = #{meterData.dtuStatus},
+                update_time = NOW()
+            WHERE meter_num = #{meterData.meterNum}
+            <if test="meterData.meterArcName != null and meterData.meterArcName != ''">
+                AND meter_arc_name = #{meterData.meterArcName}
+            </if>
+        </foreach>
+    </update>
+
+    <update id="updateTempArchive">
+        UPDATE pr_heat_temp_archive
+        SET temper = #{temperature},
+            humidity = #{humi},
+            voltage = #{voltage},
+            report_time = #{readTime},
+            reporting_interval = #{reportingInterval},
+            interval_unit = #{reportingUnit},
+            valid_time = #{validTime},
+            signal_strength = #{csq},
+            report_number = #{totalDegree},
+            report_succ_num = #{reportSuccNum},
+            collect_interval = #{collectInterval},
+            collect_unit = #{collectUnit},
+            collect_num = #{collectTime},
+            collect_time = #{collectDate},
+            mov_place = #{movPlace},
+            valve_status = #{valveStatus}
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <update id="updateHotArchive">
+        UPDATE pr_heat_hot_archive
+        SET status1 = #{valveStatus},
+            out_temperature = #{outTemp},
+            in_temperature = #{inTemp},
+            voltage = #{voltage},
+            valve_time = #{readTime},
+            cell_status = #{voltageStatus},
+            total_flow = #{totalFlow},
+            signal_strength = #{csq},
+            total_used = #{totalHeat},
+            cur_flow = #{flowRate},
+            thermal_power = #{thermalPower},
+            current_reading = #{currentPower},
+            dtu_status = #{dtuStatus},
+            status2 = #{status1}
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <update id="updateUnitHotArchive">
+        UPDATE pr_heat_unit_hot_archive
+        SET status1 = #{valveStatus},
+            out_temperature = #{outTemp},
+            in_temperature = #{inTemp},
+            voltage = #{voltage},
+            valve_time = #{readTime},
+            cell_status = #{voltageStatus},
+            total_flow = #{totalFlow},
+            signal_strength = #{csq},
+            total_used = #{totalHeat},
+            cur_flow = #{flowRate},
+            thermal_power = #{thermalPower},
+            current_reading = #{currentPower},
+            dtu_status = #{dtuStatus},
+            status2 = #{status1}
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <update id="updateDtu">
+        UPDATE pr_heat_dtu_archive
+        SET status = #{dtuStatus}
+        WHERE dtu_num IN (
+            SELECT dtu_num FROM pr_heat_valve_archive
+            WHERE meter_num = #{meterNum}
+            <if test="meterInfo != null and meterInfo != ''">
+                AND meter_arc_name = #{meterInfo}
+            </if>
+        )
+    </update>
+
+    <update id="updateDtuUnit">
+        UPDATE pr_heat_dtu_archive
+        SET status = #{dtuStatus}
+        WHERE dtu_num IN (
+            SELECT dtu_num FROM pr_heat_unit_valve_archive
+            WHERE meter_num = #{meterNum}
+            <if test="meterInfo != null and meterInfo != ''">
+                AND meter_arc_name = #{meterInfo}
+            </if>
+        )
+    </update>
+
+    <update id="updateDtuHot">
+        UPDATE pr_heat_dtu_archive
+        SET status = #{dtuStatus}
+        WHERE dtu_num IN (
+            SELECT dtu_num FROM pr_heat_hot_archive
+            WHERE meter_num = #{meterNum}
+        )
+    </update>
+
+    <update id="updateDtuHotUnit">
+        UPDATE pr_heat_dtu_archive
+        SET status = #{dtuStatus}
+        WHERE dtu_num IN (
+            SELECT dtu_num FROM pr_heat_unit_hot_archive
+            WHERE meter_num = #{meterNum}
+        )
+    </update>
+
+    <!-- ==================== 回读数据插入方法 ==================== -->
+
+    <insert id="insertReading">
+        INSERT INTO pr_heat_reading
+        (id, meter_arc_code, meter_num, st, setting_status, valve_status,
+         in_temperature, out_temperature, diff_temperature, voltage,
+         read_time, reporting_interval, reporting_unit, valid_time, total_degree,
+         csq, flow_rate, create_time, type)
+        VALUES (REPLACE(UUID(), '-', ''),
+                meter_arc_code,
+                #{meterNum},
+                #{valveStatus},
+                #{settingStatus},
+                #{actualStatus},
+                #{inTemp},
+                #{outTemp},
+                #{outTemp} - #{inTemp},
+                #{voltage},
+                #{valveTime},
+                #{reportInterval},
+                #{reportingUnit},
+                #{validTime},
+                #{totalDegree},
+                #{csq},
+                #{insFlow},
+                NOW(),
+                '1')
+    </insert>
+
+    <insert id="batchInsertReading">
+        INSERT INTO pr_heat_reading
+        (id, meter_arc_code, meter_num, st, setting_status, valve_status,
+         in_temperature, out_temperature, diff_temperature, voltage,
+         read_time, reporting_interval, reporting_unit, valid_time, total_degree,
+         csq, create_time, type)
+        VALUES
+        <foreach collection="valveDataList" item="item" index="index" separator=",">
+            (REPLACE(UUID(), '-', ''),
+             meter_arc_code,
+             #{item.meterNum},
+             #{item.valveStatus},
+             #{item.settingStatus},
+             #{item.actualStatus},
+             #{item.inTemp},
+             #{item.outTemp},
+             #{item.outTemp} - #{item.inTemp},
+             #{item.voltage},
+             #{item.valveTime},
+             #{item.reportInterval},
+             #{item.reportingUnit},
+             #{item.validTime},
+             #{item.totalDegree},
+             #{item.csq},
+             NOW(),
+             '1')
+        </foreach>
+    </insert>
+
+    <insert id="insertYTReading">
+        INSERT INTO pr_heat_reading
+        (id, meter_num, type, st, setting_status, valve_status, in_temperature, out_temperature, voltage,
+         read_time, reporting_interval, reporting_unit, csq, valve_model, user_set_temp, room_temp,
+         avg_temp, work_time, total_open_time, cold_flg, wkq_lock, temp_low, temp_high, ins_flow, create_time)
+        VALUES (REPLACE(UUID(), '-', ''),
+                #{meterNum},
+                '1',
+                #{valveStatus},
+                #{settingStatus},
+                #{actualStatus},
+                #{inTemp},
+                #{outTemp},
+                #{voltage},
+                #{valveTime},
+                #{reportInterval},
+                #{reportingUnit},
+                #{csq},
+                #{valveModel},
+                #{userSetTemp},
+                #{roomTemp},
+                #{avgTemp},
+                #{workTime},
+                #{totalOpenTime},
+                #{coldFlg},
+                #{wkqLock},
+                #{tempLow},
+                #{tempHigh},
+                #{insFlow},
+                NOW())
+    </insert>
+
+    <insert id="insertTempReading">
+        INSERT INTO pr_heat_reading
+        (id, meter_num, temperature, humi, voltage, read_time, reporting_interval, reporting_unit,
+         valid_time, csq, total_degree, report_succ_num, collect_interval, collect_unit, collect_time,
+         create_time, type, mov_place, valve_status)
+        VALUES (REPLACE(UUID(), '-', ''),
+                #{meterNum},
+                #{temperature},
+                #{humi},
+                #{voltage},
+                #{collectDate},
+                #{reportingInterval},
+                #{reportingUnit},
+                #{validTime},
+                #{csq},
+                #{totalDegree},
+                #{reportSuccNum},
+                #{collectInterval},
+                #{collectUnit},
+                #{collectTime},
+                NOW(),
+                '3',
+                #{movPlace},
+                #{valveStatus})
+    </insert>
+
+    <insert id="insertHotReading">
+        INSERT INTO pr_heat_reading
+        (id, meter_num, out_temperature, in_temperature, voltage, read_time, power_state, st,
+         total_flow, csq, total_heat, flow_rate, current_flow, heat_power, current_power, create_time, rb_status1, type)
+        VALUES (REPLACE(UUID(), '-', ''),
+                #{meterNum},
+                #{outTemp},
+                #{inTemp},
+                #{voltage},
+                #{readTime},
+                #{voltageStatus},
+                #{valveStatus},
+                #{totalFlow},
+                #{csq},
+                #{totalHeat},
+                #{flowRate},
+                #{currentFlow},
+                #{thermalPower},
+                #{currentPower},
+                NOW(),
+                #{status1},
+                '2')
+    </insert>
+
+    <!-- ==================== 房屋/单元状态更新方法 ==================== -->
+
+    <update id="updateValveHouse">
+        UPDATE pr_house
+        SET valve_open = #{actualStatus},
+            in_temp = #{inTemp},
+            out_temp = #{outTemp}
+        WHERE id IN (
+            SELECT house_id FROM pr_heat_valve_archive
+            WHERE meter_num = #{meterNum}
+            <if test="meterInfo != null and meterInfo != ''">
+                AND meter_arc_name = #{meterInfo}
+            </if>
+        )
+    </update>
+
+    <update id="updateValveHouseByGuid">
+        UPDATE pr_house
+        SET valve_open = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM pr_heat_valve_archive t1
+            INNER JOIN ht_tasks_perform t2 ON t1.id = t2.meter_id AND t1.meter_num = t2.meter_num
+            WHERE pr_house.id = t1.house_id
+              AND t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+            LIMIT 1
+        )
+        WHERE EXISTS (
+            SELECT 1
+            FROM pr_heat_valve_archive t1
+            INNER JOIN ht_tasks_perform t2 ON t1.id = t2.meter_id AND t1.meter_num = t2.meter_num
+            WHERE pr_house.id = t1.house_id
+              AND t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+        )
+    </update>
+
+    <update id="updateValveUnit">
+        UPDATE pr_unit
+        SET valve_open = #{actualStatus},
+            in_temp = #{inTemp},
+            out_temp = #{outTemp}
+        WHERE id IN (
+            SELECT unit_id FROM pr_heat_unit_valve_archive
+            WHERE meter_num = #{meterNum}
+            <if test="meterInfo != null and meterInfo != ''">
+                AND meter_arc_name = #{meterInfo}
+            </if>
+        )
+    </update>
+
+    <update id="updateValveUnitByGuid">
+        UPDATE pr_unit
+        SET valve_open = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM pr_heat_unit_valve_archive t1
+            INNER JOIN ht_tasks_perform t2 ON t1.id = t2.meter_id AND t1.meter_num = t2.meter_num
+            WHERE pr_unit.id = t1.unit_id
+              AND t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+            LIMIT 1
+        )
+        WHERE EXISTS (
+            SELECT 1
+            FROM pr_heat_unit_valve_archive t1
+            INNER JOIN ht_tasks_perform t2 ON t1.id = t2.meter_id AND t1.meter_num = t2.meter_num
+            WHERE pr_unit.id = t1.unit_id
+              AND t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+        )
+    </update>
+
+    <update id="updateTempHouse">
+        UPDATE pr_house
+        SET room_temp = #{temperature}
+        WHERE id IN (
+            SELECT house_id FROM pr_heat_temp_archive
+            WHERE meter_num = #{meterNum}
+        )
+    </update>
+
+    <update id="updateHotHouse">
+        UPDATE pr_house
+        SET cur_flow = #{flowRate}
+        WHERE id IN (
+            SELECT house_id FROM pr_heat_hot_archive
+            WHERE meter_num = #{meterNum}
+        )
+    </update>
+
+    <!-- ==================== 阀门档案状态更新方法 ==================== -->
+
+    <update id="updateValveArchiveStatusByGuid">
+        UPDATE pr_heat_valve_archive
+        SET valve_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 1
+                WHEN 2 THEN 2
+                WHEN 3 THEN 1
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_valve_archive.id = t2.meter_id
+              AND pr_heat_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        ),
+        setting_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_valve_archive.id = t2.meter_id
+              AND pr_heat_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        ),
+        actual_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_valve_archive.id = t2.meter_id
+              AND pr_heat_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        )
+        WHERE EXISTS (
+            SELECT 1 FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_valve_archive.id = t2.meter_id
+              AND pr_heat_valve_archive.meter_num = t2.meter_num
+        )
+    </update>
+
+    <update id="updateUnitValveArchiveStatusByGuid">
+        UPDATE pr_heat_unit_valve_archive
+        SET valve_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 1
+                WHEN 2 THEN 2
+                WHEN 3 THEN 1
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_unit_valve_archive.id = t2.meter_id
+              AND pr_heat_unit_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        ),
+        setting_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_unit_valve_archive.id = t2.meter_id
+              AND pr_heat_unit_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        ),
+        actual_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_unit_valve_archive.id = t2.meter_id
+              AND pr_heat_unit_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        )
+        WHERE EXISTS (
+            SELECT 1 FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_unit_valve_archive.id = t2.meter_id
+              AND pr_heat_unit_valve_archive.meter_num = t2.meter_num
+        )
+    </update>
+
+    <update id="updateCommandValveArchiveStatusByGuid">
+        UPDATE pr_heat_command_valve_archive
+        SET valve_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 1
+                WHEN 2 THEN 2
+                WHEN 3 THEN 1
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_command_valve_archive.id = t2.meter_id
+              AND pr_heat_command_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        ),
+        setting_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_command_valve_archive.id = t2.meter_id
+              AND pr_heat_command_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        ),
+        actual_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_command_valve_archive.id = t2.meter_id
+              AND pr_heat_command_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        )
+        WHERE EXISTS (
+            SELECT 1 FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_command_valve_archive.id = t2.meter_id
+              AND pr_heat_command_valve_archive.meter_num = t2.meter_num
+        )
+    </update>
+
+    <update id="updateCommandUnitiValveArchiveStatusByGuid">
+        UPDATE pr_heat_command_unit_valve_archive
+        SET valve_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 1
+                WHEN 2 THEN 2
+                WHEN 3 THEN 1
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_command_unit_valve_archive.id = t2.meter_id
+              AND pr_heat_command_unit_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        ),
+        setting_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_command_unit_valve_archive.id = t2.meter_id
+              AND pr_heat_command_unit_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        ),
+        actual_status = (
+            SELECT CASE t2.instruction_type
+                WHEN 1 THEN 100
+                WHEN 2 THEN 0
+                WHEN 3 THEN t2.instruction
+            END
+            FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_command_unit_valve_archive.id = t2.meter_id
+              AND pr_heat_command_unit_valve_archive.meter_num = t2.meter_num
+            LIMIT 1
+        )
+        WHERE EXISTS (
+            SELECT 1 FROM ht_tasks_perform t2
+            WHERE t2.id = #{guid}
+              AND t2.instruction_type IN (1, 2, 3)
+              AND pr_heat_command_unit_valve_archive.id = t2.meter_id
+              AND pr_heat_command_unit_valve_archive.meter_num = t2.meter_num
+        )
+    </update>
+
+    <update id="updateCommandValveArchive">
+        UPDATE pr_heat_command_valve_archive
+        SET valve_status = #{valveStatus},
+            setting_status = #{settingStatus},
+            actual_status = #{actualStatus},
+            in_temperature = #{inTemp},
+            out_temperature = #{outTemp},
+            voltage = #{voltage},
+            valve_time = IFNULL(#{valveTime}, NOW()),
+            signal_strength = #{csq},
+            reporting_interval = #{reportInterval},
+            interval_unit = #{reportingUnit},
+            valid_time = #{validTime},
+            total_degree = #{totalDegree},
+            dtu_status = #{dtuStatus},
+            update_time = NOW()
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <update id="updateCommandUnitiValveArchive">
+        UPDATE pr_heat_command_unit_valve_archive
+        SET valve_status = #{valveStatus},
+            setting_status = #{settingStatus},
+            actual_status = #{actualStatus},
+            in_temperature = #{inTemp},
+            out_temperature = #{outTemp},
+            voltage = #{voltage},
+            valve_time = IFNULL(#{valveTime}, NOW()),
+            signal_strength = #{csq},
+            reporting_interval = #{reportInterval},
+            interval_unit = #{reportingUnit},
+            valid_time = #{validTime},
+            total_degree = #{totalDegree},
+            dtu_status = #{dtuStatus},
+            update_time = NOW()
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <!-- ==================== 其他更新方法 ==================== -->
+
+    <update id="updateHeatValveScopeStatus">
+        UPDATE pr_heat_valve_archive
+        SET scope_status = #{valveStatus},
+            scope_time = NOW()
+        WHERE meter_num = #{meterNum}
+    </update>
+
+    <update id="updateValveScopeStatusList">
+        UPDATE pr_heat_valve_archive
+        SET scope_status = 0,
+            scope_time = NOW()
+        WHERE meter_num IN
+        <foreach collection="list" item="item" separator="," open="(" close=")">
+            #{item.meterNum}
+        </foreach>
+    </update>
+
+    <insert id="insertList">
+        INSERT INTO ht_tasks_perform (
+            id, instruction_id, instruction_type, instruction, number, intervall, unit, duration,
+            org_id, company_id, concentrator_code, tele_product_id, tele_api_key, tele_app_key,
+            device_id, meter_num, meter_id, meter_arc_code, status, instruction_status, send_time,
+            tasks_id, group_id, strategy_id, command_index, fore_start, orderr, create_time, create_by,
+            in_temp, out_temp, room_temp, valve_open, imei, dtu_num, chan_num, out_temp_pj, cur_flow_compute, group_data
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id}, #{item.instructionId}, #{item.instructionType}, #{item.instruction},
+             #{item.number}, #{item.intervall}, #{item.unit}, #{item.duration}, #{item.orgId},
+             #{item.companyId}, #{item.concentratorCode}, #{item.teleProductId}, #{item.teleApiKey}, #{item.teleAppKey},
+             #{item.deviceId}, #{item.meterNum}, #{item.meterId}, #{item.meterArcCode}, #{item.status},
+             #{item.instructionStatus}, #{item.sendTime}, #{item.tasksId}, #{item.groupId}, #{item.strategyId},
+             #{item.commandIndex}, #{item.foreStart}, #{item.orderr}, #{item.createTime}, #{item.createBy},
+             #{item.inTemp}, #{item.outTemp}, #{item.roomTemp}, #{item.valveOpen}, #{item.imei},
+             #{item.dtuNum}, #{item.chanNum}, #{item.outTempPj}, #{item.curFlowCompute},
+             #{item.groupData, jdbcType=VARCHAR, typeHandler=com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler})
+        </foreach>
+    </insert>
+
+    <update id="updateListById">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE ht_tasks_perform
+            SET status = '2',
+                send_time = NOW()
+            WHERE id = #{item.id}
+              AND status IN (0, 1)
+        </foreach>
+    </update>
+
+    <update id="updateListByIdAndRadio">
+        <foreach collection="list" item="item" index="index" separator=";">
+            UPDATE ht_tasks_perform a
+            INNER JOIN (
+                SELECT group_id, command_index, dtu_num, chan_num
+                FROM ht_tasks_perform
+                WHERE id = #{item.id}
+            ) b ON a.group_id = b.group_id
+                AND a.command_index = b.command_index
+                AND a.dtu_num = b.dtu_num
+                AND FIND_IN_SET(a.chan_num, b.chan_num) > 0
+            SET status = '2',
+                send_time = NOW()
+            WHERE IFNULL(b.group_id, '') != ''
+              AND status IN (0, 1)
+        </foreach>
+    </update>
+
+    <update id="updateByreturnControl">
+        UPDATE ht_tasks_perform
+        SET instruction_status = #{valveStatus},
+            send_time = NOW()
+        WHERE meter_num = #{meterNum}
+          AND instruction_type = #{command}
+          AND status IN (0, 1, 2)
+          AND id = #{guid}
+    </update>
+
+    <update id="updateByreturnControlByRadio">
+        UPDATE ht_tasks_perform
+        SET instruction_status = #{valveStatus},
+            send_time = NOW()
+        WHERE meter_num = #{meterNum}
+          AND instruction_type = #{command}
+          AND status IN (0, 1, 2)
+          AND (group_id, command_index) IN (
+            SELECT group_id, command_index
+            FROM (SELECT group_id, command_index FROM ht_tasks_perform WHERE id = #{guid}) AS temp
+            WHERE IFNULL(temp.group_id, '') != ''
+        )
+    </update>
+
+    <update id="updateHtScope">
+        UPDATE ht_scope
+        SET status = #{valveStatus}
+        WHERE meter_num = #{meterNum}
+          AND tasks_id IN (
+            SELECT tasks_id FROM ht_tasks_perform
+            WHERE status = '2'
+            <if test="guid != null and guid != ''">
+                AND id = #{guid}
+            </if>
+        )
+    </update>
+
+    <update id="updataTemp">
+        UPDATE pr_heat_temp_archive
+        SET valve_status = #{valveStatus},
+            update_time = NOW()
+        WHERE meter_num = #{meterNum}
+    </update>
+
+    <update id="updataTempS">
+        UPDATE pr_heat_temp_archive
+        SET valve_status = #{valveStatus},
+            update_time = NOW()
+        WHERE meter_num = #{meterNum}
+    </update>
+
+    <update id="updataHeatValve">
+        UPDATE pr_heat_valve_archive
+        SET chan_num = #{channelNum},
+            update_time = NOW()
+        WHERE meter_num = #{meterNum}
+          AND meter_arc_name = #{meterInfo}
+    </update>
+
+    <update id="updataHeatValveS">
+        UPDATE pr_heat_valve_archive
+        SET update_time = NOW(),
+            scope_status = #{valveStatus},
+            scope_time = NOW()
+        WHERE meter_num = #{meterNum}
+    </update>
+
+    <update id="updataUnitValveS">
+        UPDATE pr_heat_unit_valve_archive
+        SET update_time = NOW()
+        WHERE meter_num = #{meterNum}
+    </update>
+
+    <update id="updataUnitValve">
+        UPDATE pr_heat_unit_valve_archive
+        SET chan_num = #{channelNum},
+            update_time = NOW()
+        WHERE meter_num = #{meterNum}
+          AND meter_arc_name = #{meterInfo}
+    </update>
+
+    <update id="updataHeatDtu">
+        UPDATE pr_heat_dtu_archive
+        SET status = #{valveStatus},
+            latest_time = NOW(),
+            chan_num = #{channelNum},
+            update_time = NOW()
+        WHERE dtu_num = #{dtuNum}
+    </update>
+
+    <update id="updataHeatDtuS">
+        UPDATE pr_heat_dtu_archive
+        SET status = #{valveStatus},
+            last_time = NOW(),
+            update_time = NOW()
+        WHERE dtu_num = #{dtuNum}
+    </update>
+
+    <insert id="inserHtAlert">
+        INSERT INTO ht_alert (id, meter_id, is_charged, alert_type, alert_time, org_id, company_id,
+                             valve, in_temp, out_temp, room_temp, create_time)
+        SELECT REPLACE(UUID(), '-', ''),
+               a.id,
+               c.pay_status,
+               #{valveStatus},
+               NOW(),
+               a.org_id,
+               a.company_id,
+               a.actual_status,
+               c.in_temp,
+               c.out_temp,
+               c.room_temp,
+               NOW()
+        FROM pr_heat_valve_archive a
+                 LEFT JOIN pr_house c ON c.id = a.house_id
+        WHERE a.meter_num = #{meterNum}
+    </insert>
+
+    <insert id="inserHtAlertUnit">
+        INSERT INTO ht_alert (id, meter_id, alert_type, alert_time, org_id, company_id, valve,
+                             in_temp, out_temp, room_temp, create_time)
+        SELECT REPLACE(UUID(), '-', ''),
+               a.id,
+               a.actual_status,
+               NOW(),
+               a.org_id,
+               a.company_id,
+               #{valveStatus},
+               a.in_temperature,
+               a.out_temperature,
+               '0',
+               NOW()
+        FROM pr_heat_unit_valve_archive a
+        WHERE a.meter_num = #{meterNum}
+    </insert>
+
+    <update id="updateByDtuStatusV">
+        UPDATE pr_heat_valve_archive
+        SET dtu_status = '2'
+        WHERE meter_num = #{meterNum}
+          AND dtu_num IS NOT NULL
+    </update>
+
+    <update id="updateByDtuStatusV1">
+        UPDATE pr_heat_unit_valve_archive
+        SET dtu_status = '2'
+        WHERE meter_num = #{meterNum}
+          AND dtu_num IS NOT NULL
+    </update>
+
+    <update id="updateByDtuStatusH">
+        UPDATE pr_heat_hot_archive
+        SET dtu_status = '2'
+        WHERE meter_num = #{meterNum}
+          AND dtu_num IS NOT NULL
+    </update>
+
+    <update id="updateByDtuStatusH1">
+        UPDATE pr_heat_unit_hot_archive
+        SET dtu_status = '2'
+        WHERE meter_num = #{meterNum}
+          AND dtu_num IS NOT NULL
+    </update>
+
+    <update id="updateYTValveArchive31D1">
+        UPDATE pr_heat_valve_archive
+        SET update_time = NOW(),
+            valve_time = IFNULL(#{valveTime}, NOW()),
+            signal_strength = #{csq},
+            reporting_interval = #{reportInterval},
+            interval_unit = #{reportingUnit},
+            cold_flg = #{coldFlg},
+            wkq_lock = #{wkqLock},
+            temp_low = #{tempLow},
+            temp_high = #{tempHigh},
+            scope_status = 9
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <update id="updateYTValveArchive1F90">
+        UPDATE pr_heat_valve_archive
+        SET update_time = NOW(),
+            valve_time = IFNULL(#{valveTime}, NOW()),
+            user_set_temp = #{userSetTemp},
+            room_temp = #{roomTemp},
+            avg_temp = #{avgTemp},
+            work_time = #{workTime},
+            total_open_time = #{totalOpenTime},
+            scope_status = 9
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <update id="updateYTValveArchive2190">
+        UPDATE pr_heat_valve_archive
+        SET valve_status = #{valveStatus},
+            setting_status = #{settingStatus},
+            actual_status = #{actualStatus},
+            in_temperature = #{inTemp},
+            out_temperature = #{outTemp},
+            voltage = #{voltage},
+            valve_time = IFNULL(#{valveTime}, NOW()),
+            signal_strength = #{csq},
+            update_time = NOW(),
+            valve_model = #{valveModel},
+            user_set_temp = #{userSetTemp},
+            room_temp = #{roomTemp},
+            avg_temp = #{avgTemp},
+            work_time = #{workTime},
+            total_open_time = #{totalOpenTime},
+            scope_status = 9
+        WHERE meter_num = #{meterNum}
+        <if test="meterInfo != null and meterInfo != ''">
+            AND meter_arc_name = #{meterInfo}
+        </if>
+    </update>
+
+    <update id="updateHotArchiveDtu">
+        UPDATE pr_heat_hot_archive
+        SET dtu_num_status = #{status}
+        WHERE dtu_num = #{dtuNum}
+    </update>
+
+    <update id="updateUnitHotArchiveDtu">
+        UPDATE pr_heat_unit_hot_archive
+        SET dtu_num_status = #{status}
+        WHERE dtu_num = #{dtuNum}
+    </update>
+
+    <update id="updateValveArchiveDtu">
+        UPDATE pr_heat_valve_archive
+        SET dtu_num_status = #{status}
+        WHERE dtu_num = #{dtuNum}
+    </update>
+
+    <update id="updateUnitiValveArchiveDtu">
+        UPDATE pr_heat_unit_valve_archive
+        SET dtu_num_status = #{status}
+        WHERE dtu_num = #{dtuNum}
+    </update>
+
+    <update id="updateDtuArchive">
+        UPDATE pr_heat_dtu_archive
+        SET
+        <trim>
+            <if test="status != null and status == 1">
+                latest_time = #{collectDate},
+            </if>
+            <if test="status != null and status == 2">
+                last_time = #{collectDate},
+            </if>
+            status = #{status}
+        </trim>
+        WHERE dtu_num = #{dtuNum}
+    </update>
+
+    <insert id="insertValveOCLog">
+        INSERT INTO pr_use_valve_log (
+            id, type, meter_num, content, room_num, other_code, org_name, building_name, building_id,
+            unit_code, house_id, pay_status, user_name, phone, org_id, company_id, create_by, create_by_name, create_time
+        )
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            <if test="item.instructionType == 1 or item.instructionType == 2 or item.instructionType == 3 or item.instructionType == 5 or item.instructionType == 6">
+                (SELECT REPLACE(UUID(), '-', ''),
+                       #{item.instructionType},
+                       #{item.meterNum},
+                       CASE #{item.instructionType}
+                           WHEN 1 THEN '开阀-100'
+                           WHEN 2 THEN '关阀-0'
+                           WHEN 3 THEN CONCAT('角度调整-', #{item.instruction}, '30')
+                           WHEN 5 THEN '制动'
+                           WHEN 6 THEN CONCAT('设置上报-', #{item.instruction}, '30')
+                       END,
+                       h.room_num,
+                       h.other_code,
+                       h.org_name,
+                       h.building_name,
+                       h.building_id,
+                       h.unit_code,
+                       hva.house_id,
+                       h.pay_status,
+                       uh.user_name,
+                       uh.phone,
+                       #{item.orgId},
+                       #{item.companyId},
+                       #{item.createBy},
+                       su.user_name,
+                       NOW()
+                FROM pr_heat_valve_archive hva
+                         INNER JOIN pr_house h ON hva.house_id = h.id
+                         LEFT JOIN pr_user_house uh ON hva.house_id = uh.house_id
+                         LEFT JOIN sys_user su ON su.id = #{item.createBy}
+                WHERE hva.id = #{item.meterId}
+                LIMIT 1)
+            </if>
+        </foreach>
+    </insert>
+
+    <select id="selectValveInfo" resultType="java.lang.Object">
+        SELECT b.id, b.org_name, b.org_id, b.building_name, b.building_id, b.unit_code, b.room_num,
+               b.company_id, b.other_code, b.pay_status, b.update_time, c.user_name, c.phone,
+               a.meter_num, a.valve_status, a.meter_arc_code, a.meter_arc_name, a.update_time AS 'meterUpdateTime'
+        FROM pr_heat_valve_archive a
+                 INNER JOIN pr_house b ON b.id = a.house_id
+                 LEFT JOIN pr_user_house c ON c.house_id = a.house_id
+        WHERE a.company_id = #{companyId}
+          AND a.id IN
+        <foreach collection="list" item="meterId" index="index" separator="," open="(" close=")">
+            #{meterId}
+        </foreach>
+    </select>
+
+    <select id="selectListN" resultType="org.sdkj.thermal.domain.HtTasksPerform">
+        SELECT a.*, b.name AS 'meterInfo'
+        FROM ht_tasks_perform a
+                 LEFT JOIN mt_tc_valve b ON b.code = a.meter_arc_code
+        WHERE a.company_id = #{companyId}
+          AND a.status = '0'
+    </select>
+
 </mapper>

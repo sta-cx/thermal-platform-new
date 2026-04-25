@@ -13,6 +13,8 @@ import org.sdkj.meter.service.IMtHeatArchiveService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 热力表档案 Service 实现
  * 迁移自旧系统 MtHeatArchiveServiceImpl
@@ -27,6 +29,30 @@ public class MtHeatArchiveServiceImpl extends ServiceImpl<MtHeatArchiveMapper, M
     public TableDataInfo<MtHeatArchiveVo> selectPageList(LambdaQueryWrapper<MtHeatArchive> lqw, PageQuery pageQuery) {
         Page<MtHeatArchiveVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
+    }
+
+    @Override
+    public List<MtHeatArchiveVo> getHeatList() {
+        return baseMapper.selectVoList(new LambdaQueryWrapper<>());
+    }
+
+    @Override
+    public List<MtHeatArchiveVo> queryMtHeatArchive(MtHeatArchive entity) {
+        LambdaQueryWrapper<MtHeatArchive> lqw = new LambdaQueryWrapper<>();
+        if (entity.getId() != null && !entity.getId().isEmpty()) {
+            lqw.eq(MtHeatArchive::getId, entity.getId());
+        }
+        if (entity.getSortId() != null && !entity.getSortId().isEmpty()) {
+            lqw.eq(MtHeatArchive::getSortId, entity.getSortId());
+        }
+        if (entity.getName() != null && !entity.getName().isEmpty()) {
+            lqw.eq(MtHeatArchive::getName, entity.getName());
+        }
+        if (entity.getCode() != null && !entity.getCode().isEmpty()) {
+            lqw.eq(MtHeatArchive::getCode, entity.getCode());
+        }
+        lqw.orderByAsc(MtHeatArchive::getSeq).orderByDesc(MtHeatArchive::getCreateTime);
+        return baseMapper.selectVoList(lqw);
     }
 
     @Override

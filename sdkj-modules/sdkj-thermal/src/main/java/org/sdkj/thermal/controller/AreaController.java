@@ -4,12 +4,12 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.thermal.domain.Area;
+import org.sdkj.thermal.service.IAreaService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Validated
 @RequiredArgsConstructor
@@ -17,27 +17,32 @@ import java.util.Map;
 @RequestMapping("/thermal/area")
 public class AreaController extends BaseController {
 
+    private final IAreaService areaService;
+
+    /**
+     * 获取省份列表
+     */
     @SaCheckLogin
-    @GetMapping("/province")
-    public R<List<Map<String, Object>>> provinceList() {
-        return R.ok(new ArrayList<>());
+    @GetMapping("/provinces")
+    public R<List<Area>> provinceList() {
+        return R.ok(areaService.getProvinces());
     }
 
+    /**
+     * 根据省份ID获取城市列表
+     */
     @SaCheckLogin
-    @GetMapping("/city/{provinceCode}")
-    public R<List<Map<String, Object>>> cityList(@PathVariable String provinceCode) {
-        return R.ok(new ArrayList<>());
+    @GetMapping("/cities/{provinceId}")
+    public R<List<Area>> cityList(@PathVariable String provinceId) {
+        return R.ok(areaService.getCities(provinceId));
     }
 
+    /**
+     * 根据城市ID获取区县列表
+     */
     @SaCheckLogin
-    @GetMapping("/district/{cityCode}")
-    public R<List<Map<String, Object>>> districtList(@PathVariable String cityCode) {
-        return R.ok(new ArrayList<>());
-    }
-
-    @SaCheckLogin
-    @GetMapping("/street/{districtCode}")
-    public R<List<Map<String, Object>>> streetList(@PathVariable String districtCode) {
-        return R.ok(new ArrayList<>());
+    @GetMapping("/districts/{cityId}")
+    public R<List<Area>> districtList(@PathVariable String cityId) {
+        return R.ok(areaService.getDistricts(cityId));
     }
 }
