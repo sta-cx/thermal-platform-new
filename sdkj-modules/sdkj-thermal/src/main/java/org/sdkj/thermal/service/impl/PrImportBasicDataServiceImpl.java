@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.UUID;
 
 @Service
@@ -82,9 +84,7 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
         mapper.updateBuildId(companyId, create);
         List<PrImportBasicData> noBuildId = mapper.selectNoBuildId(companyId, create);
         if (!noBuildId.isEmpty()) {
-            for (PrImportBasicData item : noBuildId) {
-                // 创建缺失的楼宇ID
-            }
+            return R.fail("下列" + noBuildId.size() + "条数据楼宇信息无法匹配，请核对信息！");
         }
 
         mapper.updateUnitId(companyId, create);
@@ -118,28 +118,26 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
     }
 
     @Override
+    public long count() {
+        String create = LoginHelper.getUserIdStr();
+        String companyId = LoginHelper.getTenantId();
+        LambdaQueryWrapper<PrImportBasicData> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(PrImportBasicData::getCompanyId, companyId);
+        lqw.eq(PrImportBasicData::getCreateBy, create);
+        lqw.eq(PrImportBasicData::getType, 0);
+        return count(lqw);
+    }
+
+    @Override
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
         String companyId = LoginHelper.getTenantId();
         List<String> orgIds = mapper.groupOrgId(companyId, create);
         if (orgIds != null && !orgIds.isEmpty()) {
-            for (String orgId : orgIds) {
-                // 导入楼宇
-                List<PrImportBasicData> buildings = mapper.selectBuildings(companyId, create, orgId);
-                // 导入单元
-                List<PrImportBasicData> units = mapper.selectUnits(companyId, create, orgId);
-                // 导入房屋
-                List<PrImportBasicData> houses = mapper.selectHouses(companyId, create, orgId);
-            }
-            // 批量插入业主信息
-            mapper.insertUsers(companyId, create, "e10adc3949ba59abbe56e057f20f883e"); // MD5(123456)
-            // 建立业主与房屋关系
+            mapper.insertUsers(companyId, create, "e10adc3949ba59abbe56e057f20f883e");
             mapper.insertUserHouse(companyId, create);
-            // 建立房屋变更信息
             mapper.insertHouseChange(companyId, create);
-            // 建立房屋费用项目绑定关系
             mapper.insertHouseExpense(companyId, create);
-            // 清理临时数据
             mapper.deleteImportBasicData(companyId, create);
             mapper.deleteUserHouseDataByNoHouseId(companyId, orgIds);
             return true;

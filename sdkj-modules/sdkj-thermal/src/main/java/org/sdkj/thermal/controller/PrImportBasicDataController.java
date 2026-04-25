@@ -74,6 +74,10 @@ public class PrImportBasicDataController extends BaseController {
             return R.fail("文件解析失败: " + e.getMessage());
         }
 
+        long count = service.count();
+        if (count > 0) {
+            return R.fail("有未提交的数据，请先提交");
+        }
         try {
             Integer r = service.importData(objects);
             R result = service.check(r);

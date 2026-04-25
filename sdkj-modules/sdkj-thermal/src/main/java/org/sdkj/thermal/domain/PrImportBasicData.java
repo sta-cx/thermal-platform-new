@@ -71,7 +71,6 @@ public class PrImportBasicData {
 
     @ColumnWidth(15)
     @ExcelProperty(value = {TITLE, "单元位置*"}, index = 7)
-    @TableField("unitSite")
     private String unitSite;
 
     @ColumnWidth(15)
@@ -101,7 +100,6 @@ public class PrImportBasicData {
 
     @ColumnWidth(15)
     @ExcelProperty(value = {TITLE, "位置属性*"}, index = 14)
-    @TableField("siteType")
     private String siteType;
 
     @ExcelIgnore
@@ -152,12 +150,10 @@ public class PrImportBasicData {
 
     @ColumnWidth(15)
     @ExcelProperty(value = {TITLE, "缴费状态"}, index = 22)
-    @TableField("payStatus")
     private String payStatus;
 
     @ColumnWidth(18)
     @ExcelProperty(value = {TITLE, "第三方编码"}, index = 23)
-    @TableField("otherCode")
     private String otherCode;
 
     @ExcelIgnore

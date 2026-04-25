@@ -15,4 +15,6 @@ public interface IPrImportBasicDataService extends IService<PrImportBasicData> {
     boolean deleteData();
 
     boolean submitData();
+
+    long count();
 }

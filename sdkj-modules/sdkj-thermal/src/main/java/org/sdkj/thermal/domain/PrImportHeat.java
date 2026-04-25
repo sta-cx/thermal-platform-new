@@ -126,7 +126,6 @@ public class PrImportHeat {
 
     @ColumnWidth(15)
     @ExcelProperty(value = {title, "安装类型"}, index = 22)
-    @TableField("installType")
     private String installType;
 
     @ExcelIgnore
