@@ -453,7 +453,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         String companyId = LoginHelper.getTenantId();
         String create = LoginHelper.getUserIdStr();
         log.info("导入配表数据，批次号：{}，公司：{}，用户：{}", uuid, companyId, create);
-        // 导入逻辑由 Mapper XML 的 importData SQL 实现
+        baseMapper.importData(companyId, create);
         return true;
     }
 
