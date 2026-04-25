@@ -179,8 +179,42 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean insertDatallCw(List<PmParkingSpace> list) {
-        // TODO: 车位费用需要完整的 pr_expense 生成逻辑
-        return false;
+        if (list == null || list.isEmpty()) return false;
+        List<PrExpense> expenses = new ArrayList<>();
+        Date now = new Date();
+        String userId = String.valueOf(LoginHelper.getUserId());
+
+        for (PmParkingSpace space : list) {
+            PrExpense e = new PrExpense();
+            e.setHouseId(space.getId());
+            e.setItemGroup("parking");
+            e.setItemCode("parking_fee");
+            e.setItemName("车位费");
+            e.setStandardId(space.getStandardId());
+            e.setStartDate(now);
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.add(java.util.Calendar.MONTH, 1);
+            e.setExpireDate(cal.getTime());
+            e.setStandardPrice(space.getStandardPrice());
+            e.setMoney(space.getStandardPrice());
+            e.setReceivable(space.getStandardPrice());
+            e.setIsFree(0);
+            e.setIsCharged(0);
+            e.setIsClosed(0);
+            e.setIsCalc("1");
+            e.setOrgId(space.getOrgId());
+            e.setCompanyId(space.getCompanyId());
+            e.setPaidIn(BigDecimal.ZERO);
+            e.setPreferential(BigDecimal.ZERO);
+            e.setDeduction(BigDecimal.ZERO);
+            e.setLatefee(BigDecimal.ZERO);
+            e.setFinalMoney(BigDecimal.ZERO);
+            e.setOverdueDay(0);
+            e.setCreateBy(Long.valueOf(userId));
+            e.setCreateTime(now);
+            expenses.add(e);
+        }
+        return saveBatch(expenses, 500);
     }
 
     @Override

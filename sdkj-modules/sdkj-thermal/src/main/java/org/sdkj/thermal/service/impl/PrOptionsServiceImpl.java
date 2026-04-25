@@ -2,7 +2,9 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.PrOptions;
+import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.mapper.PrOptionsMapper;
 import org.sdkj.thermal.service.IPrOptionsService;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,7 @@ public class PrOptionsServiceImpl extends ServiceImpl<PrOptionsMapper, PrOptions
         implements IPrOptionsService {
 
     private final PrOptionsMapper baseMapper;
+    private final PrHouseMapper houseMapper;
 
     @Override
     public List<PrOptions> selectByOrgId(String orgId) {
@@ -37,7 +40,11 @@ public class PrOptionsServiceImpl extends ServiceImpl<PrOptionsMapper, PrOptions
 
     @Override
     public boolean forbiddenToBuyCheck(String houseId) {
-        // TODO: 根据房屋关联的组织查询选项，判断是否禁止购买
-        return false;
+        PrHouse house = houseMapper.selectById(houseId);
+        if (house == null || house.getOrgId() == null) return false;
+        var options = lambdaQuery().eq(PrOptions::getOrgId, house.getOrgId()).one();
+        if (options == null) return false;
+        return Boolean.TRUE.equals(options.getForbiddenBuyElectric())
+            || Boolean.TRUE.equals(options.getForbiddenBuyWater());
     }
 }

@@ -277,12 +277,54 @@ public class PrAccountServiceImpl implements IPrAccountService {
 
     @Override
     public Map<String, Object> pageListImportData(int pageNum, int pageSize) {
-        return Map.of("msg", "导入预览功能尚未实现，需要 pr_import_account 临时表支持");
+        String companyId = LoginHelper.getTenantId();
+        LambdaQueryWrapper<PrAccountBalance> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(PrAccountBalance::getCompanyId, companyId);
+        lqw.orderByDesc(PrAccountBalance::getCreateTime);
+        var page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<PrAccountBalance>(pageNum, pageSize);
+        var result = balanceMapper.selectPage(page, lqw);
+        return Map.of("records", result.getRecords(), "total", result.getTotal(),
+            "current", result.getCurrent(), "size", result.getSize());
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> importExcelData(Object file) {
-        return Map.of("msg", "数据导入功能尚未实现，需要 EasyExcel 集成");
+        if (!(file instanceof org.springframework.web.multipart.MultipartFile)) {
+            return Map.of("msg", "请上传有效的 Excel 文件");
+        }
+        var mf = (org.springframework.web.multipart.MultipartFile) file;
+        try {
+            var objects = cn.idev.excel.EasyExcel.read(mf.getInputStream())
+                .head(cn.idev.excel.read.listener.PageReadListener.class)
+                .sheet(0).headRowNumber(1).doReadSync();
+            if (objects.isEmpty()) {
+                return Map.of("msg", "文件中无数据");
+            }
+            String companyId = LoginHelper.getTenantId();
+            Long userId = LoginHelper.getUserId();
+            Date now = new Date();
+            int count = 0;
+            for (Object obj : objects) {
+                if (obj instanceof Map) {
+                    @SuppressWarnings("unchecked")
+                    var row = (Map<String, Object>) obj;
+                    PrAccountBalance balance = new PrAccountBalance();
+                    balance.setHouseId(String.valueOf(row.getOrDefault("houseId", "")));
+                    balance.setItemGroup(String.valueOf(row.getOrDefault("itemGroup", "")));
+                    balance.setItemCode(String.valueOf(row.getOrDefault("itemCode", "")));
+                    balance.setBalance(java.math.BigDecimal.ZERO);
+                    balance.setCompanyId(companyId);
+                    balance.setCreateBy(userId);
+                    balance.setCreateTime(now);
+                    balanceMapper.insert(balance);
+                    count++;
+                }
+            }
+            return Map.of("msg", "成功导入 " + count + " 条记录", "count", count);
+        } catch (Exception e) {
+            return Map.of("msg", "导入失败: " + e.getMessage());
+        }
     }
 
     @Override
