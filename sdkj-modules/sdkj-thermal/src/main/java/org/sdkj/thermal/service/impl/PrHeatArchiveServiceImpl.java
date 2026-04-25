@@ -148,13 +148,59 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Object recharge(PrHeatArchive heatArchive, String paymentMethod) {
-        // TODO: 实现充值逻辑
-        // 1. 生成流水号
-        // 2. 创建交易记录主表
-        // 3. 创建交易记录子表
-        // 4. 更新配表余额
-        log.info("仪表充值，表号：{}，金额：{}", heatArchive.getMeterNum(), heatArchive.getCurrentBalance());
-        return null;
+        Long userId = LoginHelper.getUserId();
+        String companyId = LoginHelper.getTenantId();
+        Date now = new Date();
+
+        PrHeatArchive archive = getById(heatArchive.getId());
+        if (archive == null) {
+            throw new RuntimeException("配表记录不存在");
+        }
+
+        String serialNum = DateUtil.format(now, "yyyyMMddHHmmss")
+            + String.format("%06d", new Random().nextInt(1000000));
+
+        BigDecimal rechargeAmount = heatArchive.getCurrentBalance() != null
+            ? heatArchive.getCurrentBalance() : BigDecimal.ZERO;
+        BigDecimal currentBalance = (archive.getCurrentBalance() != null ? archive.getCurrentBalance() : BigDecimal.ZERO)
+            .add(rechargeAmount);
+
+        archive.setTotalRecharge((archive.getTotalRecharge() != null ? archive.getTotalRecharge() : BigDecimal.ZERO)
+            .add(rechargeAmount));
+        archive.setCurrentBalance(currentBalance);
+        archive.setUpdateBy(userId);
+        updateById(archive);
+
+        PrTransactionRecord record = new PrTransactionRecord();
+        record.setId(IdUtil.simpleUUID());
+        record.setSerialNum(serialNum);
+        record.setTransactionType(1);
+        record.setPaymentType(Integer.parseInt(paymentMethod != null ? paymentMethod : "1"));
+        record.setAmount(rechargeAmount);
+        record.setPaidAmount(rechargeAmount);
+        record.setStatus(0);
+        record.setHouseId(archive.getHouseId());
+        record.setOrgId(archive.getOrgId());
+        record.setCompanyId(companyId);
+        record.setOperatorId(String.valueOf(userId));
+        record.setTransactionTime(now);
+        record.setCreateBy(userId);
+        record.setCreateTime(now);
+        prTransactionRecordMapper.insert(record);
+
+        PrTransactionRecordSub sub = new PrTransactionRecordSub();
+        sub.setId(IdUtil.simpleUUID());
+        sub.setMainId(record.getId());
+        sub.setAmount(rechargeAmount);
+        sub.setBalanceBefore(archive.getCurrentBalance().subtract(rechargeAmount));
+        sub.setBalanceAfter(currentBalance);
+        sub.setHouseId(archive.getHouseId());
+        sub.setCreateBy(userId);
+        sub.setCreateTime(now);
+        prTransactionRecordSubMapper.insert(sub);
+
+        log.info("仪表充值完成，表号：{}，金额：{}，流水号：{}", archive.getMeterNum(), rechargeAmount, serialNum);
+        return record;
     }
 
     @Override
