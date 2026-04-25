@@ -12,8 +12,8 @@ import org.sdkj.thermal.mapper.HtRepairMapper;
 import org.sdkj.thermal.service.IHtRepairService;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +50,17 @@ public class HtRepairServiceImpl extends ServiceImpl<HtRepairMapper, HtRepair> i
 
     @Override
     public String generateRepairNo() {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-        return formatter.format(new Date());
+        String date = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String prefix = "BX" + date;
+        String maxNo = baseMapper.selectMaxRepairNoByPrefix(prefix);
+        int nextSeq = 1;
+        if (maxNo != null && maxNo.length() > prefix.length()) {
+            try {
+                nextSeq = Integer.parseInt(maxNo.substring(prefix.length())) + 1;
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return prefix + String.format("%04d", nextSeq);
     }
 
 }

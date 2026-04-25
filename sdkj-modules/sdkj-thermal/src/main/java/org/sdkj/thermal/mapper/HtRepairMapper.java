@@ -1,6 +1,7 @@
 package org.sdkj.thermal.mapper;
 
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.HtRepair;
 import org.sdkj.thermal.domain.vo.HtRepairVo;
@@ -35,5 +36,8 @@ public interface HtRepairMapper extends BaseMapperPlus<HtRepair, HtRepairVo> {
      * @return 影响行数
      */
     int markAsDeleted(@Param("repairNo") String repairNo, @Param("companyId") String companyId);
+
+    @Select("SELECT MAX(repair_no) FROM ht_repair WHERE repair_no LIKE CONCAT(#{prefix}, '%')")
+    String selectMaxRepairNoByPrefix(@Param("prefix") String prefix);
 
 }

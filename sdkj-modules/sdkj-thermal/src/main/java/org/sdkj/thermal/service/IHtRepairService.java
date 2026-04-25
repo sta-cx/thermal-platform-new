@@ -48,7 +48,7 @@ public interface IHtRepairService extends IService<HtRepair> {
 
     /**
      * 生成报修编号
-     * 格式: yyyyMMddHHmmss (14位时间戳)
+     * 格式: BX + yyyyMMdd + 4位序号 (如 BX202604250001)
      * @return 报修编号
      */
     String generateRepairNo();
