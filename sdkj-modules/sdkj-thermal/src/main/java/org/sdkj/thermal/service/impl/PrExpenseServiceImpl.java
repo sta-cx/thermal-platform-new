@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -205,12 +206,12 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
             BigDecimal deduction = e.getDeduction() != null ? e.getDeduction() : BigDecimal.ZERO;
 
             if ("比例".equals(type) && scaleBd != null) {
-                preferential = money.multiply(scaleBd).divide(new BigDecimal("100"), 2, BigDecimal.ROUND_HALF_UP);
+                preferential = money.multiply(scaleBd).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
             } else if ("金额".equals(type) && priceBd != null) {
                 preferential = priceBd;
             } else if (scaleBd != null) {
                 // Fallback: if type is not explicitly matched but scale is provided, treat as percentage
-                preferential = money.multiply(scaleBd).divide(new BigDecimal("100"), 2, BigDecimal.ROUND_HALF_UP);
+                preferential = money.multiply(scaleBd).divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
             }
 
             e.setPreferential(preferential);

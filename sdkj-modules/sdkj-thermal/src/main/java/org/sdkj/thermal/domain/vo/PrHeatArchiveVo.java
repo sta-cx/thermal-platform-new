@@ -76,7 +76,6 @@ public class PrHeatArchiveVo implements Serializable {
     private Date commandTime;
     private String commandStatus;
     private Date returnTime;
-    private Integer isDeleted;
     private String isPrint;
     private String printType;
 

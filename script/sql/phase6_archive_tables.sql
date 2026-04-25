@@ -66,7 +66,7 @@ CREATE TABLE `pr_heat_archive` (
     `is_notify`           int          DEFAULT 0 COMMENT '是否通知 0否1是',
     `is_changed`          int          DEFAULT 0 COMMENT '是否换表 0否1是',
     `is_stop`             int          DEFAULT 0 COMMENT '是否停用 0否1是',
-    `is_deleted`          int          DEFAULT 0 COMMENT '是否删除 0否1是(软删除)',
+    `del_flag`            char(1)      DEFAULT '0' COMMENT '删除标志(0存在 1删除)',
     `is_print`            varchar(10)  DEFAULT NULL COMMENT '是否打印',
     `print_type`          varchar(10)  DEFAULT NULL COMMENT '打印类型',
     `create_dept`         bigint       DEFAULT NULL COMMENT '创建部门',

@@ -3,7 +3,6 @@ package org.sdkj.thermal.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
@@ -205,10 +204,6 @@ public class PrHeatArchive extends BaseEntity {
 
     /** 返回时间 */
     private Date returnTime;
-
-    /** 是否删除 */
-    @TableLogic
-    private Integer isDeleted;
 
     /** 是否打印 */
     private String isPrint;

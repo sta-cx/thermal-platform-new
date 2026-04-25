@@ -19,6 +19,8 @@ public class PrHouseLog extends BaseEntity {
     private String houseId;
     private String changeType;
     private Integer changeVal;
+    private String orgId;
+    private String companyId;
     private String remark;
 
     @TableField(exist = false)

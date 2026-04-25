@@ -201,9 +201,6 @@ public class PrHeatArchiveBo extends BaseEntity {
     /** 返回时间 */
     private Date returnTime;
 
-    /** 是否删除 */
-    private String isDeleted;
-
     /** 是否打印 */
     private String isPrint;
 
