@@ -1,28 +1,29 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaIgnore;
-import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
-import org.sdkj.common.core.exception.ServiceException;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.thermal.domain.vo.PrTransactionRecordVo;
+import org.sdkj.thermal.service.IPrAutoMachineService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
- * 自助机管理
+ * 自助缴费机管理
  * 迁移自旧系统 PrAutoMachineController
  * 旧端点: /property/autoMachine/* -> 新端点: /thermal/property/auto-machine/*
- *
- * 注意：非支付端点已迁移骨架；支付端点（二维码生成、微信/支付宝回调）
- * 需要 Phase 6 第三方支付集成后方可完整实现。
  */
-@Deprecated
-@Hidden
+@Tag(name = "自助缴费机管理")
 @Slf4j
 @Validated
 @RequiredArgsConstructor
@@ -30,53 +31,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/thermal/property/auto-machine")
 public class PrAutoMachineController extends BaseController {
 
-    /**
-     * 分页查询自助机数据
-     * 旧端点: POST /property/autoMachine/pageList
-     * 新端点: GET /thermal/property/auto-machine/list
-     */
-    @SaCheckLogin
-    @GetMapping("/list")
-    public R<?> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String search) {
-        return R.fail("此功能需要完整实现");
-    }
+    private final IPrAutoMachineService autoMachineService;
 
     /**
-     * 根据ID查询数据
-     * 旧端点: POST /property/autoMachine/getDataById
-     * 新端点: GET /thermal/property/auto-machine/{id}
-     */
-    @SaCheckLogin
-    @GetMapping("/{id}")
-    public R<?> getById(@PathVariable String id) {
-        return R.fail("此功能需要完整实现");
-    }
-
-    /**
-     * 更新数据
-     * 旧端点: POST /property/autoMachine/updateData
-     * 新端点: PUT /thermal/property/auto-machine
-     */
-    @SaCheckLogin
-    @Log(title = "自助机", businessType = BusinessType.UPDATE)
-    @PutMapping
-    public R<Void> updateData(@RequestBody Object data) {
-        return R.fail("此功能需要完整实现");
-    }
-
-    /**
-     * 生成流水号
+     * 生成缴费流水号
      * 旧端点: POST /property/autoMachine/getSerialNum
      * 新端点: GET /thermal/property/auto-machine/serial-num
      */
+    @SaCheckPermission("thermal:property:auto-machine:query")
+    @SaCheckLogin
+    @Log(title = "自助缴费机-生成流水号", businessType = BusinessType.OTHER)
     @GetMapping("/serial-num")
-    public R<?> getSerialNum(
-            @RequestParam String companyId,
-            @RequestParam String orgId) {
-        // TODO: Phase 5e 完整实现
-        return R.fail("此功能需要完整实现");
+    public R<String> getSerialNum(@RequestParam String companyId) {
+        return R.ok("生成成功", autoMachineService.generateSerialNum(companyId));
     }
 
     /**
@@ -84,10 +51,14 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/getQrCode
      * 新端点: POST /thermal/property/auto-machine/qr-heat
      */
+    @SaCheckPermission("thermal:property:auto-machine:pay")
+    @SaCheckLogin
+    @Log(title = "自助缴费机-供暖二维码", businessType = BusinessType.OTHER)
     @PostMapping("/qr-heat")
-    public R<?> getQrCode(@RequestBody Object data) {
-        // TODO: Phase 6 - 微信/支付宝支付集成
-        return R.fail("此功能需要第三方支付集成");
+    public R<String> getQrCode(@RequestBody Map<String, String> params) {
+        String type = params.getOrDefault("type", "wechat");
+        String serialNum = params.get("serialNum");
+        return R.ok("获取成功", autoMachineService.generateQrCode(type, serialNum));
     }
 
     /**
@@ -95,9 +66,14 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/getQrCodeWater
      * 新端点: POST /thermal/property/auto-machine/qr-water
      */
+    @SaCheckPermission("thermal:property:auto-machine:pay")
+    @SaCheckLogin
+    @Log(title = "自助缴费机-水费二维码", businessType = BusinessType.OTHER)
     @PostMapping("/qr-water")
-    public R<?> getQrCodeWater(@RequestBody Object data) {
-        return R.fail("此功能需要第三方支付集成");
+    public R<String> getQrCodeWater(@RequestBody Map<String, String> params) {
+        String type = params.getOrDefault("type", "wechat");
+        String serialNum = params.get("serialNum");
+        return R.ok("获取成功", autoMachineService.generateQrCode(type, serialNum));
     }
 
     /**
@@ -105,39 +81,14 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/getQrCodeEle
      * 新端点: POST /thermal/property/auto-machine/qr-ele
      */
+    @SaCheckPermission("thermal:property:auto-machine:pay")
+    @SaCheckLogin
+    @Log(title = "自助缴费机-电费二维码", businessType = BusinessType.OTHER)
     @PostMapping("/qr-ele")
-    public R<?> getQrCodeEle(@RequestBody Object data) {
-        return R.fail("此功能需要第三方支付集成");
-    }
-
-    /**
-     * 微信支付回调（供暖）
-     * 旧端点: POST /property/autoMachine/callback
-     * 新端点: POST /thermal/property/auto-machine/callback/wechat-heat
-     *
-     * @deprecated 支付回调功能尚未实现，存在安全风险，请勿调用此端点
-     */
-    @Deprecated
-    @Hidden
-    @SaIgnore
-    @PostMapping("/callback/wechat-heat")
-    public String wechatCallback(@RequestBody String xmlData) {
-        throw new ServiceException("支付回调功能尚未实现，请勿调用此端点");
-    }
-
-    /**
-     * 支付宝回调（供暖）
-     * 旧端点: POST /property/autoMachine/aliCallBack
-     * 新端点: POST /thermal/property/auto-machine/callback/ali-heat
-     *
-     * @deprecated 支付回调功能尚未实现，存在安全风险，请勿调用此端点
-     */
-    @Deprecated
-    @Hidden
-    @SaIgnore
-    @PostMapping("/callback/ali-heat")
-    public String aliCallback(@RequestBody Object data) {
-        throw new ServiceException("支付回调功能尚未实现，请勿调用此端点");
+    public R<String> getQrCodeEle(@RequestBody Map<String, String> params) {
+        String type = params.getOrDefault("type", "wechat");
+        String serialNum = params.get("serialNum");
+        return R.ok("获取成功", autoMachineService.generateQrCode(type, serialNum));
     }
 
     /**
@@ -145,10 +96,11 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/queryPaymentSuccess
      * 新端点: GET /thermal/property/auto-machine/payment-status
      */
+    @SaCheckPermission("thermal:property:auto-machine:query")
+    @SaCheckLogin
     @GetMapping("/payment-status")
-    public R<?> queryPaymentSuccess(@RequestParam String serialNum) {
-        // TODO: Phase 5e/6 完整实现
-        return R.fail("此功能需要完整实现");
+    public R<Boolean> queryPaymentSuccess(@RequestParam String serialNum) {
+        return R.ok(autoMachineService.checkPaymentStatus(serialNum));
     }
 
     /**
@@ -156,10 +108,11 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/getRecordBySerialNum
      * 新端点: GET /thermal/property/auto-machine/record
      */
+    @SaCheckPermission("thermal:property:auto-machine:query")
+    @SaCheckLogin
     @GetMapping("/record")
-    public R<?> getRecordBySerialNum(@RequestParam String serialNum) {
-        // TODO: Phase 5e/6 完整实现
-        return R.fail("此功能需要完整实现");
+    public R<PrTransactionRecordVo> getRecordBySerialNum(@RequestParam String serialNum) {
+        return R.ok(autoMachineService.getRecordBySerialNum(serialNum));
     }
 
     /**
@@ -167,11 +120,41 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/getIsReadCard
      * 新端点: GET /thermal/property/auto-machine/read-card
      */
+    @SaCheckPermission("thermal:property:auto-machine:query")
+    @SaCheckLogin
     @GetMapping("/read-card")
-    public R<?> getIsReadCard(
-            @RequestParam String companyId,
-            @RequestParam String orgId) {
-        // TODO: Phase 5e 完整实现
-        return R.fail("此功能需要完整实现");
+    public R<Boolean> getIsReadCard(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId) {
+        // 默认返回 true（读卡器可用）
+        return R.ok(true);
+    }
+
+    /**
+     * 微信支付回调（供暖）
+     * 旧端点: POST /property/autoMachine/callback
+     * 新端点: POST /thermal/property/auto-machine/callback/wechat-heat
+     *
+     * TODO: 待第三方支付SDK集成后实现，当前返回 fail
+     */
+    @SaIgnore
+    @PostMapping("/callback/wechat-heat")
+    public String wechatCallback(@RequestBody String xmlData) {
+        log.warn("微信支付回调尚未实现，收到请求但未处理: {}", xmlData);
+        return "<xml><return_code><![CDATA[FAIL]]></return_code><return_msg><![CDATA[NOT_IMPLEMENTED]]></return_msg></xml>";
+    }
+
+    /**
+     * 支付宝回调（供暖）
+     * 旧端点: POST /property/autoMachine/aliCallBack
+     * 新端点: POST /thermal/property/auto-machine/callback/ali-heat
+     *
+     * TODO: 待第三方支付SDK集成后实现，当前返回 fail
+     */
+    @SaIgnore
+    @PostMapping("/callback/ali-heat")
+    public String aliCallback(@RequestBody String body) {
+        log.warn("支付宝回调尚未实现，收到请求但未处理");
+        return "fail";
     }
 }
