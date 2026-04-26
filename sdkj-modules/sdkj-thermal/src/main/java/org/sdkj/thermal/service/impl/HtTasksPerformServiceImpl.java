@@ -1,6 +1,9 @@
 package org.sdkj.thermal.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,6 +16,7 @@ import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.vo.HtTasksPerformVo;
 import org.sdkj.thermal.mapper.HtTasksPerformMapper;
 import org.sdkj.thermal.service.IHtTasksPerformService;
+import org.sdkj.thermal.utils.CollectPlatformUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -164,21 +168,112 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void executeValveControlTasks(List<HtTasksPerform> htTasksPerformList) throws Exception {
-        // Phase 6: 调用中国电信IoT采集平台接口发送阀门调控指令
-        log.info("执行阀门调控指令（Phase 6 IoT集成），数量：{}", htTasksPerformList.size());
+        if (CollUtil.isEmpty(htTasksPerformList)) {
+            return;
+        }
+        JSONArray dataArray = new JSONArray();
+        for (HtTasksPerform task : htTasksPerformList) {
+            JSONObject item = new JSONObject();
+            item.set("meterNum", task.getMeterNum())
+                .set("dtuNum", task.getDtuNum())
+                .set("conNum", task.getConcentratorCode())
+                .set("chanNum", task.getChanNum())
+                .set("command", task.getInstructionType())
+                .set("guid", task.getId())
+                .set("meterInfo", task.getMeterArcCode())
+                .set("meterCode", task.getMeterArcCode())
+                .set("valveStatus", task.getInstruction());
+            dataArray.add(item);
+        }
+        JSONObject payload = new JSONObject();
+        payload.set("type", 1);
+        payload.set("data", dataArray);
+
+        String result = CollectPlatformUtil.sendControlMsg(payload, ipPort, username, password);
+        Date now = new Date();
+        for (HtTasksPerform task : htTasksPerformList) {
+            task.setStatus("1".equals(result) ? 2 : 3);
+            task.setSendTime(now);
+        }
+        updateBatchById(htTasksPerformList);
+        log.info("阀门调控指令下发完成，数量：{}，结果：{}", htTasksPerformList.size(), result);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void executeHeatMeterTasks(List<HtTasksPerform> htTasksPerformList) throws Exception {
-        // Phase 6: 调用中国电信IoT采集平台接口发送热表调控指令
-        log.info("执行热表调控指令（Phase 6 IoT集成），数量：{}", htTasksPerformList.size());
+        if (CollUtil.isEmpty(htTasksPerformList)) {
+            return;
+        }
+        JSONArray dataArray = new JSONArray();
+        for (HtTasksPerform task : htTasksPerformList) {
+            JSONObject item = new JSONObject();
+            item.set("meterNum", task.getMeterNum())
+                .set("dtuNum", task.getDtuNum())
+                .set("conNum", task.getConcentratorCode())
+                .set("chanNum", task.getChanNum())
+                .set("command", task.getInstructionType())
+                .set("guid", task.getId())
+                .set("meterInfo", task.getMeterArcCode())
+                .set("meterCode", task.getMeterArcCode());
+            dataArray.add(item);
+        }
+        JSONObject payload = new JSONObject();
+        payload.set("type", 2);
+        payload.set("data", dataArray);
+
+        String result = CollectPlatformUtil.sendControlMsg(payload, ipPort, username, password);
+        Date now = new Date();
+        for (HtTasksPerform task : htTasksPerformList) {
+            task.setStatus("1".equals(result) ? 2 : 3);
+            task.setSendTime(now);
+        }
+        updateBatchById(htTasksPerformList);
+        log.info("热表调控指令下发完成，数量：{}，结果：{}", htTasksPerformList.size(), result);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void executeDtuControlTasks(List<HtTasksPerform> htTasksPerformList) throws Exception {
-        // Phase 6: 调用中国电信IoT采集平台接口发送DTU调控指令
-        log.info("执行DTU调控指令（Phase 6 IoT集成），数量：{}", htTasksPerformList.size());
+        if (CollUtil.isEmpty(htTasksPerformList)) {
+            return;
+        }
+        JSONArray dataArray = new JSONArray();
+        for (HtTasksPerform task : htTasksPerformList) {
+            JSONObject item = new JSONObject();
+            item.set("meterNum", task.getMeterNum())
+                .set("dtuNum", task.getDtuNum())
+                .set("conNum", task.getConcentratorCode())
+                .set("chanNum", task.getChanNum())
+                .set("command", task.getInstructionType())
+                .set("guid", task.getId())
+                .set("meterInfo", task.getMeterArcCode())
+                .set("meterCode", task.getMeterArcCode());
+            if (task.getIntervall() != null) {
+                item.set("reportInterval", task.getIntervall());
+            }
+            if (task.getUnit() != null) {
+                item.set("intervalUnit", task.getUnit());
+            }
+            if (task.getDuration() != null) {
+                item.set("validTime", task.getDuration());
+            }
+            dataArray.add(item);
+        }
+        JSONObject payload = new JSONObject();
+        payload.set("type", 5);
+        payload.set("data", dataArray);
+
+        String result = CollectPlatformUtil.sendControlMsg(payload, ipPort, username, password);
+        Date now = new Date();
+        for (HtTasksPerform task : htTasksPerformList) {
+            task.setStatus("1".equals(result) ? 2 : 3);
+            task.setSendTime(now);
+        }
+        updateBatchById(htTasksPerformList);
+        log.info("DTU调控指令下发完成，数量：{}，结果：{}", htTasksPerformList.size(), result);
     }
 
     @Override
