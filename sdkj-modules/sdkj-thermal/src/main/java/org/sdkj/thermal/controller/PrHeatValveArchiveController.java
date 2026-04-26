@@ -24,6 +24,7 @@ import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
 import org.sdkj.thermal.service.IPrHouseService;
 import org.sdkj.thermal.utils.YunGuUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +33,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +51,15 @@ public class PrHeatValveArchiveController extends BaseController {
     private final IPrHeatValveArchiveService valveArchiveService;
     private final IHtTasksPerformService tasksPerformService;
     private final IPrHouseService houseService;
+
+    @Value("${thermal.third-party.yungu.app-code:sdkjApp}")
+    private String yunguAppCode;
+
+    @Value("${thermal.third-party.yungu.app-secret:[REMOVED]}")
+    private String yunguAppSecret;
+
+    @Value("${thermal.third-party.xinao.expected-token:[REMOVED]}")
+    private String xinaoExpectedToken;
 
     /**
      * 分页查询户间阀门配表列表
@@ -568,30 +577,10 @@ public class PrHeatValveArchiveController extends BaseController {
             @RequestBody YunGuControlRequest request) {
 
         // --- Header 校验 ---
-        if (!"sdkjApp".equals(appCode) || StringUtils.isBlank(appCode)) {
-            log.info("云谷控制-请求参数错误1(AppCode)");
-            return YunGuApiResponse.fail("请求参数错误1");
-        }
-        if (StringUtils.isBlank(appToken)) {
-            log.info("云谷控制-请求参数错误2(AppToken)");
-            return YunGuApiResponse.fail("请求参数错误2");
-        }
-        if (StringUtils.isBlank(timestamp) || !timestamp.matches("^\\d{13}$")) {
-            log.info("云谷控制-请求参数错误3(Timestamp)");
-            return YunGuApiResponse.fail("请求参数错误3");
-        }
-
-        long targetTime = Long.parseLong(timestamp.trim());
-        long timeDiff = Math.abs(targetTime - System.currentTimeMillis());
-        if (timeDiff >= 5 * 60 * 1000) {
-            log.info("云谷控制-请求参数错误4(Timestamp过期)");
-            return YunGuApiResponse.fail("请求参数错误4");
-        }
-
-        String expectedToken = YunGuUtils.generateToken("sdkjApp", "[REMOVED]", timestamp).toUpperCase();
-        if (!expectedToken.equals(appToken.toUpperCase())) {
-            log.info("云谷控制-请求参数错误5(token不匹配)");
-            return YunGuApiResponse.fail("请求参数错误5");
+        String headerError = validateYunGuHeaders(appCode, timestamp, appToken);
+        if (headerError != null) {
+            log.info("云谷控制-{}", headerError);
+            return YunGuApiResponse.fail(headerError);
         }
 
         // --- Body 校验 ---
@@ -649,30 +638,10 @@ public class PrHeatValveArchiveController extends BaseController {
             @RequestBody YunGuBatchSyncRequest request) {
 
         // --- Header 校验（与云谷控制共用逻辑） ---
-        if (!"sdkjApp".equals(appCode) || StringUtils.isBlank(appCode)) {
-            log.info("云谷同步-请求参数错误1(AppCode)");
-            return YunGuApiResponse.fail("请求参数错误1");
-        }
-        if (StringUtils.isBlank(appToken)) {
-            log.info("云谷同步-请求参数错误2(AppToken)");
-            return YunGuApiResponse.fail("请求参数错误2");
-        }
-        if (StringUtils.isBlank(timestamp) || !timestamp.matches("^\\d{13}$")) {
-            log.info("云谷同步-请求参数错误3(Timestamp)");
-            return YunGuApiResponse.fail("请求参数错误3");
-        }
-
-        long targetTime = Long.parseLong(timestamp.trim());
-        long timeDiff = Math.abs(targetTime - System.currentTimeMillis());
-        if (timeDiff >= 5 * 60 * 1000) {
-            log.info("云谷同步-请求参数错误4(Timestamp过期)");
-            return YunGuApiResponse.fail("请求参数错误4");
-        }
-
-        String expectedToken = YunGuUtils.generateToken("sdkjApp", "[REMOVED]", timestamp).toUpperCase();
-        if (!expectedToken.equals(appToken.toUpperCase())) {
-            log.info("云谷同步-请求参数错误5(token不匹配)");
-            return YunGuApiResponse.fail("请求参数错误5");
+        String headerError = validateYunGuHeaders(appCode, timestamp, appToken);
+        if (headerError != null) {
+            log.info("云谷同步-{}", headerError);
+            return YunGuApiResponse.fail(headerError);
         }
 
         // --- Body 校验 ---
@@ -719,7 +688,7 @@ public class PrHeatValveArchiveController extends BaseController {
             @RequestParam String meterNums) {
 
         // --- Header 校验 ---
-        if (!"ltrlApp".equals(appCode) || StringUtils.isBlank(appCode)) {
+        if (StringUtils.isBlank(appCode) || !appCode.equals(yunguAppCode)) {
             log.info("新奥-请求参数错误1(AppCode)");
             return R.fail("请求参数错误1");
         }
@@ -741,7 +710,7 @@ public class PrHeatValveArchiveController extends BaseController {
         }
 
         String checkResult = YunGuUtils.checkToken(appToken, targetTime);
-        if (!"[REMOVED]".equals(checkResult)) {
+        if (!xinaoExpectedToken.equals(checkResult)) {
             log.info("新奥-请求参数错误5(token不匹配)");
             return R.fail("请求参数错误5");
         }
@@ -774,5 +743,29 @@ public class PrHeatValveArchiveController extends BaseController {
 
         log.info("新奥-查询完成, count={}", valveList.size());
         return R.ok(valveList);
+    }
+
+    // ========== 云谷 Header 校验共用方法 ==========
+
+    private String validateYunGuHeaders(String appCode, String timestamp, String appToken) {
+        if (StringUtils.isBlank(appCode) || !appCode.equals(yunguAppCode)) {
+            return "请求参数错误1";
+        }
+        if (StringUtils.isBlank(appToken)) {
+            return "请求参数错误2";
+        }
+        if (StringUtils.isBlank(timestamp) || !timestamp.matches("^\\d{13}$")) {
+            return "请求参数错误3";
+        }
+        long targetTime = Long.parseLong(timestamp.trim());
+        long timeDiff = Math.abs(targetTime - System.currentTimeMillis());
+        if (timeDiff >= 5 * 60 * 1000) {
+            return "请求参数错误4";
+        }
+        String expectedToken = YunGuUtils.generateToken(yunguAppCode, yunguAppSecret, timestamp).toUpperCase();
+        if (!expectedToken.equals(appToken.toUpperCase())) {
+            return "请求参数错误5";
+        }
+        return null;
     }
 }

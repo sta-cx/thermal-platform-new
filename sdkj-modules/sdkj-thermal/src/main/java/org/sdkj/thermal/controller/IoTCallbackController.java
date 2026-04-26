@@ -10,14 +10,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.thermal.domain.dto.NbValvePayload;
 import org.sdkj.thermal.service.IIoTDataService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * IoT设备数据回调 Controller
@@ -31,7 +34,12 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class IoTCallbackController {
 
+    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     private final IIoTDataService ioTDataService;
+
+    @Value("${thermal.iot.callback-token:}")
+    private String iotCallbackToken;
 
     /**
      * 电信NB阀门回调 — 迁移自旧系统 insertDataNbValve
@@ -40,30 +48,27 @@ public class IoTCallbackController {
      * 解码后为十六进制字符串，按位解析阀门各项参数。
      */
     @PostMapping("/nb-valve")
-    public R<Integer> nbValve(HttpServletResponse response, @RequestBody String msg) {
+    public R<Integer> nbValve(HttpServletResponse response,
+                               @RequestHeader(value = "X-IoT-Token", required = false) String token,
+                               @RequestBody String msg) {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Connection", "close");
+
+        if (!verifyCallbackToken(token)) {
+            log.warn("NB阀门回调: token验证失败");
+            return R.fail("认证失败");
+        }
 
         try {
             JSONObject jsonObject = JSONUtil.parseObj(msg);
             log.info("NB阀门接收电信平台数据: {}", jsonObject);
 
-            // 推送时间
             String timestamp = jsonObject.getStr("timestamp");
-
-            // IMSI
             String imsi = jsonObject.getStr("IMSI");
-
-            // IMEI
             String imei = jsonObject.getStr("IMEI");
-
-            // productId
             String productId = jsonObject.getStr("productId");
-
-            // deviceId
             String deviceId = jsonObject.getStr("deviceId");
 
-            // 仪表上报的数据 (Base64 编码)
             String payload = jsonObject.getJSONObject("payload").getStr("APPdata");
             Base64.Decoder decoder = Base64.getDecoder();
             byte[] bytes = payload.trim().getBytes(StandardCharsets.UTF_8);
@@ -72,18 +77,17 @@ public class IoTCallbackController {
             NbValvePayload nbPayload = parseNbValveHex(text);
             if (nbPayload == null) {
                 log.warn("NB阀门数据解析失败: text长度不足, text={}", text);
-                return R.ok(0);
+                return R.fail("数据解析失败");
             }
 
-            // 格式化时间戳
             String formattedDate = formatTimestamp(timestamp);
-
             ioTDataService.processNbValveData(formattedDate, imei, imsi, productId, deviceId, nbPayload);
+            return R.ok(200);
 
         } catch (Exception e) {
             log.error("NB阀门数据处理异常", e);
+            return R.fail("处理异常: " + e.getMessage());
         }
-        return R.ok(200);
     }
 
     /**
@@ -93,12 +97,19 @@ public class IoTCallbackController {
      * "1"=阀门, "2"=热表
      */
     @PostMapping("/mbus-valve")
-    public R<Boolean> mbusValve(HttpServletResponse response, @RequestBody String args) {
+    public R<Boolean> mbusValve(HttpServletResponse response,
+                                 @RequestHeader(value = "X-IoT-Token", required = false) String token,
+                                 @RequestBody String args) {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Connection", "close");
 
         JSONObject jsonObject = JSONUtil.parseObj(args);
         log.info("接收世达数据: {}", jsonObject);
+
+        if (!verifyCallbackToken(token)) {
+            log.warn("Mbus回调: token验证失败");
+            return R.fail("认证失败");
+        }
 
         try {
             if (jsonObject.containsKey("data")) {
@@ -182,7 +193,13 @@ public class IoTCallbackController {
      */
     @RequestMapping("/mobile-valve")
     public String mobileValve(String msg, String nonce, String signature,
+                              @RequestHeader(value = "X-IoT-Token", required = false) String token,
                               @RequestBody(required = false) String args) {
+        if (!verifyCallbackToken(token)) {
+            log.warn("移动平台回调: token验证失败");
+            return "auth fail";
+        }
+
         try {
             if (StrUtil.isNotBlank(args)) {
                 log.info("NB阀门接收移动平台数据: {}", args);
@@ -214,6 +231,15 @@ public class IoTCallbackController {
             log.error("移动平台数据处理异常", e);
             return msg;
         }
+    }
+
+    // ========== 认证方法 ==========
+
+    private boolean verifyCallbackToken(String token) {
+        if (StrUtil.isBlank(iotCallbackToken)) {
+            return true;
+        }
+        return iotCallbackToken.equals(token);
     }
 
     // ========== 解析工具方法 ==========
@@ -324,7 +350,7 @@ public class IoTCallbackController {
         // 秒
         calendar.set(Calendar.SECOND, Integer.parseInt(text.substring(58, 60)));
 
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(calendar.getTime());
+        return DTF.format(calendar.toInstant().atZone(ZoneId.systemDefault()));
     }
 
     /**
@@ -364,7 +390,7 @@ public class IoTCallbackController {
             if (ts < 1_000_000_000_000L) {
                 ts = ts * 1000;
             }
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(ts));
+            return DTF.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(ts), ZoneId.systemDefault()));
         } catch (NumberFormatException e) {
             return timestamp;
         }

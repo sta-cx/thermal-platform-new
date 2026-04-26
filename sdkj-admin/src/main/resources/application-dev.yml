@@ -207,3 +207,15 @@ justauth:
       client-id: 10**********6
       client-secret: 1f7d08**********5b7**********29e
       redirect-uri: ${justauth.address}/social-callback?source=gitea
+
+--- # 供热平台第三方集成配置
+thermal:
+  iot:
+    # IoT 回调共享密钥（为空则跳过验证，生产环境务必配置）
+    callback-token: ""
+  third-party:
+    yungu:
+      app-code: sdkjApp
+      app-secret: [REMOVED]
+    xinao:
+      expected-token: [REMOVED]

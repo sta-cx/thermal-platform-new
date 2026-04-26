@@ -114,10 +114,12 @@ public class IoTDataServiceImpl implements IIoTDataService {
         }
 
         archive.setValveStatus(valveStatus);
+        Integer parsedOpening = null;
         if (valveOpening != null) {
             try {
-                archive.setSettingStatus(Integer.parseInt(valveOpening));
-                archive.setActualStatus(Integer.parseInt(valveOpening));
+                parsedOpening = Integer.parseInt(valveOpening);
+                archive.setSettingStatus(parsedOpening);
+                archive.setActualStatus(parsedOpening);
             } catch (NumberFormatException e) {
                 log.warn("Mbus阀门数据: 阀门开度解析失败 valveOpening={}", valveOpening);
             }
@@ -129,8 +131,7 @@ public class IoTDataServiceImpl implements IIoTDataService {
         log.info("Mbus阀门数据更新: meterNum={}, rows={}", meterNum, rows);
 
         // 反写到房屋表
-        Integer actualOpen = valveOpening != null ? Integer.parseInt(valveOpening) : null;
-        updateHouseTemperatures(archive.getHouseId(), supplyTemp, returnTemp, actualOpen);
+        updateHouseTemperatures(archive.getHouseId(), supplyTemp, returnTemp, parsedOpening);
 
         return rows;
     }
