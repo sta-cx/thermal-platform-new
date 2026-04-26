@@ -11,10 +11,14 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
+import org.sdkj.thermal.domain.PrHeatHotArchive;
 import org.sdkj.thermal.domain.dto.PrHeatValveArchiveDto;
 import org.sdkj.thermal.domain.dto.PrHouseByPayVo;
 import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
+import org.sdkj.thermal.domain.dto.LtValveDataResponse;
+import org.sdkj.thermal.domain.dto.YunGuDataResponse;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
+import org.sdkj.thermal.mapper.PrHeatHotArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatValveArchiveMapper;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
@@ -23,6 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +41,7 @@ import java.util.UUID;
 public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiveMapper, PrHeatValveArchive> implements IPrHeatValveArchiveService {
 
     private final PrHeatValveArchiveMapper baseMapper;
+    private final PrHeatHotArchiveMapper hotArchiveMapper;
     private final IHtTasksPerformService htTasksPerformService;
 
     @Override
@@ -347,5 +354,89 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     @Transactional(rollbackFor = Exception.class)
     public boolean removeByIds(java.util.Collection<?> ids) {
         return super.removeByIds(ids);
+    }
+
+    // ========== 第三方 API 实现 ==========
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean yunguValveControl(String manuId, int value) {
+        // 按 meterNum 查找阀门配表
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(PrHeatValveArchive::getMeterNum, manuId);
+        lqw.last("LIMIT 1");
+        PrHeatValveArchive archive = getOne(lqw);
+        if (archive == null) {
+            return false;
+        }
+
+        // 创建调控任务
+        ValveArchiveInfo info = new ValveArchiveInfo(
+            archive.getId(),
+            archive.getMeterArcCode(),
+            archive.getMeterNum(),
+            archive.getDeviceId(),
+            archive.getConcentratorCode(),
+            archive.getImeiNum(),
+            archive.getDtuNum(),
+            archive.getChanNum()
+        );
+        List<HtTasksPerform> tasks = buildTasks(List.of(info), archive.getOrgId(), archive.getCompanyId(), 3, value);
+        return htTasksPerformService.saveBatchTasks(tasks);
+    }
+
+    @Override
+    public List<YunGuDataResponse> yunguBatchSync(List<String> manuIdList) {
+        List<PrHeatHotArchive> hotList = hotArchiveMapper.getValveHotDataByList(manuIdList);
+        if (hotList == null || hotList.isEmpty()) {
+            return List.of();
+        }
+
+        List<YunGuDataResponse> dataList = new ArrayList<>();
+        long currentTime = System.currentTimeMillis();
+        for (PrHeatHotArchive hot : hotList) {
+            YunGuDataResponse resp = new YunGuDataResponse();
+            resp.setMeterManuId(hot.getMeterNum());
+            resp.setShowName(hot.getMeterNum());
+            resp.setLastFlow(hot.getCurFlow() != null
+                ? hot.getCurFlow().divide(new BigDecimal("1000000"), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO);
+            resp.setLastForwardT(hot.getInTemperature());
+            resp.setLastReturnT(hot.getOutTemperature());
+            resp.setLastHeatSum(hot.getTotalUsed() != null
+                ? hot.getTotalUsed().divide(new BigDecimal("1000"), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO);
+            resp.setLastFlowSum(hot.getTotalFlow() != null
+                ? hot.getTotalFlow().divide(new BigDecimal("1000"), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO);
+            resp.setLastHeatPower(hot.getThermalPower() != null
+                ? hot.getThermalPower().divide(new BigDecimal("1000"), 2, RoundingMode.HALF_UP)
+                : BigDecimal.ZERO);
+            resp.setLastRecordTs(hot.getValveTime() != null ? hot.getValveTime().getTime() : currentTime);
+
+            int open = 0;
+            if (StringUtils.isNotBlank(hot.getValveStatus())) {
+                try {
+                    open = Integer.parseInt(hot.getValveStatus());
+                } catch (NumberFormatException ignored) {
+                    // keep 0
+                }
+            }
+            resp.setLastValveOpenPercent(open);
+            resp.setBoltStatus(open > 0 ? 1 : 0);
+
+            resp.setLastFlowMonth(BigDecimal.ZERO);
+            resp.setLastHeatMonth(BigDecimal.ZERO);
+            resp.setLastRoomTemp(BigDecimal.ZERO);
+            resp.setLastRoomTempRecordTs(0L);
+
+            dataList.add(resp);
+        }
+        return dataList;
+    }
+
+    @Override
+    public List<LtValveDataResponse> getLTValveData(List<String> meterNums) {
+        return baseMapper.getLTValveData(meterNums);
     }
 }

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrHeatHotArchiveMapper">
+
+    <!-- 云谷数据同步：按 meterNum 列表查询热表+阀门数据 -->
+    <select id="getValveHotDataByList" resultType="org.sdkj.thermal.domain.PrHeatHotArchive">
+        SELECT a.*, IFNULL(b.actual_status, 0) AS valveStatus
+        FROM pr_heat_hot_archive a
+                 LEFT JOIN pr_heat_valve_archive b ON b.house_id = a.house_id
+        WHERE a.meter_num IN
+            <foreach collection="meterNumList" item="meterNum" open="(" separator="," close=")">
+                #{meterNum}
+            </foreach>
+    </select>
+
+</mapper>

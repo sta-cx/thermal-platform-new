@@ -6,11 +6,15 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.dto.PrHouseByPayVo;
+import org.sdkj.thermal.domain.dto.LtValveDataResponse;
+import org.sdkj.thermal.domain.dto.YunGuDataResponse;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 /**
@@ -78,4 +82,28 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
      * @return 导入结果
      */
     R<Void> importValveArchive(MultipartFile file) throws IOException;
+
+    // ========== 第三方 API（云谷/新奥） ==========
+
+    /**
+     * 云谷阀门控制：按 manuId（meterNum）创建任务下发
+     * @param manuId    设备编号
+     * @param value     开度值（0-100）
+     * @return true=下发成功
+     */
+    boolean yunguValveControl(String manuId, int value);
+
+    /**
+     * 云谷批量数据同步：按 manuId 列表查询热表+阀门数据
+     * @param manuIdList 设备编号列表（最多100个）
+     * @return 云谷格式响应列表
+     */
+    List<YunGuDataResponse> yunguBatchSync(List<String> manuIdList);
+
+    /**
+     * 新奥阀门数据查询
+     * @param meterNums 仪表编号列表（最多50个）
+     * @return 阀门数据响应列表
+     */
+    List<LtValveDataResponse> getLTValveData(List<String> meterNums);
 }
