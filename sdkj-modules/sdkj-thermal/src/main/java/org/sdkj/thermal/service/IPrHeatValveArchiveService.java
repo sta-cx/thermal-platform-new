@@ -106,4 +106,77 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
      * @return 阀门数据响应列表
      */
     List<LtValveDataResponse> getLTValveData(List<String> meterNums);
+
+    // ========== 卡表管理 ==========
+
+    /**
+     * 卡表分页查询
+     */
+    TableDataInfo<PrHeatValveArchiveVo> pageListHeatCard(String companyId, String orgId, String buildingId,
+                                                          String unit, String meterArcCode, String payStatus,
+                                                          String search, String parentId, String writeCardStatus,
+                                                          PageQuery pageQuery);
+
+    /**
+     * 更新写卡状态
+     */
+    boolean updateValveStatus(String id);
+
+    // ========== 设备查询 ==========
+
+    /**
+     * 按表号查询设备
+     */
+    List<PrHeatValveArchiveVo> queryMeterByMeterNum(String meterNum, String orgId, String code);
+
+    /**
+     * 按阀门号查询
+     */
+    List<PrHeatValveArchiveVo> queryValveByMeterNum(String meterNum);
+
+    /**
+     * 按房屋ID查卡阀
+     */
+    List<PrHeatValveArchiveVo> queryCardMeterByHouseId(String houseId);
+
+    /**
+     * 按房号查卡阀
+     */
+    List<PrHeatValveArchiveVo> queryCardMeterByRoomNum(String orgId, String buildingId, String unitCode, String search);
+
+    /**
+     * 按房屋ID获取阀门数据
+     */
+    PrHeatValveArchiveVo getValveDataByHouseId(String houseId);
+
+    // ========== 信息同步 ==========
+
+    /**
+     * 同步户阀信息到采集平台
+     */
+    boolean valveInformationSynchronization(String orgId, String companyId);
+
+    /**
+     * 获取同步数据列表（用于导出Excel）
+     */
+    List<PrHeatValveArchiveVo> listSyncData(String companyId, String orgId);
+
+    // ========== 蓝牙控制日志 ==========
+
+    /**
+     * 蓝牙阀门控制日志
+     */
+    void insertValveControlLogByBluetooth(String meterNum, String type, String opening);
+
+    // ========== 一键新增 ==========
+
+    /**
+     * 新增用户和阀门信息（事务性：PrHouse + PrFamily + PrHeatValveArchive）
+     */
+    String insertUserAndValveInfo(String companyId, String orgId, String orgName,
+                                  String buildingId, String buildingName, String unitCode,
+                                  String roomNum, String floor, String otherCode, String payStatus,
+                                  String userName, String phone,
+                                  String gfloorArea, String nfloorArea, String heatingArea,
+                                  String meterNum);
 }

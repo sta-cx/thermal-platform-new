@@ -19,8 +19,10 @@ import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.bo.PrHeatValveArchiveBo;
 import org.sdkj.thermal.domain.dto.*;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
+import org.sdkj.thermal.domain.vo.PrHouseVo;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
+import org.sdkj.thermal.service.IPrHouseService;
 import org.sdkj.thermal.utils.YunGuUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -48,6 +50,7 @@ public class PrHeatValveArchiveController extends BaseController {
 
     private final IPrHeatValveArchiveService valveArchiveService;
     private final IHtTasksPerformService tasksPerformService;
+    private final IPrHouseService houseService;
 
     /**
      * 分页查询户间阀门配表列表
@@ -326,6 +329,225 @@ public class PrHeatValveArchiveController extends BaseController {
     @PostMapping("/import")
     public R<Void> importValveArchive(@RequestParam("file") MultipartFile file) throws IOException {
         return valveArchiveService.importValveArchive(file);
+    }
+
+    // ========== 卡表管理端点 ==========
+
+    /**
+     * 卡表分页查询
+     * 旧端点: GET /ht/valveArchive/heatCardPageList
+     * 新端点: GET /thermal/ht/valve-archive/heat-card
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckLogin
+    @GetMapping("/heat-card")
+    public TableDataInfo<PrHeatValveArchiveVo> pageListHeatCard(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unit,
+            @RequestParam(required = false) String meterArcCode,
+            @RequestParam(required = false) String payStatus,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String parentId,
+            @RequestParam(required = false) String writeCardStatus,
+            PageQuery pageQuery) {
+        return valveArchiveService.pageListHeatCard(companyId, orgId, buildingId, unit, meterArcCode,
+            payStatus, search, parentId, writeCardStatus, pageQuery);
+    }
+
+    /**
+     * 更新写卡状态
+     * 旧端点: PUT /ht/valveArchive/updateCardStatus/{id}
+     * 新端点: PUT /thermal/ht/valve-archive/{id}/card-status
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-更新写卡状态", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/card-status")
+    public R<Void> updateValveStatus(@PathVariable String id) {
+        return toAjax(valveArchiveService.updateValveStatus(id));
+    }
+
+    // ========== 设备查询端点 ==========
+
+    /**
+     * 按表号查询设备
+     * 旧端点: GET /ht/valveArchive/queryMeterByMeterNum
+     * 新端点: GET /thermal/ht/valve-archive/query-by-meter
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckLogin
+    @GetMapping("/query-by-meter")
+    public R<List<PrHeatValveArchiveVo>> queryMeterByMeterNum(
+            @RequestParam String meterNum,
+            @RequestParam String orgId,
+            @RequestParam String code) {
+        return R.ok(valveArchiveService.queryMeterByMeterNum(meterNum, orgId, code));
+    }
+
+    /**
+     * 按阀门号查询
+     * 旧端点: GET /ht/valveArchive/queryValveByMeterNum
+     * 新端点: GET /thermal/ht/valve-archive/query-by-valve
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckLogin
+    @GetMapping("/query-by-valve")
+    public R<List<PrHeatValveArchiveVo>> queryValveByMeterNum(@RequestParam String meterNum) {
+        return R.ok(valveArchiveService.queryValveByMeterNum(meterNum));
+    }
+
+    /**
+     * 按阀门号查房屋
+     * 旧端点: GET /ht/valveArchive/queryHouseByMeterNum
+     * 新端点: GET /thermal/ht/valve-archive/query-house
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckLogin
+    @GetMapping("/query-house")
+    public R<PrHouseVo> queryHouseByMeterNum(@RequestParam String meterNum) {
+        List<PrHeatValveArchiveVo> valves = valveArchiveService.queryValveByMeterNum(meterNum);
+        if (valves.isEmpty()) {
+            return R.fail("未找到对应的阀门档案");
+        }
+        String houseId = valves.get(0).getHouseId();
+        if (StringUtils.isBlank(houseId)) {
+            return R.fail("该阀门未关联房屋");
+        }
+        return R.ok(houseService.selectById(houseId));
+    }
+
+    /**
+     * 按房屋ID查卡阀
+     * 旧端点: GET /ht/valveArchive/queryCardMeterByHouseId
+     * 新端点: GET /thermal/ht/valve-archive/query-card-by-house
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckLogin
+    @GetMapping("/query-card-by-house")
+    public R<List<PrHeatValveArchiveVo>> queryCardMeterByHouseId(@RequestParam String houseId) {
+        return R.ok(valveArchiveService.queryCardMeterByHouseId(houseId));
+    }
+
+    /**
+     * 按房号查卡阀
+     * 旧端点: GET /ht/valveArchive/queryCardMeterByRoomNum
+     * 新端点: GET /thermal/ht/valve-archive/query-card-by-room
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckLogin
+    @GetMapping("/query-card-by-room")
+    public R<List<PrHeatValveArchiveVo>> queryCardMeterByRoomNum(
+            @RequestParam String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam String search) {
+        return R.ok(valveArchiveService.queryCardMeterByRoomNum(orgId, buildingId, unitCode, search));
+    }
+
+    /**
+     * 按房屋ID获取阀门数据
+     * 旧端点: GET /ht/valveArchive/getValveDataByHouseId/{houseId}
+     * 新端点: GET /thermal/ht/valve-archive/valve-data/{houseId}
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckLogin
+    @GetMapping("/valve-data/{houseId}")
+    public R<PrHeatValveArchiveVo> getValveDataByHouseId(@PathVariable String houseId) {
+        return R.ok(valveArchiveService.getValveDataByHouseId(houseId));
+    }
+
+    // ========== 信息同步端点 ==========
+
+    /**
+     * 同步户阀信息到采集平台
+     * 旧端点: POST /ht/valveArchive/valveInformationSynchronization
+     * 新端点: POST /thermal/ht/valve-archive/sync
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-同步采集平台", businessType = BusinessType.UPDATE)
+    @PostMapping("/sync")
+    public R<Boolean> valveInformationSynchronization(
+            @RequestParam String orgId,
+            @RequestParam String companyId) {
+        boolean result = valveArchiveService.valveInformationSynchronization(orgId, companyId);
+        return result ? R.ok(true) : R.fail("同步失败，请检查采集平台配置");
+    }
+
+    /**
+     * 下载同步信息Excel
+     * 旧端点: GET /ht/valveArchive/downloadInfoSync
+     * 新端点: GET /thermal/ht/valve-archive/sync-download
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-同步信息下载", businessType = BusinessType.EXPORT)
+    @GetMapping("/sync-download")
+    public void downloadInfoSync(HttpServletResponse response,
+                                  @RequestParam String companyId,
+                                  @RequestParam String orgId) throws IOException {
+        List<PrHeatValveArchiveVo> list = valveArchiveService.listSyncData(companyId, orgId);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("户阀同步信息", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatValveArchiveVo.class).sheet("同步信息").doWrite(list);
+    }
+
+    // ========== 蓝牙控制日志端点 ==========
+
+    /**
+     * 蓝牙阀门控制日志
+     * 旧端点: POST /ht/valveArchive/insertValveControlLogByBluetooth
+     * 新端点: POST /thermal/ht/valve-archive/bluetooth-log
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-蓝牙控制", businessType = BusinessType.UPDATE)
+    @PostMapping("/bluetooth-log")
+    public R<Void> insertValveControlLogByBluetooth(
+            @RequestParam String meterNum,
+            @RequestParam String type,
+            @RequestParam String opening) {
+        valveArchiveService.insertValveControlLogByBluetooth(meterNum, type, opening);
+        return R.ok();
+    }
+
+    // ========== 一键新增端点 ==========
+
+    /**
+     * 新增用户和阀门信息
+     * 旧端点: POST /ht/valveArchive/insertUserAndValveInfo
+     * 新端点: POST /thermal/ht/valve-archive/user-valve
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:add")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-一键新增", businessType = BusinessType.INSERT)
+    @PostMapping("/user-valve")
+    public R<String> insertUserAndValveInfo(
+            @RequestParam String companyId,
+            @RequestParam String orgId,
+            @RequestParam(required = false) String orgName,
+            @RequestParam String buildingId,
+            @RequestParam(required = false) String buildingName,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam String roomNum,
+            @RequestParam(required = false) String floor,
+            @RequestParam(required = false) String otherCode,
+            @RequestParam(required = false) String payStatus,
+            @RequestParam(required = false) String userName,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String gfloorArea,
+            @RequestParam(required = false) String nfloorArea,
+            @RequestParam(required = false) String heatingArea,
+            @RequestParam String meterNum) {
+        String houseId = valveArchiveService.insertUserAndValveInfo(
+            companyId, orgId, orgName, buildingId, buildingName, unitCode,
+            roomNum, floor, otherCode, payStatus, userName, phone,
+            gfloorArea, nfloorArea, heatingArea, meterNum);
+        return R.ok(houseId, "创建成功");
     }
 
     // ========== 第三方 API（云谷/新奥） — 不需要 @SaCheckLogin ==========

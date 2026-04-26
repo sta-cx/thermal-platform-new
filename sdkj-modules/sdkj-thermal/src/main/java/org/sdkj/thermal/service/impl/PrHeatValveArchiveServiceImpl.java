@@ -1,27 +1,37 @@
 package org.sdkj.thermal.service.impl;
 
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
 import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.HtTasksPerform;
+import org.sdkj.thermal.domain.PrFamily;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.PrHeatHotArchive;
+import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.dto.PrHeatValveArchiveDto;
 import org.sdkj.thermal.domain.dto.PrHouseByPayVo;
 import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.dto.LtValveDataResponse;
 import org.sdkj.thermal.domain.dto.YunGuDataResponse;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
+import org.sdkj.thermal.domain.vo.PrHouseVo;
+import org.sdkj.thermal.mapper.PrFamilyMapper;
 import org.sdkj.thermal.mapper.PrHeatHotArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatValveArchiveMapper;
+import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
+import org.sdkj.thermal.utils.CollectPlatformUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,11 +48,21 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiveMapper, PrHeatValveArchive> implements IPrHeatValveArchiveService {
 
     private final PrHeatValveArchiveMapper baseMapper;
     private final PrHeatHotArchiveMapper hotArchiveMapper;
     private final IHtTasksPerformService htTasksPerformService;
+    private final PrHouseMapper houseMapper;
+    private final PrFamilyMapper familyMapper;
+
+    @Value("${collect.ipPort:}")
+    private String ipPort;
+    @Value("${collect.username:}")
+    private String username;
+    @Value("${collect.password:}")
+    private String password;
 
     @Override
     public PrHeatValveArchiveVo selectById(java.io.Serializable id) {
@@ -438,5 +458,250 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     @Override
     public List<LtValveDataResponse> getLTValveData(List<String> meterNums) {
         return baseMapper.getLTValveData(meterNums);
+    }
+
+    // ========== 卡表管理实现 ==========
+
+    @Override
+    public TableDataInfo<PrHeatValveArchiveVo> pageListHeatCard(String companyId, String orgId, String buildingId,
+                                                                 String unit, String meterArcCode, String payStatus,
+                                                                 String search, String parentId, String writeCardStatus,
+                                                                 PageQuery pageQuery) {
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatValveArchive::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
+        lqw.eq(StringUtils.isNotBlank(parentId), PrHeatValveArchive::getHouseId, parentId);
+        // buildingId / unit 需通过 house 关联，这里先按 archive 的直接字段过滤
+        if (StringUtils.isNotBlank(meterArcCode)) {
+            lqw.eq(PrHeatValveArchive::getMeterArcCode, meterArcCode);
+        }
+        if (StringUtils.isNotBlank(search)) {
+            lqw.and(w -> w.like(PrHeatValveArchive::getMeterNum, search.trim())
+                .or().like(PrHeatValveArchive::getCardNum, search.trim())
+                .or().like(PrHeatValveArchive::getMeterArcName, search.trim()));
+        }
+        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        // writeCardStatus 筛选: 0=未写卡, 1=已写卡（基于 isOpen 字段映射）
+        if (StringUtils.isNotBlank(writeCardStatus)) {
+            lqw.eq(PrHeatValveArchive::getIsOpen, Integer.parseInt(writeCardStatus));
+        }
+        // payStatus 筛选需要 JOIN pr_house，在简单查询中暂不支持；预留参数位置
+        lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
+        Page<PrHeatValveArchiveVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateValveStatus(String id) {
+        PrHeatValveArchive archive = getById(id);
+        if (archive == null) {
+            return false;
+        }
+        archive.setIsOpen(archive.getIsOpen() == null || archive.getIsOpen() == 0 ? 1 : 0);
+        return updateById(archive);
+    }
+
+    // ========== 设备查询实现 ==========
+
+    @Override
+    public List<PrHeatValveArchiveVo> queryMeterByMeterNum(String meterNum, String orgId, String code) {
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(PrHeatValveArchive::getMeterNum, meterNum);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
+        lqw.eq(StringUtils.isNotBlank(code), PrHeatValveArchive::getMeterArcCode, code);
+        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        lqw.last("LIMIT 100");
+        return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public List<PrHeatValveArchiveVo> queryValveByMeterNum(String meterNum) {
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(PrHeatValveArchive::getMeterNum, meterNum);
+        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public List<PrHeatValveArchiveVo> queryCardMeterByHouseId(String houseId) {
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(PrHeatValveArchive::getHouseId, houseId);
+        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public List<PrHeatValveArchiveVo> queryCardMeterByRoomNum(String orgId, String buildingId, String unitCode, String search) {
+        // 1. 根据 buildingId + unitCode + search 找到 house
+        LambdaQueryWrapper<PrHouse> houseLqw = new LambdaQueryWrapper<>();
+        houseLqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
+        houseLqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
+        if (StringUtils.isNotBlank(unitCode)) {
+            houseLqw.eq(PrHouse::getUnitCode, unitCode);
+        }
+        if (StringUtils.isNotBlank(search)) {
+            houseLqw.and(w -> w.like(PrHouse::getRoomNum, search.trim())
+                .or().like(PrHouse::getCode, search.trim()));
+        }
+        houseLqw.last("LIMIT 500");
+        List<PrHouse> houses = houseMapper.selectList(houseLqw);
+        if (houses.isEmpty()) {
+            return List.of();
+        }
+        // 2. 按房屋ID列表查卡阀
+        List<String> houseIds = houses.stream().map(PrHouse::getId).toList();
+        LambdaQueryWrapper<PrHeatValveArchive> valveLqw = new LambdaQueryWrapper<>();
+        valveLqw.in(PrHeatValveArchive::getHouseId, houseIds);
+        valveLqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        return baseMapper.selectVoList(valveLqw);
+    }
+
+    @Override
+    public PrHeatValveArchiveVo getValveDataByHouseId(String houseId) {
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(PrHeatValveArchive::getHouseId, houseId);
+        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        lqw.last("LIMIT 1");
+        return baseMapper.selectVoOne(lqw);
+    }
+
+    // ========== 信息同步实现 ==========
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean valveInformationSynchronization(String orgId, String companyId) {
+        // 1. 查询该小区下所有有效阀门档案
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatValveArchive::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
+        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        List<PrHeatValveArchive> archives = list(lqw);
+        if (archives.isEmpty()) {
+            log.info("同步-未找到阀门档案数据, orgId={}, companyId={}", orgId, companyId);
+            return false;
+        }
+
+        // 2. 构建同步 JSON
+        JSONArray dataArray = new JSONArray();
+        for (PrHeatValveArchive archive : archives) {
+            JSONObject item = new JSONObject();
+            item.set("meterNum", archive.getMeterNum());
+            item.set("meterArcCode", archive.getMeterArcCode());
+            item.set("meterArcName", archive.getMeterArcName());
+            item.set("concentratorCode", archive.getConcentratorCode());
+            item.set("imeiNum", archive.getImeiNum());
+            item.set("deviceId", archive.getDeviceId());
+            item.set("dtuNum", archive.getDtuNum());
+            item.set("chanNum", archive.getChanNum());
+            item.set("orgId", archive.getOrgId());
+            item.set("companyId", archive.getCompanyId());
+            dataArray.add(item);
+        }
+
+        JSONObject payload = new JSONObject();
+        payload.set("type", "valve");
+        payload.set("data", dataArray);
+
+        // 3. 调用采集平台同步
+        boolean result = CollectPlatformUtil.informationSynchronization(payload, ipPort, username, password);
+        log.info("同步户阀信息到采集平台, orgId={}, companyId={}, count={}, result={}",
+            orgId, companyId, archives.size(), result);
+        return result;
+    }
+
+    @Override
+    public List<PrHeatValveArchiveVo> listSyncData(String companyId, String orgId) {
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatValveArchive::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
+        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
+        return baseMapper.selectVoList(lqw);
+    }
+
+    // ========== 蓝牙控制日志实现 ==========
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void insertValveControlLogByBluetooth(String meterNum, String type, String opening) {
+        // 查找阀门档案
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(PrHeatValveArchive::getMeterNum, meterNum);
+        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        lqw.last("LIMIT 1");
+        PrHeatValveArchive archive = getOne(lqw);
+        if (archive == null) {
+            log.warn("蓝牙控制日志-未找到阀门档案, meterNum={}", meterNum);
+            return;
+        }
+
+        // 创建蓝牙控制任务
+        ValveArchiveInfo info = new ValveArchiveInfo(
+            archive.getId(),
+            archive.getMeterArcCode(),
+            archive.getMeterNum(),
+            archive.getDeviceId(),
+            archive.getConcentratorCode(),
+            archive.getImeiNum(),
+            archive.getDtuNum(),
+            archive.getChanNum()
+        );
+
+        int instructionType = "1".equals(type) ? 3 : 3; // 默认开阀
+        int instruction = StringUtils.isNotBlank(opening) ? Integer.parseInt(opening) : 0;
+
+        List<HtTasksPerform> tasks = buildTasks(List.of(info), archive.getOrgId(), archive.getCompanyId(),
+            instructionType, instruction);
+        htTasksPerformService.saveBatchTasks(tasks);
+        log.info("蓝牙控制日志-指令下发, meterNum={}, type={}, opening={}", meterNum, type, opening);
+    }
+
+    // ========== 一键新增实现 ==========
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String insertUserAndValveInfo(String companyId, String orgId, String orgName,
+                                          String buildingId, String buildingName, String unitCode,
+                                          String roomNum, String floor, String otherCode, String payStatus,
+                                          String userName, String phone,
+                                          String gfloorArea, String nfloorArea, String heatingArea,
+                                          String meterNum) {
+        // 1. 创建房屋
+        PrHouse house = new PrHouse();
+        house.setRoomNum(roomNum);
+        house.setBuildingId(buildingId);
+        house.setBuildingName(buildingName);
+        house.setUnitCode(unitCode);
+        house.setFloor(StringUtils.isNotBlank(floor) ? Integer.parseInt(floor) : null);
+        house.setOtherCode(otherCode);
+        house.setOrgId(orgId);
+        house.setCompanyId(companyId);
+        house.setGfloorArea(StringUtils.isNotBlank(gfloorArea) ? new BigDecimal(gfloorArea) : null);
+        house.setNfloorArea(StringUtils.isNotBlank(nfloorArea) ? new BigDecimal(nfloorArea) : null);
+        house.setHeatingArea(StringUtils.isNotBlank(heatingArea) ? new BigDecimal(heatingArea) : null);
+        house.setStatus("1");
+        houseMapper.insert(house);
+
+        // 2. 创建家庭成员（关联用户）
+        if (StringUtils.isNotBlank(userName)) {
+            PrFamily family = new PrFamily();
+            family.setName(userName);
+            family.setHouseId(house.getId());
+            family.setContactAddr(phone);
+            familyMapper.insert(family);
+        }
+
+        // 3. 创建阀门配表
+        PrHeatValveArchive archive = new PrHeatValveArchive();
+        archive.setMeterNum(meterNum);
+        archive.setHouseId(house.getId());
+        archive.setOrgId(orgId);
+        archive.setCompanyId(companyId);
+        archive.setIsChanged(0);
+        archive.setIsOpen(0);
+        save(archive);
+
+        return house.getId();
     }
 }
