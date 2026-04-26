@@ -2,7 +2,9 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.MapstructUtils;
@@ -10,17 +12,21 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
-import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.bo.PrHeatValveArchiveBo;
+import org.sdkj.thermal.domain.dto.PrHouseByPayVo;
 import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -215,5 +221,104 @@ public class PrHeatValveArchiveController extends BaseController {
         }
         PrHeatValveArchive entity = MapstructUtils.convert(bo, PrHeatValveArchive.class);
         return toAjax(valveArchiveService.save(entity));
+    }
+
+    // ========== 批量操作端点 ==========
+
+    /**
+     * 批量设置阀门开关/查询/制动状态
+     * 旧端点: POST /ht/valveArchive/setValveOCStatus
+     * 新端点: POST /thermal/ht/valve-archive/batch-status
+     *
+     * @param houseList   房屋列表（含 meterNum + meterArcCode）
+     * @param valveStatus 阀门状态: "1"→开(100), "2"→关(0), "4"→查询, "5"→制动, "51"→特殊制动
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-批量开关", businessType = BusinessType.UPDATE)
+    @PostMapping("/batch-status")
+    public R<Void> batchSetValveStatus(@RequestBody List<PrHouseByPayVo> houseList,
+                                        @RequestParam String valveStatus) {
+        if (houseList == null || houseList.isEmpty()) {
+            return R.fail("参数为空");
+        }
+        return toAjax(valveArchiveService.batchSetValveStatus(houseList, valveStatus));
+    }
+
+    /**
+     * 批量设置阀门开度
+     * 旧端点: POST /ht/valveArchive/setValveOCOpening
+     * 新端点: POST /thermal/ht/valve-archive/batch-opening
+     *
+     * @param houseList 房屋列表（含 meterNum + meterArcCode）
+     * @param valveStatus 开度值 (0-100)
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-批量开度", businessType = BusinessType.UPDATE)
+    @PostMapping("/batch-opening")
+    public R<Void> batchSetValveOpening(@RequestBody List<PrHouseByPayVo> houseList,
+                                         @RequestParam String valveStatus) {
+        if (houseList == null || houseList.isEmpty()) {
+            return R.fail("参数为空");
+        }
+        return toAjax(valveArchiveService.batchSetValveOpening(houseList, valveStatus));
+    }
+
+    /**
+     * 批量设置上报周期
+     * 旧端点: POST /ht/valveArchive/setValveCycle
+     * 新端点: POST /thermal/ht/valve-archive/batch-cycle
+     *
+     * @param houseList 房屋列表（含 meterNum + meterArcCode）
+     * @param interval  上报间隔
+     * @param unit      间隔单位
+     * @param valid     有效时间
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-批量周期", businessType = BusinessType.UPDATE)
+    @PostMapping("/batch-cycle")
+    public R<Void> batchSetValveCycle(@RequestBody List<PrHouseByPayVo> houseList,
+                                       @RequestParam String interval,
+                                       @RequestParam String unit,
+                                       @RequestParam String valid) {
+        if (houseList == null || houseList.isEmpty()) {
+            return R.fail("参数为空");
+        }
+        return toAjax(valveArchiveService.batchSetValveCycle(houseList, interval, unit, valid));
+    }
+
+    /**
+     * 导出阀门配表 Excel
+     * 旧端点: GET /ht/valveArchive/exportAll
+     * 新端点: GET /thermal/ht/valve-archive/export
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-导出", businessType = BusinessType.EXPORT)
+    @GetMapping("/export")
+    public void exportAll(HttpServletResponse response,
+                           @RequestParam(required = false) String companyId,
+                           @RequestParam(required = false) String orgId) throws IOException {
+        List<PrHeatValveArchiveVo> list = valveArchiveService.listAll(companyId, orgId);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("阀门配表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatValveArchiveVo.class).sheet("阀门配表").doWrite(list);
+    }
+
+    /**
+     * 导入阀门配表 Excel
+     * 旧端点: POST /ht/valveArchive/importValveArchive
+     * 新端点: POST /thermal/ht/valve-archive/import
+     */
+    @SaCheckPermission("thermal:ht:valve-archive:add")
+    @SaCheckLogin
+    @Log(title = "户间阀门配表-导入", businessType = BusinessType.IMPORT)
+    @PostMapping("/import")
+    public R<Void> importValveArchive(@RequestParam("file") MultipartFile file) throws IOException {
+        return valveArchiveService.importValveArchive(file);
     }
 }

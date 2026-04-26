@@ -1,18 +1,31 @@
 package org.sdkj.thermal.service.impl;
 
+import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
+import org.sdkj.thermal.domain.dto.PrHeatValveArchiveDto;
+import org.sdkj.thermal.domain.dto.PrHouseByPayVo;
+import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
 import org.sdkj.thermal.mapper.PrHeatValveArchiveMapper;
+import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * 户间阀门配表 Service 实现
@@ -22,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiveMapper, PrHeatValveArchive> implements IPrHeatValveArchiveService {
 
     private final PrHeatValveArchiveMapper baseMapper;
+    private final IHtTasksPerformService htTasksPerformService;
 
     @Override
     public PrHeatValveArchiveVo selectById(java.io.Serializable id) {
@@ -45,6 +59,276 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
         Page<PrHeatValveArchiveVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
+    }
+
+    @Override
+    public List<PrHeatValveArchiveVo> listAll(String companyId, String orgId) {
+        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatValveArchive::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
+        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
+        return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean batchSetValveStatus(List<PrHouseByPayVo> houseList, String valveStatus) {
+        List<ValveArchiveInfo> infos = new ArrayList<>();
+        for (PrHouseByPayVo house : houseList) {
+            // 按 meterNum + meterArcCode 查找 PrHeatValveArchive
+            LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(PrHeatValveArchive::getMeterNum, house.getMeterNum());
+            lqw.eq(PrHeatValveArchive::getMeterArcCode, house.getMeterArcCode());
+            lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+            lqw.last("LIMIT 1");
+            PrHeatValveArchive archive = getOne(lqw);
+            if (archive == null) {
+                continue;
+            }
+            infos.add(new ValveArchiveInfo(
+                archive.getId(),
+                archive.getMeterArcCode(),
+                archive.getMeterNum(),
+                archive.getDeviceId(),
+                archive.getConcentratorCode(),
+                archive.getImeiNum(),
+                archive.getDtuNum(),
+                archive.getChanNum()
+            ));
+        }
+        if (infos.isEmpty()) {
+            return false;
+        }
+
+        // valveStatus 决定 instructionType 和 instruction
+        int instructionType;
+        int instruction;
+        switch (valveStatus) {
+            case "1": // 开阀
+                instructionType = 3;
+                instruction = 100;
+                break;
+            case "2": // 关阀
+                instructionType = 3;
+                instruction = 0;
+                break;
+            case "4": // 查询
+                instructionType = 4;
+                instruction = 0;
+                break;
+            case "5": // 制动
+                instructionType = 5;
+                instruction = 0;
+                break;
+            case "51": // 特殊制动
+                instructionType = 5;
+                instruction = 1;
+                break;
+            default: // 默认按开度处理
+                instructionType = 3;
+                instruction = 0;
+                break;
+        }
+
+        List<HtTasksPerform> tasks = buildTasks(infos, houseList.get(0).getOrgId(), houseList.get(0).getCompanyId(),
+            instructionType, instruction);
+        return htTasksPerformService.saveBatchTasks(tasks);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean batchSetValveOpening(List<PrHouseByPayVo> houseList, String opening) {
+        List<ValveArchiveInfo> infos = new ArrayList<>();
+        for (PrHouseByPayVo house : houseList) {
+            LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(PrHeatValveArchive::getMeterNum, house.getMeterNum());
+            lqw.eq(PrHeatValveArchive::getMeterArcCode, house.getMeterArcCode());
+            lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+            lqw.last("LIMIT 1");
+            PrHeatValveArchive archive = getOne(lqw);
+            if (archive == null) {
+                continue;
+            }
+            infos.add(new ValveArchiveInfo(
+                archive.getId(),
+                archive.getMeterArcCode(),
+                archive.getMeterNum(),
+                archive.getDeviceId(),
+                archive.getConcentratorCode(),
+                archive.getImeiNum(),
+                archive.getDtuNum(),
+                archive.getChanNum()
+            ));
+        }
+        if (infos.isEmpty()) {
+            return false;
+        }
+
+        int instructionValue = Integer.parseInt(opening);
+        List<HtTasksPerform> tasks = buildTasks(infos, houseList.get(0).getOrgId(), houseList.get(0).getCompanyId(),
+            3, instructionValue);
+        return htTasksPerformService.saveBatchTasks(tasks);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean batchSetValveCycle(List<PrHouseByPayVo> houseList, String interval, String unit, String valid) {
+        List<ValveArchiveInfo> infos = new ArrayList<>();
+        for (PrHouseByPayVo house : houseList) {
+            LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(PrHeatValveArchive::getMeterNum, house.getMeterNum());
+            lqw.eq(PrHeatValveArchive::getMeterArcCode, house.getMeterArcCode());
+            lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+            lqw.last("LIMIT 1");
+            PrHeatValveArchive archive = getOne(lqw);
+            if (archive == null) {
+                continue;
+            }
+            infos.add(new ValveArchiveInfo(
+                archive.getId(),
+                archive.getMeterArcCode(),
+                archive.getMeterNum(),
+                archive.getDeviceId(),
+                archive.getConcentratorCode(),
+                archive.getImeiNum(),
+                archive.getDtuNum(),
+                archive.getChanNum()
+            ));
+        }
+        if (infos.isEmpty()) {
+            return false;
+        }
+
+        // instructionType=6, 设置上报周期
+        List<HtTasksPerform> tasks = buildCycleTasks(infos, houseList.get(0).getOrgId(), houseList.get(0).getCompanyId(),
+            interval, unit, valid);
+        return htTasksPerformService.saveBatchTasks(tasks);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R<Void> importValveArchive(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return R.fail("文件为空");
+        }
+
+        List<PrHeatValveArchiveDto> dataList;
+        try {
+            dataList = EasyExcel.read(file.getInputStream())
+                .head(PrHeatValveArchiveDto.class)
+                .sheet(0)
+                .headRowNumber(1)
+                .doReadSync();
+        } catch (Exception e) {
+            return R.fail("文件解析失败: " + e.getMessage());
+        }
+
+        if (dataList == null || dataList.isEmpty()) {
+            return R.fail("导入数据为空");
+        }
+
+        int successCount = 0;
+        int failCount = 0;
+        for (PrHeatValveArchiveDto dto : dataList) {
+            if (StringUtils.isBlank(dto.getMeterNum()) || StringUtils.isBlank(dto.getMeterArcCode())) {
+                failCount++;
+                continue;
+            }
+            // 检查是否已存在
+            long count = count(new LambdaQueryWrapper<PrHeatValveArchive>()
+                .eq(PrHeatValveArchive::getMeterNum, dto.getMeterNum())
+                .eq(PrHeatValveArchive::getMeterArcCode, dto.getMeterArcCode())
+                .eq(PrHeatValveArchive::getIsChanged, 0));
+            if (count > 0) {
+                failCount++;
+                continue;
+            }
+            PrHeatValveArchive entity = new PrHeatValveArchive();
+            entity.setMeterNum(dto.getMeterNum());
+            entity.setMeterArcCode(dto.getMeterArcCode());
+            entity.setMeterArcName(dto.getMeterArcName());
+            entity.setCardNum(dto.getCardNum());
+            entity.setConcentratorCode(dto.getConcentratorCode());
+            entity.setImeiNum(dto.getImeiNum());
+            entity.setDeviceId(dto.getDeviceId());
+            entity.setDtuNum(dto.getDtuNum());
+            entity.setChanNum(dto.getChanNum());
+            entity.setHouseId(dto.getHouseId());
+            entity.setOrgId(dto.getOrgId());
+            entity.setCompanyId(dto.getCompanyId());
+            entity.setIsChanged(0);
+            entity.setIsOpen(0);
+            entity.setMeterSerial(dto.getMeterSerial());
+            entity.setInstallSite(dto.getInstallSite());
+            entity.setCaliber(dto.getCaliber());
+            entity.setInstallType(dto.getInstallType());
+            entity.setGroupNum25(dto.getGroupNum25());
+            entity.setValveModel(dto.getValveModel());
+            entity.setDtuType(dto.getDtuType());
+            save(entity);
+            successCount++;
+        }
+        return R.ok();
+    }
+
+    // ========== 私有方法 ==========
+
+    /**
+     * 构建批量阀门控制任务列表
+     */
+    private List<HtTasksPerform> buildTasks(List<ValveArchiveInfo> infos, String orgId, String companyId,
+                                             int instructionType, int instruction) {
+        return infos.stream().map(info -> {
+            HtTasksPerform task = new HtTasksPerform();
+            task.setId(UUID.randomUUID().toString().replace("-", ""));
+            task.setInstructionType(instructionType);
+            task.setInstruction(instruction);
+            task.setNumber(0);
+            task.setOrgId(orgId);
+            task.setCompanyId(companyId);
+            task.setDeviceId(info.deviceId());
+            task.setMeterArcCode(info.meterArcCode());
+            task.setMeterId(info.meterId());
+            task.setMeterNum(info.meterNum());
+            task.setStatus(0);
+            task.setInstructionStatus(0);
+            task.setImei(info.imei());
+            task.setConcentratorCode(info.concentratorCode());
+            task.setDtuNum(info.dtuNum());
+            task.setChanNum(info.chanNum());
+            return task;
+        }).toList();
+    }
+
+    /**
+     * 构建批量上报周期设置任务列表（instructionType=6）
+     */
+    private List<HtTasksPerform> buildCycleTasks(List<ValveArchiveInfo> infos, String orgId, String companyId,
+                                                  String interval, String unit, String valid) {
+        return infos.stream().map(info -> {
+            HtTasksPerform task = new HtTasksPerform();
+            task.setId(UUID.randomUUID().toString().replace("-", ""));
+            task.setInstructionType(6);
+            task.setInstruction(0);
+            task.setNumber(0);
+            task.setIntervall(StringUtils.isNotBlank(interval) ? Integer.parseInt(interval) : null);
+            task.setUnit(StringUtils.isNotBlank(unit) ? Integer.parseInt(unit) : null);
+            task.setDuration(StringUtils.isNotBlank(valid) ? Integer.parseInt(valid) : null);
+            task.setOrgId(orgId);
+            task.setCompanyId(companyId);
+            task.setDeviceId(info.deviceId());
+            task.setMeterArcCode(info.meterArcCode());
+            task.setMeterId(info.meterId());
+            task.setMeterNum(info.meterNum());
+            task.setStatus(0);
+            task.setInstructionStatus(0);
+            task.setImei(info.imei());
+            task.setConcentratorCode(info.concentratorCode());
+            task.setDtuNum(info.dtuNum());
+            task.setChanNum(info.chanNum());
+            return task;
+        }).toList();
     }
 
     @Override
