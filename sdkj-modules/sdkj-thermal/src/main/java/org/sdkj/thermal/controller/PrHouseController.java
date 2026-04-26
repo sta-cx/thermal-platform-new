@@ -184,4 +184,38 @@ public class PrHouseController extends BaseController {
     public R<BigDecimal> areaByUser(@RequestParam String userId) {
         return R.ok(houseService.areaByUser(userId));
     }
+
+    // ========== 孤岛户功能 ==========
+
+    /**
+     * 查询孤岛户列表
+     * 旧端点: GET /property/prHouse/queryGDH
+     * 新端点: GET /thermal/property/house/isolated
+     */
+    @SaCheckPermission("thermal:property:house:list")
+    @SaCheckLogin
+    @GetMapping("/isolated")
+    public R<List<PrHouseVo>> queryIsolatedHouses(
+            @RequestParam String companyId,
+            @RequestParam String orgId,
+            @RequestParam(required = false) String buildingId) {
+        return R.ok(houseService.queryIsolatedHouses(companyId, orgId, buildingId));
+    }
+
+    /**
+     * 设置孤岛户标记
+     * 旧端点: POST /property/prHouse/setGDH
+     * 新端点: PUT /thermal/property/house/isolated
+     */
+    @SaCheckPermission("thermal:property:house:edit")
+    @SaCheckLogin
+    @Log(title = "房屋信息-设置孤岛户", businessType = BusinessType.UPDATE)
+    @PutMapping("/isolated")
+    public R<Void> setIsolatedHouses(
+            @RequestBody List<PrHouse> houseList,
+            @RequestParam String companyId,
+            @RequestParam String orgId,
+            @RequestParam(required = false) String buildingId) {
+        return toAjax(houseService.setIsolatedHouses(houseList, companyId, orgId, buildingId));
+    }
 }

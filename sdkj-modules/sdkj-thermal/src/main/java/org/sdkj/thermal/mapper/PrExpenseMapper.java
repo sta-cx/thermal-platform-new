@@ -119,4 +119,55 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
         @Param("parentId") String parentId, @Param("type") String type,
         @Param("startTime") String startTime, @Param("endTime") String endTime,
         @Param("search") String search);
+
+    // ========== 阶梯单价计算方法 ==========
+
+    /**
+     * 设置建筑面积阶梯单价
+     */
+    int setStandardPriceJzmj(@Param("standardId") String standardId);
+
+    /**
+     * 设置使用面积阶梯单价
+     */
+    int setStandardPriceSymj(@Param("standardId") String standardId);
+
+    /**
+     * 设置楼层阶梯单价
+     */
+    int setStandardPriceLc(@Param("standardId") String standardId);
+
+    // ========== 滞纳金计算方法 ==========
+
+    /**
+     * 滞纳金计算 - 起收日期
+     */
+    int updateLatefeeQs(@Param("companyId") String companyId, @Param("orgId") String orgId,
+                        @Param("latefeeFormula") String latefeeFormula, @Param("standardId") String standardId);
+
+    /**
+     * 滞纳金计算 - 到期日期
+     */
+    int updateLatefeeJs(@Param("companyId") String companyId, @Param("orgId") String orgId,
+                        @Param("latefeeFormula") String latefeeFormula, @Param("standardId") String standardId);
+
+    /**
+     * 滞纳金计算 - 指定日期
+     */
+    int updateLatefeeZd(@Param("companyId") String companyId, @Param("orgId") String orgId,
+                        @Param("latefeeFormula") String latefeeFormula, @Param("standardId") String standardId,
+                        @Param("latefeeStartdate") java.util.Date latefeeStartdate);
+
+    /**
+     * 滞纳金计算 - 数据核查
+     */
+    int updateLatefeeSJHC(@Param("companyId") String companyId, @Param("orgId") String orgId,
+                          @Param("latefeeFormula") String latefeeFormula, @Param("standardId") String standardId,
+                          @Param("year") String year, @Param("month") String month);
+
+    /**
+     * 滞纳金计算后更新最终金额
+     */
+    int updateFinalMoneyAfterLateFee(@Param("companyId") String companyId, @Param("orgId") String orgId,
+                                      @Param("standardId") String standardId);
 }

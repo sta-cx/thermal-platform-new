@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.mybatis.core.page.PageQuery;
+import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrScheduling;
 import org.sdkj.thermal.service.IPrSchedulingService;
@@ -25,17 +27,17 @@ public class PrSchedulingController extends BaseController {
     @SaCheckPermission("thermal:property:scheduling:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<Page<PrScheduling>> list(
+    public TableDataInfo<PrScheduling> list(
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String companyId,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<PrScheduling> page = new Page<>(pageNum, pageSize);
+            PageQuery pageQuery) {
+        Page<PrScheduling> page = pageQuery.build();
         LambdaQueryWrapper<PrScheduling> lqw = new LambdaQueryWrapper<>();
         lqw.eq(companyId != null && !companyId.isEmpty(), PrScheduling::getCompanyId, companyId);
         lqw.eq(orgId != null && !orgId.isEmpty(), PrScheduling::getOrgId, orgId);
         lqw.orderByDesc(PrScheduling::getWorkDate);
-        return R.ok(schedulingService.page(page, lqw));
+        schedulingService.page(page, lqw);
+        return TableDataInfo.build(page);
     }
 
     @SaCheckPermission("thermal:property:scheduling:query")

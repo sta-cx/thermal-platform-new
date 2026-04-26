@@ -16,10 +16,12 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
+import org.sdkj.thermal.domain.PrHeatHotArchive;
 import org.sdkj.thermal.domain.bo.PrHeatValveArchiveBo;
 import org.sdkj.thermal.domain.dto.*;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
+import org.sdkj.thermal.mapper.PrHeatHotArchiveMapper;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
 import org.sdkj.thermal.service.IPrHouseService;
@@ -30,9 +32,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,6 +56,7 @@ public class PrHeatValveArchiveController extends BaseController {
     private final IPrHeatValveArchiveService valveArchiveService;
     private final IHtTasksPerformService tasksPerformService;
     private final IPrHouseService houseService;
+    private final PrHeatHotArchiveMapper hotArchiveMapper;
 
     @Value("${thermal.third-party.yungu.app-code:sdkjApp}")
     private String yunguAppCode;
@@ -767,5 +773,181 @@ public class PrHeatValveArchiveController extends BaseController {
             return "请求参数错误5";
         }
         return null;
+    }
+
+    // ========== NB/MBus 阀门数据接收端点 ==========
+
+    /**
+     * 接收电信 NB 阀门数据
+     * 旧端点: POST /ht/valveArchive/insertDataNbValve
+     * 新端点: POST /thermal/ht/valve-archive/nb-data
+     *
+     * 接收格式: JSON payload with Base64 encoded data
+     * 接收后反写温度到 pr_house 表
+     */
+    @PostMapping("/nb-data")
+    public R<Integer> insertDataNbValve(@RequestBody String msg) {
+        try {
+            cn.hutool.json.JSONObject jsonObject = cn.hutool.json.JSONUtil.parseObj(msg);
+            log.info("NB阀门接收电信平台数据:{}", jsonObject);
+
+            // 解析基础字段
+            long timestamp = Long.decode(jsonObject.getStr("timestamp"));
+            String date = cn.hutool.core.date.DateUtil.format(new Date(timestamp), "yyyy-MM-dd HH:mm:ss");
+            String imei = jsonObject.getStr("IMEI");
+            String deviceId = jsonObject.getStr("deviceId");
+
+            // 解析 payload
+            String payload = jsonObject.getJSONObject("payload").getStr("APPdata");
+            String text = new String(java.util.Base64.getDecoder().decode(payload.trim()),
+                java.nio.charset.StandardCharsets.UTF_8);
+
+            if (text.startsWith("0")) {
+                text = text.substring(1);
+                // 阀门编号
+                String meterNum = text.substring(4, 20);
+                // 阀门状态
+                String valveStatus = text.substring(28, 30);
+                // 设定开度
+                int settingStatus = Integer.parseInt(text.substring(30, 32), 16);
+                // 实际开度
+                int actualOpen = Integer.parseInt(text.substring(32, 34), 16);
+                // 进水温度
+                BigDecimal inTemperature = new BigDecimal(Integer.parseInt(text.substring(34, 38), 16))
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+                // 回水温度
+                BigDecimal outTemperature = new BigDecimal(Integer.parseInt(text.substring(38, 42), 16))
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+                // 电压
+                BigDecimal voltage = new BigDecimal(Integer.parseInt(text.substring(42, 46), 16))
+                    .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP);
+
+                if ("00".equals(valveStatus)) {
+                    valveStatus = "02";
+                }
+
+                // 查找阀门档案并反写温度到房屋
+                LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+                lqw.eq(PrHeatValveArchive::getMeterNum, meterNum);
+                lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+                lqw.last("LIMIT 1");
+                PrHeatValveArchive archive = valveArchiveService.getOne(lqw);
+
+                if (archive != null && StringUtils.isNotBlank(archive.getHouseId())) {
+                    valveArchiveService.updateHouseTemperature(
+                        archive.getHouseId(), inTemperature, outTemperature, actualOpen);
+                }
+
+                log.info("NB阀门数据接收完成, meterNum={}, inTemp={}, outTemp={}",
+                    meterNum, inTemperature, outTemperature);
+            }
+            return R.ok(200);
+        } catch (Exception e) {
+            log.error("NB阀门数据接收失败", e);
+            return R.fail("数据解析失败");
+        }
+    }
+
+    /**
+     * 接收 MBus 阀门数据（大连世达）
+     * 旧端点: POST /ht/valveArchive/insertDataMBusValve
+     * 新端点: POST /thermal/ht/valve-archive/mbus-data
+     *
+     * 接收格式: JSON array of valve information
+     * 接收后反写温度到 pr_house 表
+     */
+    @PostMapping("/mbus-data")
+    public R<Integer> insertDataMBusValve(@RequestBody String args) {
+        try {
+            cn.hutool.json.JSONObject jsonObject = cn.hutool.json.JSONUtil.parseObj(args);
+            log.info("接收MBus阀门数据:{}", jsonObject);
+
+            if (jsonObject.containsKey("data")) {
+                java.util.List<cn.hutool.json.JSONObject> objects = jsonObject.getJSONArray("data")
+                    .stream()
+                    .map(obj -> (cn.hutool.json.JSONObject) obj)
+                    .toList();
+
+                for (cn.hutool.json.JSONObject obj : objects) {
+                    String type = obj.getStr("type");
+                    String meterArcCode;
+                    BigDecimal supplyTemp;
+                    BigDecimal returnTemp;
+                    String valveNo;
+                    String valveOpening;
+                    String valveStatus;
+
+                    if ("2".equals(type)) {
+                        // 热表
+                        meterArcCode = "04030301";
+                        supplyTemp = obj.getBigDecimal("rbSupplyTemp");
+                        returnTemp = obj.getBigDecimal("rbReturnTemp");
+                        valveNo = obj.getStr("valveNo");
+
+                        // 查找热表档案并反写温度到房屋
+                        PrHeatHotArchive hotArchive = hotArchiveMapper.selectOne(
+                            new LambdaQueryWrapper<PrHeatHotArchive>()
+                                .eq(PrHeatHotArchive::getMeterNum, valveNo)
+                                .eq(PrHeatHotArchive::getIsChanged, 0)
+                                .last("LIMIT 1")
+                        );
+
+                        if (hotArchive != null && StringUtils.isNotBlank(hotArchive.getHouseId())) {
+                            valveArchiveService.updateHouseTemperature(
+                                hotArchive.getHouseId(), supplyTemp, returnTemp, null);
+                        }
+
+                    } else if ("1".equals(type)) {
+                        // 阀门
+                        meterArcCode = "04310401";
+                        supplyTemp = obj.getBigDecimal("supplyTemp");
+                        returnTemp = obj.getBigDecimal("returnTemp");
+                        valveNo = obj.getStr("valveNo");
+                        valveStatus = obj.getStr("valveStatus");
+                        valveOpening = obj.getStr("valveOpening");
+
+                        // 转换阀门状态
+                        if ("0".equals(valveStatus)) {
+                            valveStatus = "02";
+                        } else if ("1".equals(valveStatus)) {
+                            valveStatus = "01";
+                        }
+
+                        // 开度处理
+                        if (StringUtils.isNotBlank(valveOpening)) {
+                            try {
+                                int opening = Integer.parseInt(valveOpening);
+                                if (opening > 100) {
+                                    valveOpening = "100";
+                                }
+                            } catch (NumberFormatException ignored) {
+                                valveOpening = "0";
+                            }
+                        }
+
+                        // 查找阀门档案并反写温度到房屋
+                        LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
+                        lqw.eq(PrHeatValveArchive::getMeterNum, valveNo);
+                        lqw.eq(PrHeatValveArchive::getMeterArcCode, meterArcCode);
+                        lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+                        lqw.last("LIMIT 1");
+                        PrHeatValveArchive archive = valveArchiveService.getOne(lqw);
+
+                        if (archive != null && StringUtils.isNotBlank(archive.getHouseId())) {
+                            Integer actualOpen = StringUtils.isNotBlank(valveOpening)
+                                ? Integer.parseInt(valveOpening) : null;
+                            valveArchiveService.updateHouseTemperature(
+                                archive.getHouseId(), supplyTemp, returnTemp, actualOpen);
+                        }
+                    }
+                }
+
+                log.info("MBus阀门数据接收完成, count={}", objects.size());
+            }
+            return R.ok(200);
+        } catch (Exception e) {
+            log.error("MBus阀门数据接收失败", e);
+            return R.fail("数据解析失败");
+        }
     }
 }

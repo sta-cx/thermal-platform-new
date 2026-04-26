@@ -11,14 +11,11 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
-import org.sdkj.thermal.domain.PrRepairPerson;
 import org.sdkj.thermal.domain.PrRepairRecord;
-import org.sdkj.thermal.service.IPrRepairPersonService;
 import org.sdkj.thermal.service.IPrRepairRecordService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @Validated
@@ -28,7 +25,6 @@ import java.util.Map;
 public class PrRepairRecordController extends BaseController {
 
     private final IPrRepairRecordService repairRecordService;
-    private final IPrRepairPersonService repairPersonService;
 
     @SaCheckPermission("thermal:property:repair:list")
     @SaCheckLogin
@@ -92,21 +88,6 @@ public class PrRepairRecordController extends BaseController {
                             @RequestParam(required = false) String dispatchMoney) {
         return toAjax(repairRecordService.dispatch(
             ids.split(","), dispatchId, isReject, rejectReason, dispatchMoney));
-    }
-
-    @SaCheckPermission("thermal:property:repair:list")
-    @SaCheckLogin
-    @GetMapping("/person/company/{companyId}")
-    public R<List<PrRepairPerson>> personByCompany(@PathVariable String companyId) {
-        return R.ok(repairPersonService.selectByCompanyId(companyId));
-    }
-
-    @SaCheckPermission("thermal:property:repair:list")
-    @SaCheckLogin
-    @GetMapping("/person/org")
-    public R<List<PrRepairPerson>> personByOrg(@RequestParam String orgId,
-                                                @RequestParam String companyId) {
-        return R.ok(repairPersonService.selectByOrgId(orgId, companyId));
     }
 
     @SaCheckPermission("thermal:property:repair:query")

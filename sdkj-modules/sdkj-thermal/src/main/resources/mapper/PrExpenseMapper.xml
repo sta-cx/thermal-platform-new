@@ -95,27 +95,123 @@
     </select>
 
     <update id="updateStepPrice">
-        <!-- TODO: Phase 5b 完整实现 - 阶梯单价计算逻辑 -->
-        UPDATE pr_expense SET standard_price = standard_price
-        WHERE company_id = #{companyId} AND org_id = #{orgId} AND del_flag = '0'
+        UPDATE pr_expense a
+        LEFT JOIN pr_standard_price b ON b.standard_id = a.standard_id
+        LEFT JOIN pr_house c ON c.id = a.house_id
+        SET a.standard_price = b.standard_price,
+            a.price_formula = b.price_formula,
+            a.max_price = b.max_price
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.is_calc = '0'
+          AND b.grade = '1'
+          AND a.del_flag = '0'
+    </update>
+
+    <update id="setStandardPriceJzmj">
+        UPDATE pr_expense a
+        LEFT JOIN pr_standard_price b ON b.standard_id = a.standard_id
+        LEFT JOIN pr_house c ON c.id = a.house_id
+        SET a.standard_price = b.standard_price,
+            a.price_formula = b.price_formula,
+            a.max_price = b.max_price
+        WHERE a.standard_id = #{standardId}
+          AND a.is_calc = '0'
+          AND b.minimum &lt;= c.gfloor_area
+          AND b.maximum &gt;= c.gfloor_area
+          AND a.del_flag = '0'
+    </update>
+
+    <update id="setStandardPriceSymj">
+        UPDATE pr_expense a
+        LEFT JOIN pr_standard_price b ON b.standard_id = a.standard_id
+        LEFT JOIN pr_house c ON c.id = a.house_id
+        SET a.standard_price = b.standard_price,
+            a.price_formula = b.price_formula,
+            a.max_price = b.max_price
+        WHERE a.standard_id = #{standardId}
+          AND a.is_calc = '0'
+          AND b.minimum &lt;= c.nfloor_area
+          AND b.maximum &gt;= c.nfloor_area
+          AND a.del_flag = '0'
+    </update>
+
+    <update id="setStandardPriceLc">
+        UPDATE pr_expense a
+        LEFT JOIN pr_standard_price b ON b.standard_id = a.standard_id
+        LEFT JOIN pr_house c ON c.id = a.house_id
+        SET a.standard_price = b.standard_price,
+            a.price_formula = b.price_formula,
+            a.max_price = b.max_price
+        WHERE a.standard_id = #{standardId}
+          AND a.is_calc = '0'
+          AND b.minimum &lt;= c.floor
+          AND b.maximum &gt;= c.floor
+          AND a.del_flag = '0'
     </update>
 
     <update id="updateMoney">
-        <!-- TODO: Phase 5b 完整实现 - 金额计算逻辑 -->
-        UPDATE pr_expense SET money = money
-        WHERE company_id = #{companyId} AND org_id = #{orgId} AND del_flag = '0'
+        UPDATE pr_expense a
+        LEFT JOIN pr_house b ON b.id = a.house_id
+        LEFT JOIN pr_standard c ON c.id = a.standard_id
+        LEFT JOIN pr_standard_price d ON d.standard_id = a.standard_id
+        LEFT JOIN pr_expense_item e ON e.item_code = c.item_code
+            AND e.item_group = c.item_group
+            AND e.company_id = c.company_id
+            AND e.org_id = c.org_id
+        SET a.standard_price = IF(a.max_price = 0,
+            ROUND(${a.price_formula}, e.price_precision),
+            IF(ROUND(${a.price_formula}, e.price_precision) >= a.max_price,
+                a.max_price,
+                ROUND(${a.price_formula}, e.price_precision)))
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.is_calc = '0'
+          AND a.del_flag = '0'
     </update>
 
     <update id="updateFormula">
-        <!-- TODO: Phase 5b 完整实现 - 公式计算逻辑 -->
-        UPDATE pr_expense SET receivable = money
-        WHERE company_id = #{companyId} AND org_id = #{orgId} AND del_flag = '0'
+        UPDATE pr_expense a
+        LEFT JOIN pr_house b ON b.id = a.house_id
+        LEFT JOIN pr_standard c ON c.id = a.standard_id
+        LEFT JOIN pr_standard_price d ON d.standard_id = a.standard_id
+        LEFT JOIN pr_expense_item e ON e.item_group = c.item_group
+            AND e.item_code = c.item_code
+            AND e.company_id = c.company_id
+            AND e.org_id = c.org_id
+        SET a.is_calc = '1',
+            a.receivable = IF(a.max_money > '0' AND ROUND(${a.money_formula}, e.money_precision) >= a.max_money,
+                a.max_money,
+                ROUND(${a.money_formula}, e.money_precision)),
+            a.final_money = ROUND(
+                IF(a.max_money > '0' AND ROUND(${a.money_formula}, e.money_precision) >= a.max_money,
+                    a.max_money,
+                    ROUND(${a.money_formula}, e.money_precision))
+                - a.preferential - a.deduction + a.latefee,
+                e.money_precision)
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.is_calc = '0'
+          AND a.del_flag = '0'
     </update>
 
     <update id="updateFormulaCw">
-        <!-- TODO: Phase 5b 完整实现 - 车位公式计算逻辑 -->
-        UPDATE pr_expense SET receivable = money
-        WHERE company_id = #{companyId} AND org_id = #{orgId} AND del_flag = '0'
+        UPDATE pr_expense a
+        LEFT JOIN pr_house b ON b.id = a.house_id
+        LEFT JOIN pm_standard c ON c.id = a.standard_id
+        SET a.is_calc = '1',
+            a.receivable = IF(a.max_money > '0' AND ROUND(${a.money_formula}, '2') >= a.max_money,
+                a.max_money,
+                ROUND(${a.money_formula}, '2')),
+            a.final_money = ROUND(
+                IF(a.max_money > '0' AND ROUND(${a.money_formula}, '2') >= a.max_money,
+                    a.max_money,
+                    ROUND(${a.money_formula}, '2'))
+                - a.preferential - a.deduction + a.latefee, '2')
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.is_calc = '0'
+          AND a.del_flag = '0'
     </update>
 
     <update id="updateHousePayStatus">
@@ -240,5 +336,115 @@
         <if test="search != null and search != ''">AND (b.room_num LIKE CONCAT('%', #{search}, '%') OR b.other_code LIKE CONCAT('%', #{search}, '%') OR c.phone LIKE CONCAT('%', #{search}, '%'))</if>
         ORDER BY a.create_time DESC
     </select>
+
+    <!-- 滞纳金计算 - 起收日期 -->
+    <update id="updateLatefeeQs">
+        UPDATE pr_expense a
+        LEFT JOIN pr_standard b ON b.id = a.standard_id
+        LEFT JOIN pr_expense_item c ON c.item_group = b.item_group AND c.item_code = b.item_code
+        SET a.latefee = ROUND(
+            (${latefeeFormula}) *
+            IF(DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)) &lt;= 0,
+                0,
+                DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY))),
+            c.money_precision),
+            a.overdue_day = IF(DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)) &lt;= 0,
+                0,
+                DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)))
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND b.id = #{standardId}
+          AND a.is_charged = '0'
+          AND a.is_calc = '1'
+          AND DATE_FORMAT(a.start_date, '%Y-%m') &lt; DATE_FORMAT(CURRENT_DATE, '%Y-%m')
+          AND a.del_flag = '0'
+    </update>
+
+    <!-- 滞纳金计算 - 到期日期 -->
+    <update id="updateLatefeeJs">
+        UPDATE pr_expense a
+        LEFT JOIN pr_standard b ON b.id = a.standard_id
+        LEFT JOIN pr_expense_item c ON c.item_group = b.item_group AND c.item_code = b.item_code
+        SET a.latefee = ROUND(
+            (${latefeeFormula}) *
+            IF(DATEDIFF(CURRENT_DATE, DATE_ADD(a.expire_date, INTERVAL b.latefee_startdays DAY)) &lt;= 0,
+                0,
+                DATEDIFF(CURRENT_DATE, DATE_ADD(a.expire_date, INTERVAL b.latefee_startdays DAY))),
+            c.money_precision),
+            a.overdue_day = IF(DATEDIFF(CURRENT_DATE, DATE_ADD(a.expire_date, INTERVAL b.latefee_startdays DAY)) &lt;= 0,
+                0,
+                DATEDIFF(CURRENT_DATE, DATE_ADD(a.expire_date, INTERVAL b.latefee_startdays DAY)))
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND b.id = #{standardId}
+          AND a.is_charged = '0'
+          AND a.is_calc = '1'
+          AND DATE_FORMAT(a.expire_date, '%Y-%m') &lt; DATE_FORMAT(CURRENT_DATE, '%Y-%m')
+          AND a.del_flag = '0'
+    </update>
+
+    <!-- 滞纳金计算 - 指定日期 -->
+    <update id="updateLatefeeZd">
+        UPDATE pr_expense a
+        LEFT JOIN pr_standard b ON b.id = a.standard_id
+        LEFT JOIN pr_expense_item c ON c.item_group = b.item_group AND c.item_code = b.item_code
+        SET a.latefee = ROUND(
+            (${latefeeFormula}) *
+            IF(DATEDIFF(CURRENT_DATE, DATE_ADD(b.latefee_startdate, INTERVAL b.latefee_startdays DAY)) &lt;= 0,
+                0,
+                DATEDIFF(CURRENT_DATE, DATE_ADD(b.latefee_startdate, INTERVAL b.latefee_startdays DAY))),
+            c.money_precision),
+            a.overdue_day = IF(DATEDIFF(CURRENT_DATE, DATE_ADD(b.latefee_startdate, INTERVAL b.latefee_startdays DAY)) &lt;= 0,
+                0,
+                DATEDIFF(CURRENT_DATE, DATE_ADD(b.latefee_startdate, INTERVAL b.latefee_startdays DAY)))
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND b.id = #{standardId}
+          AND a.is_charged = '0'
+          AND a.is_calc = '1'
+          AND DATE_FORMAT(b.latefee_startdate, '%Y-%m') &lt; DATE_FORMAT(CURRENT_DATE, '%Y-%m')
+          AND a.del_flag = '0'
+    </update>
+
+    <!-- 滞纳金计算 - 数据核查 -->
+    <update id="updateLatefeeSJHC">
+        UPDATE pr_expense a
+        LEFT JOIN pr_standard b ON b.id = a.standard_id
+        LEFT JOIN pr_expense_item c ON c.item_group = b.item_group AND c.item_code = b.item_code
+        SET a.latefee = ROUND(
+            (${latefeeFormula}) *
+            IF((DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)) - '30') &lt;= 0,
+                0,
+                (DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)) - '30')),
+            c.money_precision),
+            a.overdue_day = IF((DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)) - '30') &lt;= 0,
+                0,
+                (DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)) - '30'))
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND b.id = #{standardId}
+          AND a.is_charged = '0'
+          AND a.is_calc = '1'
+          AND a.year = #{year}
+          AND a.month = #{month}
+          AND a.del_flag = '0'
+    </update>
+
+    <!-- 滞纳金计算后更新最终金额 -->
+    <update id="updateFinalMoneyAfterLateFee">
+        UPDATE pr_expense a
+        LEFT JOIN pr_standard b ON b.id = a.standard_id
+        LEFT JOIN pr_expense_item c ON c.item_group = a.item_group
+            AND c.item_code = a.item_code
+            AND c.company_id = a.company_id
+            AND c.org_id = a.org_id
+        SET a.final_money = ROUND(a.receivable - a.preferential - a.deduction + a.latefee, c.money_precision)
+        WHERE a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
+          AND a.is_charged = '0'
+          AND a.is_calc = '1'
+          AND b.id = #{standardId}
+          AND a.del_flag = '0'
+    </update>
 
 </mapper>

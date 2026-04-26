@@ -704,4 +704,15 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
 
         return house.getId();
     }
+
+    // ========== NB/MBus 数据接收实现 ==========
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateHouseTemperature(String houseId, BigDecimal inTemperature,
+                                       BigDecimal outTemperature, Integer actualOpen) {
+        baseMapper.updateHouse(houseId, inTemperature, outTemperature, actualOpen);
+        log.debug("温度反写完成, houseId={}, inTemp={}, outTemp={}, actualOpen={}",
+            houseId, inTemperature, outTemperature, actualOpen);
+    }
 }

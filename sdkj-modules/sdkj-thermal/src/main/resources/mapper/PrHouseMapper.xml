@@ -10,4 +10,40 @@
         UPDATE pr_house SET other_code = #{otherCode} WHERE id = #{id}
     </update>
 
+    <!-- ========== 孤岛户功能 ========== -->
+
+    <!-- 查询孤岛户列表 -->
+    <select id="queryIsolatedHouses" resultType="org.sdkj.thermal.domain.PrHouse">
+        SELECT h.* FROM pr_house h
+        WHERE h.company_id = #{companyId}
+          AND h.org_id = #{orgId}
+          AND h.building_id = #{buildingId}
+          AND h.is_deleted = 0
+          AND h.room_num REGEXP '^[0-9]+-[0-9]+-[0-9]+$'
+        ORDER BY h.seq, h.room_num
+    </select>
+
+    <!-- 批量更新房屋位置属性 -->
+    <update id="updateSiteTypeBatch">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE pr_house
+            SET site_type = #{item.siteType},
+                site_type_old = #{item.siteTypeOld},
+                update_time = NOW()
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <!-- 重置楼宇下所有房屋的位置属性 -->
+    <update id="resetSiteTypeByBuilding">
+        UPDATE pr_house
+        SET site_type = NULL,
+            site_type_old = site_type,
+            update_time = NOW()
+        WHERE company_id = #{companyId}
+          AND org_id = #{orgId}
+          AND building_id = #{buildingId}
+          AND is_deleted = 0
+    </update>
+
 </mapper>

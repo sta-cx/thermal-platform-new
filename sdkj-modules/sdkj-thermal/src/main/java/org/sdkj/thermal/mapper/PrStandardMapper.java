@@ -58,7 +58,7 @@ public interface PrStandardMapper extends BaseMapperPlus<PrStandard, PrStandardV
     List<PrStandardPrice> selectPriceList(@Param("standardId") String standardId);
 
     /**
-     * 查询标准单价完整列表（所有 grade）
+     * 查询标准单价完整列表（所有 grade，包含 step12）
      */
     List<PrStandardPrice> selectPriceListAll(@Param("standardId") String standardId);
 

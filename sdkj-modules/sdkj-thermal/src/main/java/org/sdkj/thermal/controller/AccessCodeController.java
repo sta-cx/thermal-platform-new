@@ -2,7 +2,6 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
  * 迁移自旧系统 AccessCodeController
  * 为自助机提供仪表厂商/分类/设备的最新编码
  */
-@Slf4j
 @Validated
 @RestController
 @RequestMapping("/thermal/agent/access-code")
@@ -63,7 +61,6 @@ public class AccessCodeController {
             default -> null;
         };
         if (tableName == null) {
-            log.warn("未知仪表类型: {}", meterType);
             return "";
         }
         try {
@@ -73,7 +70,6 @@ public class AccessCodeController {
                 Integer.class, sortCode, sortCode + "%");
             return sortCode + String.format("%04d", (max != null ? max : 0) + 1);
         } catch (Exception e) {
-            log.warn("获取仪表编码失败: table={}, sortCode={}", tableName, sortCode, e);
             return sortCode + "0001";
         }
     }

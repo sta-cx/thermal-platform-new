@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.AgPropertyMapper">
+
+    <resultMap id="BaseResultMap" type="org.sdkj.thermal.domain.vo.AgPropertyVo">
+        <id column="id" property="id"/>
+        <result column="agent_company_id" property="agentCompanyId"/>
+        <result column="property_company_id" property="propertyCompanyId"/>
+        <result column="property_name" property="propertyName"/>
+        <result column="property_code" property="propertyCode"/>
+    </resultMap>
+
+    <select id="selectPropertyPage" resultMap="BaseResultMap">
+        SELECT ap.id, ap.agent_company_id, ap.property_company_id,
+               sc.name AS property_name, sc.code AS property_code
+        FROM ag_company_property ap
+        INNER JOIN sys_company sc ON ap.property_company_id = sc.id
+        WHERE ap.agent_company_id = #{agentCode}
+          AND sc.is_deleted = '0'
+        <if test="searchContent != null and searchContent != ''">
+            AND (sc.name LIKE CONCAT('%', #{searchContent}, '%')
+                  OR sc.tele LIKE CONCAT('%', #{searchContent}, '%'))
+        </if>
+        ORDER BY ap.create_time DESC
+    </select>
+
+    <select id="selectUnboundPage" resultMap="BaseResultMap">
+        SELECT sc.id, sc.name AS property_name, sc.code AS property_code
+        FROM sys_company sc
+        WHERE sc.nature = '2'
+          AND sc.is_deleted = '0'
+          AND sc.id NOT IN (
+              SELECT property_company_id
+              FROM ag_company_property
+              WHERE agent_company_id = #{agentCode}
+          )
+        <if test="searchContent != null and searchContent != ''">
+            AND (sc.name LIKE CONCAT('%', #{searchContent}, '%')
+                  OR sc.tele LIKE CONCAT('%', #{searchContent}, '%'))
+        </if>
+        ORDER BY sc.create_time DESC
+    </select>
+
+</mapper>

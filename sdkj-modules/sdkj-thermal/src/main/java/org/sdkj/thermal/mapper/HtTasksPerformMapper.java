@@ -456,4 +456,14 @@ public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtT
      * 查询列表N
      */
     List<HtTasksPerform> selectListN(@Param("companyId") String companyId);
+
+    /**
+     * 查询最新的任务执行记录
+     */
+    HtTasksPerform queryLatestTasksPerform(@Param("tasksId") Integer tasksId, @Param("groupId") String groupId);
+
+    /**
+     * 获取任务最后执行的回报率
+     */
+    Integer getTaskLastPerformReportRate(@Param("tasksId") Integer tasksId, @Param("groupId") String groupId);
 }

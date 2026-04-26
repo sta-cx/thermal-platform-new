@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.AgPropertyMenuMapper">
+
+    <resultMap id="BaseResultMap" type="org.sdkj.thermal.domain.vo.AgPropertyMenuVo">
+        <id column="id" property="id"/>
+        <result column="company_id" property="companyId"/>
+        <result column="menu_id" property="menuId"/>
+        <result column="menu_name" property="menuName"/>
+        <result column="menu_code" property="menuCode"/>
+    </resultMap>
+
+    <select id="selectAssignedMenus" resultMap="BaseResultMap">
+        SELECT m.id, m.name as menu_name, m.code as menu_code
+        FROM ag_property_menu a
+        LEFT JOIN sys_menu m ON a.menu_id = m.id
+        WHERE a.company_id = #{companyId}
+          AND m.is_deleted = '0'
+          AND m.nature = '2'
+        ORDER BY m.seq
+    </select>
+
+    <select id="selectUnassignedMenus" resultMap="BaseResultMap">
+        SELECT m.id, m.name as menu_name, m.code as menu_code
+        FROM sys_menu m
+        WHERE m.is_deleted = '0'
+          AND m.nature = '2'
+          AND m.id NOT IN (
+              SELECT menu_id FROM ag_property_menu WHERE company_id = #{companyId}
+          )
+        ORDER BY m.seq
+    </select>
+
+    <delete id="deletePropertyMenus">
+        DELETE FROM ag_property_menu WHERE company_id = #{companyId}
+    </delete>
+
+    <insert id="insertPropertyMenus">
+        INSERT INTO ag_property_menu (id, company_id, menu_id) VALUES
+        <foreach collection="menuIds" item="menuId" separator=",">
+            (REPLACE(UUID(), '-', ''), #{companyId}, #{menuId})
+        </foreach>
+    </insert>
+
+</mapper>

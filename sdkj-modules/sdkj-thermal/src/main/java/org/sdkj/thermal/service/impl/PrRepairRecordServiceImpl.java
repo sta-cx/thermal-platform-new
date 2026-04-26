@@ -25,7 +25,7 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean dispatch(String[] ids, String dispatchId, String isReject, String rejectReason, String dispatchMoney) {
-        for (String id : ids) {
+        Arrays.stream(ids).forEach(id -> {
             PrRepairRecord record = new PrRepairRecord();
             record.setId(id);
             record.setDispatchId(dispatchId);
@@ -40,32 +40,39 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
                 record.setRepairStatus(4);
             }
             baseMapper.updateById(record);
-        }
+        });
         return true;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateService(String id, String value, String type) {
-        PrRepairRecord record = new PrRepairRecord();
-        record.setId(id);
+        LambdaUpdateWrapper<PrRepairRecord> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(PrRepairRecord::getId, id);
+
         switch (type) {
-            case "attitude" -> record.setServiceAttitude(value);
-            case "quality" -> record.setServiceQuality(value);
-            case "efficiency" -> record.setServiceEfficiency(value);
+            case "attitude" -> wrapper.set(PrRepairRecord::getServiceAttitude, value);
+            case "quality" -> wrapper.set(PrRepairRecord::getServiceQuality, value);
+            case "efficiency" -> wrapper.set(PrRepairRecord::getServiceEfficiency, value);
             default -> { return false; }
         }
-        return baseMapper.updateById(record) > 0;
+
+        wrapper.set(PrRepairRecord::getEvaluationTime, new Date());
+        boolean result = baseMapper.update(null, wrapper) > 0;
+
+        if (result) {
+            baseMapper.update(null, new LambdaUpdateWrapper<PrRepairRecord>()
+                .eq(PrRepairRecord::getId, id)
+                .set(PrRepairRecord::getRepairStatus, 5));
+        }
+        return result;
     }
 
     @Override
     public Map<String, Object> getAllTypeCount(String companyId) {
-        LambdaQueryWrapper<PrRepairRecord> lqw = new LambdaQueryWrapper<PrRepairRecord>()
-            .eq(PrRepairRecord::getCompanyId, companyId);
-        long total = baseMapper.selectCount(lqw);
-        Map<String, Object> result = new HashMap<>();
-        result.put("total", total);
-        return result;
+        long total = baseMapper.selectCount(
+            new LambdaQueryWrapper<PrRepairRecord>().eq(PrRepairRecord::getCompanyId, companyId));
+        return Map.of("total", total);
     }
 
     @Override

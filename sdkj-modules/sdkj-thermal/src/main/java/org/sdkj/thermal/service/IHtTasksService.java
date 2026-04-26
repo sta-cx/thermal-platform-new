@@ -100,4 +100,9 @@ public interface IHtTasksService extends IService<HtTasks> {
      * 更新房屋其他编码
      */
     boolean updateHouseOtherCode(String houseId, String otherCode);
+
+    /**
+     * DTU任务执行生成指令（调控依据=3时使用）
+     */
+    boolean insertHtTasksPerformDtu(org.sdkj.thermal.domain.HtTasks htTasks);
 }

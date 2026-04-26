@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.AgRoleMapper">
+
+    <resultMap id="BaseResultMap" type="org.sdkj.thermal.domain.AgRole">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="identifying" property="identifying"/>
+        <result column="nature" property="nature"/>
+        <result column="role_desc" property="roleDesc"/>
+        <result column="is_super" property="isSuper"/>
+        <result column="company_id" property="companyId"/>
+    </resultMap>
+
+    <select id="selectNoRoleByUserId" resultMap="BaseResultMap">
+        SELECT r.* FROM sys_role r
+        WHERE r.company_id = #{companyId}
+        AND r.id NOT IN (
+            SELECT ur.role_id FROM sys_user_role ur WHERE ur.user_id = #{userId}
+        )
+    </select>
+
+    <select id="selectYesRoleByUserId" resultMap="BaseResultMap">
+        SELECT r.* FROM sys_role r
+        INNER JOIN sys_user_role ur ON r.id = ur.role_id
+        WHERE r.company_id = #{companyId}
+        AND ur.user_id = #{userId}
+    </select>
+
+    <delete id="removeRoleMenu">
+        DELETE FROM sys_role_menu WHERE role_id = #{roleId}
+    </delete>
+
+    <insert id="batchInsertRoleMenu">
+        INSERT INTO sys_role_menu (role_id, menu_id) VALUES
+        <foreach collection="menuIds" item="menuId" separator=",">
+            (#{roleId}, #{menuId})
+        </foreach>
+    </insert>
+
+    <select id="hasUser" resultType="int">
+        SELECT COUNT(1) FROM sys_user_role WHERE role_id = #{id}
+    </select>
+
+    <!-- 查询角色已分配的菜单列表 -->
+    <select id="selectYesMenuByRoleId" resultType="org.sdkj.system.domain.vo.SysMenuVo">
+        SELECT m.menu_id, m.parent_id, m.menu_name, m.order_num, m.path, m.component,
+               m.query_param, m.is_frame, m.is_cache, m.menu_type, m.visible,
+               m.status, m.perms, m.icon, m.remark, m.create_time, m.update_time
+        FROM sys_role_menu rm
+        INNER JOIN sys_menu m ON rm.menu_id = m.menu_id
+        WHERE rm.role_id = #{roleId}
+        AND m.status = '0'
+        AND m.visible = '0'
+        ORDER BY m.order_num
+    </select>
+
+    <!-- 查询角色未分配的菜单列表 -->
+    <select id="selectNoMenuByRoleId" resultType="org.sdkj.system.domain.vo.SysMenuVo">
+        SELECT m.menu_id, m.parent_id, m.menu_name, m.order_num, m.path, m.component,
+               m.query_param, m.is_frame, m.is_cache, m.menu_type, m.visible,
+               m.status, m.perms, m.icon, m.remark, m.create_time, m.update_time
+        FROM sys_menu m
+        WHERE m.status = '0'
+        AND m.visible = '0'
+        AND m.menu_id NOT IN (
+            SELECT rm.menu_id FROM sys_role_menu rm WHERE rm.role_id = #{roleId}
+        )
+        ORDER BY m.order_num
+    </select>
+
+    <!-- 查询所有代理商菜单 -->
+    <select id="selectAgentMenus" resultType="org.sdkj.system.domain.vo.SysMenuVo">
+        SELECT m.menu_id, m.parent_id, m.menu_name, m.order_num, m.path, m.component,
+               m.query_param, m.is_frame, m.is_cache, m.menu_type, m.visible,
+               m.status, m.perms, m.icon, m.remark, m.create_time, m.update_time
+        FROM sys_menu m
+        WHERE m.status = '0'
+        AND m.visible = '0'
+        ORDER BY m.order_num
+    </select>
+
+</mapper>

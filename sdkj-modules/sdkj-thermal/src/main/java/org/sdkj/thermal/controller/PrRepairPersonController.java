@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.mybatis.core.page.PageQuery;
+import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrRepairPerson;
 import org.sdkj.thermal.service.IPrRepairPersonService;
@@ -25,17 +27,17 @@ public class PrRepairPersonController extends BaseController {
     @SaCheckPermission("thermal:property:repair:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<Page<PrRepairPerson>> list(
+    public TableDataInfo<PrRepairPerson> list(
             @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        Page<PrRepairPerson> page = new Page<>(pageNum, pageSize);
+            PageQuery pageQuery) {
+        Page<PrRepairPerson> page = pageQuery.build();
         LambdaQueryWrapper<PrRepairPerson> lqw = new LambdaQueryWrapper<>();
         lqw.eq(companyId != null && !companyId.isEmpty(), PrRepairPerson::getCompanyId, companyId);
         lqw.like(search != null && !search.isEmpty(), PrRepairPerson::getName, search);
         lqw.orderByDesc(PrRepairPerson::getCreateTime);
-        return R.ok(repairPersonService.page(page, lqw));
+        repairPersonService.page(page, lqw);
+        return TableDataInfo.build(page);
     }
 
     @SaCheckPermission("thermal:property:repair:query")

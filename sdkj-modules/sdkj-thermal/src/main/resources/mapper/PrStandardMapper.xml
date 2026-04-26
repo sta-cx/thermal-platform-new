@@ -56,7 +56,7 @@
         FROM pr_standard a
         LEFT JOIN pr_standard_price b
             ON b.standard_id = a.id AND b.company_id = #{companyId} AND b.org_id = #{orgId}
-               AND b.grade = 1 AND b.step_1_2 = 1
+               AND b.grade = 1 AND b.step12 = 1
         WHERE a.company_id = #{companyId}
           AND a.org_id = #{orgId}
           AND a.item_group = '5'
@@ -69,7 +69,7 @@
         FROM pr_standard a
         LEFT JOIN pr_standard_price b
             ON b.standard_id = a.id AND b.company_id = #{companyId} AND b.org_id = #{orgId}
-               AND b.grade = 1 AND b.step_1_2 = 1
+               AND b.grade = 1 AND b.step12 = 1
         WHERE a.company_id = #{companyId}
           AND a.org_id = #{orgId}
           AND a.item_group = '5'
@@ -82,23 +82,23 @@
         FROM pr_standard a
         LEFT JOIN pr_standard_price b
             ON b.standard_id = a.id AND b.company_id = #{companyId} AND b.org_id = #{orgId}
-               AND b.grade = 1 AND b.step_1_2 = 1
+               AND b.grade = 1 AND b.step12 = 1
         WHERE a.company_id = #{companyId}
           AND a.org_id = #{orgId}
           AND a.item_group = '6'
     </select>
 
     <select id="selectPriceList" resultType="org.sdkj.thermal.domain.PrStandardPrice">
-        SELECT id, standard_id, step_1_2, grade, minimum, maximum, standard_price,
+        SELECT id, standard_id, step12, grade, minimum, maximum, standard_price,
                price_formula, other1_price, other2_price, other3_price, max_price,
                line_mode, line_amount, money_formula, org_id, company_id
         FROM pr_standard_price
         WHERE standard_id = #{standardId} AND grade = 1
-        ORDER BY grade, step_1_2
+        ORDER BY grade, step12
     </select>
 
     <select id="selectPriceListAll" resultType="org.sdkj.thermal.domain.PrStandardPrice">
-        SELECT id, standard_id, step_1_2, grade, minimum, maximum, standard_price,
+        SELECT id, standard_id, step12, grade, minimum, maximum, standard_price,
                price_formula, other1_price, other2_price, other3_price, max_price,
                line_mode, line_amount, money_formula, org_id, company_id
         FROM pr_standard_price
@@ -214,7 +214,7 @@
     </delete>
 
     <insert id="insertPriceList">
-        INSERT INTO pr_standard_price(id, standard_id, step_1_2, grade, minimum, maximum,
+        INSERT INTO pr_standard_price(id, standard_id, step12, grade, minimum, maximum,
             standard_price, price_formula, other1_price, other2_price, other3_price, max_price,
             start_time, end_time, line_mode, line_amount, money_formula, org_id, company_id,
             create_by, create_time)

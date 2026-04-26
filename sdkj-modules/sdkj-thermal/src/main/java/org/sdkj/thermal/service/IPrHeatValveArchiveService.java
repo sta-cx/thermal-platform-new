@@ -179,4 +179,17 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
                                   String userName, String phone,
                                   String gfloorArea, String nfloorArea, String heatingArea,
                                   String meterNum);
+
+    // ========== NB/MBus 数据接收 ==========
+
+    /**
+     * 温度反写到 pr_house 表
+     * 用于 NB/MBus 阀门数据接收后更新进水/出水温度
+     * @param houseId 房屋ID
+     * @param inTemperature 进水温度
+     * @param outTemperature 出水温度
+     * @param actualOpen 实际开度（可选）
+     */
+    void updateHouseTemperature(String houseId, BigDecimal inTemperature,
+                                 BigDecimal outTemperature, Integer actualOpen);
 }

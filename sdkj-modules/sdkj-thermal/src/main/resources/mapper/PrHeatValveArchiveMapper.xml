@@ -31,4 +31,15 @@
               </foreach>
     </select>
 
+    <!-- 温度反写到 pr_house 表 -->
+    <update id="updateHouse">
+        UPDATE pr_house
+        SET in_temperature = #{inTemperature},
+            out_temperature = #{outTemperature}
+        <if test="actualOpen != null">
+            ,actual_open = #{actualOpen}
+        </if>
+        WHERE id = #{houseId}
+    </update>
+
 </mapper>

@@ -127,4 +127,19 @@ public interface HtTasksMapper extends BaseMapperPlus<HtTasks, HtTasksVo> {
      * 重新设定开度日志 - 更新单元阀设定状态
      */
     int updateValveSettingStatusD(@Param("newMainId") String newMainId);
+
+    /**
+     * 查询DTU平均回水温度（调控依据=3时使用）
+     */
+    List<org.sdkj.thermal.domain.vo.PJHSVo> queryHtTasksPJHSDTU(@Param("taskId") String taskId);
+
+    /**
+     * 更新任务执行次数
+     */
+    int updateHtasks(@Param("taskId") String taskId);
+
+    /**
+     * 插入指令表每个阀门信息（广播方式，不下发，仅作为界面查询展示用）
+     */
+    int insertHtTasksPerformByRadio(@Param("taskId") String taskId, @Param("commandIndex") Integer commandIndex);
 }

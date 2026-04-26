@@ -78,10 +78,22 @@
             <artifactId>sdkj-common-encrypt</artifactId>
         </dependency>
 
+        <!-- 系统模块依赖 -->
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-system</artifactId>
+        </dependency>
+
         <!-- Quartz 调度器 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-quartz</artifactId>
+        </dependency>
+
+        <!-- Spring Security Crypto (BCrypt) -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
     </dependencies>

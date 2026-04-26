@@ -195,4 +195,51 @@
         WHERE b.main_id = #{newMainId}
     </update>
 
+    <!-- 查询DTU平均回水温度（调控依据=3时使用） -->
+    <select id="queryHtTasksPJHSDTU" resultType="org.sdkj.thermal.domain.vo.PJHSVo">
+        SELECT
+            sd.chan_nums AS chanNum,
+            ROUND(AVG(s.out_temp), 2) AS outTempPJ
+        FROM ht_scope_dtu sd
+        LEFT JOIN ht_scope s ON s.tasks_id = sd.tasks_id AND s.chan_num = sd.chan_nums
+        WHERE sd.tasks_id = #{taskId}
+          AND s.is_special != 1
+        GROUP BY sd.chan_nums
+    </select>
+
+    <!-- 更新任务执行次数 -->
+    <update id="updateHtasks">
+        UPDATE ht_tasks SET number = number + 1, last_time = NOW() WHERE id = CAST(#{taskId} AS UNSIGNED)
+    </update>
+
+    <!-- 插入指令表每个阀门信息（广播方式，不下发，仅作为界面查询展示用） -->
+    <insert id="insertHtTasksPerformByRadio">
+        INSERT INTO ht_tasks_perform (
+            id, tasks_id, strategy_id, instruction_id, group_id, command_index,
+            orderr, org_id, company_id, concentrator_code, meter_arc_code,
+            dtu_num, chan_num, status, instruction_status, create_time, create_by
+        )
+        SELECT
+            REPLACE(UUID(), '-', '') AS id,
+            sd.tasks_id,
+            (SELECT strategy_id FROM ht_tasks WHERE id = CAST(sd.tasks_id AS UNSIGNED)) AS strategy_id,
+            sp.instruction_id AS instruction_id,
+            (SELECT cu_group_id FROM ht_tasks WHERE id = CAST(sd.tasks_id AS UNSIGNED)) AS group_id,
+            #{commandIndex} AS command_index,
+            sp.orderr AS orderr,
+            sd.org_id,
+            sd.company_id,
+            sd.concentrator_code,
+            sd.meter_arc_code,
+            sd.dtu_num,
+            sd.chan_nums AS chan_num,
+            0 AS status,
+            0 AS instruction_status,
+            NOW() AS create_time,
+            (SELECT create_by FROM ht_tasks WHERE id = CAST(sd.tasks_id AS UNSIGNED)) AS create_by
+        FROM ht_scope_dtu sd
+        INNER JOIN ht_strategy_perform sp ON sp.tasks_id = CAST(sd.tasks_id AS UNSIGNED) AND sp.command_index = #{commandIndex}
+        WHERE sd.tasks_id = #{taskId}
+    </insert>
+
 </mapper>

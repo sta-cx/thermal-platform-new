@@ -4,19 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.satoken.utils.LoginHelper;
-import org.sdkj.thermal.domain.HtTasks;
-import org.sdkj.thermal.domain.HtScope;
-import org.sdkj.thermal.domain.HtTasksPerform;
-import org.sdkj.thermal.domain.vo.HtStrategySubVo;
-import org.sdkj.thermal.domain.vo.HtTasksVo;
-import org.sdkj.thermal.mapper.HtTasksMapper;
-import org.sdkj.thermal.mapper.HtScopeMapper;
-import org.sdkj.thermal.mapper.HtStrategySubMapper;
-import org.sdkj.thermal.mapper.HtInstructionMapper;
-import org.sdkj.thermal.mapper.PrHouseMapper;
+import org.sdkj.thermal.domain.*;
+import org.sdkj.thermal.domain.vo.*;
+import org.sdkj.thermal.mapper.*;
 import org.sdkj.thermal.service.IHtTasksService;
 import org.sdkj.thermal.quartz.ThermalJobManager;
 import org.springframework.stereotype.Service;
@@ -24,15 +18,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 调控任务服务实现
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> implements IHtTasksService {
@@ -43,6 +35,10 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     private final HtInstructionMapper instructionMapper;
     private final PrHouseMapper prHouseMapper;
     private final ThermalJobManager jobManager;
+    private final HtStrategyMapper htStrategyMapper;
+    private final HtStrategyPerformMapper htStrategyPerformMapper;
+    private final HtScopeDtuMapper htScopeDtuMapper;
+    private final HtTasksPerformMapper htTasksPerformMapper;
 
     @Override
     public TableDataInfo<HtTasksVo> selectPageList(LambdaQueryWrapper<HtTasks> lqw, PageQuery pageQuery) {
@@ -331,5 +327,168 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     @Transactional(rollbackFor = Exception.class)
     public boolean updateHouseOtherCode(String houseId, String otherCode) {
         return prHouseMapper.updateOtherCodeById(houseId, otherCode) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean insertHtTasksPerformDtu(HtTasks htTasks) {
+        boolean result = false;
+        // 调控依据平均回水温度
+        if (htTasks.getAdjustBasis() == 3) {
+
+            // 检查回报率
+            if (htTasks.getIsUseReportRate() != null && htTasks.getIsUseReportRate() == 1 && htTasks.getNumber() != null && htTasks.getNumber() > 0) {
+                Integer reportRate = htTasksPerformMapper.getTaskLastPerformReportRate(htTasks.getId(), htTasks.getCuGroupId());
+                if (reportRate != null && reportRate < htTasks.getReportRate()) {
+                    log.info("回报率 {}% 小于设定值 {}% 跳过指令生成！", reportRate, htTasks.getReportRate());
+                    return true;
+                } else {
+                    log.info("回报率 {}% 大于等于设定值 {}% 继续指令生成！", reportRate, htTasks.getReportRate());
+                }
+            }
+
+            List<PJHSVo> pjhsVoList = new ArrayList<>();
+            // 判断控制范围类型--3 户阀
+            if (htTasks.getScopeType() == 3) {
+                // 根据组号计算调控范围内的平均回水温度（不包括特殊户）
+                pjhsVoList = baseMapper.queryHtTasksPJHSDTU(htTasks.getId().toString());
+                if (!pjhsVoList.isEmpty()) {
+                    baseMapper.queryHtTasksPJHSDTU(htTasks.getId().toString());
+                }
+            }
+
+            Map<String, Double> pjhsMap = pjhsVoList.stream()
+                .filter(pj -> pj.getChanNum() != null && !pj.getChanNum().isEmpty())
+                .collect(Collectors.toMap(PJHSVo::getChanNum, PJHSVo::getOutTempPJ));
+
+            // 必须有策略
+            if (htTasks.getStrategyId() != null && !"".equals(htTasks.getStrategyId())) {
+
+                HtStrategy htStrategy = htStrategyMapper.selectById(htTasks.getStrategyId());
+
+                if (htStrategy == null) {
+                    log.error("未获取到策略！");
+                    return false;
+                }
+
+                int commandIndex = -1;
+                HtTasksPerform lastPerform = htTasksPerformMapper.queryLatestTasksPerform(htTasks.getId(), htTasks.getCuGroupId());
+
+                if (lastPerform != null) {
+                    commandIndex = lastPerform.getCommandIndex();
+                }
+                commandIndex = commandIndex + 1;
+
+                HtStrategyPerform htStrategyPerform = htStrategyPerformMapper.queryStrategyPerformListByTasksIdAndIndex(
+                    Long.valueOf(htTasks.getId()), commandIndex);
+
+                if (htStrategyPerform == null) {
+                    log.error("未获取到指令或指令序列已完成！");
+                    return false;
+                }
+
+                List<HtScopeDtu> htScopeDtuList = htScopeDtuMapper.queryHtScopeDtuListByTasksId(htTasks.getId().toString());
+
+                if (htScopeDtuList == null || htScopeDtuList.isEmpty()) {
+                    log.error("未获取到调控范围数据！");
+                    return false;
+                }
+
+                List<HtTasksPerform> htTasksPerformList = new ArrayList<>();
+                HtScopeDtu htScopeDtu;
+
+                for (HtScopeDtu scopeDtu : htScopeDtuList) {
+                    htScopeDtu = scopeDtu;
+                    HtTasksPerform htTasksPerform = new HtTasksPerform();
+                    htTasksPerform.setId(UUID.randomUUID().toString().replace("-", ""));
+                    htTasksPerform.setGroupId(htTasks.getCuGroupId());
+                    htTasksPerform.setStrategyId(htTasks.getStrategyId());
+                    htTasksPerform.setInstructionId(String.valueOf(htStrategyPerform.getInstructionId()));
+                    htTasksPerform.setInstructionType(htStrategyPerform.getType());
+                    try {
+                        htTasksPerform.setInstruction(Integer.parseInt(htStrategyPerform.getInstruction()));
+                    } catch (NumberFormatException e) {
+                        htTasksPerform.setInstruction(0);
+                    }
+                    htTasksPerform.setNumber(commandIndex);
+                    htTasksPerform.setIntervall(htStrategyPerform.getIntervall());
+                    htTasksPerform.setUnit(htStrategyPerform.getUnit());
+                    htTasksPerform.setDuration(htStrategyPerform.getDuration());
+                    htTasksPerform.setOrgId(htScopeDtu.getOrgId());
+                    htTasksPerform.setCompanyId(htScopeDtu.getCompanyId());
+                    htTasksPerform.setConcentratorCode(htScopeDtu.getConcentratorCode());
+                    htTasksPerform.setMeterNum("AAAAAAAAAAAAAAAA");
+                    htTasksPerform.setMeterArcCode(htScopeDtu.getMeterArcCode());
+                    htTasksPerform.setStatus(0);
+                    htTasksPerform.setMeterId("");
+                    htTasksPerform.setInstructionStatus(0);
+                    htTasksPerform.setTasksId(htTasks.getId().toString());
+                    htTasksPerform.setOrderr(htStrategyPerform.getOrderr());
+                    htTasksPerform.setForeStart(htStrategyPerform.getXunhuan());
+                    htTasksPerform.setCreateTime(new Date());
+                    htTasksPerform.setCreateBy(htTasks.getCreateBy());
+                    htTasksPerform.setDtuNum(htScopeDtu.getDtuNum());
+                    htTasksPerform.setChanNum(htScopeDtu.getChanNums());
+                    htTasksPerform.setCommandIndex(commandIndex);
+
+                    // 设置分组数据
+                    List<GroupData> groupDataList = createGroupDatas(htScopeDtu.getChanNums(), pjhsMap, htStrategy);
+                    if (!groupDataList.isEmpty()) {
+                        // 这里可以根据需要将 groupDataList 转换为 JSON 字符串或其他格式存储
+                        // 如果 HtTasksPerform 有 groupData 字段，可以在这里设置
+                        htTasksPerformList.add(htTasksPerform);
+                    } else {
+                        log.error("未获取到指令相关调控数据，跳过指令生成！");
+                    }
+                }
+
+                if (!htTasksPerformList.isEmpty()) {
+                    // 下发控制指令
+                    baseMapper.insertTasksPerformBatch(htTasksPerformList);
+                    // 更新执行次数
+                    baseMapper.updateHtasks(htTasks.getId().toString());
+                    // 插入指令表每个阀门信息（不下发，仅作为界面查询展示用）
+                    baseMapper.insertHtTasksPerformByRadio(htTasks.getId().toString(), commandIndex);
+                } else {
+                    log.error("无可下发指令，跳过调控次数累计！");
+                }
+
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 创建分组数据
+     */
+    private List<GroupData> createGroupDatas(String chanNums, Map<String, Double> pjhsMap, HtStrategy htStrategy) {
+        List<GroupData> result = new ArrayList<>();
+        if (chanNums == null || chanNums.isEmpty()) {
+            return result;
+        }
+        if (pjhsMap == null || pjhsMap.isEmpty()) {
+            return result;
+        }
+        if (htStrategy == null) {
+            return result;
+        }
+
+        String[] chanNumsArray = chanNums.split(",");
+        for (String chanNum : chanNumsArray) {
+            if (!pjhsMap.containsKey(chanNum)) {
+                continue;
+            }
+
+            GroupData groupData = new GroupData();
+            groupData.setChanNum(chanNum);
+            groupData.setOutTempPJ((int) Math.round(pjhsMap.get(chanNum) * 100));
+            groupData.setStride(htStrategy.getStride());
+            groupData.setOutTempDeviation(htStrategy.getOutTempDeviation());
+            result.add(groupData);
+        }
+
+        return result;
     }
 }

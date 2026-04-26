@@ -73,4 +73,27 @@ public interface IPrHouseService extends IService<PrHouse> {
      * @return 总面积
      */
     BigDecimal areaByUser(String userId);
+
+    // ========== 孤岛户功能 ==========
+
+    /**
+     * 查询孤岛户列表
+     * 通过分析相邻房号的阀门状态来判断孤岛户
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @param buildingId 楼宇ID
+     * @return 孤岛户列表
+     */
+    List<PrHouseVo> queryIsolatedHouses(String companyId, String orgId, String buildingId);
+
+    /**
+     * 设置孤岛户标记
+     * 先重置楼宇下所有房屋的位置属性，再更新传入的孤岛户列表
+     * @param houseList 房屋列表（包含 siteType 和 siteTypeOld）
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @param buildingId 楼宇ID
+     * @return 是否成功
+     */
+    boolean setIsolatedHouses(List<PrHouse> houseList, String companyId, String orgId, String buildingId);
 }

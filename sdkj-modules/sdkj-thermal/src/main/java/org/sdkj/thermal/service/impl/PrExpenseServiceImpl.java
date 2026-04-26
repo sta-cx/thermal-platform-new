@@ -11,8 +11,10 @@ import org.sdkj.thermal.domain.PrExpense;
 import org.sdkj.thermal.domain.PrHouseExpense;
 import org.sdkj.thermal.domain.PmParkingSpace;
 import org.sdkj.thermal.domain.PrStandard;
+import org.sdkj.thermal.domain.PrStandardPrice;
 import org.sdkj.thermal.domain.vo.PrExpenseVo;
 import org.sdkj.thermal.mapper.PrExpenseMapper;
+import org.sdkj.thermal.mapper.PrStandardMapper;
 import org.sdkj.thermal.service.IPrExpenseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +36,7 @@ import java.util.Map;
 public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense> implements IPrExpenseService {
 
     private final PrExpenseMapper baseMapper;
+    private final org.sdkj.thermal.mapper.PrStandardMapper standardMapper;
 
     @Override
     public TableDataInfo<PrExpenseVo> selectPageList(String companyId, String orgId, String buildingId, String unitCode,
@@ -136,7 +140,283 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Transactional(rollbackFor = Exception.class)
     public boolean insertDatall(List<PrHouseExpense> list) {
         if (list == null || list.isEmpty()) return false;
-        return insertData(list);
+
+        List<PrExpense> expenses = new ArrayList<>();
+        Date now = new Date();
+        String userId = String.valueOf(LoginHelper.getUserId());
+
+        for (PrHouseExpense he : list) {
+            if (he.getHouseId() == null || he.getStandardId() == null) continue;
+
+            PrStandard std = baseMapper.selectStandardById(he.getStandardId());
+            if (std == null) continue;
+
+            // 获取标准单价列表
+            List<PrStandardPrice> priceList = standardMapper.selectPriceListAll(he.getStandardId());
+
+            Calendar calStart = Calendar.getInstance();
+            Calendar calEnd = Calendar.getInstance();
+
+            // 根据生成规则生成费用明细
+            String generateRule = std.getGenerateRule();
+            Integer cycles = std.getCycles() != null ? std.getCycles() : 1;
+
+            if ("1".equals(generateRule) || "2".equals(generateRule)) {
+                // 规则1: 月对月, 规则2: 自然月
+                for (int i = 0; i < cycles; i++) {
+                    PrExpense e = new PrExpense();
+                    e.setHouseId(he.getHouseId());
+                    e.setItemGroup(he.getItemGroup());
+                    e.setItemCode(he.getItemCode());
+                    e.setItemName(he.getItemName() != null ? he.getItemName() : std.getName());
+                    e.setStandardId(he.getStandardId());
+
+                    if ("1".equals(generateRule)) {
+                        // 月对月
+                        calStart.setTime(he.getOpenTime());
+                        calStart.add(Calendar.MONTH, i);
+                        calEnd.setTime(he.getOpenTime());
+                        calEnd.add(Calendar.MONTH, i + 1);
+                    } else {
+                        // 自然月
+                        calStart.setTime(he.getOpenTime());
+                        calStart.add(Calendar.MONTH, i);
+                        calEnd.setTime(he.getOpenTime());
+                        calEnd.add(Calendar.MONTH, i);
+                        calEnd.set(Calendar.DAY_OF_MONTH, calEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+                    }
+
+                    e.setStartDate(calStart.getTime());
+                    e.setExpireDate(calEnd.getTime());
+                    e.setLastDate(calStart.getTime());
+                    e.setYear(String.valueOf(calStart.get(Calendar.YEAR)));
+                    e.setMonth(String.valueOf(calStart.get(Calendar.MONTH) + 1));
+                    e.setQty(1);
+
+                    if (priceList != null && !priceList.isEmpty()) {
+                        e.setPriceFormula(priceList.get(0).getPriceFormula());
+                        e.setMoney(priceList.get(0).getStandardPrice());
+                    }
+                    e.setStandardPrice(std.getStandardPrice());
+                    e.setMaxMoney(std.getMaxMoney());
+                    e.setMoneyFormula(std.getMoneyFormula());
+                    e.setIsCalc("0");
+                    e.setIsFree(0);
+                    e.setIsCharged(0);
+                    e.setIsClosed(0);
+                    e.setOrgId(he.getOrgId());
+                    e.setCompanyId(he.getCompanyId());
+                    e.setPaidIn(BigDecimal.ZERO);
+                    e.setPreferential(BigDecimal.ZERO);
+                    e.setDeduction(BigDecimal.ZERO);
+                    e.setLatefee(BigDecimal.ZERO);
+                    e.setFinalMoney(BigDecimal.ZERO);
+                    e.setReceivable(BigDecimal.ZERO);
+                    e.setOverdueDay(0);
+                    e.setCreateBy(Long.valueOf(userId));
+                    e.setCreateTime(now);
+
+                    expenses.add(e);
+                }
+            } else if ("3".equals(generateRule)) {
+                // 规则3: 固定期限
+                PrExpense e = new PrExpense();
+                e.setHouseId(he.getHouseId());
+                e.setItemGroup(he.getItemGroup());
+                e.setItemCode(he.getItemCode());
+                e.setItemName(he.getItemName() != null ? he.getItemName() : std.getName());
+                e.setStandardId(he.getStandardId());
+                e.setStartDate(he.getOpenTime());
+                e.setExpireDate(he.getCloseTime());
+                e.setLastDate(he.getOpenTime());
+
+                // 计算月数
+                int months = calcCycleMonths(he.getOpenTime(), he.getCloseTime());
+                e.setQty(months > 0 ? months : 1);
+
+                e.setPriceFormula("pr_expense.standard_price");
+                e.setStandardPrice(std.getStandardPrice());
+                e.setReceivable(std.getStandardPrice());
+                e.setFinalMoney(std.getStandardPrice());
+                e.setMoneyFormula("pr_expense.standard_price");
+                e.setMaxMoney(std.getMaxMoney());
+                e.setIsCalc("1");
+                e.setIsFree(0);
+                e.setIsCharged(0);
+                e.setIsClosed(0);
+                e.setOrgId(he.getOrgId());
+                e.setCompanyId(he.getCompanyId());
+                e.setPaidIn(BigDecimal.ZERO);
+                e.setPreferential(BigDecimal.ZERO);
+                e.setDeduction(BigDecimal.ZERO);
+                e.setLatefee(BigDecimal.ZERO);
+                e.setOverdueDay(0);
+                e.setCreateBy(Long.valueOf(userId));
+                e.setCreateTime(now);
+
+                // 设置年月
+                if (he.getOpenTime() != null) {
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTime(he.getOpenTime());
+                    e.setYear(String.valueOf(cal.get(Calendar.YEAR)));
+                    e.setMonth(String.valueOf(cal.get(Calendar.MONTH) + 1));
+                }
+
+                expenses.add(e);
+            } else if ("4".equals(generateRule)) {
+                // 规则4: 按年生成
+                for (int i = 0; i < cycles; i++) {
+                    PrExpense e = new PrExpense();
+                    e.setHouseId(he.getHouseId());
+                    e.setItemGroup(he.getItemGroup());
+                    e.setItemCode(he.getItemCode());
+                    e.setItemName(he.getItemName() != null ? he.getItemName() : std.getName());
+                    e.setStandardId(he.getStandardId());
+
+                    calStart.setTime(he.getOpenTime());
+                    calStart.add(Calendar.MONTH, i * 12);
+                    calEnd.setTime(he.getOpenTime());
+                    calEnd.add(Calendar.MONTH, i * 12 + 12);
+
+                    e.setStartDate(calStart.getTime());
+                    e.setExpireDate(calEnd.getTime());
+                    e.setLastDate(calStart.getTime());
+                    e.setYear(String.valueOf(calStart.get(Calendar.YEAR)));
+                    e.setMonth(String.valueOf(calStart.get(Calendar.MONTH) + 1));
+                    e.setQty(12);
+
+                    if (priceList != null && !priceList.isEmpty()) {
+                        e.setPriceFormula(priceList.get(0).getPriceFormula());
+                        e.setMoney(priceList.get(0).getStandardPrice());
+                    }
+                    e.setStandardPrice(std.getStandardPrice());
+                    e.setMaxMoney(std.getMaxMoney());
+                    e.setMoneyFormula(std.getMoneyFormula());
+                    e.setIsCalc("0");
+                    e.setIsFree(0);
+                    e.setIsCharged(0);
+                    e.setIsClosed(0);
+                    e.setOrgId(he.getOrgId());
+                    e.setCompanyId(he.getCompanyId());
+                    e.setPaidIn(BigDecimal.ZERO);
+                    e.setPreferential(BigDecimal.ZERO);
+                    e.setDeduction(BigDecimal.ZERO);
+                    e.setLatefee(BigDecimal.ZERO);
+                    e.setFinalMoney(BigDecimal.ZERO);
+                    e.setReceivable(BigDecimal.ZERO);
+                    e.setOverdueDay(0);
+                    e.setCreateBy(Long.valueOf(userId));
+                    e.setCreateTime(now);
+
+                    expenses.add(e);
+                }
+            } else if ("5".equals(generateRule)) {
+                // 规则5: 按季度生成
+                for (int i = 0; i < cycles; i++) {
+                    PrExpense e = new PrExpense();
+                    e.setHouseId(he.getHouseId());
+                    e.setItemGroup(he.getItemGroup());
+                    e.setItemCode(he.getItemCode());
+                    e.setItemName(he.getItemName() != null ? he.getItemName() : std.getName());
+                    e.setStandardId(he.getStandardId());
+
+                    calStart.setTime(he.getOpenTime());
+                    calStart.add(Calendar.MONTH, i * 3);
+                    calEnd.setTime(he.getOpenTime());
+                    calEnd.add(Calendar.MONTH, i * 3 + 3);
+
+                    e.setStartDate(calStart.getTime());
+                    e.setExpireDate(calEnd.getTime());
+                    e.setLastDate(calStart.getTime());
+                    e.setYear(String.valueOf(calStart.get(Calendar.YEAR)));
+                    e.setMonth(String.valueOf(calStart.get(Calendar.MONTH) + 1));
+                    e.setQty(3);
+
+                    if (priceList != null && !priceList.isEmpty()) {
+                        e.setPriceFormula(priceList.get(0).getPriceFormula());
+                        e.setMoney(priceList.get(0).getStandardPrice());
+                    }
+                    e.setStandardPrice(std.getStandardPrice());
+                    e.setMaxMoney(std.getMaxMoney());
+                    e.setMoneyFormula(std.getMoneyFormula());
+                    e.setIsCalc("0");
+                    e.setIsFree(0);
+                    e.setIsCharged(0);
+                    e.setIsClosed(0);
+                    e.setOrgId(he.getOrgId());
+                    e.setCompanyId(he.getCompanyId());
+                    e.setPaidIn(BigDecimal.ZERO);
+                    e.setPreferential(BigDecimal.ZERO);
+                    e.setDeduction(BigDecimal.ZERO);
+                    e.setLatefee(BigDecimal.ZERO);
+                    e.setFinalMoney(BigDecimal.ZERO);
+                    e.setReceivable(BigDecimal.ZERO);
+                    e.setOverdueDay(0);
+                    e.setCreateBy(Long.valueOf(userId));
+                    e.setCreateTime(now);
+
+                    expenses.add(e);
+                }
+            } else if ("6".equals(generateRule)) {
+                // 规则6: 按半年生成
+                for (int i = 0; i < cycles; i++) {
+                    PrExpense e = new PrExpense();
+                    e.setHouseId(he.getHouseId());
+                    e.setItemGroup(he.getItemGroup());
+                    e.setItemCode(he.getItemCode());
+                    e.setItemName(he.getItemName() != null ? he.getItemName() : std.getName());
+                    e.setStandardId(he.getStandardId());
+
+                    calStart.setTime(he.getOpenTime());
+                    calStart.add(Calendar.MONTH, i * 6);
+                    calEnd.setTime(he.getOpenTime());
+                    calEnd.add(Calendar.MONTH, i * 6 + 6);
+
+                    e.setStartDate(calStart.getTime());
+                    e.setExpireDate(calEnd.getTime());
+                    e.setLastDate(calStart.getTime());
+                    e.setYear(String.valueOf(calStart.get(Calendar.YEAR)));
+                    e.setMonth(String.valueOf(calStart.get(Calendar.MONTH) + 1));
+                    e.setQty(6);
+
+                    if (priceList != null && !priceList.isEmpty()) {
+                        e.setPriceFormula(priceList.get(0).getPriceFormula());
+                        e.setMoney(priceList.get(0).getStandardPrice());
+                    }
+                    e.setStandardPrice(std.getStandardPrice());
+                    e.setMaxMoney(std.getMaxMoney());
+                    e.setMoneyFormula(std.getMoneyFormula());
+                    e.setIsCalc("0");
+                    e.setIsFree(0);
+                    e.setIsCharged(0);
+                    e.setIsClosed(0);
+                    e.setOrgId(he.getOrgId());
+                    e.setCompanyId(he.getCompanyId());
+                    e.setPaidIn(BigDecimal.ZERO);
+                    e.setPreferential(BigDecimal.ZERO);
+                    e.setDeduction(BigDecimal.ZERO);
+                    e.setLatefee(BigDecimal.ZERO);
+                    e.setFinalMoney(BigDecimal.ZERO);
+                    e.setReceivable(BigDecimal.ZERO);
+                    e.setOverdueDay(0);
+                    e.setCreateBy(Long.valueOf(userId));
+                    e.setCreateTime(now);
+
+                    expenses.add(e);
+                }
+            }
+
+            // 每 10000 条批量插入一次
+            if (expenses.size() >= 10000) {
+                saveBatch(expenses, 500);
+                expenses.clear();
+            }
+        }
+
+        if (!expenses.isEmpty()) {
+            return saveBatch(expenses, 500);
+        }
+        return false;
     }
 
     @Override
@@ -384,7 +664,41 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean updateStepPrice(String companyId, String orgId) {
-        return baseMapper.updateStepPrice(companyId, orgId) > 0;
+        // 查询所有收费标准
+        List<org.sdkj.thermal.domain.vo.PrStandardVo> standardList = standardMapper.selectPageList(
+            new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 1000), orgId, null);
+
+        if (standardList == null || standardList.isEmpty()) return false;
+
+        boolean result = true;
+        for (org.sdkj.thermal.domain.vo.PrStandardVo standardVo : standardList) {
+            PrStandard standard = standardMapper.selectById(standardVo.getId());
+            if (standard == null) continue;
+
+            // 取暖费、临时费用不计算单价
+            if ("6".equals(standard.getItemGroup()) || "3".equals(standard.getItemGroup())) {
+                continue;
+            }
+
+            // 没有阶梯（step_maxgrade = 1）
+            if (standard.getStepMaxgrade() == null || standard.getStepMaxgrade() == 1) {
+                // 设置基本单价（已经在 updateStepPrice SQL 中处理）
+                result &= baseMapper.updateStepPrice(companyId, orgId) > 0;
+            }
+            // 建筑面积阶梯
+            else if ("1".equals(standard.getStepType())) {
+                result &= baseMapper.setStandardPriceJzmj(standard.getId()) > 0;
+            }
+            // 使用面积阶梯
+            else if ("2".equals(standard.getStepType())) {
+                result &= baseMapper.setStandardPriceSymj(standard.getId()) > 0;
+            }
+            // 楼层阶梯
+            else if ("3".equals(standard.getStepType())) {
+                result &= baseMapper.setStandardPriceLc(standard.getId()) > 0;
+            }
+        }
+        return result;
     }
 
     @Override
@@ -442,5 +756,54 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
         baseMapper.selectWechatOrderList(page, companyId, orgId, buildingId,
             unitCode, parentId, type, startTime, endTime, search);
         return TableDataInfo.build(page);
+    }
+
+    // ========== 滞纳金计算方法实现 ==========
+
+    @Override
+    public boolean updateLatefeeQs(String companyId, String orgId, String latefeeFormula, String standardId) {
+        boolean result = baseMapper.updateLatefeeQs(companyId, orgId, latefeeFormula, standardId) > 0;
+        // 计算滞纳金后更新最终金额
+        if (result) {
+            baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean updateLatefeeJs(String companyId, String orgId, String latefeeFormula, String standardId) {
+        boolean result = baseMapper.updateLatefeeJs(companyId, orgId, latefeeFormula, standardId) > 0;
+        // 计算滞纳金后更新最终金额
+        if (result) {
+            baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean updateLatefeeZd(String companyId, String orgId, String latefeeFormula, String standardId,
+                                    java.util.Date latefeeStartdate) {
+        boolean result = baseMapper.updateLatefeeZd(companyId, orgId, latefeeFormula, standardId, latefeeStartdate) > 0;
+        // 计算滞纳金后更新最终金额
+        if (result) {
+            baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean updateLatefeeSJHC(String companyId, String orgId, String latefeeFormula, String standardId,
+                                      String year, String month) {
+        boolean result = baseMapper.updateLatefeeSJHC(companyId, orgId, latefeeFormula, standardId, year, month) > 0;
+        // 计算滞纳金后更新最终金额
+        if (result) {
+            baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId);
+        }
+        return result;
+    }
+
+    @Override
+    public boolean updateFinalMoneyAfterLateFee(String companyId, String orgId, String standardId) {
+        return baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId) > 0;
     }
 }

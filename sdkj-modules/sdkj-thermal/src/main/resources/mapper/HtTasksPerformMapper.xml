@@ -1107,4 +1107,20 @@
           AND a.status = '0'
     </select>
 
+    <!-- 查询最新的任务执行记录 -->
+    <select id="queryLatestTasksPerform" resultType="org.sdkj.thermal.domain.HtTasksPerform">
+        SELECT * FROM ht_tasks_perform
+        WHERE tasks_id = #{tasksId} AND group_id = #{groupId}
+        ORDER BY command_index DESC
+        LIMIT 1
+    </select>
+
+    <!-- 获取任务最后执行的回报率 -->
+    <select id="getTaskLastPerformReportRate" resultType="java.lang.Integer">
+        SELECT ROUND(
+            COUNT(CASE WHEN status IN (0, 1, 9) THEN 1 END) * 100.0 / NULLIF(COUNT(*), 0), 0
+        ) FROM ht_tasks_perform
+        WHERE tasks_id = #{tasksId} AND group_id = #{groupId}
+    </select>
+
 </mapper>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.HtScopeDtuMapper">
+
+    <!-- 根据任务ID删除DTU控制范围 -->
+    <delete id="deleteByTasksId">
+        DELETE FROM ht_scope_dtu WHERE tasks_id = #{tasksId}
+    </delete>
+
+    <!-- 根据任务ID查询DTU控制范围列表 -->
+    <select id="queryHtScopeDtuListByTasksId" resultType="org.sdkj.thermal.domain.HtScopeDtu">
+        SELECT * FROM ht_scope_dtu WHERE tasks_id = #{tasksId}
+    </select>
+
+    <!-- 批量插入DTU控制范围 -->
+    <insert id="insertList">
+        INSERT INTO ht_scope_dtu (id, tasks_id, org_id, company_id, meter_arc_code, dtu_num, chan_nums, concentrator_code, status, create_time, create_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.id}, #{item.tasksId}, #{item.orgId}, #{item.companyId}, #{item.meterArcCode}, #{item.dtuNum}, #{item.chanNums}, #{item.concentratorCode}, #{item.status}, #{item.createTime}, #{item.createBy})
+        </foreach>
+    </insert>
+
+</mapper>

@@ -153,4 +153,33 @@ public interface IPrExpenseService extends IService<PrExpense> {
     TableDataInfo<Map<String, Object>> wechatOrderList(String companyId, String orgId, String buildingId,
         String unitCode, String parentId, String type, String startTime, String endTime, String search,
         PageQuery pageQuery);
+
+    // ========== 滞纳金计算方法 ==========
+
+    /**
+     * 滞纳金计算 - 起收日期
+     */
+    boolean updateLatefeeQs(String companyId, String orgId, String latefeeFormula, String standardId);
+
+    /**
+     * 滞纳金计算 - 到期日期
+     */
+    boolean updateLatefeeJs(String companyId, String orgId, String latefeeFormula, String standardId);
+
+    /**
+     * 滞纳金计算 - 指定日期
+     */
+    boolean updateLatefeeZd(String companyId, String orgId, String latefeeFormula, String standardId,
+                             java.util.Date latefeeStartdate);
+
+    /**
+     * 滞纳金计算 - 数据核查
+     */
+    boolean updateLatefeeSJHC(String companyId, String orgId, String latefeeFormula, String standardId,
+                              String year, String month);
+
+    /**
+     * 滞纳金计算后更新最终金额
+     */
+    boolean updateFinalMoneyAfterLateFee(String companyId, String orgId, String standardId);
 }
