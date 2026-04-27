@@ -18,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -184,6 +187,12 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     public boolean saveValveAngle(String taskId, String scopeType) {
         HtTasks task = getById(Integer.parseInt(taskId));
         if (task == null) throw new RuntimeException("任务不存在");
+
+        // 终止条件检查：天数/平衡率/次数
+        if (checkTerminationConditions(task)) {
+            return true; // 任务已自动停止，不再生成指令
+        }
+
         if (task.getStrategyId() == null || task.getStrategyId().isEmpty()) {
             throw new RuntimeException("该任务未关联策略，无法生成指令");
         }
@@ -333,6 +342,12 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     @Transactional(rollbackFor = Exception.class)
     public boolean insertHtTasksPerformDtu(HtTasks htTasks) {
         boolean result = false;
+
+        // 终止条件检查：天数/平衡率/次数
+        if (checkTerminationConditions(htTasks)) {
+            return true; // 任务已自动停止，不再生成指令
+        }
+
         // 调控依据平均回水温度
         if (htTasks.getAdjustBasis() == 3) {
 
@@ -458,6 +473,73 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
         }
 
         return result;
+    }
+
+    /**
+     * 检查任务是否满足终止条件。满足任一条件则自动停止任务：
+     * 1. 调控天数已超出设定天数
+     * 2. 平衡率已达到或超过达标值
+     * 3. 调控次数已达上限
+     *
+     * @param task 调控任务实体
+     * @return true 表示任务应终止，false 表示继续执行
+     */
+    private boolean checkTerminationConditions(HtTasks task) {
+        if (task == null) return true;
+        Integer taskId = task.getId();
+
+        // ---- 条件1: 调控天数检查 ----
+        if (task.getDays() != null && task.getDays() > 0 && task.getLastTime() != null) {
+            LocalDate lastTimeDate = task.getLastTime().toInstant()
+                .atZone(ZoneId.systemDefault()).toLocalDate();
+            long elapsedDays = ChronoUnit.DAYS.between(lastTimeDate, LocalDate.now());
+            if (elapsedDays >= task.getDays()) {
+                stopTask(taskId, "调控天数已达上限（已调控 " + elapsedDays + " 天，上限 " + task.getDays() + " 天）");
+                return true;
+            }
+        }
+
+        // ---- 条件2: 平衡率达标检查 ----
+        if (task.getStandard() != null && task.getStandard() > 0) {
+            double currentBalanceRate = baseMapper.queryBalanceRate(String.valueOf(taskId));
+            if (currentBalanceRate >= task.getStandard()) {
+                stopTask(taskId, "平衡率已达标（当前 " + currentBalanceRate + "%，目标 " + task.getStandard() + "%）");
+                return true;
+            }
+        }
+
+        // ---- 条件3: 调控次数上限检查 ----
+        if (task.getNums() != null && task.getNums() > 0 && task.getNumber() != null) {
+            if (task.getNumber() >= task.getNums()) {
+                stopTask(taskId, "调控次数已达上限（已调控 " + task.getNumber() + " 次，上限 " + task.getNums() + " 次）");
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 停止调控任务：更新状态为停止、移除 Quartz 调度、记录结束时间
+     *
+     * @param taskId 任务ID
+     * @param reason 停止原因（用于日志）
+     */
+    private void stopTask(Integer taskId, String reason) {
+        // 更新状态为停止
+        lambdaUpdate().eq(HtTasks::getId, taskId)
+            .set(HtTasks::getStatus, 0)
+            .set(HtTasks::getEndTime, new Date())
+            .update();
+
+        // 移除 Quartz 调度任务
+        try {
+            jobManager.deleteJob(taskId);
+        } catch (Exception e) {
+            log.warn("停止任务 {} 时删除 Quartz 调度失败: {}", taskId, e.getMessage());
+        }
+
+        log.info("任务 {} 已自动停止: {}", taskId, reason);
     }
 
     /**
