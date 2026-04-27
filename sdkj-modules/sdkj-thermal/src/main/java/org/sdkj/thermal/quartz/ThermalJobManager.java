@@ -2,6 +2,7 @@ package org.sdkj.thermal.quartz;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.common.tenant.helper.TenantHelper;
 import org.sdkj.thermal.domain.HtTasks;
 import org.sdkj.thermal.mapper.HtTasksMapper;
 import org.quartz.*;
@@ -35,11 +36,17 @@ public class ThermalJobManager {
             scheduler.deleteJob(jobKey);
         }
 
+        String tenantId = TenantHelper.getTenantId();
+
         JobDetail jobDetail = JobBuilder.newJob(ThermalJob.class)
             .withIdentity(jobKey)
             .usingJobData("taskId", taskId)
             .usingJobData("taskName", task.getName())
             .build();
+
+        if (tenantId != null && !tenantId.isEmpty()) {
+            jobDetail.getJobDataMap().put("tenantId", tenantId);
+        }
 
         CronScheduleBuilder cronBuilder = CronScheduleBuilder.cronSchedule(task.getCronExpression())
             .withMisfireHandlingInstructionDoNothing();
