@@ -236,10 +236,16 @@ public class IoTCallbackController {
     // ========== 认证方法 ==========
 
     private boolean verifyCallbackToken(String token) {
-        if (StrUtil.isBlank(iotCallbackToken)) {
+        String expectedToken = iotCallbackToken;
+        if (StrUtil.isBlank(expectedToken)) {
+            log.warn("IoT callback token not configured, skipping validation");
             return true;
         }
-        return iotCallbackToken.equals(token);
+        if (StrUtil.isBlank(token)) {
+            log.warn("IoT callback request missing token");
+            return false;
+        }
+        return expectedToken.equals(token);
     }
 
     // ========== 解析工具方法 ==========
