@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.AgMeterMapper">
+
+    <!-- ========================================== -->
+    <!-- 已分配仪表查询：按公司ID和仪表类型关联查询 -->
+    <!-- ========================================== -->
+
+    <!-- 查询已分配给公司的电表 -->
+    <select id="getAllocatedElectricList" resultType="java.util.Map">
+        SELECT
+            a.id,
+            a.sort_id AS sortId,
+            a.code,
+            a.name,
+            a.specification,
+            a.model,
+            a.rated_voltage AS ratedVoltage,
+            a.rated_current AS ratedCurrent,
+            a.voltage_ratio AS voltageRatio,
+            a.current_ratio AS currentRatio,
+            a.load_limit AS loadLimit,
+            a.alarm_value AS alarmValue,
+            a.constant,
+            a.is_enabled AS isEnabled,
+            a.seq,
+            a.remark,
+            c.name AS meterName
+        FROM mt_electric_archive a
+        LEFT JOIN mt_meter_vendor c ON c.code = LEFT(a.code, 2)
+        LEFT JOIN mt_meter_match b ON b.archive_id = a.id
+        WHERE b.company_id = #{companyId} AND b.meter_type = '01'
+        <if test="search != null and search != ''">
+            AND (a.code LIKE CONCAT('%', TRIM(#{search}), '%') OR a.name LIKE CONCAT('%', TRIM(#{search}), '%'))
+        </if>
+        ORDER BY a.seq, a.create_time DESC
+    </select>
+
+    <!-- 查询已分配给公司的水表 -->
+    <select id="getAllocatedWaterList" resultType="java.util.Map">
+        SELECT
+            a.id,
+            a.sort_id AS sortId,
+            a.code,
+            a.name,
+            a.specification,
+            a.model,
+            a.constant,
+            a.is_enabled AS isEnabled,
+            a.seq,
+            a.remark,
+            c.name AS meterName
+        FROM mt_water_archive a
+        LEFT JOIN mt_meter_vendor c ON c.code = LEFT(a.code, 2)
+        LEFT JOIN mt_meter_match b ON b.archive_id = a.id
+        WHERE b.company_id = #{companyId} AND b.meter_type = '02'
+        <if test="search != null and search != ''">
+            AND (a.code LIKE CONCAT('%', TRIM(#{search}), '%') OR a.name LIKE CONCAT('%', TRIM(#{search}), '%'))
+        </if>
+        ORDER BY a.seq, a.create_time DESC
+    </select>
+
+    <!-- 查询已分配给公司的热力表 -->
+    <select id="getAllocatedHeatList" resultType="java.util.Map">
+        SELECT
+            a.id,
+            a.sort_id AS sortId,
+            a.code,
+            a.name,
+            a.specification,
+            a.model,
+            a.is_enabled AS isEnabled,
+            a.seq,
+            a.remark,
+            c.name AS meterName
+        FROM mt_heat_archive a
+        LEFT JOIN mt_meter_vendor c ON c.code = LEFT(a.code, 2)
+        LEFT JOIN mt_meter_match b ON b.archive_id = a.id
+        WHERE b.company_id = #{companyId} AND b.meter_type = '03'
+        <if test="search != null and search != ''">
+            AND (a.code LIKE CONCAT('%', TRIM(#{search}), '%') OR a.name LIKE CONCAT('%', TRIM(#{search}), '%'))
+        </if>
+        ORDER BY a.seq, a.create_time DESC
+    </select>
+
+    <!-- 查询已分配给公司的燃气表 -->
+    <select id="getAllocatedGasList" resultType="java.util.Map">
+        SELECT
+            a.id,
+            a.sort_id AS sortId,
+            a.code,
+            a.name,
+            a.specification,
+            a.model,
+            a.is_enabled AS isEnabled,
+            a.seq,
+            a.remark,
+            c.name AS meterName
+        FROM mt_gas_archive a
+        LEFT JOIN mt_meter_vendor c ON c.code = LEFT(a.code, 2)
+        LEFT JOIN mt_meter_match b ON b.archive_id = a.id
+        WHERE b.company_id = #{companyId} AND b.meter_type = '04'
+        <if test="search != null and search != ''">
+            AND (a.code LIKE CONCAT('%', TRIM(#{search}), '%') OR a.name LIKE CONCAT('%', TRIM(#{search}), '%'))
+        </if>
+        ORDER BY a.seq, a.create_time DESC
+    </select>
+
+    <!-- ========================================== -->
+    <!-- 所有可分配仪表查询：全量档案列表 -->
+    <!-- ========================================== -->
+
+    <!-- 查询所有电表档案 -->
+    <select id="getAllElectricList" resultType="java.util.Map">
+        SELECT
+            a.id,
+            a.sort_id AS sortId,
+            a.code,
+            a.name,
+            a.specification,
+            a.model,
+            a.rated_voltage AS ratedVoltage,
+            a.rated_current AS ratedCurrent,
+            a.constant,
+            a.is_enabled AS isEnabled,
+            a.seq,
+            a.remark,
+            c.name AS meterName
+        FROM mt_electric_archive a
+        LEFT JOIN mt_meter_vendor c ON c.code = LEFT(a.code, 2)
+        <where>
+            <if test="search != null and search != ''">
+                (a.code LIKE CONCAT('%', TRIM(#{search}), '%') OR a.name LIKE CONCAT('%', TRIM(#{search}), '%'))
+            </if>
+        </where>
+        ORDER BY a.seq, a.create_time DESC
+    </select>
+
+    <!-- 查询所有水表档案 -->
+    <select id="getAllWaterList" resultType="java.util.Map">
+        SELECT
+            a.id,
+            a.sort_id AS sortId,
+            a.code,
+            a.name,
+            a.specification,
+            a.model,
+            a.constant,
+            a.is_enabled AS isEnabled,
+            a.seq,
+            a.remark,
+            c.name AS meterName
+        FROM mt_water_archive a
+        LEFT JOIN mt_meter_vendor c ON c.code = LEFT(a.code, 2)
+        <where>
+            <if test="search != null and search != ''">
+                (a.code LIKE CONCAT('%', TRIM(#{search}), '%') OR a.name LIKE CONCAT('%', TRIM(#{search}), '%'))
+            </if>
+        </where>
+        ORDER BY a.seq, a.create_time DESC
+    </select>
+
+    <!-- 查询所有热力表档案 -->
+    <select id="getAllHeatList" resultType="java.util.Map">
+        SELECT
+            a.id,
+            a.sort_id AS sortId,
+            a.code,
+            a.name,
+            a.specification,
+            a.model,
+            a.is_enabled AS isEnabled,
+            a.seq,
+            a.remark,
+            c.name AS meterName
+        FROM mt_heat_archive a
+        LEFT JOIN mt_meter_vendor c ON c.code = LEFT(a.code, 2)
+        <where>
+            <if test="search != null and search != ''">
+                (a.code LIKE CONCAT('%', TRIM(#{search}), '%') OR a.name LIKE CONCAT('%', TRIM(#{search}), '%'))
+            </if>
+        </where>
+        ORDER BY a.seq, a.create_time DESC
+    </select>
+
+    <!-- 查询所有燃气表档案 -->
+    <select id="getAllGasList" resultType="java.util.Map">
+        SELECT
+            a.id,
+            a.sort_id AS sortId,
+            a.code,
+            a.name,
+            a.specification,
+            a.model,
+            a.is_enabled AS isEnabled,
+            a.seq,
+            a.remark,
+            c.name AS meterName
+        FROM mt_gas_archive a
+        LEFT JOIN mt_meter_vendor c ON c.code = LEFT(a.code, 2)
+        <where>
+            <if test="search != null and search != ''">
+                (a.code LIKE CONCAT('%', TRIM(#{search}), '%') OR a.name LIKE CONCAT('%', TRIM(#{search}), '%'))
+            </if>
+        </where>
+        ORDER BY a.seq, a.create_time DESC
+    </select>
+
+    <!-- ========================================== -->
+    <!-- 分配操作：删除旧记录 + 批量插入新记录 -->
+    <!-- ========================================== -->
+
+    <!-- 删除该公司该类型的所有分配记录 -->
+    <delete id="removeMeterMatch">
+        DELETE FROM mt_meter_match
+        WHERE company_id = #{companyId} AND meter_type = #{meterType}
+    </delete>
+
+    <!-- 批量插入仪表分配记录 -->
+    <insert id="insertMeterMatch">
+        INSERT INTO mt_meter_match (
+            id,
+            archive_id,
+            company_id,
+            meter_type,
+            create_by,
+            create_time
+        )
+        VALUES
+        <foreach collection="archiveIds" separator="," item="archiveId">
+            (REPLACE(UUID(), '-', ''), #{archiveId}, #{companyId}, #{meterType}, #{username}, NOW())
+        </foreach>
+    </insert>
+
+</mapper>
