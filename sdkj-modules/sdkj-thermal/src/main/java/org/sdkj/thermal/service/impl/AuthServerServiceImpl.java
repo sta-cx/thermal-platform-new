@@ -38,10 +38,10 @@ public class AuthServerServiceImpl implements IAuthServerService {
             throw new ServiceException("用户名或密码错误");
         }
 
-        // 检查用户是否启用
+        // 检查用户是否启用（不泄露账号状态，统一返回相同错误）
         if (user.getIsEnabled() != null && user.getIsEnabled() == 0) {
             log.info("登录用户：{} 已被停用.", username);
-            throw new ServiceException("该账户尚未启用");
+            throw new ServiceException("用户名或密码错误");
         }
 
         // BCrypt 校验密码（与 RuoYi-Vue-Plus 新系统密码验证方式一致）

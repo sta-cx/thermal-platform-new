@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrWechatOrderMapper">
+
+    <select id="selectByOutTradeNo" resultType="org.sdkj.thermal.domain.PrWechatOrder">
+        SELECT * FROM pr_wechat_order
+        WHERE out_trade_no = #{outTradeNo} AND is_deleted = 0
+    </select>
+
+    <select id="selectByTransactionId" resultType="org.sdkj.thermal.domain.PrWechatOrder">
+        SELECT * FROM pr_wechat_order
+        WHERE transaction_id = #{transactionId} AND is_deleted = 0
+    </select>
+
+    <select id="selectByDateRange" resultType="org.sdkj.thermal.domain.PrWechatOrder">
+        SELECT * FROM pr_wechat_order
+        WHERE create_time &gt;= #{startTime} AND create_time &lt; #{endTime}
+        AND is_deleted = 0
+    </select>
+
+    <select id="selectExpiredOrders" resultType="org.sdkj.thermal.domain.PrWechatOrder">
+        SELECT * FROM pr_wechat_order
+        WHERE order_status = #{pendingStatus}
+        AND expire_time &lt; #{now}
+        AND is_deleted = 0
+    </select>
+
+    <insert id="insertPrTransactionRecordByWechat">
+        insert into pr_transaction_record(
+            id, house_id, receivable, preferential, paid_in,
+            record_time, bill_num, serial_num, charge_serial,
+            payment_balance, recharge_balance, is_charge, is_finished,
+            payment_method1, payment_money1, payment_method2, payment_money2,
+            is_deleted, trade_type, trade_sources, charge_time, create_by, create_time
+        ) values (
+            #{id}, #{houseId}, #{paidIn}, '0.0000', #{paidIn},
+            NOW(), #{billNum}, #{transactionId}, #{transactionId},
+            '0.0000', '0.0000', '1', '0',
+            '008', #{paidIn}, '000', '0.0000',
+            '0', '1', 'WX_GZH_PAY', NOW(), #{openId}, NOW()
+        )
+    </insert>
+
+    <update id="updatePrExponseByWechat">
+        update pr_expense
+        set paid_in = #{paidIn},
+            final_money = #{paidIn},
+            is_charged = 1,
+            charge_time = NOW(),
+            record_id = #{recordId},
+            update_by = #{openId},
+            update_time = NOW()
+        where house_id = #{houseId}
+          and year = #{year}
+    </update>
+
+    <update id="updatePrHouse">
+        UPDATE pr_house
+        SET pay_status = '1'
+        WHERE id = #{houseId}
+    </update>
+
+</mapper>

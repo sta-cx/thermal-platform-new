@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrWechatRefundMapper">
+
+    <select id="selectByOutRefundNo" resultType="org.sdkj.thermal.domain.PrWechatRefund">
+        SELECT * FROM pr_wechat_refund
+        WHERE out_refund_no = #{outRefundNo}
+    </select>
+
+    <select id="selectByRefundId" resultType="org.sdkj.thermal.domain.PrWechatRefund">
+        SELECT * FROM pr_wechat_refund
+        WHERE refund_id = #{refundId}
+    </select>
+
+    <select id="selectByOutTradeNo" resultType="org.sdkj.thermal.domain.PrWechatRefund">
+        SELECT * FROM pr_wechat_refund
+        WHERE out_trade_no = #{outTradeNo}
+    </select>
+
+</mapper>
