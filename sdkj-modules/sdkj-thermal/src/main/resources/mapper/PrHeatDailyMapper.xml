@@ -107,4 +107,38 @@
           AND DATE_FORMAT(b.daily_date, '%Y-%m-%d') = DATE_FORMAT(#{date}, '%Y-%m-%d')
     </update>
 
+    <!-- 月表生成: 按房屋/仪表分组汇总日表数据 -->
+    <select id="aggregateToMonth" resultType="org.sdkj.thermal.domain.PrHeatMonth">
+        SELECT
+            d.meter_num,
+            d.card_num,
+            d.meter_id,
+            d.meter_arc_code,
+            0                  AS start_reading,
+            0                  AS current_reading,
+            SUM(IFNULL(d.qty, 0))  AS qty,
+            CONCAT(#{year}, LPAD(#{month}, 2, '0')) AS record_ym,
+            SUM(IFNULL(d.total_money, 0)) AS total_money,
+            0                  AS is_audit,
+            0                  AS is_hiscalc,
+            0                  AS current_balance,
+            0                  AS recharge_money,
+            0                  AS pay_degrees,
+            0                  AS current_arrearage,
+            0                  AS add_arrearage,
+            0                  AS add_advances,
+            d.house_id,
+            d.org_id,
+            d.company_id
+        FROM pr_heat_daily d
+        WHERE d.company_id = #{companyId}
+          AND d.org_id = #{orgId}
+          AND YEAR(d.daily_date) = #{year}
+          AND MONTH(d.daily_date) = #{month}
+          AND d.house_id IS NOT NULL
+          AND d.qty > 0
+        GROUP BY d.house_id, d.meter_id, d.meter_num, d.meter_arc_code, d.card_num, d.org_id, d.company_id
+        ORDER BY d.house_id
+    </select>
+
 </mapper>

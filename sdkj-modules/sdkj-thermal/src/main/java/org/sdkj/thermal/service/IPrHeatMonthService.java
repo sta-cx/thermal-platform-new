@@ -47,4 +47,14 @@ public interface IPrHeatMonthService extends IService<PrHeatMonth> {
      * @return 是否成功
      */
     boolean generateHeatMonth(String companyId, String orgId);
+
+    /**
+     * 从日表聚合生成月表数据
+     * 默认生成上月数据，force=true时重算当月
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @param force 是否强制重算当月
+     * @return 结果消息
+     */
+    String setHeat(String companyId, String orgId, Boolean force);
 }

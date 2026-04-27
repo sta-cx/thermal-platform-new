@@ -3,9 +3,11 @@ package org.sdkj.thermal.mapper;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrHeatDaily;
+import org.sdkj.thermal.domain.PrHeatMonth;
 import org.sdkj.thermal.domain.vo.PrHeatDailyVo;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 热表日记录 Mapper
@@ -43,4 +45,11 @@ public interface PrHeatDailyMapper extends BaseMapperPlus<PrHeatDaily, PrHeatDai
      * 步骤5: 更新配表档案的当前读数
      */
     boolean setCurrentReading(@Param("date") Date date, @Param("companyId") String companyId, @Param("orgId") String orgId);
+
+    /**
+     * 月表生成: 从日表按房屋/仪表分组聚合数据
+     * 按月汇总每个房屋每个仪表的用量和金额
+     */
+    List<PrHeatMonth> aggregateToMonth(@Param("year") int year, @Param("month") int month,
+                                       @Param("companyId") String companyId, @Param("orgId") String orgId);
 }

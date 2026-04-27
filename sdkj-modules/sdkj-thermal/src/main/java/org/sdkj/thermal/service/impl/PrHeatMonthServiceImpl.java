@@ -10,12 +10,16 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHeatMonth;
 import org.sdkj.thermal.domain.vo.PrHeatMonthVo;
+import org.sdkj.thermal.mapper.PrHeatDailyMapper;
 import org.sdkj.thermal.mapper.PrHeatMonthMapper;
 import org.sdkj.thermal.service.IPrHeatMonthService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.Calendar;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * 热表月记录 Service 实现
@@ -26,6 +30,7 @@ import java.io.Serializable;
 public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHeatMonth> implements IPrHeatMonthService {
 
     private final PrHeatMonthMapper baseMapper;
+    private final PrHeatDailyMapper prHeatDailyMapper;
 
     @Override
     public PrHeatMonthVo selectById(Serializable id) {
@@ -80,5 +85,64 @@ public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHea
         // 5. updateArrearage - Update arrearage status
         log.warn("generateHeatMonth not yet implemented for companyId={}, orgId={}", companyId, orgId);
         return false;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public String setHeat(String companyId, String orgId, Boolean force) {
+        // 1. 确定生成月份: 默认上月, force=true时当月
+        Calendar cal = Calendar.getInstance();
+        if (!Boolean.TRUE.equals(force)) {
+            cal.add(Calendar.MONTH, -1);
+        }
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH) + 1;
+        String recordYm = String.format("%04d%02d", year, month);
+
+        log.info("开始生成月表数据: year={}, month={}, recordYm={}, companyId={}, orgId={}, force={}",
+            year, month, recordYm, companyId, orgId, force);
+
+        // 2. 检查是否已生成
+        long exists = baseMapper.selectCount(
+            new LambdaQueryWrapper<PrHeatMonth>()
+                .eq(PrHeatMonth::getRecordYm, recordYm)
+                .eq(PrHeatMonth::getCompanyId, companyId)
+                .eq(PrHeatMonth::getOrgId, orgId));
+
+        if (exists > 0 && !Boolean.TRUE.equals(force)) {
+            String msg = String.format("月表数据已生成（%s），共 %d 条，如需重算请使用 force=true 参数", recordYm, exists);
+            log.warn(msg);
+            return msg;
+        }
+
+        // 3. 从日表汇总
+        List<PrHeatMonth> monthList = prHeatDailyMapper.aggregateToMonth(year, month, companyId, orgId);
+
+        if (monthList.isEmpty()) {
+            String msg = String.format("未找到 %s 的日表数据，请先生成日表", recordYm);
+            log.warn(msg);
+            return msg;
+        }
+
+        // 4. 删除旧数据 + 批量插入
+        if (exists > 0) {
+            baseMapper.delete(
+                new LambdaQueryWrapper<PrHeatMonth>()
+                    .eq(PrHeatMonth::getRecordYm, recordYm)
+                    .eq(PrHeatMonth::getCompanyId, companyId)
+                    .eq(PrHeatMonth::getOrgId, orgId));
+            log.info("已删除 {} 条旧月表数据", exists);
+        }
+
+        // 设置 UUID (ASSIGN_UUID 策略自动处理, 但显式设置更可靠)
+        for (PrHeatMonth m : monthList) {
+            m.setId(UUID.randomUUID().toString().replace("-", ""));
+        }
+
+        super.saveBatch(monthList);
+
+        String msg = String.format("月表生成成功（%s），共生成 %d 条记录", recordYm, monthList.size());
+        log.info(msg);
+        return msg;
     }
 }

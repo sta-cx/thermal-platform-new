@@ -66,7 +66,8 @@ public class PrHeatMonthController extends BaseController {
     }
 
     /**
-     * 生成月表数据
+     * 生成月表数据（从日表聚合）
+     * 默认生成上月数据，force=true 时重算当月
      * 旧端点: POST /ht/heatMonth/setHeat
      * 新端点: POST /thermal/ht/heat-month/setHeat
      */
@@ -74,8 +75,10 @@ public class PrHeatMonthController extends BaseController {
     @SaCheckLogin
     @Log(title = "热表月表-生成", businessType = BusinessType.UPDATE)
     @PostMapping("/setHeat")
-    public R<Void> setHeat(@RequestParam String companyId, @RequestParam String orgId) {
-        return R.fail("月表生成功能尚未实现，依赖日表数据完整性");
+    public R<Void> setHeat(@RequestParam String companyId, @RequestParam String orgId,
+                           @RequestParam(required = false, defaultValue = "false") Boolean force) {
+        heatMonthService.setHeat(companyId, orgId, force);
+        return R.ok();
     }
 
     /**
