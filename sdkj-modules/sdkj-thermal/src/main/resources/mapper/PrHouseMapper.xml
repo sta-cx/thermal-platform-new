@@ -46,4 +46,13 @@
           AND is_deleted = 0
     </update>
 
+    <!-- 微信支付成功后更新房屋缴费状态 -->
+    <update id="updateHouseIsCharged">
+        UPDATE pr_house
+        SET is_charged = 1,
+            update_time = NOW()
+        WHERE id = #{houseId}
+          AND is_deleted = 0
+    </update>
+
 </mapper>

@@ -120,6 +120,16 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
         @Param("startTime") String startTime, @Param("endTime") String endTime,
         @Param("search") String search);
 
+    /**
+     * 微信支付成功后更新费用明细
+     * 将指定房屋指定年份的未缴费明细标记为已缴费
+     */
+    int updateExpenseByWechat(@Param("houseId") String houseId,
+                              @Param("paidIn") java.math.BigDecimal paidIn,
+                              @Param("recordId") String recordId,
+                              @Param("openId") String openId,
+                              @Param("year") String year);
+
     // ========== 阶梯单价计算方法 ==========
 
     /**

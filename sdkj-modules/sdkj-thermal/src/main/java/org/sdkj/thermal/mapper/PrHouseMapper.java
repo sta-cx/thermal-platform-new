@@ -53,4 +53,11 @@ public interface PrHouseMapper extends BaseMapperPlus<PrHouse, PrHouseVo> {
     int resetSiteTypeByBuilding(@Param("companyId") String companyId,
                                  @Param("orgId") String orgId,
                                  @Param("buildingId") String buildingId);
+
+    /**
+     * 微信支付成功后更新房屋缴费状态
+     * @param houseId 房屋ID
+     * @return 更新行数
+     */
+    int updateHouseIsCharged(@Param("houseId") String houseId);
 }

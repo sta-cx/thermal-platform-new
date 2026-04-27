@@ -6,8 +6,12 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.thermal.config.WechatPayConfig;
+import org.sdkj.thermal.domain.PrTransactionRecord;
 import org.sdkj.thermal.domain.PrWechatOrder;
 import org.sdkj.thermal.domain.PrWechatRefund;
+import org.sdkj.thermal.mapper.PrExpenseMapper;
+import org.sdkj.thermal.mapper.PrHouseMapper;
+import org.sdkj.thermal.mapper.PrTransactionRecordMapper;
 import org.sdkj.thermal.mapper.PrWechatOrderMapper;
 import org.sdkj.thermal.mapper.PrWechatRefundMapper;
 import org.sdkj.thermal.service.IPrWechatPayService;
@@ -22,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.*;
 
 @Slf4j
@@ -33,6 +38,9 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
     private final PrWechatOrderMapper baseMapper;
     private final PrWechatRefundMapper wechatRefundMapper;
     private final WechatPayConfig payConfig;
+    private final PrTransactionRecordMapper transactionRecordMapper;
+    private final PrExpenseMapper expenseMapper;
+    private final PrHouseMapper houseMapper;
 
     private WXPay wxPay;
 
@@ -213,14 +221,36 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
                 baseMapper.updateById(order);
                 log.info("微信支付回调处理成功，订单: {}, 交易号: {}", outTradeNo, transactionId);
 
-                // TODO: Phase 2 Task 18 - 插入交易流水记录 (PrTransactionRecord)
-                // wechatOrderMapper.insertPrTransactionRecordByWechat(id, houseId, amount, outTradeNo, transactionId, openId);
+                // 10. 插入交易流水记录 (PrTransactionRecord)
+                String recordId = UUID.randomUUID().toString().replace("-", "");
+                PrTransactionRecord record = new PrTransactionRecord();
+                record.setId(recordId);
+                record.setSerialNum(transactionId);
+                record.setTransactionType(1);      // 1=收费
+                record.setPaymentType(2);          // 2=微信
+                record.setAmount(notifyAmount);
+                record.setPaidAmount(notifyAmount);
+                record.setStatus(0);               // 0=正常
+                record.setHouseId(order.getHouseId());
+                record.setUserId(openId);
+                record.setTransactionTime(new Date());
+                record.setOperatorId(openId);
+                record.setNotes("微信支付自动入账，订单号: " + outTradeNo);
+                record.setCreateTime(new Date());
+                transactionRecordMapper.insert(record);
+                log.info("微信支付回调：交易流水已创建，recordId: {}", recordId);
 
-                // TODO: Phase 2 Task 18 - 更新费用明细已缴金额 (PrExpense)
-                // wechatOrderMapper.updatePrExponseByWechat(houseId, amount, transactionId, openId, yearStr);
+                // 11. 更新费用明细已缴金额 (PrExpense)
+                String yearStr = String.valueOf(LocalDate.now().getYear());
+                int expenseRows = expenseMapper.updateExpenseByWechat(
+                    order.getHouseId(), notifyAmount, recordId, openId, yearStr);
+                log.info("微信支付回调：费用明细已更新，houseId: {}, year: {}, 更新行数: {}",
+                    order.getHouseId(), yearStr, expenseRows);
 
-                // TODO: Phase 2 Task 18 - 更新房屋缴费状态 (PrHouse)
-                // wechatOrderMapper.updatePrHouse(houseId);
+                // 12. 更新房屋缴费状态 (PrHouse)
+                int houseRows = houseMapper.updateHouseIsCharged(order.getHouseId());
+                log.info("微信支付回调：房屋缴费状态已更新，houseId: {}, 更新行数: {}",
+                    order.getHouseId(), houseRows);
             }
 
             // 10. 返回处理结果
