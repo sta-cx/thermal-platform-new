@@ -242,4 +242,906 @@
         WHERE sd.tasks_id = #{taskId}
     </insert>
 
+    <!-- ==================== Regulation Engine SQL ==================== -->
+    <!-- Ported from old ControlJob flow for single valve 5-step regulation -->
+
+    <!-- 获取户阀平均回水温度（不包括特殊户，缴费状态=1） -->
+    <select id="queryHtTasksPJHS" resultType="double">
+        SELECT
+            CASE
+              WHEN COUNT(*) = 0 THEN 0
+              ELSE FORMAT(SUM(b.out_temperature) / COUNT(*), 2)
+              END AS average_temperature
+        FROM ht_scope a
+        LEFT JOIN pr_heat_valve_archive b ON b.id = a.meter_id
+        LEFT JOIN pr_house h ON a.house_id = h.id
+        WHERE a.tasks_id = #{tasksId} AND a.is_special = '0' AND h.pay_status = '1' AND b.out_temperature &gt; 0
+    </select>
+
+    <!-- 获取单元阀平均回水温度（不包括特殊户） -->
+    <select id="queryHtTasksPJHSD" resultType="double">
+        SELECT FORMAT(IFNULL(SUM(b.out_temperature), 0) / COUNT(*), 2)
+        FROM ht_scope a
+        LEFT JOIN pr_heat_unit_valve_archive b ON b.id = a.meter_id
+        WHERE a.tasks_id = #{tasksId} AND a.is_special = 0 AND b.out_temperature &gt; 0
+    </select>
+
+    <!-- 更新任务执行时长和平均回水温度 -->
+    <update id="updateExecutionTime">
+        UPDATE ht_tasks
+        SET execution_time = #{executionTime},
+            out_temp_pj = #{average}
+        WHERE id = #{tasksId}
+    </update>
+
+    <!-- 查询当前平衡率（户阀/单元阀） -->
+    <select id="queryStandard" resultType="int">
+        SELECT
+            ROUND(IFNULL(d.standardN, '0') / IFNULL(b.total, '0') * '100', '0') AS standardNow
+        FROM ht_tasks a
+        LEFT JOIN (
+            SELECT COUNT(id) AS total, tasks_id FROM ht_scope WHERE is_special &lt;&gt; '1' GROUP BY tasks_id
+        ) b ON b.tasks_id = a.id
+        LEFT JOIN (
+            SELECT COUNT(id) AS standardN, tasks_id FROM ht_scope WHERE status = '9' AND is_special &lt;&gt; '1' GROUP BY tasks_id
+        ) d ON d.tasks_id = a.id
+        WHERE a.id = #{tasksId}
+    </select>
+
+    <!-- 查询DTU平衡率 -->
+    <select id="queryDtuStandard" resultType="int">
+        SELECT
+            ROUND(IFNULL(d.standardN, '0') / IFNULL(b.total, '0') * '100', '0') AS standardNow
+        FROM ht_tasks a
+        LEFT JOIN (
+            SELECT COUNT(id) AS total, tasks_id FROM ht_scope WHERE is_special &lt;&gt; '1' GROUP BY tasks_id
+        ) b ON b.tasks_id = a.id
+        LEFT JOIN (
+            SELECT COUNT(id) AS standardN, tasks_id FROM ht_scope WHERE status = '9' AND is_special &lt;&gt; '1' GROUP BY tasks_id
+        ) d ON d.tasks_id = a.id
+        WHERE a.id = #{tasksId}
+    </select>
+
+    <!-- 更新DTU调控范围状态（根据组平均回水温度判断是否达标） -->
+    <update id="updateDtuScopeStatus">
+        UPDATE ht_scope s1
+        INNER JOIN pr_heat_valve_archive s2 ON s1.meter_id = s2.id
+        LEFT JOIN (
+            SELECT b.chan_num AS chanNum, ROUND(AVG(IFNULL(a.out_temperature, 0)), 2) AS outTempAvg
+            FROM pr_heat_valve_archive a
+            INNER JOIN ht_scope b ON a.id = b.meter_id
+            WHERE b.tasks_id = #{tasksId}
+            GROUP BY b.chan_num
+        ) s3 ON s1.chan_num = s3.chanNum
+        INNER JOIN ht_tasks s4 ON s1.tasks_id = s4.id
+        INNER JOIN ht_strategy s5 ON s4.strategy_id = s5.id
+        SET s1.status = CASE
+            WHEN IFNULL(s2.out_temperature, 0) BETWEEN (s3.outTempAvg - IFNULL(s5.out_temp_deviation, 0))
+                AND (s3.outTempAvg + IFNULL(s5.out_temp_deviation, 0)) THEN 9 ELSE 0 END
+        WHERE s1.tasks_id = #{tasksId}
+    </update>
+
+    <!-- Step 1: 清空调控临时表 -->
+    <delete id="deleteHtTasksPerformLs">
+        DELETE FROM ht_tasks_perform_ls WHERE tasks_id = #{tasksId}
+    </delete>
+
+    <!-- Step 2: 户阀 - 填充临时表（平均回水调控方式，关联上次执行记录） -->
+    <insert id="insertHtTasksPerformLsHfPj">
+        INSERT INTO ht_tasks_perform_ls (
+            id, instruction_id, orderr, instruction_type, instruction,
+            number, org_id, company_id, concentrator_code, meter_num,
+            meter_id, meter_arc_code, status, in_temp, out_temp,
+            room_temp, valve_open, instruction_status, send_time,
+            tasks_id, alert_type, device_id, fore_start, imei,
+            dtu_num, chan_num
+        )
+        SELECT
+            id, instruction_id, orderr, instruction_type, instruction,
+            number, org_id, company_id, concentrator_code, meter_num,
+            meter_id, meter_arc_code, status, in_temp, out_temp,
+            room_temp, valve_open, instruction_status, send_time,
+            tasks_id, alert_type, device_id, fore_start, imei,
+            dtu_num, chan_num
+        FROM (
+            SELECT
+                REPLACE(UUID(), '-', '') AS id,
+                IFNULL(d.instruction_id, f.instruction_id) AS instruction_id,
+                IFNULL(d.orderr, '0') AS orderr,
+                IFNULL(d.instruction_type, f.type) AS instruction_type,
+                IFNULL(d.instruction, f.instruction) AS instruction,
+                IFNULL(d.number, '1') AS number,
+                a.org_id,
+                a.company_id,
+                h.concentrator_code,
+                a.meter_num,
+                a.meter_id,
+                a.meter_arc_code,
+                IFNULL(d.status, '0') AS status,
+                IFNULL(b.in_temp, '0') AS in_temp,
+                IFNULL(b.out_temp, '0') AS out_temp,
+                IFNULL(b.room_temp, '0') AS room_temp,
+                IFNULL(b.valve_open, '0') AS valve_open,
+                IFNULL(d.instruction_status, '0') AS instruction_status,
+                NULL AS send_time,
+                a.tasks_id,
+                '0' AS alert_type,
+                a.device_id,
+                IFNULL(d.fore_start, '0') AS fore_start,
+                a.imei,
+                h.dtu_num,
+                h.chan_num,
+                ROW_NUMBER() OVER (PARTITION BY a.meter_id ORDER BY d.create_time DESC, d.id ASC) AS rn
+            FROM ht_scope a
+                LEFT JOIN pr_house b ON b.id = a.house_id
+                LEFT JOIN ht_tasks c ON c.id = a.tasks_id
+                LEFT JOIN (
+                    SELECT t1.*
+                    FROM ht_tasks_perform_last t1
+                    INNER JOIN (
+                        SELECT meter_id, MAX(create_time) AS max_create_time
+                        FROM ht_tasks_perform_last
+                        WHERE tasks_id = #{tasksId}
+                        GROUP BY meter_id
+                    ) t2 ON t1.meter_id = t2.meter_id AND t1.create_time = t2.max_create_time
+                    WHERE t1.tasks_id = #{tasksId}
+                      AND t1.id = (
+                        SELECT MIN(id) FROM ht_tasks_perform_last t3
+                        WHERE t3.meter_id = t1.meter_id AND t3.create_time = t1.create_time
+                    )
+                ) g ON g.meter_id = a.meter_id AND g.tasks_id = a.tasks_id
+                LEFT JOIN ht_tasks_perform_last d
+                    ON d.meter_id = a.meter_id AND d.tasks_id = a.tasks_id AND d.create_time = g.create_time
+                LEFT JOIN ht_strategy_sub f ON f.strategy_id = c.strategy_id AND f.orderr = '1'
+                LEFT JOIN pr_heat_valve_archive h ON h.id = a.meter_id
+            WHERE a.tasks_id = #{tasksId}
+              AND b.pay_status = '1'
+              AND b.is_special = '0'
+        ) ranked_records
+        WHERE rn = 1
+    </insert>
+
+    <!-- Step 2: 单元阀 - 填充临时表（平均回水调控方式，关联上次执行记录） -->
+    <insert id="insertHtTasksPerformLsDyPj">
+        INSERT INTO ht_tasks_perform_ls (
+            id, instruction_id, orderr, instruction_type, instruction,
+            number, org_id, company_id, concentrator_code, meter_num,
+            meter_id, meter_arc_code, status, in_temp, out_temp,
+            room_temp, valve_open, instruction_status, send_time,
+            tasks_id, alert_type, device_id, imei, dtu_num, chan_num
+        )
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            IFNULL(d.instruction_id, f.instruction_id),
+            IFNULL(d.orderr, '0'),
+            IFNULL(d.instruction_type, f.type),
+            IFNULL(d.instruction, f.instruction),
+            IFNULL(d.number, '1'),
+            a.org_id,
+            a.company_id,
+            h.concentrator_code,
+            a.meter_num,
+            a.meter_id,
+            a.meter_arc_code,
+            IFNULL(d.status, '0'),
+            IFNULL(b.in_temp, '0'),
+            IFNULL(b.out_temp, '0'),
+            IFNULL(b.room_temp, '0'),
+            IFNULL(h.actual_status, '0'),
+            IFNULL(d.instruction_status, '0'),
+            NULL,
+            a.tasks_id,
+            '0',
+            a.device_id,
+            a.imei,
+            h.dtu_num,
+            h.chan_num
+        FROM ht_scope a
+            LEFT JOIN pr_unit b ON b.id = a.unit_id
+            LEFT JOIN ht_tasks c ON c.id = a.tasks_id
+            LEFT JOIN (
+                SELECT MAX(send_time) AS send_time, number, id, instruction_id,
+                    instruction_type, instruction, intervall, unit, duration,
+                    org_id, company_id, device_id, meter_num, meter_id,
+                    meter_arc_code, status, instruction_status, tasks_id, orderr
+                FROM ht_tasks_perform_last
+                WHERE tasks_id = #{tasksId}
+                GROUP BY meter_id
+            ) g ON g.meter_id = a.meter_id
+            LEFT JOIN ht_tasks_perform_last d
+                ON d.meter_id = a.meter_id AND d.tasks_id = #{tasksId} AND d.send_time = g.send_time
+            LEFT JOIN ht_strategy_sub f ON f.strategy_id = c.strategy_id AND f.orderr = '1'
+            LEFT JOIN pr_heat_unit_valve_archive h ON h.id = a.meter_id
+        WHERE a.tasks_id = #{tasksId} AND b.is_special = '0'
+        GROUP BY a.meter_id
+    </insert>
+
+    <!-- ==================== Step 3: instructionGeneration ==================== -->
+
+    <!-- 单一策略：次数超限标记为完成(alert_type=9) -->
+    <update id="setNumber">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.alert_type = '9'
+        WHERE a.tasks_id = #{tasksId}
+          AND a.number &gt; b.nums
+          AND (a.alert_type = '0' OR a.alert_type = '1')
+    </update>
+
+    <!-- 回水温度 - 不在范围且次数未超限，阀门角度报警(alert_type=4) -->
+    <update id="setOutTempNumberX">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_house_strategy c ON c.tasks_id = d.house_id
+        SET a.alert_type = '4'
+        WHERE a.tasks_id = #{tasksId}
+          AND a.number &lt;= b.nums
+          AND (
+            ((c.out_temp + c.out_temp_deviation) &lt; a.out_temp AND (a.valve_open - c.stride) &lt; c.valve_min)
+            OR
+            ((c.out_temp - c.out_temp_deviation) &gt; a.out_temp AND (a.valve_open + c.stride) &gt; c.valve_max)
+          )
+          AND (a.alert_type = '0' OR a.alert_type = '1')
+    </update>
+
+    <!-- 回水温度 - 不在范围且次数已超限，温度报警(alert_type=5) -->
+    <update id="setOutTempNumberD">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_house_strategy c ON c.tasks_id = d.house_id
+        SET a.alert_type = '5'
+        WHERE a.tasks_id = #{tasksId}
+          AND a.number &gt; b.nums
+          AND ((c.out_temp + c.out_temp_deviation) &lt; a.out_temp
+            OR (c.out_temp - c.out_temp_deviation) &gt; a.out_temp)
+          AND (a.alert_type = '0' OR a.alert_type = '1')
+    </update>
+
+    <!-- 回水温度 - 在范围内，标记完成(alert_type=9) -->
+    <update id="setOutTempW">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_house_strategy c ON c.tasks_id = d.house_id
+        SET a.alert_type = '9'
+        WHERE a.tasks_id = #{tasksId}
+          AND (c.out_temp + c.out_temp_deviation) &gt;= a.out_temp
+          AND (c.out_temp - c.out_temp_deviation) &lt;= a.out_temp
+          AND (a.alert_type = '0' OR a.alert_type = '1')
+    </update>
+
+    <!-- 室温 - 不在范围且次数未超限，阀门角度报警(alert_type=4) -->
+    <update id="setRoomTempNumberX">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_house_strategy c ON c.tasks_id = d.house_id
+        SET a.alert_type = '4'
+        WHERE a.tasks_id = #{tasksId}
+          AND a.number &lt;= b.nums
+          AND (
+            ((c.room_temp + c.room_temp_deviation) &lt; a.room_temp AND (a.valve_open - c.stride) &lt; c.valve_min)
+            OR
+            ((c.room_temp - c.room_temp_deviation) &gt; a.room_temp AND (a.valve_open + c.stride) &gt; c.valve_max)
+          )
+          AND (a.alert_type = '0' OR a.alert_type = '1')
+    </update>
+
+    <!-- 室温 - 不在范围且次数已超限，温度报警(alert_type=5) -->
+    <update id="setRoomTempNumberD">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_house_strategy c ON c.tasks_id = d.house_id
+        SET a.alert_type = '5'
+        WHERE a.tasks_id = #{tasksId}
+          AND a.number &gt; b.nums
+          AND ((c.room_temp + c.room_temp_deviation) &lt; a.room_temp
+            OR (c.room_temp - c.room_temp_deviation) &gt; a.room_temp)
+          AND (a.alert_type = '0' OR a.alert_type = '1')
+    </update>
+
+    <!-- 室温 - 在范围内，标记完成(alert_type=9) -->
+    <update id="setRoomTempW">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_house_strategy c ON c.tasks_id = d.house_id
+        SET a.alert_type = '9'
+        WHERE a.tasks_id = #{tasksId}
+          AND (c.room_temp + c.room_temp_deviation) &gt;= a.room_temp
+          AND (c.room_temp - c.room_temp_deviation) &lt;= a.room_temp
+          AND (a.alert_type = '0' OR a.alert_type = '1')
+    </update>
+
+    <!-- 平均回水温度 - 不在范围且次数未超限，阀门角度报警(alert_type=4) -->
+    <update id="setRoomTempNumberXPJ">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.alert_type = '4',
+            a.out_temp_pj = #{average}
+        WHERE a.tasks_id = #{tasksId}
+          AND a.number &lt;= b.nums
+          AND (
+            ((#{average} + c.out_temp_deviation) &lt; a.out_temp AND (a.valve_open - c.stride) &lt; c.valve_min)
+            OR
+            ((#{average} - c.out_temp_deviation) &gt; a.out_temp AND (a.valve_open + c.stride) &gt; c.valve_max)
+          )
+    </update>
+
+    <!-- 平均回水温度 - 不在范围且次数已超限，温度报警(alert_type=5) -->
+    <update id="setRoomTempNumberDPJ">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.alert_type = '5',
+            a.out_temp_pj = #{average}
+        WHERE a.tasks_id = #{tasksId}
+          AND a.number &gt; b.nums
+          AND ((#{average} + c.out_temp_deviation) &lt; a.out_temp
+            OR (#{average} - c.out_temp_deviation) &gt; a.out_temp)
+    </update>
+
+    <!-- 平均回水温度 - 在范围内，标记完成(alert_type=9) -->
+    <update id="setRoomTempWPJ">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope d ON d.tasks_id = a.tasks_id AND d.meter_id = a.meter_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.alert_type = '9'
+        WHERE a.tasks_id = #{tasksId}
+          AND (#{average} + c.out_temp_deviation) &gt; a.out_temp
+          AND (#{average} - c.out_temp_deviation) &lt; a.out_temp
+    </update>
+
+    <!-- ==================== Step 4: updateInstructionGeneration ==================== -->
+
+    <!-- 更新异常记录（继续执行）：失败记录重试次数+1 -->
+    <update id="updateInstructionGenerationyC">
+        UPDATE ht_tasks_perform_ls
+        SET number = IF(number &lt; 127, number + 1, number)
+        WHERE id = #{tasksId}
+          AND (alert_type = '0' OR alert_type = '1')
+    </update>
+
+    <!-- 无策略 - 调大指令 -->
+    <update id="updateInstructionGenerationD">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope e ON e.meter_id = a.meter_id AND e.tasks_id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+            LEFT JOIN pr_house g ON g.id = e.house_id
+            LEFT JOIN (
+                SELECT MAX(orderr) AS orderr, strategy_id FROM ht_strategy_sub GROUP BY strategy_id
+            ) f ON f.strategy_id = b.strategy_id
+            LEFT JOIN ht_strategy_sub h ON h.strategy_id = b.strategy_id
+                AND h.orderr = CASE
+                    WHEN b.number + 1 &lt;= f.orderr THEN b.number + 1
+                    WHEN f.orderr = 1 AND b.number + 1 &gt; f.orderr THEN 1
+                    ELSE MOD(b.number, f.orderr) + 1
+                END
+        SET a.instruction_id = h.id,
+            a.orderr = h.orderr,
+            a.instruction_type = h.type,
+            a.number = CASE WHEN f.orderr = h.orderr THEN a.number + 1 ELSE IFNULL(a.number, '0') END,
+            a.fore_start = CASE WHEN f.orderr = h.orderr THEN '1' ELSE '0' END,
+            a.intervall = h.intervall,
+            a.unit = h.unit,
+            a.duration = h.duration
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+    </update>
+
+    <!-- 无策略 - 调小指令 -->
+    <update id="updateInstructionGenerationX">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope e ON e.meter_id = a.meter_id AND e.tasks_id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+            LEFT JOIN pr_house g ON g.id = e.house_id
+            LEFT JOIN (
+                SELECT MAX(orderr) AS orderr, strategy_id FROM ht_strategy_sub GROUP BY strategy_id
+            ) f ON f.strategy_id = b.strategy_id
+            LEFT JOIN ht_strategy_sub h ON h.strategy_id = b.strategy_id
+                AND h.orderr = CASE
+                    WHEN b.number + 1 &lt;= f.orderr THEN b.number + 1
+                    WHEN f.orderr = 1 AND b.number + 1 &gt; f.orderr THEN 1
+                    ELSE MOD(b.number, f.orderr) + 1
+                END
+        SET a.instruction_id = h.id,
+            a.orderr = h.orderr,
+            a.instruction_type = h.type,
+            a.number = CASE WHEN f.orderr = h.orderr THEN a.number + 1 ELSE IFNULL(a.number, '0') END,
+            a.fore_start = CASE WHEN f.orderr = h.orderr THEN '1' ELSE '0' END,
+            a.intervall = h.intervall,
+            a.unit = h.unit,
+            a.duration = h.duration
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+    </update>
+
+    <!-- 单一策略 - 循环执行指令（非首次） -->
+    <update id="updateInstructionGeneration">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope e ON e.meter_id = a.meter_id AND e.tasks_id = a.tasks_id
+            LEFT JOIN pr_house g ON g.id = e.house_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+            LEFT JOIN (
+                SELECT MAX(orderr) AS orderr, strategy_id FROM ht_strategy_sub GROUP BY strategy_id
+            ) f ON f.strategy_id = b.strategy_id
+            LEFT JOIN (
+                SELECT strategy_id, COUNT(*) AS xcnt FROM ht_strategy_sub WHERE xunhuan = '0' GROUP BY strategy_id
+            ) m ON m.strategy_id = b.strategy_id
+            LEFT JOIN ht_strategy_sub h ON h.strategy_id = b.strategy_id
+                AND h.orderr = CASE
+                    WHEN b.number + 1 &lt;= f.orderr THEN b.number + 1
+                    WHEN f.orderr = 1 AND b.number + 1 &gt; f.orderr THEN 1
+                    WHEN f.orderr &gt; 1 AND b.number + 1 &gt; f.orderr AND m.xcnt = 0 THEN MOD(b.number, f.orderr) + 1
+                    WHEN f.orderr &gt; 1 AND b.number + 1 &gt; f.orderr AND m.xcnt = 1 THEN MOD(b.number, f.orderr) + 1
+                    ELSE MOD(b.number, f.orderr) + 1
+                END
+        SET a.instruction_id = h.id,
+            a.orderr = h.orderr,
+            a.instruction_type = h.type,
+            a.number = CASE WHEN f.orderr = h.orderr THEN a.number + 1 ELSE IFNULL(a.number, '0') END,
+            a.fore_start = CASE WHEN f.orderr = h.orderr THEN '1' ELSE '0' END,
+            a.intervall = h.intervall,
+            a.unit = h.unit,
+            a.duration = h.duration
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+    </update>
+
+    <!-- 单一策略 - 首次执行指令 -->
+    <update id="updateInstructionGenerationOne">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope e ON e.meter_id = a.meter_id AND e.tasks_id = a.tasks_id
+            LEFT JOIN pr_house g ON g.id = e.house_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+            LEFT JOIN (
+                SELECT MAX(orderr) AS orderr, strategy_id FROM ht_strategy_sub GROUP BY strategy_id
+            ) f ON f.strategy_id = c.id
+            LEFT JOIN (
+                SELECT * FROM ht_strategy_sub WHERE orderr = '1' GROUP BY strategy_id
+            ) d ON d.strategy_id = c.id
+        SET a.instruction_id = d.id,
+            a.orderr = d.orderr,
+            a.instruction_type = d.type,
+            a.instruction = d.instruction,
+            a.number = CASE WHEN f.orderr = d.orderr THEN a.number + '1' ELSE IFNULL(a.number, '0') END,
+            a.fore_start = CASE WHEN f.orderr = d.orderr THEN '1' ELSE '0' END,
+            a.intervall = d.intervall,
+            a.unit = d.unit,
+            a.duration = d.duration
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+    </update>
+
+    <!-- 平均回水 - 调大指令（非首次） -->
+    <update id="updateInstructionGenerationDPJ">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope e ON e.meter_id = a.meter_id AND e.tasks_id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+            LEFT JOIN (
+                SELECT MAX(orderr) AS orderr, strategy_id FROM ht_strategy_sub GROUP BY strategy_id
+            ) f ON f.strategy_id = b.strategy_id
+            LEFT JOIN (
+                SELECT strategy_id, COUNT(*) AS xcnt FROM ht_strategy_sub WHERE xunhuan = '0' GROUP BY strategy_id
+            ) m ON m.strategy_id = b.strategy_id
+            LEFT JOIN ht_strategy_sub h ON h.strategy_id = b.strategy_id
+                AND h.orderr = CASE
+                    WHEN b.number + 1 &lt;= f.orderr THEN b.number + 1
+                    WHEN f.orderr = 1 AND b.number + 1 &gt; f.orderr THEN 1
+                    WHEN f.orderr &gt; 1 AND b.number + 1 &gt; f.orderr AND m.xcnt = 0 THEN MOD(b.number, f.orderr) + 1
+                    WHEN f.orderr &gt; 1 AND b.number + 1 &gt; f.orderr AND m.xcnt = 1 THEN MOD(b.number, f.orderr) + 1
+                    ELSE MOD(b.number, f.orderr) + 1
+                END
+        SET a.instruction_id = h.id,
+            a.orderr = h.orderr,
+            a.instruction_type = h.type,
+            a.instruction = h.instruction,
+            a.number = CASE WHEN f.orderr = h.orderr THEN a.number + 1 ELSE IFNULL(a.number, '0') END,
+            a.fore_start = CASE WHEN f.orderr = h.orderr THEN '1' ELSE '0' END,
+            a.intervall = h.intervall,
+            a.unit = h.unit,
+            a.duration = h.duration,
+            a.out_temp_pj = #{average}
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+          AND #{average} - c.out_temp_deviation &gt; a.out_temp
+    </update>
+
+    <!-- 平均回水 - 调小指令（非首次） -->
+    <update id="updateInstructionGenerationXPJ">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_scope e ON e.meter_id = a.meter_id AND e.tasks_id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+            LEFT JOIN (
+                SELECT MAX(orderr) AS orderr, strategy_id FROM ht_strategy_sub GROUP BY strategy_id
+            ) f ON f.strategy_id = b.strategy_id
+            LEFT JOIN (
+                SELECT strategy_id, COUNT(*) AS xcnt FROM ht_strategy_sub WHERE xunhuan = '0' GROUP BY strategy_id
+            ) m ON m.strategy_id = b.strategy_id
+            LEFT JOIN ht_strategy_sub h ON h.strategy_id = b.strategy_id
+                AND h.orderr = CASE
+                    WHEN b.number + 1 &lt;= f.orderr THEN b.number + 1
+                    WHEN f.orderr = 1 AND b.number + 1 &gt; f.orderr THEN 1
+                    WHEN f.orderr &gt; 1 AND b.number + 1 &gt; f.orderr AND m.xcnt = 0 THEN MOD(b.number, f.orderr) + 1
+                    WHEN f.orderr &gt; 1 AND b.number + 1 &gt; f.orderr AND m.xcnt = 1 THEN MOD(b.number, f.orderr) + 1
+                    ELSE MOD(b.number, f.orderr) + 1
+                END
+        SET a.instruction_id = h.id,
+            a.orderr = h.orderr,
+            a.instruction_type = h.type,
+            a.instruction = h.instruction,
+            a.number = CASE WHEN f.orderr = h.orderr THEN a.number + 1 ELSE IFNULL(a.number, '0') END,
+            a.fore_start = CASE WHEN f.orderr = h.orderr THEN '1' ELSE '0' END,
+            a.intervall = h.intervall,
+            a.unit = h.unit,
+            a.duration = h.duration,
+            a.out_temp_pj = #{average}
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+          AND #{average} + c.out_temp_deviation &lt; a.out_temp
+    </update>
+
+    <!-- 平均回水 - 完成查询（温度在范围内） -->
+    <update id="updateInstructionGenerationWPJ">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.alert_type = '9',
+            a.out_temp_pj = #{average}
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+          AND (#{average} + c.out_temp_deviation) &gt;= a.out_temp
+          AND (#{average} - c.out_temp_deviation) &lt;= a.out_temp
+    </update>
+
+    <!-- 平均回水 - 首次执行默认指令 -->
+    <update id="updateInstructionGenerationOnePJ">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+            LEFT JOIN (
+                SELECT * FROM ht_strategy_sub WHERE orderr = '1' GROUP BY strategy_id
+            ) d ON d.strategy_id = c.id
+        SET a.instruction_id = d.id,
+            a.orderr = d.orderr,
+            a.instruction_type = d.type,
+            a.instruction = d.instruction,
+            a.number = IFNULL(a.number, '0'),
+            a.fore_start = '0',
+            a.intervall = d.intervall,
+            a.unit = d.unit,
+            a.duration = d.duration,
+            a.out_temp_pj = #{average}
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+    </update>
+
+    <!-- ==================== Step 5: Boundary checks ==================== -->
+
+    <!-- 判断调大最大范围 -->
+    <update id="updateInstructionGenerationDMax">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.instruction = c.valve_max
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+          AND a.instruction &gt; c.valve_max
+    </update>
+
+    <!-- 判断调小最小范围 -->
+    <update id="updateInstructionGenerationDMin">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.instruction = c.valve_min
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+          AND a.instruction &lt; c.valve_min
+    </update>
+
+    <!-- 控制指令完成均衡判断 -->
+    <update id="updateInstructionGenerationHPEQUJ">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.alert_type = '9'
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+          AND a.instruction = a.valve_open
+    </update>
+
+    <!-- 判断调大最大范围（平均回水） -->
+    <update id="updateInstructionGenerationDPJMax">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.instruction = IFNULL(c.valve_max, a.instruction)
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+          AND a.instruction &gt; IFNULL(c.valve_max, a.instruction)
+    </update>
+
+    <!-- 控制指令调大最大范围（开度） -->
+    <update id="updateInstructionGenerationDKzMax">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.instruction = IFNULL(c.valve_max, a.instruction)
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+          AND a.instruction &gt; IFNULL(c.valve_max, a.instruction)
+    </update>
+
+    <!-- 控制指令调小最小范围（开度） -->
+    <update id="updateInstructionGenerationXKzMin">
+        UPDATE ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        SET a.instruction = IFNULL(c.valve_min, a.instruction)
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '0'
+          AND a.instruction &lt; IFNULL(c.valve_min, a.instruction)
+    </update>
+
+    <!-- 删除状态=0的执行记录 -->
+    <delete id="deleteHtTasksPerform0">
+        DELETE FROM ht_tasks_perform WHERE tasks_id = #{tasksId} AND status = '0'
+    </delete>
+
+    <!-- 插入执行记录（平均回水/单一策略模式） -->
+    <insert id="inserHtTasksPerformPj">
+        INSERT INTO ht_tasks_perform (
+            id, instruction_id, instruction_type, instruction,
+            number, intervall, unit, duration, org_id, company_id,
+            concentrator_code, device_id, meter_num, meter_id,
+            meter_arc_code, status, instruction_status, tasks_id,
+            orderr, fore_start, create_time, create_by,
+            in_temp, out_temp, room_temp, valve_open, imei,
+            dtu_num, chan_num, out_temp_pj
+        )
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            a.instruction_id,
+            IFNULL(a.instruction_type, 3) AS instruction_type,
+            IFNULL(a.instruction, c.valve_max) AS instruction,
+            a.number,
+            a.intervall,
+            a.unit,
+            a.duration,
+            a.org_id,
+            a.company_id,
+            a.concentrator_code,
+            a.device_id,
+            a.meter_num,
+            a.meter_id,
+            a.meter_arc_code,
+            '0',
+            a.instruction_status,
+            a.tasks_id,
+            a.orderr,
+            a.fore_start,
+            NOW(),
+            b.update_by,
+            a.in_temp,
+            a.out_temp,
+            a.room_temp,
+            a.valve_open,
+            a.imei,
+            a.dtu_num,
+            a.chan_num,
+            a.out_temp_pj
+        FROM ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+            LEFT JOIN ht_strategy c ON c.id = b.strategy_id
+        WHERE a.tasks_id = #{tasksId}
+    </insert>
+
+    <!-- 插入执行记录（普通模式） -->
+    <insert id="inserHtTasksPerform">
+        INSERT INTO ht_tasks_perform (
+            id, instruction_id, instruction_type, instruction,
+            number, intervall, unit, duration, org_id, company_id,
+            concentrator_code, device_id, meter_num, meter_id,
+            meter_arc_code, status, instruction_status, send_time,
+            tasks_id, orderr, fore_start, create_time, create_by,
+            in_temp, out_temp, room_temp, valve_open, imei,
+            dtu_num, chan_num
+        )
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            a.instruction_id,
+            a.instruction_type,
+            a.instruction,
+            a.number,
+            a.intervall,
+            a.unit,
+            a.duration,
+            a.org_id,
+            a.company_id,
+            a.concentrator_code,
+            a.device_id,
+            a.meter_num,
+            a.meter_id,
+            a.meter_arc_code,
+            '0',
+            a.instruction_status,
+            a.send_time,
+            a.tasks_id,
+            a.orderr,
+            a.fore_start,
+            NOW(),
+            b.update_by,
+            a.in_temp,
+            a.out_temp,
+            a.room_temp,
+            a.valve_open,
+            a.imei,
+            a.dtu_num,
+            a.chan_num
+        FROM ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+        WHERE a.tasks_id = #{tasksId}
+          AND (a.alert_type = '0' OR a.alert_type = '1')
+    </insert>
+
+    <!-- 插入已完成的执行记录 -->
+    <insert id="inserHtTasksPerformW">
+        INSERT INTO ht_tasks_perform (
+            id, instruction_id, instruction_type, instruction,
+            number, intervall, unit, duration, org_id, company_id,
+            concentrator_code, device_id, meter_num, meter_id,
+            meter_arc_code, status, instruction_status, send_time,
+            tasks_id, orderr, fore_start, create_time, create_by,
+            in_temp, out_temp, room_temp, valve_open, imei,
+            dtu_num, chan_num
+        )
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            a.instruction_id,
+            a.instruction_type,
+            a.instruction,
+            a.number,
+            a.intervall,
+            a.unit,
+            a.duration,
+            a.org_id,
+            a.company_id,
+            a.concentrator_code,
+            a.device_id,
+            a.meter_num,
+            a.meter_id,
+            a.meter_arc_code,
+            '0',
+            a.instruction_status,
+            a.send_time,
+            a.tasks_id,
+            a.orderr,
+            a.fore_start,
+            NOW(),
+            b.update_by,
+            a.in_temp,
+            a.out_temp,
+            a.room_temp,
+            a.valve_open,
+            a.imei,
+            a.dtu_num,
+            a.chan_num
+        FROM ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type = '9'
+    </insert>
+
+    <!-- 插入异常报警记录 -->
+    <insert id="insertHtAlert">
+        INSERT INTO ht_alert (id, meter_id, alert_type, alert_time, org_id, company_id, valve, in_temp, out_temp, room_temp)
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            a.meter_id,
+            a.alert_type,
+            NOW(),
+            a.org_id,
+            a.company_id,
+            a.valve_open,
+            a.in_temp,
+            a.out_temp,
+            a.room_temp
+        FROM ht_tasks_perform_ls a
+        WHERE a.tasks_id = #{tasksId}
+          AND a.alert_type IN ('2', '3', '4', '5', '6')
+    </insert>
+
+    <!-- 更新任务执行次数（number+1） -->
+    <update id="updateHtasks">
+        UPDATE ht_tasks SET number = number + 1, last_time = NOW() WHERE id = CAST(#{tasksId} AS UNSIGNED)
+    </update>
+
+    <!-- 更新控制范围状态（从临时表同步alert_type） -->
+    <update id="updateHtScope">
+        UPDATE ht_scope a
+            LEFT JOIN ht_tasks_perform_ls b ON b.meter_id = a.meter_id AND b.tasks_id = a.tasks_id
+        SET a.status = IFNULL(b.alert_type, a.status)
+        WHERE a.tasks_id = #{tasksId}
+    </update>
+
+    <!-- 删除上次执行记录备份 -->
+    <delete id="deleteHtTasksPerformLast">
+        DELETE FROM ht_tasks_perform_last WHERE tasks_id = #{tasksId}
+    </delete>
+
+    <!-- 备份执行记录到last表 -->
+    <insert id="inserHtTasksPerformLast">
+        INSERT INTO ht_tasks_perform_last (
+            id, instruction_id, instruction_type, instruction,
+            number, intervall, unit, duration, org_id, company_id,
+            concentrator_code, device_id, meter_num, meter_id,
+            meter_arc_code, status, instruction_status, send_time,
+            tasks_id, orderr, fore_start, create_time, create_by,
+            in_temp, out_temp, room_temp, valve_open, imei,
+            dtu_num, chan_num, out_temp_pj, cur_flow_compute, ref_heat,
+            group_id, strategy_id, command_index
+        )
+        SELECT
+            REPLACE(UUID(), '-', ''),
+            a.instruction_id,
+            a.instruction_type,
+            a.instruction,
+            a.number,
+            a.intervall,
+            a.unit,
+            a.duration,
+            a.org_id,
+            a.company_id,
+            a.concentrator_code,
+            a.device_id,
+            a.meter_num,
+            a.meter_id,
+            a.meter_arc_code,
+            a.status,
+            a.instruction_status,
+            a.send_time,
+            a.tasks_id,
+            a.orderr,
+            a.fore_start,
+            NOW(),
+            b.update_by,
+            a.in_temp,
+            a.out_temp,
+            a.room_temp,
+            a.valve_open,
+            a.imei,
+            a.dtu_num,
+            a.chan_num,
+            a.out_temp_pj,
+            a.cur_flow_compute,
+            a.ref_heat,
+            b.cu_group_id,
+            b.strategy_id,
+            a.number
+        FROM ht_tasks_perform_ls a
+            LEFT JOIN ht_tasks b ON b.id = a.tasks_id
+        WHERE a.tasks_id = #{tasksId}
+    </insert>
+
+    <!-- 清空临时表 -->
+    <delete id="deleteTtTasksPerformTemp">
+        DELETE FROM ht_tasks_perform_ls WHERE tasks_id = #{tasksId}
+    </delete>
+
 </mapper>

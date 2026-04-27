@@ -1,40 +1,47 @@
 package org.sdkj.thermal.quartz;
 
 import lombok.extern.slf4j.Slf4j;
-import org.sdkj.thermal.domain.HtTasks;
-import org.sdkj.thermal.service.IHtTasksService;
+import org.sdkj.thermal.service.impl.ThermalRegulationEngine;
 import org.quartz.Job;
-import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 
+/**
+ * Thermal regulation Quartz job.
+ *
+ * Delegates to ThermalRegulationEngine which encapsulates the complete
+ * regulation flow with all adjustBasis branches, temperature calculation,
+ * instruction generation, and DTU broadcast support.
+ */
 @Slf4j
 public class ThermalJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) {
-        JobDataMap data = context.getJobDetail().getJobDataMap();
-        Integer taskId = data.getInt("taskId");
-        String taskName = data.getString("taskName");
+        Integer taskId = context.getJobDetail().getJobDataMap().getInt("taskId");
+        String taskName = context.getJobDetail().getJobDataMap().getString("taskName");
 
-        log.info("Quartz 触发调控任务: {} (ID: {})", taskName, taskId);
+        log.info("Quartz triggered thermal regulation task: {} (ID: {})", taskName, taskId);
 
         try {
             Object bean = context.getScheduler().getContext().get("applicationContext");
-            if (bean instanceof org.springframework.context.ApplicationContext) {
-                org.springframework.context.ApplicationContext ctx =
-                    (org.springframework.context.ApplicationContext) bean;
-                IHtTasksService tasksService = ctx.getBean(IHtTasksService.class);
+            if (bean instanceof org.springframework.context.ApplicationContext ctx) {
+                ThermalRegulationEngine engine = ctx.getBean(ThermalRegulationEngine.class);
 
-                HtTasks task = tasksService.getById(taskId);
-                if (task != null && task.getStatus() == 1) {
-                    tasksService.saveValveAngle(String.valueOf(taskId), task.getScopeType() != null ? String.valueOf(task.getScopeType()) : "1");
-                    log.info("调控任务执行完成: {} (ID: {})", taskName, taskId);
+                // Load task to get current scopeType
+                org.sdkj.thermal.service.IHtTasksService tasksService =
+                    ctx.getBean(org.sdkj.thermal.service.IHtTasksService.class);
+                org.sdkj.thermal.domain.HtTasks task = tasksService.getById(taskId);
+
+                if (task != null && task.getStatus() != null && task.getStatus() == 1) {
+                    Integer scopeType = task.getScopeType() != null ? task.getScopeType() : 1;
+                    engine.executeRegulation(taskId, scopeType);
+                    log.info("Thermal regulation task completed: {} (ID: {})", taskName, taskId);
                 } else {
-                    log.warn("调控任务已停止，跳过执行: {} (ID: {})", taskName, taskId);
+                    log.warn("Thermal regulation task is stopped, skipping: {} (ID: {})", taskName, taskId);
                 }
             }
         } catch (Exception e) {
-            log.error("调控任务执行失败: {} (ID: {})", taskName, taskId, e);
+            log.error("Thermal regulation task failed: {} (ID: {})", taskName, taskId, e);
         }
     }
 }
