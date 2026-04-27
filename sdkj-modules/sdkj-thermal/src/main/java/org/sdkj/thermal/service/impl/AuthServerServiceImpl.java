@@ -27,14 +27,15 @@ public class AuthServerServiceImpl implements IAuthServerService {
 
     @Override
     public Map<String, Object> login(String tenantId, String username, String password) {
-        // 查询用户（按 userName）
+        // 查询用户（按 userName + 租户 companyId）
         AgUser user = agUserMapper.selectOne(
             new LambdaQueryWrapper<AgUser>()
-                .eq(AgUser::getUserName, username));
+                .eq(AgUser::getUserName, username)
+                .eq(AgUser::getCompanyId, tenantId));
 
         if (user == null) {
             log.info("登录用户：{} 不存在.", username);
-            throw new ServiceException("用户不存在");
+            throw new ServiceException("用户名或密码错误");
         }
 
         // 检查用户是否启用
@@ -46,7 +47,7 @@ public class AuthServerServiceImpl implements IAuthServerService {
         // BCrypt 校验密码（与 RuoYi-Vue-Plus 新系统密码验证方式一致）
         if (!BCrypt.checkpw(password, user.getUserPwd())) {
             log.info("登录用户：{} 密码错误.", username);
-            throw new ServiceException("账号名或密码错误");
+            throw new ServiceException("用户名或密码错误");
         }
 
         // Sa-Token 登录
@@ -54,7 +55,6 @@ public class AuthServerServiceImpl implements IAuthServerService {
 
         // 在 Session 中存储租户信息
         StpUtil.getSession().set("tenantId", tenantId);
-        StpUtil.getSession().set("tenantCode", tenantId);
 
         // 返回 token 信息
         Map<String, Object> result = new HashMap<>();

@@ -1,6 +1,7 @@
 package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
@@ -49,6 +50,7 @@ public class SaOAuth2ServerController {
     /**
      * 登出
      */
+    @SaCheckLogin
     @PostMapping("/logout")
     public R<Void> logout(@RequestHeader("Authorization") String token) {
         authServerService.logout(token);
