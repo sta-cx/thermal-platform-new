@@ -282,12 +282,6 @@
                 <version>${revision}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.sdkj</groupId>
-                <artifactId>sdkj-job</artifactId>
-                <version>${revision}</version>
-            </dependency>
-
             <!-- 仪表模块 -->
             <dependency>
                 <groupId>org.sdkj</groupId>
