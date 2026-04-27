@@ -249,3 +249,24 @@ CREATE TABLE IF NOT EXISTS `mt_meter_match` (
     `remark` varchar(80) DEFAULT NULL COMMENT '备注',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='仪表分配表';
+
+-- ========================================
+-- 11. 公式档案表
+-- ========================================
+CREATE TABLE IF NOT EXISTS `mt_formula_file` (
+    `id` varchar(32) NOT NULL COMMENT '主键',
+    `tenant_id` varchar(20) DEFAULT '000000' COMMENT '租户编号',
+    `name` varchar(64) DEFAULT NULL COMMENT '公式名称',
+    `type` varchar(32) DEFAULT NULL COMMENT '公式类型',
+    `cformula` varchar(500) DEFAULT NULL COMMENT '中文公式',
+    `eformula` varchar(500) DEFAULT NULL COMMENT '英文公式',
+    `seq` varchar(10) DEFAULT NULL COMMENT '排序',
+    `is_enabled` varchar(1) DEFAULT '1' COMMENT '是否启用 0=禁用 1=启用',
+    `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
+    `create_by` varchar(80) DEFAULT NULL COMMENT '创建者',
+    `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+    `update_by` varchar(80) DEFAULT NULL COMMENT '修改者',
+    `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+    `remark` varchar(80) DEFAULT NULL COMMENT '备注',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='公式档案表';
