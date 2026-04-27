@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -60,6 +61,56 @@ public class SysTenant extends BaseEntity {
     private String address;
 
     /**
+     * 企业性质（0运营商 1代理商 2物业 3商户 4服务商 5其他）
+     */
+    private String nature;
+
+    /**
+     * 营业执照号
+     */
+    private String businessLicense;
+
+    /**
+     * 法人代表
+     */
+    private String legalPerson;
+
+    /**
+     * 开户银行
+     */
+    private String bankName;
+
+    /**
+     * 银行地址
+     */
+    private String bankAddress;
+
+    /**
+     * 账户名称
+     */
+    private String accountName;
+
+    /**
+     * 对公账号
+     */
+    private String corporateAccount;
+
+    /**
+     * 省份
+     */
+    private String province;
+
+    /**
+     * 城市
+     */
+    private String city;
+
+    /**
+     * 区县
+     */
+    private String county;
+
+    /**
      * 域名
      */
     private String domain;
@@ -68,6 +119,16 @@ public class SysTenant extends BaseEntity {
      * 企业简介
      */
     private String intro;
+
+    /**
+     * 经度
+     */
+    private BigDecimal longitude;
+
+    /**
+     * 纬度
+     */
+    private BigDecimal latitude;
 
     /**
      * 备注
