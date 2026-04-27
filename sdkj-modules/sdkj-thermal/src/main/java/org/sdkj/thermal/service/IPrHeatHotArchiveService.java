@@ -7,6 +7,7 @@ import org.sdkj.thermal.domain.PrHeatHotArchive;
 import org.sdkj.thermal.domain.vo.PrHeatHotArchiveVo;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * 房屋热量表配表 Service 接口
@@ -32,4 +33,30 @@ public interface IPrHeatHotArchiveService extends IService<PrHeatHotArchive> {
     TableDataInfo<PrHeatHotArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
                                                       String unit, String search, String parentId,
                                                       PageQuery pageQuery);
+
+    // ========== 批量操作 ==========
+
+    /**
+     * 同步户热表信息到采集平台
+     * @param orgId 小区ID
+     * @param companyId 公司ID
+     * @return 是否同步成功
+     */
+    boolean valveInformationSynchronization(String orgId, String companyId);
+
+    /**
+     * 获取同步数据列表（用于下载Excel）
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @return 热量表配表列表
+     */
+    List<PrHeatHotArchiveVo> listSyncData(String companyId, String orgId);
+
+    /**
+     * 查询全部热量表信息（用于导出）
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @return 热量表配表列表
+     */
+    List<PrHeatHotArchiveVo> listAll(String companyId, String orgId);
 }

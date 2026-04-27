@@ -2,7 +2,9 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.MapstructUtils;
@@ -18,6 +20,9 @@ import org.sdkj.thermal.service.IPrHeatHotArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -138,5 +143,63 @@ public class PrHeatHotArchiveController extends BaseController {
         }
         PrHeatHotArchive entity = MapstructUtils.convert(bo, PrHeatHotArchive.class);
         return toAjax(hotArchiveService.save(entity));
+    }
+
+    // ========== 批量操作端点 ==========
+
+    /**
+     * 同步户热表信息到采集平台
+     * 旧端点: POST /property/prHeatHotArchive/valveInformationSynchronization
+     * 新端点: POST /thermal/ht/hot-archive/sync
+     */
+    @SaCheckPermission("thermal:ht:hot-archive:edit")
+    @SaCheckLogin
+    @Log(title = "房屋热量表配表-同步采集平台", businessType = BusinessType.UPDATE)
+    @PostMapping("/sync")
+    public R<Boolean> valveInformationSynchronization(
+            @RequestParam String orgId,
+            @RequestParam String companyId) {
+        boolean result = hotArchiveService.valveInformationSynchronization(orgId, companyId);
+        return result ? R.ok(true) : R.fail("同步失败，请检查采集平台配置");
+    }
+
+    /**
+     * 下载同步信息Excel
+     * 旧端点: POST /property/prHeatHotArchive/downloadInfoSync
+     * 新端点: GET /thermal/ht/hot-archive/sync-download
+     */
+    @SaCheckPermission("thermal:ht:hot-archive:list")
+    @SaCheckLogin
+    @Log(title = "房屋热量表配表-同步信息下载", businessType = BusinessType.EXPORT)
+    @GetMapping("/sync-download")
+    public void downloadInfoSync(HttpServletResponse response,
+                                  @RequestParam String companyId,
+                                  @RequestParam String orgId) throws IOException {
+        List<PrHeatHotArchiveVo> list = hotArchiveService.listSyncData(companyId, orgId);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("户热同步信息", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatHotArchiveVo.class).sheet("同步信息").doWrite(list);
+    }
+
+    /**
+     * 导出热量表配表 Excel
+     * 旧端点: POST /property/prHeatHotArchive/exportAll
+     * 新端点: GET /thermal/ht/hot-archive/export
+     */
+    @SaCheckPermission("thermal:ht:hot-archive:list")
+    @SaCheckLogin
+    @Log(title = "房屋热量表配表-导出", businessType = BusinessType.EXPORT)
+    @GetMapping("/export")
+    public void exportAll(HttpServletResponse response,
+                           @RequestParam(required = false) String companyId,
+                           @RequestParam(required = false) String orgId) throws IOException {
+        List<PrHeatHotArchiveVo> list = hotArchiveService.listAll(companyId, orgId);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("热量表配表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatHotArchiveVo.class).sheet("热量表配表").doWrite(list);
     }
 }
