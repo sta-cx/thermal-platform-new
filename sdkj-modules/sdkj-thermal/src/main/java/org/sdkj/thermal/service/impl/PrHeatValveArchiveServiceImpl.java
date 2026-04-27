@@ -715,4 +715,20 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         log.debug("温度反写完成, houseId={}, inTemp={}, outTemp={}, actualOpen={}",
             houseId, inTemperature, outTemperature, actualOpen);
     }
+
+    @Override
+    public List<PrHeatValveArchive> queryPaidClosedValves(String companyId, String orgId) {
+        // TODO: Implement - query valves where house is paid but valve is closed (from old queryValveStatusGetByPayK)
+        // SQL logic: JOIN pr_house on houseId WHERE pr_house.payStatus='1' AND pr_heat_valve_archive.valveStatus != '1'
+        log.warn("queryPaidClosedValves not yet implemented for companyId={}, orgId={}", companyId, orgId);
+        return List.of();
+    }
+
+    @Override
+    public List<PrHeatValveArchive> queryUnpaidOpenValves(String companyId, String orgId) {
+        // TODO: Implement - query valves where house is unpaid but valve is open (from old queryValveStatusGetByPayG)
+        // SQL logic: JOIN pr_house on houseId WHERE pr_house.payStatus!='1' AND pr_heat_valve_archive.valveStatus == '1'
+        log.warn("queryUnpaidOpenValves not yet implemented for companyId={}, orgId={}", companyId, orgId);
+        return List.of();
+    }
 }

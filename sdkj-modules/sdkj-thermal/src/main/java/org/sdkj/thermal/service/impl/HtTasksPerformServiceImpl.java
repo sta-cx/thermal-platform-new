@@ -293,4 +293,14 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
         // Phase 6: 创建 pr_valve_oc_log 表后实现阀门开关日志记录
         log.info("阀门开关日志（Phase 6 待实现），数量：{}", htTasksPerformList.size());
     }
+
+    @Override
+    public void executePendingCommands(String companyId, String orgId) {
+        // TODO: Implement pending command execution (from old system getNonExecutionNew)
+        // 1. Query all pending (status=1, instructionStatus=0) HtTasksPerform records
+        // 2. Group by concentrator/device
+        // 3. Send via DTU/NB/MBus depending on device type
+        // 4. Update instructionStatus after send
+        log.warn("executePendingCommands not yet implemented for companyId={}, orgId={}", companyId, orgId);
+    }
 }

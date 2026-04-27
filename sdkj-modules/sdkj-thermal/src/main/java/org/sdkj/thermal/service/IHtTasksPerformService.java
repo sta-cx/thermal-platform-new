@@ -107,4 +107,12 @@ public interface IHtTasksPerformService extends IService<HtTasksPerform> {
      * @param htTasksPerformList 任务执行记录列表
      */
     void insertValveOCLog(List<HtTasksPerform> htTasksPerformList);
+
+    /**
+     * 查询并执行所有待发送的指令（全局）
+     * 从旧系统 getNonExecutionNew 移植
+     * @param companyId 公司ID
+     * @param orgId 小区ID（可逗号分隔多个）
+     */
+    void executePendingCommands(String companyId, String orgId);
 }

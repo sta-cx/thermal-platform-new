@@ -149,6 +149,24 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
      */
     PrHeatValveArchiveVo getValveDataByHouseId(String houseId);
 
+    /**
+     * 查询已缴费但未开阀的阀门列表（用于自动开阀）
+     * 从旧系统 queryValveStatusGetByPayK 移植
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @return 需要开阀的阀门列表
+     */
+    List<PrHeatValveArchive> queryPaidClosedValves(String companyId, String orgId);
+
+    /**
+     * 查询未缴费但已开阀的阀门列表（用于自动关阀）
+     * 从旧系统 queryValveStatusGetByPayG 移植
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @return 需要关阀的阀门列表
+     */
+    List<PrHeatValveArchive> queryUnpaidOpenValves(String companyId, String orgId);
+
     // ========== 信息同步 ==========
 
     /**

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
@@ -19,6 +20,7 @@ import java.io.Serializable;
 /**
  * 热表月记录 Service 实现
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHeatMonth> implements IPrHeatMonthService {
@@ -65,5 +67,18 @@ public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHea
     @Transactional(rollbackFor = Exception.class)
     public boolean removeByIds(java.util.Collection<?> ids) {
         return super.removeByIds(ids);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean generateHeatMonth(String companyId, String orgId) {
+        // TODO: Implement monthly heat report generation (5-step flow from old system)
+        // 1. insertPrHeatMonth - Insert monthly records
+        // 2. updateStartReading - Update start reading
+        // 3. updateQty - Update quantity
+        // 4. setFee - Calculate fees
+        // 5. updateArrearage - Update arrearage status
+        log.warn("generateHeatMonth not yet implemented for companyId={}, orgId={}", companyId, orgId);
+        return false;
     }
 }

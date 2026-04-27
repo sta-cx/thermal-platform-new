@@ -7,6 +7,11 @@ import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 
+/**
+ * @deprecated 与 ThermalJob 功能完全重复，请使用 ThermalJob 替代。
+ * 将在下一版本移除。
+ */
+@Deprecated
 @Slf4j
 public class ControlJob implements Job {
 
