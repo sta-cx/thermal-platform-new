@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -272,7 +273,89 @@ public class PrAccountServiceImpl implements IPrAccountService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> saveDeposit(Map<String, Object> depositVo) {
-        return balanceMapper.saveDepositTransaction(depositVo);
+        String houseId = (String) depositVo.get("houseId");
+        String userId = (String) depositVo.get("userId");
+        String itemGroup = (String) depositVo.get("itemGroup");
+        String itemCode = (String) depositVo.get("itemCode");
+        String paymentStr = (String) depositVo.get("payment");
+        String orgId = (String) depositVo.get("orgId");
+        String companyId = (String) depositVo.get("companyId");
+
+        if (houseId == null || houseId.isEmpty()) {
+            throw new RuntimeException("房屋ID不能为空");
+        }
+        if (itemGroup == null || itemGroup.isEmpty()) {
+            throw new RuntimeException("费用分组不能为空");
+        }
+
+        Object amountObj = depositVo.get("amount");
+        BigDecimal amount;
+        if (amountObj instanceof BigDecimal) {
+            amount = (BigDecimal) amountObj;
+        } else if (amountObj instanceof Number) {
+            amount = BigDecimal.valueOf(((Number) amountObj).doubleValue());
+        } else if (amountObj instanceof String) {
+            amount = new BigDecimal((String) amountObj);
+        } else {
+            amount = BigDecimal.ZERO;
+        }
+
+        Long loginUserId = LoginHelper.getUserId();
+        Date now = new Date();
+
+        // 创建交易记录
+        PrTransactionRecord record = new PrTransactionRecord();
+        record.setSerialNum("DEP" + System.currentTimeMillis());
+        record.setTransactionType(1); // 收费
+        record.setPaymentType(paymentStr != null ? Integer.parseInt(paymentStr) : 1);
+        record.setAmount(amount);
+        record.setPaidAmount(amount);
+        record.setStatus(0);
+        record.setHouseId(houseId);
+        record.setUserId(userId);
+        record.setOrgId(orgId);
+        record.setCompanyId(companyId);
+        record.setItemGroup(itemGroup);
+        record.setItemCode(itemCode);
+        record.setTransactionTime(now);
+        record.setOperatorId(String.valueOf(loginUserId));
+        record.setNotes("押金缴费");
+        transactionMapper.insert(record);
+
+        // 更新或创建账户余额
+        LambdaQueryWrapper<PrAccountBalance> qw = new LambdaQueryWrapper<>();
+        qw.eq(PrAccountBalance::getHouseId, houseId);
+        if (userId != null && !userId.isEmpty()) {
+            qw.eq(PrAccountBalance::getUserId, userId);
+        }
+        qw.eq(PrAccountBalance::getItemGroup, itemGroup);
+        if (itemCode != null && !itemCode.isEmpty()) {
+            qw.eq(PrAccountBalance::getItemCode, itemCode);
+        }
+        PrAccountBalance existing = balanceMapper.selectOne(qw);
+
+        if (existing != null) {
+            balanceMapper.updateBalance(userId, houseId, itemGroup, itemCode, amount);
+        } else {
+            PrAccountBalance balance = new PrAccountBalance();
+            balance.setHouseId(houseId);
+            balance.setUserId(userId);
+            balance.setOrgId(orgId);
+            balance.setCompanyId(companyId);
+            balance.setItemGroup(itemGroup);
+            balance.setItemCode(itemCode);
+            balance.setBalance(amount);
+            balance.setCreateBy(loginUserId);
+            balance.setCreateTime(now);
+            balanceMapper.insert(balance);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("recordId", record.getId());
+        result.put("serialNum", record.getSerialNum());
+        result.put("amount", amount);
+        return result;
     }
 
     @Override

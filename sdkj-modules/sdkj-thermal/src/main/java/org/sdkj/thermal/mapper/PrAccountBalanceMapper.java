@@ -56,9 +56,6 @@ public interface PrAccountBalanceMapper extends BaseMapperPlus<PrAccountBalance,
         @Param("unitCode") String unitCode,
         @Param("search") String search);
 
-    /** 保存押金交易 */
-    Map<String, Object> saveDepositTransaction(@Param("depositVo") Map<String, Object> depositVo);
-
     /** 删除导入临时数据 */
     int deleteImportStagingData();
 }

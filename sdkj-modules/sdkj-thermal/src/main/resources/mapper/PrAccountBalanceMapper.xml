@@ -62,10 +62,6 @@
         <if test="search != null and search != ''">AND h.room_num = TRIM(#{search})</if>
     </select>
 
-    <select id="saveDepositTransaction" resultType="java.util.LinkedHashMap">
-        SELECT 1
-    </select>
-
     <delete id="deleteImportStagingData">
         DELETE FROM pr_import_account WHERE type = 0
     </delete>

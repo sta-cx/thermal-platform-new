@@ -214,7 +214,7 @@ public class PrAccountController extends BaseController {
     @Log(title = "押金缴费", businessType = BusinessType.INSERT)
     @PostMapping("/deposit")
     public R<Map<String, Object>> saveDeposit(@RequestBody Map<String, Object> depositVo) {
-        return R.fail("押金缴费功能尚未实现，需要完整的交易记录创建逻辑");
+        return R.ok(accountService.saveDeposit(depositVo));
     }
 
     /**
