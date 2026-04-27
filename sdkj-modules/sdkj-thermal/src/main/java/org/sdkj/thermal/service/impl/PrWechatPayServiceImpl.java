@@ -15,6 +15,7 @@ import org.sdkj.thermal.wechat.wxPay.WXPay;
 import org.sdkj.thermal.wechat.wxPay.WXPayConfigImpl;
 import org.sdkj.thermal.wechat.wxPay.WXPayConstants;
 import org.sdkj.thermal.wechat.wxPay.WXPayUtil;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -147,23 +148,82 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
     @Override
     public String handlePayNotify(HttpServletRequest request) {
         try {
+            // 1. 读取回调数据
             BufferedReader reader = request.getReader();
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-            Map<String, String> resultMap = WXPayUtil.xmlToMap(sb.toString());
-            String outTradeNo = resultMap.get("out_trade_no");
-            if (outTradeNo != null) {
-                PrWechatOrder order = baseMapper.selectByOutTradeNo(outTradeNo);
-                if (order != null && order.getOrderStatus() == 0) {
-                    order.setOrderStatus(1);
-                    order.setTransactionId(resultMap.get("transaction_id"));
-                    order.setPayTime(new Date());
-                    baseMapper.updateById(order);
-                }
+            String xmlData = sb.toString();
+            log.info("收到微信支付回调通知: {}", xmlData);
+
+            // 2. 解析XML
+            Map<String, String> resultMap = WXPayUtil.xmlToMap(xmlData);
+
+            // 3. 验证签名 - 防止伪造回调
+            if (!WXPayUtil.isSignatureValid(resultMap, payConfig.getKey())) {
+                log.error("微信支付回调签名验证失败");
+                return buildXmlResponse("FAIL", "签名验证失败");
             }
+
+            // 4. 验证返回状态
+            if (!WXPayConstants.SUCCESS.equals(resultMap.get("return_code"))) {
+                log.error("微信支付回调返回失败: {}", resultMap.get("return_msg"));
+                return buildXmlResponse("FAIL", resultMap.get("return_msg"));
+            }
+
+            // 5. 处理支付结果
+            if (WXPayConstants.SUCCESS.equals(resultMap.get("result_code"))) {
+                String outTradeNo = resultMap.get("out_trade_no");
+                String transactionId = resultMap.get("transaction_id");
+                String totalFeeFen = resultMap.get("total_fee");
+                String openId = resultMap.get("openid");
+                String bankType = resultMap.get("bank_type");
+                String timeEnd = resultMap.get("time_end");
+
+                // 6. 查询本地订单
+                PrWechatOrder order = baseMapper.selectByOutTradeNo(outTradeNo);
+                if (order == null) {
+                    log.error("微信支付回调处理失败，订单不存在: {}", outTradeNo);
+                    return buildXmlResponse("FAIL", "订单不存在");
+                }
+
+                // 7. 幂等性检查 - 已处理过的通知直接返回成功
+                if (order.getOrderStatus() != null && order.getOrderStatus() == 1) {
+                    log.info("微信支付回调重复通知，订单已处理: {}", outTradeNo);
+                    return buildXmlResponse("SUCCESS", "OK");
+                }
+
+                // 8. 验证金额 - 防止金额篡改
+                BigDecimal orderAmount = order.getTotalFee();
+                BigDecimal notifyAmount = new BigDecimal(totalFeeFen).divide(new BigDecimal(100));
+                if (orderAmount.compareTo(notifyAmount) != 0) {
+                    log.error("微信支付回调金额不匹配，订单: {}, 订单金额: {}，回调金额: {}",
+                            outTradeNo, orderAmount, notifyAmount);
+                    return buildXmlResponse("FAIL", "金额不匹配");
+                }
+
+                // 9. 更新订单状态
+                order.setOrderStatus(1);
+                order.setTransactionId(transactionId);
+                order.setBankType(bankType);
+                order.setPayTime(new Date());
+                order.setUpdateTime(new Date());
+                baseMapper.updateById(order);
+                log.info("微信支付回调处理成功，订单: {}, 交易号: {}", outTradeNo, transactionId);
+
+                // TODO: Phase 2 Task 18 - 插入交易流水记录 (PrTransactionRecord)
+                // wechatOrderMapper.insertPrTransactionRecordByWechat(id, houseId, amount, outTradeNo, transactionId, openId);
+
+                // TODO: Phase 2 Task 18 - 更新费用明细已缴金额 (PrExpense)
+                // wechatOrderMapper.updatePrExponseByWechat(houseId, amount, transactionId, openId, yearStr);
+
+                // TODO: Phase 2 Task 18 - 更新房屋缴费状态 (PrHouse)
+                // wechatOrderMapper.updatePrHouse(houseId);
+            }
+
+            // 10. 返回处理结果
             return buildXmlResponse("SUCCESS", "OK");
         } catch (Exception e) {
             log.error("处理微信支付回调失败", e);
@@ -180,57 +240,154 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
     @Override
     public Map<String, Object> applyRefund(String outTradeNo, BigDecimal refundFee,
                                            String refundReason, String operator) {
-        PrWechatOrder order = baseMapper.selectByOutTradeNo(outTradeNo);
-        if (order == null) throw new RuntimeException("原订单不存在");
-        if (order.getOrderStatus() != 1) throw new RuntimeException("只有支付成功的订单才能申请退款");
+        try {
+            // 1. 查询原订单
+            PrWechatOrder order = baseMapper.selectByOutTradeNo(outTradeNo);
+            if (order == null) {
+                throw new RuntimeException("原订单不存在");
+            }
 
-        String outRefundNo = "RF" + System.currentTimeMillis();
-        PrWechatRefund refund = new PrWechatRefund();
-        refund.setId(UUID.randomUUID().toString().replace("-", ""));
-        refund.setOutTradeNo(outTradeNo);
-        refund.setTransactionId(order.getTransactionId());
-        refund.setOutRefundNo(outRefundNo);
-        refund.setTotalFee(order.getTotalFee());
-        refund.setRefundFee(refundFee);
-        refund.setRefundReason(refundReason);
-        refund.setRefundStatus(0);
-        refund.setOpenId(order.getOpenId());
-        refund.setHouseId(order.getHouseId());
-        refund.setOperator(operator);
-        refund.setCreateTime(new Date());
-        wechatRefundMapper.insert(refund);
+            // 2. 验证订单状态（1=支付成功）
+            if (order.getOrderStatus() != 1) {
+                throw new RuntimeException("只有支付成功的订单才能申请退款");
+            }
 
-        order.setOrderStatus(4);
-        order.setUpdateTime(new Date());
-        baseMapper.updateById(order);
+            // 3. 验证退款金额不超过订单总金额
+            if (refundFee.compareTo(order.getTotalFee()) > 0) {
+                throw new RuntimeException("退款金额不能超过订单总金额");
+            }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("outTradeNo", outTradeNo);
-        result.put("outRefundNo", outRefundNo);
-        result.put("refundFee", refundFee);
-        return result;
+            // 4. 检查是否已有成功的退款记录
+            PrWechatRefund existingRefund = wechatRefundMapper.selectByOutTradeNo(outTradeNo);
+            if (existingRefund != null && existingRefund.getRefundStatus() == 1) {
+                throw new RuntimeException("该订单已完成退款");
+            }
+
+            // 5. 生成退款单号
+            String outRefundNo = "RF" + System.currentTimeMillis() +
+                    String.format("%06d", new Random().nextInt(1000000));
+
+            // 6. 准备微信退款接口参数（金额单位为分）
+            Map<String, String> params = new HashMap<>();
+            params.put("appid", payConfig.getAppid());
+            params.put("mch_id", payConfig.getMchId());
+            params.put("nonce_str", WXPayUtil.generateNonceStr());
+            params.put("out_trade_no", outTradeNo);
+            params.put("out_refund_no", outRefundNo);
+            params.put("total_fee", String.valueOf(order.getTotalFee().multiply(new BigDecimal(100)).intValue()));
+            params.put("refund_fee", String.valueOf(refundFee.multiply(new BigDecimal(100)).intValue()));
+            params.put("refund_desc", refundReason != null ? refundReason : "正常退款");
+            if (payConfig.getRefundNotifyUrl() != null) {
+                params.put("notify_url", payConfig.getRefundNotifyUrl());
+            }
+
+            // 7. 调用微信退款接口
+            log.info("调用微信退款接口，订单号: {}, 退款单号: {}, 退款金额(分): {}",
+                    outTradeNo, outRefundNo, refundFee.multiply(new BigDecimal(100)).intValue());
+            Map<String, String> wxResult = wxPay.refund(params);
+            log.info("微信退款接口返回结果: {}", wxResult);
+
+            // 8. 校验返回结果
+            if (!WXPayConstants.SUCCESS.equals(wxResult.get("return_code"))) {
+                throw new RuntimeException("申请退款失败: " + wxResult.get("return_msg"));
+            }
+            if (!WXPayConstants.SUCCESS.equals(wxResult.get("result_code"))) {
+                throw new RuntimeException("申请退款失败: " + wxResult.get("err_code_des"));
+            }
+
+            // 9. 保存退款记录（状态=0 退款处理中）
+            PrWechatRefund refund = new PrWechatRefund();
+            refund.setId(UUID.randomUUID().toString().replace("-", ""));
+            refund.setOutTradeNo(outTradeNo);
+            refund.setTransactionId(order.getTransactionId());
+            refund.setOutRefundNo(outRefundNo);
+            refund.setRefundId(wxResult.get("refund_id"));
+            refund.setTotalFee(order.getTotalFee());
+            refund.setRefundFee(refundFee);
+            refund.setRefundReason(refundReason);
+            refund.setRefundStatus(0); // 0=退款处理中
+            refund.setRefundChannel(wxResult.get("refund_channel"));
+            refund.setOpenId(order.getOpenId());
+            refund.setHouseId(order.getHouseId());
+            refund.setOperator(operator);
+            refund.setCreateTime(new Date());
+            wechatRefundMapper.insert(refund);
+
+            // 10. 更新订单状态为退款中（4=退款中）
+            order.setOrderStatus(4);
+            order.setUpdateTime(new Date());
+            baseMapper.updateById(order);
+
+            // 11. 构建返回结果
+            Map<String, Object> result = new HashMap<>();
+            result.put("outTradeNo", outTradeNo);
+            result.put("outRefundNo", outRefundNo);
+            result.put("refundId", wxResult.get("refund_id"));
+            result.put("refundFee", refundFee);
+            result.put("refundStatus", 0);
+            return result;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("申请微信退款失败", e);
+            throw new RuntimeException("申请退款失败: " + e.getMessage(), e);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     @Override
     public String handleRefundNotify(HttpServletRequest request) {
         try {
+            // 1. 读取回调数据
             BufferedReader reader = request.getReader();
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-            Map<String, String> resultMap = WXPayUtil.xmlToMap(sb.toString());
-            String outRefundNo = resultMap.get("out_refund_no");
-            if (outRefundNo != null) {
-                PrWechatRefund refund = wechatRefundMapper.selectByOutRefundNo(outRefundNo);
-                if (refund != null) {
-                    refund.setRefundStatus(1);
-                    refund.setRefundTime(new Date());
-                    wechatRefundMapper.updateById(refund);
-                }
+            String xmlData = sb.toString();
+            log.info("收到微信退款回调通知: {}", xmlData);
+
+            // 2. 解析XML
+            Map<String, String> resultMap = WXPayUtil.xmlToMap(xmlData);
+
+            // 3. 验证签名 - 防止伪造回调
+            if (!WXPayUtil.isSignatureValid(resultMap, payConfig.getKey())) {
+                log.error("微信退款回调签名验证失败");
+                return buildXmlResponse("FAIL", "签名验证失败");
             }
+
+            // 4. 获取退款单号和退款状态
+            String outRefundNo = resultMap.get("out_refund_no");
+            String refundStatus = resultMap.get("refund_status");
+
+            // 5. 查找本地退款记录
+            PrWechatRefund refund = wechatRefundMapper.selectByOutRefundNo(outRefundNo);
+            if (refund == null) {
+                log.error("微信退款回调处理失败，退款记录不存在: {}", outRefundNo);
+                return buildXmlResponse("FAIL", "退款记录不存在");
+            }
+
+            // 6. 根据退款状态更新本地记录
+            //    SUCCESS=1(退款成功), CHANGE=2(退款异常), REFUNDCLOSE=3(退款关闭), FAIL=3(退款失败)
+            if ("SUCCESS".equals(refundStatus)) {
+                refund.setRefundStatus(1);
+                refund.setRefundTime(new Date());
+            } else if ("CHANGE".equals(refundStatus)) {
+                refund.setRefundStatus(2);
+                refund.setRefundTime(new Date());
+            } else if ("REFUNDCLOSE".equals(refundStatus)) {
+                refund.setRefundStatus(3);
+            } else if ("FAIL".equals(refundStatus)) {
+                refund.setRefundStatus(3);
+            }
+
+            refund.setUpdateTime(new Date());
+            wechatRefundMapper.updateById(refund);
+
+            log.info("微信退款回调处理成功，退款单号: {}, 退款状态: {}", outRefundNo, refundStatus);
+
+            // 7. 返回处理结果
             return buildXmlResponse("SUCCESS", "OK");
         } catch (Exception e) {
             log.error("处理微信退款回调失败", e);
@@ -241,6 +398,39 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
     @Override
     public PrWechatRefund getRefundByOutRefundNo(String outRefundNo) {
         return wechatRefundMapper.selectByOutRefundNo(outRefundNo);
+    }
+
+    /**
+     * 定时取消超过24小时未支付的订单
+     * 每天凌晨2点执行
+     */
+    @Scheduled(cron = "0 0 2 * * ?")
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelExpiredOrders() {
+        try {
+            Date expireThreshold = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
+            List<PrWechatOrder> expiredOrders = lambdaQuery()
+                    .eq(PrWechatOrder::getOrderStatus, 0)
+                    .lt(PrWechatOrder::getCreateTime, expireThreshold)
+                    .list();
+
+            if (expiredOrders.isEmpty()) {
+                log.debug("没有需要取消的过期订单");
+                return;
+            }
+
+            for (PrWechatOrder order : expiredOrders) {
+                order.setOrderStatus(3); // 3 = 已取消
+                order.setUpdateTime(new Date());
+                baseMapper.updateById(order);
+                log.info("取消过期微信支付订单: outTradeNo={}, createTime={}",
+                        order.getOutTradeNo(), order.getCreateTime());
+            }
+
+            log.info("过期订单取消完成，共取消 {} 笔订单", expiredOrders.size());
+        } catch (Exception e) {
+            log.error("取消过期订单任务执行失败", e);
+        }
     }
 
     private String buildXmlResponse(String code, String msg) {
