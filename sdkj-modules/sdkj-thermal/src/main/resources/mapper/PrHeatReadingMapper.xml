@@ -85,4 +85,101 @@
         LIMIT 50
     </select>
 
+    <!-- ========== PrHeatReadingCopy1 远传抄表副本查询 ========== -->
+
+    <!-- 根据标签列表查询抄表副本数据（聚合查询） -->
+    <select id="selectPageListCopy1" resultType="org.sdkj.thermal.domain.vo.PrHeatReadingCopy1Vo">
+        SELECT
+            GROUP_CONCAT(h.out_temperature ORDER BY h.read_time) AS 'nowTemperatureString',
+            GROUP_CONCAT(h.valve_status ORDER BY h.read_time) AS 'nowValveStatusString',
+            h.id,
+            h.room_num AS 'roomNum',
+            h.meter_num AS 'meterNum',
+            h.type,
+            h.setting_status AS 'settingStatus',
+            h.valve_status AS 'valveStatus',
+            h.read_time AS 'readTime',
+            h.in_temperature AS 'inTemperature',
+            h.out_temperature AS 'outTemperature',
+            h.now_temperature AS 'nowTemperature',
+            h.create_by AS 'createBy',
+            AVG(h.in_temperature) AS 'avgInTemperature',
+            AVG(h.out_temperature) AS 'avgOutTemperature',
+            AVG(h.now_temperature) AS 'avgNowTemperature',
+            AVG(h.valve_status) AS 'avgValveStatus'
+        FROM pr_heat_reading_copy1 h
+        <where>
+            <if test="labels != null and labels.size() > 0">
+                AND h.room_num IN
+                <foreach item="item" collection="labels" separator="," open="(" close=")">
+                    #{item.label}
+                </foreach>
+            </if>
+            <if test="startTime != null and startTime != '' and endTime != null and endTime != ''">
+                AND h.read_time BETWEEN #{startTime} AND #{endTime}
+            </if>
+        </where>
+        GROUP BY h.room_num
+        ORDER BY h.read_time
+    </select>
+
+    <!-- 分页查询热表配表读数情况 -->
+    <select id="selectPageHeatReadingList" resultType="org.sdkj.thermal.domain.vo.PrHeatReadingCopy1Vo">
+        SELECT
+            c.org_name AS 'orgName',
+            c.building_name AS 'buildingName',
+            c.unit_code AS 'unitCode',
+            c.room_num AS 'roomNum',
+            c.floor,
+            a.id,
+            a.house_id AS 'houseId',
+            a.meter_serial AS 'meterSerial',
+            a.meter_num AS 'meterNum',
+            a.meter_arc_code AS 'meterArcCode',
+            b.in_temperature AS 'inTemperature',
+            b.out_temperature AS 'outTemperature',
+            b.attack_status AS 'attackStatus',
+            b.setting_status AS 'settingStatus',
+            b.valve_status AS 'valveStatus',
+            b.create_time AS 'createTime',
+            b.read_time AS 'readTime',
+            f.phone,
+            f.user_name AS 'userName',
+            b.total_worktime AS 'totalWorktime',
+            MAX(IFNULL(b.csq, 0)) AS 'csq',
+            b.voltage,
+            MAX(IFNULL(b.humi, 0)) AS 'humi',
+            MAX(IFNULL(b.temperature, 0)) AS 'temperature',
+            MAX(IFNULL(b.total_heat, a.total_heat)) AS 'totalHeat',
+            MAX(IFNULL(b.total_flow, a.total_flow)) AS 'totalFlow',
+            b.rb_status1 AS 'rbStatus1',
+            b.rb_status2 AS 'rbStatus2'
+        FROM pr_heat_archive a
+        LEFT JOIN pr_heat_reading b ON a.meter_num = b.meter_num
+        LEFT JOIN pr_house c ON a.house_id = c.id
+        LEFT JOIN pr_building d ON c.building_id = d.id
+        LEFT JOIN pr_user_house f ON a.house_id = f.house_id
+        WHERE a.company_id = #{companyId}
+          AND a.is_changed = '0'
+        <if test="orgId != null and orgId != ''">
+            AND a.org_id = #{orgId}
+        </if>
+        <if test="buildingId != null and buildingId != ''">
+            AND c.building_id = #{buildingId}
+        </if>
+        <if test="unitCode != null and unitCode != ''">
+            AND c.unit_code = #{unitCode}
+        </if>
+        <if test="meterArcCode != null and meterArcCode != ''">
+            AND a.meter_arc_code = #{meterArcCode}
+        </if>
+        <if test="search != null and search != ''">
+            AND (c.room_num LIKE CONCAT('%', TRIM(#{search}), '%')
+              OR f.phone LIKE CONCAT('%', TRIM(#{search}), '%')
+              OR a.meter_num LIKE CONCAT('%', TRIM(#{search}), '%'))
+        </if>
+        GROUP BY a.meter_num, b.read_time
+        ORDER BY a.meter_num, b.read_time DESC
+    </select>
+
 </mapper>
