@@ -2,7 +2,9 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.MapstructUtils;
@@ -20,7 +22,11 @@ import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatUnitValveArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -144,5 +150,72 @@ public class PrHeatUnitValveArchiveController extends BaseController {
             .map(a -> new ValveArchiveInfo(a.getId(), a.getMeterArcCode(), a.getMeterNum(), a.getDeviceId(), a.getConcentratorCode(), a.getImeiNum(), null, null))
             .toList();
         return toAjax(tasksPerformService.batchCreateValveControlTasks(infos, orgId, companyId, 0));
+    }
+
+    // ========== 批量操作端点 ==========
+
+    /**
+     * 同步单元阀门信息到采集平台
+     * POST /thermal/ht/unit-valve-archive/sync
+     */
+    @SaCheckPermission("thermal:ht:unit-valve-archive:edit")
+    @SaCheckLogin
+    @Log(title = "单元阀门配表-同步采集平台", businessType = BusinessType.UPDATE)
+    @PostMapping("/sync")
+    public R<Boolean> valveInformationSynchronization(
+            @RequestParam String orgId,
+            @RequestParam String companyId) {
+        boolean result = unitValveArchiveService.valveInformationSynchronization(orgId, companyId);
+        return result ? R.ok(true) : R.fail("同步失败，请检查采集平台配置");
+    }
+
+    /**
+     * 下载同步信息Excel
+     * GET /thermal/ht/unit-valve-archive/sync-download
+     */
+    @SaCheckPermission("thermal:ht:unit-valve-archive:list")
+    @SaCheckLogin
+    @Log(title = "单元阀门配表-同步信息下载", businessType = BusinessType.EXPORT)
+    @GetMapping("/sync-download")
+    public void downloadInfoSync(HttpServletResponse response,
+                                  @RequestParam String companyId,
+                                  @RequestParam String orgId) throws IOException {
+        List<PrHeatUnitValveArchiveVo> list = unitValveArchiveService.listSyncData(companyId, orgId);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("单元阀门同步信息", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatUnitValveArchiveVo.class).sheet("同步信息").doWrite(list);
+    }
+
+    /**
+     * 导出单元阀门配表 Excel
+     * GET /thermal/ht/unit-valve-archive/export
+     */
+    @SaCheckPermission("thermal:ht:unit-valve-archive:list")
+    @SaCheckLogin
+    @Log(title = "单元阀门配表-导出", businessType = BusinessType.EXPORT)
+    @GetMapping("/export")
+    public void exportAll(HttpServletResponse response,
+                           @RequestParam(required = false) String companyId,
+                           @RequestParam(required = false) String orgId) throws IOException {
+        List<PrHeatUnitValveArchiveVo> list = unitValveArchiveService.listAll(companyId, orgId);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("单元阀门配表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatUnitValveArchiveVo.class).sheet("单元阀门配表").doWrite(list);
+    }
+
+    /**
+     * 导入单元阀门配表 Excel
+     * POST /thermal/ht/unit-valve-archive/import
+     */
+    @SaCheckPermission("thermal:ht:unit-valve-archive:add")
+    @SaCheckLogin
+    @Log(title = "单元阀门配表-导入", businessType = BusinessType.IMPORT)
+    @PostMapping("/import")
+    public R<Void> importUnitValveArchive(@RequestParam("file") MultipartFile file) throws IOException {
+        return unitValveArchiveService.importUnitValveArchive(file);
     }
 }

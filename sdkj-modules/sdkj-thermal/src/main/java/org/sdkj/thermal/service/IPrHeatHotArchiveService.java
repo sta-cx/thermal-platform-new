@@ -1,11 +1,14 @@
 package org.sdkj.thermal.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.sdkj.common.core.domain.R;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHeatHotArchive;
 import org.sdkj.thermal.domain.vo.PrHeatHotArchiveVo;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 
@@ -59,4 +62,11 @@ public interface IPrHeatHotArchiveService extends IService<PrHeatHotArchive> {
      * @return 热量表配表列表
      */
     List<PrHeatHotArchiveVo> listAll(String companyId, String orgId);
+
+    /**
+     * 导入热量表配表
+     * @param file Excel 文件
+     * @return 导入结果
+     */
+    R<Void> importHotArchive(MultipartFile file) throws IOException;
 }

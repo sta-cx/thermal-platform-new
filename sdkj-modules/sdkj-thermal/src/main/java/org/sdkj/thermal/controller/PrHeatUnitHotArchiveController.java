@@ -2,7 +2,9 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.MapstructUtils;
@@ -17,6 +19,12 @@ import org.sdkj.thermal.domain.vo.PrHeatUnitHotArchiveVo;
 import org.sdkj.thermal.service.IPrHeatUnitHotArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * 单元热表配表管理
@@ -116,5 +124,72 @@ public class PrHeatUnitHotArchiveController extends BaseController {
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable String id) {
         return toAjax(unitHotArchiveService.removeById(id));
+    }
+
+    // ========== 批量操作端点 ==========
+
+    /**
+     * 同步单元热表信息到采集平台
+     * POST /thermal/ht/unit-hot-archive/sync
+     */
+    @SaCheckPermission("thermal:ht:unit-hot-archive:edit")
+    @SaCheckLogin
+    @Log(title = "单元热表配表-同步采集平台", businessType = BusinessType.UPDATE)
+    @PostMapping("/sync")
+    public R<Boolean> valveInformationSynchronization(
+            @RequestParam String orgId,
+            @RequestParam String companyId) {
+        boolean result = unitHotArchiveService.valveInformationSynchronization(orgId, companyId);
+        return result ? R.ok(true) : R.fail("同步失败，请检查采集平台配置");
+    }
+
+    /**
+     * 下载同步信息Excel
+     * GET /thermal/ht/unit-hot-archive/sync-download
+     */
+    @SaCheckPermission("thermal:ht:unit-hot-archive:list")
+    @SaCheckLogin
+    @Log(title = "单元热表配表-同步信息下载", businessType = BusinessType.EXPORT)
+    @GetMapping("/sync-download")
+    public void downloadInfoSync(HttpServletResponse response,
+                                  @RequestParam String companyId,
+                                  @RequestParam String orgId) throws IOException {
+        List<PrHeatUnitHotArchiveVo> list = unitHotArchiveService.listSyncData(companyId, orgId);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("单元热表同步信息", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatUnitHotArchiveVo.class).sheet("同步信息").doWrite(list);
+    }
+
+    /**
+     * 导出单元热表配表 Excel
+     * GET /thermal/ht/unit-hot-archive/export
+     */
+    @SaCheckPermission("thermal:ht:unit-hot-archive:list")
+    @SaCheckLogin
+    @Log(title = "单元热表配表-导出", businessType = BusinessType.EXPORT)
+    @GetMapping("/export")
+    public void exportAll(HttpServletResponse response,
+                           @RequestParam(required = false) String companyId,
+                           @RequestParam(required = false) String orgId) throws IOException {
+        List<PrHeatUnitHotArchiveVo> list = unitHotArchiveService.listAll(companyId, orgId);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("单元热表配表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatUnitHotArchiveVo.class).sheet("单元热表配表").doWrite(list);
+    }
+
+    /**
+     * 导入单元热表配表 Excel
+     * POST /thermal/ht/unit-hot-archive/import
+     */
+    @SaCheckPermission("thermal:ht:unit-hot-archive:add")
+    @SaCheckLogin
+    @Log(title = "单元热表配表-导入", businessType = BusinessType.IMPORT)
+    @PostMapping("/import")
+    public R<Void> importUnitHotArchive(@RequestParam("file") MultipartFile file) throws IOException {
+        return unitHotArchiveService.importUnitHotArchive(file);
     }
 }

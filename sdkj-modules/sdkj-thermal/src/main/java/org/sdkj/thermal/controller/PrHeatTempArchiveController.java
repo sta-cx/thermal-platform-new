@@ -19,6 +19,7 @@ import org.sdkj.thermal.domain.vo.PrHeatTempArchiveVo;
 import org.sdkj.thermal.service.IPrHeatTempArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -171,5 +172,17 @@ public class PrHeatTempArchiveController extends BaseController {
         String fileName = URLEncoder.encode("温采器配表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
         response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
         EasyExcel.write(response.getOutputStream(), PrHeatTempArchiveVo.class).sheet("温采器配表").doWrite(list);
+    }
+
+    /**
+     * 导入温采器配表 Excel
+     * POST /thermal/ht/temp-archive/import
+     */
+    @SaCheckPermission("thermal:ht:temp-archive:add")
+    @SaCheckLogin
+    @Log(title = "温采器配表-导入", businessType = BusinessType.IMPORT)
+    @PostMapping("/import")
+    public R<Void> importTempArchive(@RequestParam("file") MultipartFile file) throws IOException {
+        return tempArchiveService.importTempArchive(file);
     }
 }

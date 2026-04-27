@@ -2,15 +2,18 @@ package org.sdkj.thermal.service.impl;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
+import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHeatTempArchive;
+import org.sdkj.thermal.domain.dto.PrHeatTempArchiveDto;
 import org.sdkj.thermal.domain.vo.PrHeatTempArchiveVo;
 import org.sdkj.thermal.mapper.PrHeatTempArchiveMapper;
 import org.sdkj.thermal.service.IPrHeatTempArchiveService;
@@ -18,7 +21,9 @@ import org.sdkj.thermal.utils.CollectPlatformUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -152,5 +157,75 @@ public class PrHeatTempArchiveServiceImpl extends ServiceImpl<PrHeatTempArchiveM
         lqw.eq(PrHeatTempArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatTempArchive::getCreateTime);
         return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public R<Void> importTempArchive(MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            return R.fail("文件为空");
+        }
+
+        List<PrHeatTempArchiveDto> dataList;
+        try {
+            dataList = EasyExcel.read(file.getInputStream())
+                .head(PrHeatTempArchiveDto.class)
+                .sheet(0)
+                .headRowNumber(1)
+                .doReadSync();
+        } catch (Exception e) {
+            return R.fail("文件解析失败: " + e.getMessage());
+        }
+
+        if (dataList == null || dataList.isEmpty()) {
+            return R.fail("导入数据为空");
+        }
+
+        int successCount = 0;
+        int failCount = 0;
+        for (PrHeatTempArchiveDto dto : dataList) {
+            if (StringUtils.isBlank(dto.getMeterNum()) || StringUtils.isBlank(dto.getMeterArcCode())) {
+                failCount++;
+                continue;
+            }
+            // 检查是否已存在
+            long count = count(new LambdaQueryWrapper<PrHeatTempArchive>()
+                .eq(PrHeatTempArchive::getMeterNum, dto.getMeterNum())
+                .eq(PrHeatTempArchive::getMeterArcCode, dto.getMeterArcCode())
+                .eq(PrHeatTempArchive::getIsChanged, 0));
+            if (count > 0) {
+                failCount++;
+                continue;
+            }
+            PrHeatTempArchive entity = new PrHeatTempArchive();
+            entity.setMeterNum(dto.getMeterNum());
+            entity.setMeterArcCode(dto.getMeterArcCode());
+            entity.setMeterArcName(dto.getMeterArcName());
+            entity.setCardNum(dto.getCardNum());
+            entity.setConcentratorCode(dto.getConcentratorCode());
+            entity.setImeiNum(dto.getImeiNum());
+            entity.setDeviceId(dto.getDeviceId());
+            entity.setHouseId(dto.getHouseId());
+            entity.setOrgId(dto.getOrgId());
+            entity.setCompanyId(dto.getCompanyId());
+            entity.setIsChanged(0);
+            entity.setIsStop(0);
+            entity.setValveStatus(dto.getValveStatus());
+            entity.setTemper(dto.getTemper());
+            entity.setHumidity(dto.getHumidity());
+            entity.setVoltage(dto.getVoltage());
+            entity.setSignalStrength(dto.getSignalStrength());
+            entity.setReportingInterval(dto.getReportingInterval());
+            entity.setIntervalUnit(dto.getIntervalUnit());
+            entity.setValidTime(dto.getValidTime());
+            entity.setCollectInterval(dto.getCollectInterval());
+            entity.setCollectUnit(dto.getCollectUnit());
+            entity.setCollectNum(dto.getCollectNum());
+            entity.setMovPlace(dto.getMovPlace());
+            save(entity);
+            successCount++;
+        }
+        log.info("温采器导入完成, success={}, fail={}", successCount, failCount);
+        return R.ok();
     }
 }
