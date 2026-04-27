@@ -60,4 +60,24 @@ public interface IAgCompanyService extends IService<AgCompany> {
      * 更新公司
      */
     boolean updateCompany(AgCompanyBo companyBo);
+
+    /**
+     * 公司注册（含自动创建管理员用户+角色）
+     */
+    boolean registerCompany(AgCompanyBo companyBo);
+
+    /**
+     * 判断公司是否可以删除（名下无业务数据）
+     */
+    boolean canDeleteCompany(String id);
+
+    /**
+     * 编辑公司详情（富文本）
+     */
+    boolean editDetails(AgCompanyBo companyBo);
+
+    /**
+     * 获取公司详情（富文本，含OSS图片路径）
+     */
+    String getCompanyDetails(String id);
 }

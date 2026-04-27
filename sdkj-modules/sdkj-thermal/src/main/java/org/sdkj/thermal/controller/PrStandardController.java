@@ -18,6 +18,9 @@ import org.sdkj.thermal.service.IPrStandardService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -224,5 +227,40 @@ public class PrStandardController extends BaseController {
             @RequestParam String itemName,
             PageQuery pageQuery) {
         return standardService.selectByItemName(orgIdCopy, itemName, pageQuery);
+    }
+
+    /**
+     * 跨小区复制收费标准
+     * 迁移自旧系统 PrStandardController.standardFeeListCopy()
+     */
+    @SaCheckPermission("thermal:property:standard:copy")
+    @SaCheckLogin
+    @Log(title = "跨小区复制收费标准", businessType = BusinessType.INSERT)
+    @PostMapping("/copy")
+    public R<Void> copyStandards(@RequestBody Map<String, Object> params) {
+        @SuppressWarnings("unchecked")
+        List<PrStandard> standards = (List<PrStandard>) params.get("standards");
+        String orgIdCopy = (String) params.get("orgIdCopy");
+        Boolean itemNameIstrue = (Boolean) params.getOrDefault("itemNameIstrue", false);
+        String id = (String) params.get("id");
+        return toAjax(standardService.copyStandardsToOrg(standards, orgIdCopy, itemNameIstrue, id));
+    }
+
+    /**
+     * 批量复制标准到多小区
+     * 迁移自旧系统 PrStandardController.standardFeeListCopyAll()
+     */
+    @SaCheckPermission("thermal:property:standard:copy")
+    @SaCheckLogin
+    @Log(title = "批量复制收费标准到多小区", businessType = BusinessType.INSERT)
+    @PostMapping("/copyAll")
+    public R<Void> copyStandardsAll(@RequestBody Map<String, Object> params) {
+        @SuppressWarnings("unchecked")
+        List<PrStandard> standards = (List<PrStandard>) params.get("standards");
+        String orgIdSour = (String) params.get("orgIdSour");
+        String itemId = (String) params.get("itemId");
+        @SuppressWarnings("unchecked")
+        List<String> orgIds = (List<String>) params.get("orgIds");
+        return toAjax(standardService.copyStandardsToMultiOrgs(standards, orgIdSour, itemId, orgIds));
     }
 }

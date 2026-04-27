@@ -84,6 +84,16 @@ public interface IPrStandardService extends IService<PrStandard> {
     TableDataInfo<PrStandardVo> selectByItemName(String orgIdCopy, String itemName, PageQuery pageQuery);
 
     /**
+     * 跨小区复制收费标准
+     */
+    boolean copyStandardsToOrg(List<PrStandard> standards, String orgIdCopy, Boolean itemNameIstrue, String id);
+
+    /**
+     * 批量复制收费标准到多小区
+     */
+    boolean copyStandardsToMultiOrgs(List<PrStandard> standards, String orgIdSour, String itemId, List<String> orgIds);
+
+    /**
      * 购买限额检查结果
      */
     record PurchaseCheckResult(boolean exceeded, String message) {}

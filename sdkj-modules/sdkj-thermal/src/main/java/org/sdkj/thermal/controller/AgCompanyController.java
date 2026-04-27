@@ -143,4 +143,50 @@ public class AgCompanyController extends BaseController {
     public R<Void> disable(@PathVariable String id) {
         return toAjax(companyService.disableCompany(id));
     }
+
+    /**
+     * 公司保存（含自动创建管理员用户+关联角色）
+     * 迁移自旧系统 SysCompanyController.save()
+     */
+    @SaCheckPermission("thermal:agent:company:add")
+    @SaCheckLogin
+    @Log(title = "代理商公司注册", businessType = BusinessType.INSERT)
+    @PostMapping("/register")
+    public R<Void> register(@Validated @RequestBody AgCompanyBo companyBo) {
+        return toAjax(companyService.registerCompany(companyBo));
+    }
+
+    /**
+     * 验证是否可删除（判断公司名下是否有业务数据）
+     * 迁移自旧系统 SysCompanyController.verifyDelete()
+     */
+    @SaCheckPermission("thermal:agent:company:remove")
+    @SaCheckLogin
+    @GetMapping("/{id}/verifyDelete")
+    public R<Boolean> verifyDelete(@PathVariable String id) {
+        return R.ok(companyService.canDeleteCompany(id));
+    }
+
+    /**
+     * 编辑公司详情（富文本详情编辑）
+     * 迁移自旧系统 SysCompanyController.editDetails()
+     */
+    @SaCheckPermission("thermal:agent:company:edit")
+    @SaCheckLogin
+    @Log(title = "编辑代理商公司详情", businessType = BusinessType.UPDATE)
+    @PutMapping("/editDetails")
+    public R<Void> editDetails(@Validated @RequestBody AgCompanyBo companyBo) {
+        return toAjax(companyService.editDetails(companyBo));
+    }
+
+    /**
+     * 查看公司详情（含 OSS 图片路径替换）
+     * 迁移自旧系统 SysCompanyController.selectDetails()
+     */
+    @SaCheckPermission("thermal:agent:company:query")
+    @SaCheckLogin
+    @GetMapping("/{id}/details")
+    public R<String> selectDetails(@PathVariable String id) {
+        return R.ok(companyService.getCompanyDetails(id));
+    }
 }

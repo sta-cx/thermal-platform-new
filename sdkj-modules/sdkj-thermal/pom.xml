@@ -96,6 +96,48 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
+        <!-- Apache HttpClient (微信支付 WXPay SDK) -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+        </dependency>
+
+        <!-- XStream (微信消息 XML 序列化) -->
+        <dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.20</version>
+        </dependency>
+
+        <!-- dom4j (微信消息 XML 解析) -->
+        <dependency>
+            <groupId>org.dom4j</groupId>
+            <artifactId>dom4j</artifactId>
+            <version>2.1.4</version>
+        </dependency>
+
+        <!-- Jackcess (Access .mdb 文件读取 - 授权码导入) -->
+        <dependency>
+            <groupId>com.healthmarketscience.jackcess</groupId>
+            <artifactId>jackcess</artifactId>
+            <version>4.0.8</version>
+        </dependency>
+
+        <!-- WxJava 微信小程序 -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-miniapp</artifactId>
+            <version>4.6.5.B</version>
+        </dependency>
+
+        <!-- WxJava 微信公众号 -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-mp</artifactId>
+            <version>4.6.5.B</version>
+        </dependency>
+
     </dependencies>
 
 </project>

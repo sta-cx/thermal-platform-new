@@ -14,6 +14,7 @@ import org.sdkj.thermal.domain.PrStandardPrice;
 import org.sdkj.thermal.domain.vo.PrStandardVo;
 import org.sdkj.thermal.mapper.PrStandardMapper;
 import org.sdkj.thermal.service.IPrStandardService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -192,5 +193,35 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
         Page<PrStandardVo> page = pageQuery.build();
         baseMapper.selectByItemName(page, orgIdCopy, itemName);
         return TableDataInfo.build(page);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean copyStandardsToOrg(List<PrStandard> standards, String orgIdCopy, Boolean itemNameIstrue, String id) {
+        if (standards == null || standards.isEmpty() || orgIdCopy == null) return false;
+        for (PrStandard standard : standards) {
+            PrStandard copy = new PrStandard();
+            BeanUtils.copyProperties(standard, copy);
+            copy.setId(null);
+            copy.setOrgId(orgIdCopy);
+            save(copy);
+        }
+        return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean copyStandardsToMultiOrgs(List<PrStandard> standards, String orgIdSour, String itemId, List<String> orgIds) {
+        if (standards == null || standards.isEmpty() || orgIds == null || orgIds.isEmpty()) return false;
+        for (String orgId : orgIds) {
+            for (PrStandard standard : standards) {
+                PrStandard copy = new PrStandard();
+                BeanUtils.copyProperties(standard, copy);
+                copy.setId(null);
+                copy.setOrgId(orgId);
+                save(copy);
+            }
+        }
+        return true;
     }
 }

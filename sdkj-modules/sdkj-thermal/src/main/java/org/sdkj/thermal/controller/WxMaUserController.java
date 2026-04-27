@@ -1,52 +1,66 @@
 package org.sdkj.thermal.controller;
 
+import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
+import cn.binarywang.wx.miniapp.util.WxMaConfigHolder;
 import cn.dev33.satoken.annotation.SaIgnore;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.sdkj.common.core.domain.R;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/thermal/wx/user/{appid}")
 public class WxMaUserController {
 
-    @SaIgnore
-    @GetMapping("/login")
-    public R<Object> login(@PathVariable String appid, @RequestParam String code) {
-        if (code == null || code.isEmpty()) return R.fail("登录凭证 code 不能为空");
-        log.info("小程序登录: appid={}, code={}", appid, code);
-        // Phase 6: WxMaService.getUserService().getSessionInfo(code) → openId, sessionKey, unionId
-        // Phase 6: 查询/创建 pr_wechat_bind_record 用户绑定记录
-        // Phase 6: 生成 Sa-Token 登录态并返回
-        return R.fail("小程序登录 Phase 6 实现 — 需 WxMaService SDK");
-    }
+    private final WxMaService wxMaService;
 
     @SaIgnore
-    @GetMapping("/info")
-    public R<Object> info(@PathVariable String appid,
-                          @RequestParam String sessionKey,
-                          @RequestParam String signature,
-                          @RequestParam String rawData,
-                          @RequestParam String encryptedData,
-                          @RequestParam String iv) {
-        if (sessionKey == null || sessionKey.isEmpty()) return R.fail("sessionKey 不能为空");
-        if (encryptedData == null || encryptedData.isEmpty()) return R.fail("encryptedData 不能为空");
-        log.info("获取小程序用户信息: appid={}", appid);
-        // Phase 6: 签名校验 — Sha1(rawData + sessionKey) 与 signature 比对
-        // Phase 6: 解密 — WxMaService.getUserService().getUserInfo(sessionKey, encryptedData, iv)
-        return R.fail("用户信息获取 Phase 6 实现 — 需 WxMaService SDK");
+    @GetMapping("/login")
+    public R<Map<String, Object>> login(@PathVariable String appid, @RequestParam String code) {
+        if (!wxMaService.switchover(appid)) {
+            return R.fail("未找到对应appid=[" + appid + "]的配置");
+        }
+        try {
+            WxMaJscode2SessionResult session = wxMaService.getUserService().getSessionInfo(code);
+            Map<String, Object> result = new HashMap<>();
+            result.put("openid", session.getOpenid());
+            result.put("sessionKey", session.getSessionKey());
+            result.put("unionid", session.getUnionid());
+            return R.ok(result);
+        } catch (WxErrorException e) {
+            log.error("小程序登录失败: appid={}, code={}", appid, code, e);
+            return R.fail("登录失败: " + e.getMessage());
+        } finally {
+            WxMaConfigHolder.remove();
+        }
     }
 
     @SaIgnore
     @GetMapping("/phone")
-    public R<Object> phone(@PathVariable String appid,
-                           @RequestParam String sessionKey,
-                           @RequestParam String encryptedData,
-                           @RequestParam String iv) {
-        if (sessionKey == null || sessionKey.isEmpty()) return R.fail("sessionKey 不能为空");
-        if (encryptedData == null || encryptedData.isEmpty()) return R.fail("encryptedData 不能为空");
-        log.info("获取小程序手机号: appid={}", appid);
-        // Phase 6: WxMaService.getUserService().getPhoneNoInfo(sessionKey, encryptedData, iv)
-        return R.fail("手机号获取 Phase 6 实现 — 需 WxMaService SDK");
+    public R<Map<String, Object>> getPhone(@PathVariable String appid, @RequestParam String code) {
+        if (!wxMaService.switchover(appid)) {
+            return R.fail("未找到对应appid=[" + appid + "]的配置");
+        }
+        try {
+            WxMaPhoneNumberInfo phoneInfo = wxMaService.getUserService().getPhoneNoInfo(code);
+            Map<String, Object> result = new HashMap<>();
+            result.put("phoneNumber", phoneInfo.getPhoneNumber());
+            result.put("purePhoneNumber", phoneInfo.getPurePhoneNumber());
+            result.put("countryCode", phoneInfo.getCountryCode());
+            return R.ok(result);
+        } catch (WxErrorException e) {
+            log.error("获取手机号失败: appid={}", appid, e);
+            return R.fail("获取手机号失败: " + e.getMessage());
+        } finally {
+            WxMaConfigHolder.remove();
+        }
     }
 }
