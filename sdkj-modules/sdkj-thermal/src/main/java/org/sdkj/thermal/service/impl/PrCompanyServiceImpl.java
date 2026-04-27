@@ -60,13 +60,7 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
         }
 
         // 将组织机构转换为 TreeNode
-        List<TreeNode> nodes = orgs.stream().map(o -> {
-            TreeNode node = new TreeNode();
-            node.setId(o.getId());
-            node.setLabel(o.getName());
-            node.setParentId(o.getParentId());
-            return node;
-        }).collect(Collectors.toList());
+        List<TreeNode> nodes = TreeUtil.fromSysOrganizationList(orgs);
 
         // 将楼栋转换为虚拟 TreeNode（作为对应的 org 的子节点）
         for (PrBuilding b : buildings) {
@@ -86,15 +80,7 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
         List<SysOrganization> orgs = prCompanyMapper.getDataGrantOrg(
                 companyId, String.valueOf(userId));
 
-        List<TreeNode> nodes = orgs.stream().map(o -> {
-            TreeNode node = new TreeNode();
-            node.setId(o.getId());
-            node.setLabel(o.getName());
-            node.setParentId(o.getParentId());
-            return node;
-        }).collect(Collectors.toList());
-
-        return TreeUtil.buildByLoop(nodes, "-1");
+        return TreeUtil.buildByLoop(TreeUtil.fromSysOrganizationList(orgs), "-1");
     }
 
     @Override
@@ -109,8 +95,8 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public int deleteAllData(Long orgId) {
-        SysOrganization org = prCompanyMapper.selectOrgById(String.valueOf(orgId));
+    public int deleteAllData(String orgId) {
+        SysOrganization org = prCompanyMapper.selectOrgById(orgId);
         if (org == null) {
             return 0;
         }
@@ -137,7 +123,13 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
         }
 
         if ("2".equals(level)) {
-            // 小区：级联删除所有关联数据
+            // 小区：检查有无子部门，有则拒绝删除
+            int childCount = prCompanyMapper.findChild(orgIdStr, companyId);
+            if (childCount > 0) {
+                log.warn("小区下存在部门,不可删除, orgId={}", orgId);
+                return 0;
+            }
+            // 级联删除所有关联数据
             prCompanyMapper.deleteValveData(orgIdStr);
             prCompanyMapper.deleteUnitValveData(orgIdStr);
             prCompanyMapper.deleteHotData(orgIdStr);

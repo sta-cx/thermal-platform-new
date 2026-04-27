@@ -18,7 +18,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 物业公司管理
@@ -38,13 +37,7 @@ public class PrCompanyController extends BaseController {
     @GetMapping("/list")
     public R<List<TreeNode>> list(@RequestParam(required = false) String companyId) {
         List<PrCompany> companies = companyService.listCompanies();
-        List<TreeNode> trees = companies.stream().map(c -> {
-            TreeNode node = new TreeNode();
-            node.setId(c.getId());
-            node.setParentId(c.getParentId() != null ? c.getParentId() : "-1");
-            node.setLabel(c.getName());
-            return node;
-        }).collect(Collectors.toList());
+        List<TreeNode> trees = TreeUtil.fromPrCompanyList(companies);
         String parentId = "-1";
         if (companyId != null && !companyId.isEmpty()) {
             PrCompany c = companyService.getById(companyId);
@@ -84,18 +77,12 @@ public class PrCompanyController extends BaseController {
         return toAjax(companyService.removeById(id));
     }
 
+    @SaCheckPermission("thermal:property:company:query")
     @SaCheckLogin
     @GetMapping("/organizationTree")
     public R<List<TreeNode>> organizationTree(@RequestParam String companyId) {
         List<SysOrganization> orgs = companyService.getOrganizationsByCompanyId(companyId);
-        List<TreeNode> trees = orgs.stream().map(o -> {
-            TreeNode node = new TreeNode();
-            node.setId(o.getId());
-            node.setParentId(o.getParentId());
-            node.setLabel(o.getName());
-            return node;
-        }).collect(Collectors.toList());
-        return R.ok(TreeUtil.buildByLoop(trees, "-1"));
+        return R.ok(TreeUtil.buildByLoop(TreeUtil.fromSysOrganizationList(orgs), "-1"));
     }
 
     // ==================== 新增端点 ====================
@@ -150,7 +137,7 @@ public class PrCompanyController extends BaseController {
     @SaCheckLogin
     @Log(title = "组织机构级联删除", businessType = BusinessType.DELETE)
     @DeleteMapping("/deleteAll/{orgId}")
-    public R<Integer> deleteAllData(@PathVariable Long orgId) {
+    public R<Integer> deleteAllData(@PathVariable String orgId) {
         int result = companyService.deleteAllData(orgId);
         if (result > 0) {
             return R.ok(result);

@@ -36,5 +36,5 @@ public interface IPrCompanyService extends IService<PrCompany> {
     /**
      * 级联删除组织机构及其子节点
      */
-    int deleteAllData(Long orgId);
+    int deleteAllData(String orgId);
 }
