@@ -28,4 +28,19 @@ public interface AgPropertyMapper extends BaseMapperPlus<AgProperty, AgPropertyV
     IPage<AgPropertyVo> selectUnboundPage(Page<?> page,
                                          @Param("agentCode") String agentCode,
                                          @Param("searchContent") String searchContent);
+
+    /**
+     * 查询关联物业详情
+     */
+    AgPropertyVo selectPropertyDetail(@Param("id") String id);
+
+    /**
+     * 更新审核状态
+     */
+    int updateAuditedStatus(@Param("id") String id, @Param("isAudited") Integer isAudited);
+
+    /**
+     * 更新启用状态
+     */
+    int updateEnabledStatus(@Param("id") String id, @Param("isEnabled") Integer isEnabled);
 }

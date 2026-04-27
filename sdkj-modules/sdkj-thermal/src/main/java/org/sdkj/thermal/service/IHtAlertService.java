@@ -38,4 +38,18 @@ public interface IHtAlertService extends IService<HtAlert> {
      */
     List<Map<String, Object>> selectTypeCount(String companyId);
 
+    /**
+     * 批量新增报警记录
+     * @param list 报警记录列表
+     * @return 是否成功
+     */
+    boolean batchInsertAlerts(List<HtAlert> list);
+
+    /**
+     * 按报警类型和DTU维度统计数量
+     * @param companyId 公司ID
+     * @return DTU维度类型统计列表
+     */
+    List<Map<String, Object>> selectTypeCountDtu(String companyId);
+
 }

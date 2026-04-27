@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.sdkj.thermal.domain.PrExpense;
 import org.sdkj.thermal.domain.PrRepairRecord;
 import org.sdkj.thermal.mapper.PrRepairRecordMapper;
+import org.sdkj.thermal.service.IPrExpenseService;
 import org.sdkj.thermal.service.IPrRepairRecordService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -21,6 +24,7 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
         implements IPrRepairRecordService {
 
     private final PrRepairRecordMapper baseMapper;
+    private final IPrExpenseService expenseService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -88,5 +92,62 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
             }
         }
         return prefix + String.format("%04d", nextSeq);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean insertRepairItems(List<PrRepairRecord> records) {
+        if (records == null || records.isEmpty()) {
+            return false;
+        }
+        return saveBatch(records);
+    }
+
+    @Override
+    public boolean getHouseIsOwe(String houseId) {
+        if (!StringUtils.hasText(houseId)) {
+            return false;
+        }
+        // Query expense records for the house that are not yet charged
+        // isCharged=0 means unpaid, isCharged=1 means paid
+        long unpaidCount = expenseService.count(
+            new LambdaQueryWrapper<PrExpense>()
+                .eq(PrExpense::getHouseId, houseId)
+                .eq(PrExpense::getIsCharged, 0)
+        );
+        return unpaidCount > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateDataService(PrRepairRecord record) {
+        if (record.getId() == null) {
+            return false;
+        }
+        LambdaUpdateWrapper<PrRepairRecord> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(PrRepairRecord::getId, record.getId());
+
+        if (record.getServiceObject() != null) {
+            wrapper.set(PrRepairRecord::getServiceObject, record.getServiceObject());
+        }
+        if (record.getServiceResult() != null) {
+            wrapper.set(PrRepairRecord::getServiceResult, record.getServiceResult());
+        }
+        if (record.getGetMaterial() != null) {
+            wrapper.set(PrRepairRecord::getGetMaterial, record.getGetMaterial());
+        }
+        if (record.getWhyFailure() != null) {
+            wrapper.set(PrRepairRecord::getWhyFailure, record.getWhyFailure());
+        }
+        if (record.getAlertStatus() != null) {
+            wrapper.set(PrRepairRecord::getAlertStatus, record.getAlertStatus());
+        }
+        // If service result is "0" (completed), update status and completion time
+        if ("0".equals(record.getServiceResult())) {
+            wrapper.set(PrRepairRecord::getRepairStatus, 3);
+            wrapper.set(PrRepairRecord::getCompletionTime, new Date());
+        }
+
+        return baseMapper.update(null, wrapper) > 0;
     }
 }

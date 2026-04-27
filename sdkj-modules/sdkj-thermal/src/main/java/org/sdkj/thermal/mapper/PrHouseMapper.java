@@ -22,6 +22,11 @@ public interface PrHouseMapper extends BaseMapperPlus<PrHouse, PrHouseVo> {
      */
     int updateOtherCodeById(@Param("id") String id, @Param("otherCode") String otherCode);
 
+    /**
+     * 通过外部缴费编码查询房屋列表
+     */
+    List<PrHouseVo> selectByOtherCode(@Param("otherCode") String otherCode);
+
     // ========== 孤岛户功能 ==========
 
     /**

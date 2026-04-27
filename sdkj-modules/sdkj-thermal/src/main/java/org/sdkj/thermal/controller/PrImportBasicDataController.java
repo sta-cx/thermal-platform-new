@@ -9,6 +9,7 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrImportBasicData;
+import org.sdkj.thermal.domain.PrImportBasicDataByCode;
 import org.sdkj.thermal.excel.ExcelStyleUtils;
 import org.sdkj.thermal.service.IPrImportBasicDataService;
 import org.springframework.validation.annotation.Validated;
@@ -97,6 +98,72 @@ public class PrImportBasicDataController extends BaseController {
     public R<Void> submitData() {
         boolean result = service.submitData();
         return result ? R.ok() : R.fail("提交失败");
+    }
+
+    // ========== 按房屋编码导入 ==========
+
+    /**
+     * 下载按房屋编码导入的 Excel 模板
+     */
+    @SaCheckPermission("thermal:property:import:export")
+    @SaCheckLogin
+    @PostMapping("/template-by-code")
+    public void downloadTemplateByHeatCode(HttpServletResponse response) throws IOException {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("按房屋编码导入模板", StandardCharsets.UTF_8)
+            .replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+
+        EasyExcel.write(response.getOutputStream(), PrImportBasicDataByCode.class)
+            .registerWriteHandler(ExcelStyleUtils.fullStyleHandler(500))
+            .sheet("按房屋编码导入")
+            .doWrite(new java.util.ArrayList<>());
+    }
+
+    /**
+     * 按房屋编码导入基础数据
+     * 读取 Excel，通过房屋编码匹配已有房屋，更新房屋信息及用户档案
+     */
+    @SaCheckPermission("thermal:property:import:import")
+    @SaCheckLogin
+    @Log(title = "按房屋编码导入", businessType = BusinessType.IMPORT)
+    @PostMapping("/import-by-code")
+    public R<String> importDataByHeatCode(@RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return R.fail("文件为空");
+        }
+        List<PrImportBasicDataByCode> objects;
+        try {
+            objects = (List<PrImportBasicDataByCode>) (List<?>) EasyExcel.read(file.getInputStream())
+                .head(PrImportBasicDataByCode.class)
+                .sheet(0)
+                .headRowNumber(2)
+                .doReadSync();
+        } catch (Exception e) {
+            return R.fail("文件解析失败: " + e.getMessage());
+        }
+
+        if (objects == null || objects.isEmpty()) {
+            return R.fail("文件中没有数据");
+        }
+
+        try {
+            R<String> result = service.importDataByHeatCode(objects);
+            return result;
+        } catch (Exception e) {
+            return R.fail("导入失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 检查指定房屋编码的房屋是否存在
+     */
+    @SaCheckLogin
+    @GetMapping("/check-house")
+    public R<Boolean> isCheckHouse(@RequestParam("code") String code) {
+        boolean exists = service.isCheckHouse(code);
+        return R.ok(exists);
     }
 
 }

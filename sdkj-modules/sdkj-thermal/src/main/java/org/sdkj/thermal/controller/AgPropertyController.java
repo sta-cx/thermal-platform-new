@@ -76,4 +76,50 @@ public class AgPropertyController extends BaseController {
     public R<Void> remove(@PathVariable String id) {
         return toAjax(propertyService.unbindProperty(id));
     }
+
+    /**
+     * 查询关联物业详情
+     */
+    @SaCheckPermission("thermal:agent:property:query")
+    @SaCheckLogin
+    @GetMapping("/{id}/detail")
+    public R<AgPropertyVo> getDetail(@PathVariable String id) {
+        return R.ok(propertyService.getPropertyDetail(id));
+    }
+
+    /**
+     * 审核/驳回物业
+     */
+    @SaCheckPermission("thermal:agent:property:edit")
+    @SaCheckLogin
+    @Log(title = "审核物业", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/audited")
+    public R<Void> updateAudited(@PathVariable String id,
+                                 @RequestParam boolean audited) {
+        return toAjax(propertyService.updateAuditedStatus(id, audited));
+    }
+
+    /**
+     * 启用/禁用物业
+     */
+    @SaCheckPermission("thermal:agent:property:edit")
+    @SaCheckLogin
+    @Log(title = "启用/禁用物业", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/enabled")
+    public R<Void> updateEnabled(@PathVariable String id,
+                                 @RequestParam boolean enabled) {
+        return toAjax(propertyService.updateEnabledStatus(id, enabled));
+    }
+
+    /**
+     * 编辑关联物业信息
+     */
+    @SaCheckPermission("thermal:agent:property:edit")
+    @SaCheckLogin
+    @Log(title = "编辑关联物业", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}")
+    public R<Void> edit(@PathVariable String id,
+                        @Validated @RequestBody AgPropertyBo propertyBo) {
+        return toAjax(propertyService.editProperty(id, propertyBo));
+    }
 }

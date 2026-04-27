@@ -10,6 +10,13 @@
         UPDATE pr_house SET other_code = #{otherCode} WHERE id = #{id}
     </update>
 
+    <!-- 通过外部缴费编码查询房屋列表 -->
+    <select id="selectByOtherCode" resultType="org.sdkj.thermal.domain.vo.PrHouseVo">
+        SELECT h.* FROM pr_house h
+        WHERE h.other_code = #{otherCode}
+          AND h.is_deleted = 0
+    </select>
+
     <!-- ========== 孤岛户功能 ========== -->
 
     <!-- 查询孤岛户列表 -->

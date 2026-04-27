@@ -111,4 +111,28 @@ public class HtAlertController extends BaseController {
         return R.ok(htAlertService.selectTypeCount(companyId));
     }
 
+    /**
+     * 批量新增报警记录
+     * 新端点: POST /thermal/ht/alert/batch
+     */
+    @SaCheckPermission("thermal:ht:alert:add")
+    @SaCheckLogin
+    @Log(title = "报警记录", businessType = BusinessType.INSERT)
+    @PostMapping("/batch")
+    public R<Void> batchInsert(@Validated @RequestBody List<HtAlertBo> boList) {
+        List<HtAlert> list = MapstructUtils.convert(boList, HtAlert.class);
+        return toAjax(htAlertService.batchInsertAlerts(list));
+    }
+
+    /**
+     * 按报警类型和DTU维度统计数量
+     * 新端点: GET /thermal/ht/alert/typeCountDtu
+     */
+    @SaCheckPermission("thermal:ht:alert:query")
+    @SaCheckLogin
+    @GetMapping("/typeCountDtu")
+    public R<List<Map<String, Object>>> typeCountDtu(@RequestParam String companyId) {
+        return R.ok(htAlertService.selectTypeCountDtu(companyId));
+    }
+
 }

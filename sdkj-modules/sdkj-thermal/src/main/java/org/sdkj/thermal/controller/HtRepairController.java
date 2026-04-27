@@ -155,6 +155,25 @@ public class HtRepairController extends BaseController {
     }
 
     /**
+     * 维修人员视图 - 分页查询分配给当前用户的报修任务
+     * 仅返回当前登录用户作为维修人员（fixId）的报修记录
+     * 新端点: GET /thermal/ht/repair/repair-view
+     */
+    @SaCheckLogin
+    @GetMapping("/repair-view")
+    public TableDataInfo<HtRepairVo> pageListForRepair(
+            @RequestParam(required = false) Integer repairStatus,
+            PageQuery pageQuery) {
+        String currentUserId = LoginHelper.getUserIdStr();
+        LambdaQueryWrapper<HtRepair> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(HtRepair::getIsDelete, 0);
+        lqw.eq(HtRepair::getFixId, currentUserId);
+        lqw.eq(repairStatus != null, HtRepair::getRepairStatus, repairStatus);
+        lqw.orderByDesc(HtRepair::getRepairTime);
+        return htRepairService.selectPageList(lqw, pageQuery);
+    }
+
+    /**
      * 按报修类型统计数量
      * 旧端点: GET /htRepair/queryTypeCount
      * 新端点: GET /thermal/ht/repair/typeCount

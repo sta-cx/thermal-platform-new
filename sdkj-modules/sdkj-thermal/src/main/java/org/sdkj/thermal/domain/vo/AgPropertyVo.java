@@ -18,6 +18,12 @@ public class AgPropertyVo implements Serializable {
     /** 物业公司ID */
     private String propertyCompanyId;
 
+    /** 是否审核 0未审核 1已审核 */
+    private Integer isAudited;
+
+    /** 是否启用 0未启用 1启用 */
+    private Integer isEnabled;
+
     /** 物业公司名称（查询用） */
     private String propertyName;
 

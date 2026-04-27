@@ -28,4 +28,11 @@ public interface HtAlertMapper extends BaseMapperPlus<HtAlert, HtAlertVo> {
      */
     List<Map<String, Object>> selectTypeCount(@Param("companyId") String companyId);
 
+    /**
+     * 按报警类型和DTU维度统计数量
+     * @param companyId 公司ID
+     * @return DTU维度类型统计列表
+     */
+    List<Map<String, Object>> selectTypeCountDtu(@Param("companyId") String companyId);
+
 }

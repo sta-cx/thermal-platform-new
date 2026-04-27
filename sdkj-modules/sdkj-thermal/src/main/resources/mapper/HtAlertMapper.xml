@@ -20,4 +20,16 @@
         GROUP BY alert_type
     </select>
 
+    <!-- 按报警类型和DTU维度统计数量 -->
+    <select id="selectTypeCountDtu" resultType="java.util.Map">
+        SELECT s.dtu_num AS dtuNum,
+               a.alert_type AS alertType,
+               COUNT(*) AS count
+        FROM ht_alert a
+        LEFT JOIN ht_scope s ON a.meter_id = s.meter_id
+        WHERE a.company_id = #{companyId}
+        GROUP BY s.dtu_num, a.alert_type
+        ORDER BY s.dtu_num, a.alert_type
+    </select>
+
 </mapper>

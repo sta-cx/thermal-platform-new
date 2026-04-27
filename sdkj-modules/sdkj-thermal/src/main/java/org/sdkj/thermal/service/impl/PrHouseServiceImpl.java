@@ -10,6 +10,7 @@ import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHouse;
+import org.sdkj.thermal.domain.bo.PrHouseBo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
 import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.service.IPrHouseService;
@@ -123,6 +124,176 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         return super.removeByIds(ids);
     }
 
+    // ========== 类型筛选功能实现 ==========
+
+    @Override
+    public List<PrHouseVo> selectByType(String companyId, String orgId, String buildingId,
+                                        String unitCode, String stationId, List<String> types) {
+        LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
+        lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
+        lqw.eq(StringUtils.isNotBlank(unitCode), PrHouse::getUnitCode, unitCode);
+        lqw.eq(StringUtils.isNotBlank(stationId), PrHouse::getStationType, stationId);
+        lqw.orderByAsc(PrHouse::getSeq, PrHouse::getRoomNum);
+
+        // 按类型过滤（1=特殊户, 2=非特殊户, 3=已收费, 4=未收费）
+        // 优先使用数据库级过滤（is_charged 是真实列，is_special 通过 stationType 推断）
+        if (types != null && !types.isEmpty()) {
+            boolean hasSpecial = types.contains("1");
+            boolean hasNonSpecial = types.contains("2");
+            boolean hasCharged = types.contains("3");
+            boolean hasUnpaid = types.contains("4");
+
+            // 如果同时包含特殊户和非特殊户（或都不含），则不需要按 is_special 过滤
+            boolean needSpecialFilter = (hasSpecial || hasNonSpecial) && !(hasSpecial && hasNonSpecial);
+
+            if (needSpecialFilter) {
+                // 特殊户/非特殊户通过 stationType 推断：stationType="1" 视为特殊户
+                if (hasSpecial) {
+                    lqw.eq(PrHouse::getStationType, "1");
+                } else if (hasNonSpecial) {
+                    lqw.ne(PrHouse::getStationType, "1");
+                }
+            }
+
+            // 已收费/未收费通过 is_charged 列过滤
+            boolean needChargeFilter = (hasCharged || hasUnpaid) && !(hasCharged && hasUnpaid);
+            if (needChargeFilter) {
+                if (hasCharged) {
+                    lqw.eq(PrHouse::getIsCharged, 1);
+                } else if (hasUnpaid) {
+                    lqw.and(w -> w.isNull(PrHouse::getIsCharged).or().eq(PrHouse::getIsCharged, 0));
+                }
+            }
+        }
+
+        List<PrHouse> list = baseMapper.selectList(lqw);
+        return MapstructUtils.convert(list, PrHouseVo.class);
+    }
+
+    @Override
+    public List<PrHouseVo> selectByValveAndHotType(String companyId, String orgId, String buildingId,
+                                                   String unitCode, String stationId, List<String> types) {
+        // 按阀门和供热类型筛选
+        // valveOpen > 0 表示阀门已开启, stationType 表示供热区域属性
+        LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
+        lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
+        lqw.eq(StringUtils.isNotBlank(unitCode), PrHouse::getUnitCode, unitCode);
+        lqw.eq(StringUtils.isNotBlank(stationId), PrHouse::getStationType, stationId);
+
+        // types: 1=特殊户, 2=非特殊户, 3=已收费, 4=未收费
+        // 额外按 valveOpen 和 heating 相关字段过滤
+        if (types != null && !types.isEmpty()) {
+            boolean hasSpecial = types.contains("1");
+            boolean hasNonSpecial = types.contains("2");
+            boolean hasCharged = types.contains("3");
+            boolean hasUnpaid = types.contains("4");
+
+            boolean needSpecialFilter = (hasSpecial || hasNonSpecial) && !(hasSpecial && hasNonSpecial);
+            if (needSpecialFilter) {
+                if (hasSpecial) {
+                    lqw.eq(PrHouse::getStationType, "1");
+                } else if (hasNonSpecial) {
+                    lqw.ne(PrHouse::getStationType, "1");
+                }
+            }
+
+            boolean needChargeFilter = (hasCharged || hasUnpaid) && !(hasCharged && hasUnpaid);
+            if (needChargeFilter) {
+                if (hasCharged) {
+                    lqw.eq(PrHouse::getIsCharged, 1);
+                } else if (hasUnpaid) {
+                    lqw.and(w -> w.isNull(PrHouse::getIsCharged).or().eq(PrHouse::getIsCharged, 0));
+                }
+            }
+        }
+
+        lqw.orderByAsc(PrHouse::getSeq, PrHouse::getRoomNum);
+        List<PrHouse> list = baseMapper.selectList(lqw);
+        return MapstructUtils.convert(list, PrHouseVo.class);
+    }
+
+    @Override
+    public List<PrHouseVo> selectAllForExport(String companyId, String orgId, String buildingId,
+                                              String status, String search) {
+        LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
+        lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
+        lqw.eq(StringUtils.isNotBlank(status), PrHouse::getStatus, status);
+        if (StringUtils.isNotBlank(search)) {
+            lqw.and(w -> w.like(PrHouse::getRoomNum, search.trim())
+                .or().like(PrHouse::getBuildingName, search.trim())
+                .or().like(PrHouse::getCode, search.trim()));
+        }
+        lqw.orderByAsc(PrHouse::getSeq, PrHouse::getRoomNum);
+        return baseMapper.selectVoList(lqw);
+    }
+
+    @Override
+    public List<PrHouseVo> selectByOtherCode(String otherCode) {
+        return baseMapper.selectByOtherCode(otherCode);
+    }
+
+    @Override
+    public TableDataInfo<PrHouseVo> selectByPayStatus(String companyId, String orgId, String buildingId,
+                                                      String status, String payStatus, String search,
+                                                      PageQuery pageQuery) {
+        LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
+        lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
+        lqw.eq(StringUtils.isNotBlank(status), PrHouse::getStatus, status);
+        if (StringUtils.isNotBlank(search)) {
+            lqw.and(w -> w.like(PrHouse::getRoomNum, search.trim())
+                .or().like(PrHouse::getCode, search.trim()));
+        }
+        lqw.orderByAsc(PrHouse::getSeq).orderByDesc(PrHouse::getCreateTime);
+        Page<PrHouseVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+
+        // 在内存中按缴费状态过滤（payStatus 是 VO 字段）
+        if (StringUtils.isNotBlank(payStatus)) {
+            List<PrHouseVo> filtered = result.getRecords().stream()
+                .filter(v -> payStatus.equals(v.getPayStatus()))
+                .toList();
+            result.setRecords(filtered);
+            result.setTotal(filtered.size());
+        }
+        return TableDataInfo.build(result);
+    }
+
+    @Override
+    public TableDataInfo<PrHouseVo> selectByMultiSearch(String companyId, String orgId, String buildingId,
+                                                        String type, String search, PageQuery pageQuery) {
+        LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
+        lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
+        lqw.eq(StringUtils.isNotBlank(type), PrHouse::getType, type);
+        if (StringUtils.isNotBlank(search)) {
+            lqw.and(w -> w.like(PrHouse::getRoomNum, search.trim())
+                .or().like(PrHouse::getBuildingName, search.trim())
+                .or().like(PrHouse::getCode, search.trim())
+                .or().like(PrHouse::getUserName, search.trim()));
+        }
+        lqw.orderByAsc(PrHouse::getSeq).orderByDesc(PrHouse::getCreateTime);
+        Page<PrHouseVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        return TableDataInfo.build(result);
+    }
+
+    @Override
+    public boolean updateOtherCode(String id, String otherCode) {
+        return baseMapper.updateOtherCodeById(id, otherCode) > 0;
+    }
+
+    @Override
+    public String queryOtherCode(String id) {
+        return baseMapper.selectOtherCodeById(id);
+    }
+
     // ========== 孤岛户功能实现 ==========
 
     @Override
@@ -225,5 +396,46 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         log.info("设置孤岛户完成, companyId={}, orgId={}, buildingId={}, count={}",
             companyId, orgId, buildingId, houseList != null ? houseList.size() : 0);
         return true;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int importAll(List<PrHouseBo> houseList) {
+        if (houseList == null || houseList.isEmpty()) {
+            return 0;
+        }
+        List<PrHouse> entities = MapstructUtils.convert(houseList, PrHouse.class);
+        int count = 0;
+        for (PrHouse house : entities) {
+            // 校验必填字段：房间号和楼宇ID
+            if (StringUtils.isBlank(house.getRoomNum()) || StringUtils.isBlank(house.getBuildingId())) {
+                log.warn("跳过无效房屋数据: roomNum={}, buildingId={}", house.getRoomNum(), house.getBuildingId());
+                continue;
+            }
+            // 校验房间号唯一性
+            if (validateRoomNum(house.getRoomNum(), house.getBuildingId(), house.getUnitCode(), null)) {
+                log.warn("跳过重复房间号: {} (buildingId={})", house.getRoomNum(), house.getBuildingId());
+                continue;
+            }
+            if (super.save(house)) {
+                count++;
+            }
+        }
+        log.info("房屋数据导入完成, 总数={}, 成功导入={}", houseList.size(), count);
+        return count;
+    }
+
+    @Override
+    public List<PrHouseVo> selectForStrategyBinding(String companyId, String orgId, String buildingId, String search) {
+        LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
+        lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
+        lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
+        if (StringUtils.isNotBlank(search)) {
+            lqw.and(w -> w.like(PrHouse::getRoomNum, search.trim())
+                .or().like(PrHouse::getBuildingName, search.trim()));
+        }
+        lqw.orderByAsc(PrHouse::getSeq, PrHouse::getRoomNum);
+        return baseMapper.selectVoList(lqw);
     }
 }

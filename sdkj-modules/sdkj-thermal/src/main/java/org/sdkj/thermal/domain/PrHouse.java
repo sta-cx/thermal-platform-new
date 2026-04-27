@@ -188,7 +188,6 @@ public class PrHouse extends BaseEntity {
     private String stationName;
 
     /** 是否已收费 */
-    @TableField(exist = false)
     private Integer isCharged;
 
     /** 是否特殊户 */

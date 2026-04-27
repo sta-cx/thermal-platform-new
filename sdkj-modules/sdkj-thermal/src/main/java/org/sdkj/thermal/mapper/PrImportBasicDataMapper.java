@@ -67,4 +67,42 @@ public interface PrImportBasicDataMapper extends BaseMapperPlus<PrImportBasicDat
     void insertHouseExpense(@Param("companyId") String companyId, @Param("create") String create);
 
     void deleteUserHouseDataByNoHouseId(@Param("companyId") String companyId, @Param("orgIds") List<String> orgIds);
+
+    // ========== 按房屋编码导入相关方法 ==========
+
+    /**
+     * 直接插入用户
+     */
+    void insertUserDirect(@Param("user") org.sdkj.thermal.domain.PrUser user);
+
+    /**
+     * 插入用户-房屋关联
+     */
+    void insertUserHouseRelation(@Param("userId") String userId,
+                                  @Param("houseId") String houseId,
+                                  @Param("companyId") String companyId,
+                                  @Param("createBy") String createBy,
+                                  @Param("createTime") java.util.Date createTime);
+
+    /**
+     * 按标准名称插入房屋费用绑定
+     */
+    void insertHouseExpenseByCode(@Param("houseId") String houseId,
+                                   @Param("standardName") String standardName,
+                                   @Param("standardPrice") java.math.BigDecimal standardPrice,
+                                   @Param("itemName") String itemName,
+                                   @Param("companyId") String companyId,
+                                   @Param("createBy") String createBy,
+                                   @Param("createTime") java.util.Date createTime);
+
+    /**
+     * 更新账户余额（按房屋/用户/费项）
+     */
+    void updateAccountBalance(@Param("houseId") String houseId,
+                               @Param("userId") String userId,
+                               @Param("account") java.math.BigDecimal account,
+                               @Param("itemName") String itemName,
+                               @Param("companyId") String companyId,
+                               @Param("createBy") String createBy,
+                               @Param("createTime") java.util.Date createTime);
 }

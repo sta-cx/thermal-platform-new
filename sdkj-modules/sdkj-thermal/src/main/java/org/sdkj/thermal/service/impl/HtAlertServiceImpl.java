@@ -11,6 +11,7 @@ import org.sdkj.thermal.domain.vo.HtAlertVo;
 import org.sdkj.thermal.mapper.HtAlertMapper;
 import org.sdkj.thermal.service.IHtAlertService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,20 @@ public class HtAlertServiceImpl extends ServiceImpl<HtAlertMapper, HtAlert> impl
     @Override
     public List<Map<String, Object>> selectTypeCount(String companyId) {
         return baseMapper.selectTypeCount(companyId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean batchInsertAlerts(List<HtAlert> list) {
+        if (list == null || list.isEmpty()) {
+            return false;
+        }
+        return saveBatch(list);
+    }
+
+    @Override
+    public List<Map<String, Object>> selectTypeCountDtu(String companyId) {
+        return baseMapper.selectTypeCountDtu(companyId);
     }
 
 }

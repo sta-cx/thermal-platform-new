@@ -32,4 +32,24 @@ public interface IAgPropertyService extends IService<AgProperty> {
      * 解除关联
      */
     boolean unbindProperty(String id);
+
+    /**
+     * 查询关联物业详情
+     */
+    AgPropertyVo getPropertyDetail(String id);
+
+    /**
+     * 更新审核状态
+     */
+    boolean updateAuditedStatus(String id, boolean audited);
+
+    /**
+     * 更新启用状态
+     */
+    boolean updateEnabledStatus(String id, boolean enabled);
+
+    /**
+     * 编辑关联物业信息
+     */
+    boolean editProperty(String id, AgPropertyBo propertyBo);
 }

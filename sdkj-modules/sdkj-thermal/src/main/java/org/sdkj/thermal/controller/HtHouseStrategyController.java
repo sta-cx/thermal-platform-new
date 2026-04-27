@@ -13,7 +13,9 @@ import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtHouseStrategy;
 import org.sdkj.thermal.domain.bo.HtHouseStrategyBo;
 import org.sdkj.thermal.domain.vo.HtHouseStrategyVo;
+import org.sdkj.thermal.domain.vo.PrHouseVo;
 import org.sdkj.thermal.service.IHtHouseStrategyService;
+import org.sdkj.thermal.service.IPrHouseService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,6 +34,7 @@ import java.util.List;
 public class HtHouseStrategyController extends BaseController {
 
     private final IHtHouseStrategyService houseStrategyService;
+    private final IPrHouseService houseService;
 
     /**
      * 分页查询房屋策略绑定
@@ -54,6 +57,22 @@ public class HtHouseStrategyController extends BaseController {
         lqw.like(keyword != null && !keyword.isEmpty(), HtHouseStrategy::getName, keyword);
         lqw.orderByDesc(HtHouseStrategy::getCreateTime);
         return houseStrategyService.selectPageList(lqw, pageQuery);
+    }
+
+    /**
+     * 查询可用房屋（用于策略绑定）
+     * 根据小区/楼宇查询可绑定到热力调控策略的房屋列表
+     */
+    @SaCheckPermission("thermal:ht:houseStrategy:list")
+    @SaCheckLogin
+    @GetMapping("/houses")
+    public R<List<PrHouseVo>> queryPrHouse(
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String search) {
+        List<PrHouseVo> list = houseService.selectForStrategyBinding(companyId, orgId, buildingId, search);
+        return R.ok(list);
     }
 
     /**

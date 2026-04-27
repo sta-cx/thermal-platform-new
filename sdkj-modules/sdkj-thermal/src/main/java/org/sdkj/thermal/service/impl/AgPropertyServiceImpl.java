@@ -45,4 +45,42 @@ public class AgPropertyServiceImpl extends ServiceImpl<AgPropertyMapper, AgPrope
     public boolean unbindProperty(String id) {
         return removeById(id);
     }
+
+    @Override
+    public AgPropertyVo getPropertyDetail(String id) {
+        return propertyMapper.selectPropertyDetail(id);
+    }
+
+    @Override
+    public boolean updateAuditedStatus(String id, boolean audited) {
+        int rows = propertyMapper.updateAuditedStatus(id, audited ? 1 : 0);
+        return rows > 0;
+    }
+
+    @Override
+    public boolean updateEnabledStatus(String id, boolean enabled) {
+        int rows = propertyMapper.updateEnabledStatus(id, enabled ? 1 : 0);
+        return rows > 0;
+    }
+
+    @Override
+    public boolean editProperty(String id, AgPropertyBo propertyBo) {
+        AgProperty entity = getById(id);
+        if (entity == null) {
+            return false;
+        }
+        if (propertyBo.getAgentCompanyId() != null) {
+            entity.setAgentCompanyId(propertyBo.getAgentCompanyId());
+        }
+        if (propertyBo.getPropertyCompanyId() != null) {
+            entity.setPropertyCompanyId(propertyBo.getPropertyCompanyId());
+        }
+        if (propertyBo.getIsAudited() != null) {
+            entity.setIsAudited(propertyBo.getIsAudited());
+        }
+        if (propertyBo.getIsEnabled() != null) {
+            entity.setIsEnabled(propertyBo.getIsEnabled());
+        }
+        return updateById(entity);
+    }
 }

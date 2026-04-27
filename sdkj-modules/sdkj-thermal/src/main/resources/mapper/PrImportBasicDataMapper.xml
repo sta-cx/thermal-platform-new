@@ -277,4 +277,45 @@
           and a.house_id is not null and b.id is null
     </delete>
 
+    <!-- ========== 按房屋编码导入相关方法 ========== -->
+
+    <insert id="insertUserDirect">
+        insert into pr_user (id, name, phone, id_type, id_no, password, org_id, company_id, create_by, create_time)
+        values (#{user.id}, #{user.name}, #{user.phone}, #{user.idType}, #{user.idNo}, #{user.password},
+                #{user.orgId}, #{user.companyId}, #{user.createBy}, #{user.createTime})
+    </insert>
+
+    <insert id="insertUserHouseRelation">
+        insert into pr_user_house (id, user_id, house_id, company_id, create_by, create_time)
+        select replace(uuid(), '-', ''), #{userId}, #{houseId}, #{companyId}, #{createBy}, #{createTime}
+        where not exists (
+            select 1 from pr_user_house where user_id = #{userId} and house_id = #{houseId}
+        )
+    </insert>
+
+    <insert id="insertHouseExpenseByCode">
+        insert into pr_house_expense (id, house_id, standard_id, item_group, item_code, company_id, create_by, create_time)
+        select replace(uuid(), '-', ''), #{houseId}, s.id, s.item_group, s.item_code, #{companyId}, #{createBy}, #{createTime}
+        from pr_standard s
+        where s.name = #{standardName}
+          and s.company_id = #{companyId}
+          and s.del_flag = '0'
+          and not exists (
+              select 1 from pr_house_expense where house_id = #{houseId} and standard_id = s.id
+          )
+        limit 1
+    </insert>
+
+    <insert id="updateAccountBalance">
+        insert into pr_account_balance (id, user_id, house_id, item_group, item_code, balance, company_id, create_by, create_time)
+        select replace(uuid(), '-', ''), #{userId}, #{houseId}, e.item_group, e.item_code, #{account}, #{companyId}, #{createBy}, #{createTime}
+        from pr_house_expense he
+        left join pr_standard e on he.standard_id = e.id
+        where he.house_id = #{houseId}
+        and not exists (
+            select 1 from pr_account_balance where user_id = #{userId} and house_id = #{houseId}
+        )
+        limit 1
+    </insert>
+
 </mapper>

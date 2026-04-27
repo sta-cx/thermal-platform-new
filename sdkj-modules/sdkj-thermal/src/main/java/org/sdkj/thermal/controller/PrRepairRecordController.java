@@ -16,6 +16,7 @@ import org.sdkj.thermal.service.IPrRepairRecordService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Validated
@@ -105,5 +106,43 @@ public class PrRepairRecordController extends BaseController {
                             @RequestParam String value,
                             @RequestParam String type) {
         return toAjax(repairRecordService.updateService(id, value, type));
+    }
+
+    /**
+     * 批量增加报修项目
+     * 旧端点: POST /property/prRepairRecord/insertRepairItems
+     * 新端点: POST /thermal/property/repair-record/items
+     */
+    @SaCheckPermission("thermal:property:repair:edit")
+    @SaCheckLogin
+    @Log(title = "报修项目", businessType = BusinessType.INSERT)
+    @PostMapping("/items")
+    public R<Void> insertRepairItems(@RequestBody List<PrRepairRecord> records) {
+        return toAjax(repairRecordService.insertRepairItems(records));
+    }
+
+    /**
+     * 查询房屋是否欠费
+     * 旧端点: POST /property/prRepairRecord/getHouseIsOwe
+     * 新端点: GET /thermal/property/repair-record/owe
+     */
+    @SaCheckPermission("thermal:property:repair:query")
+    @SaCheckLogin
+    @GetMapping("/owe")
+    public R<Boolean> getHouseIsOwe(@RequestParam String houseId) {
+        return R.ok(repairRecordService.getHouseIsOwe(houseId));
+    }
+
+    /**
+     * 更新维修服务数据（服务事物/完成情况/物料/失败原因等）
+     * 旧端点: POST /property/prRepairRecord/updateDataService
+     * 新端点: PUT /thermal/property/repair-record/service
+     */
+    @SaCheckPermission("thermal:property:repair:edit")
+    @SaCheckLogin
+    @Log(title = "报修服务", businessType = BusinessType.UPDATE)
+    @PutMapping("/service")
+    public R<Void> updateDataService(@RequestBody PrRepairRecord record) {
+        return toAjax(repairRecordService.updateDataService(record));
     }
 }

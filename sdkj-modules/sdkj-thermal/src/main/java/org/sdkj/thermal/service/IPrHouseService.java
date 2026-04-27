@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHouse;
+import org.sdkj.thermal.domain.bo.PrHouseBo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
 
 import java.io.Serializable;
@@ -74,6 +75,95 @@ public interface IPrHouseService extends IService<PrHouse> {
      */
     BigDecimal areaByUser(String userId);
 
+    // ========== 类型筛选功能 ==========
+
+    /**
+     * 按类型筛选房屋列表（特殊户、收费状态等）
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @param buildingId 楼宇ID
+     * @param unitCode 单元编码
+     * @param stationId 换热站ID
+     * @param types 类型列表（1=特殊户, 2=非特殊户, 3=已收费, 4=未收费）
+     * @return 房屋列表
+     */
+    List<PrHouseVo> selectByType(String companyId, String orgId, String buildingId,
+                                 String unitCode, String stationId, List<String> types);
+
+    /**
+     * 按阀门和供热类型筛选房屋列表
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @param buildingId 楼宇ID
+     * @param unitCode 单元编码
+     * @param stationId 换热站ID
+     * @param types 类型列表
+     * @return 房屋列表
+     */
+    List<PrHouseVo> selectByValveAndHotType(String companyId, String orgId, String buildingId,
+                                            String unitCode, String stationId, List<String> types);
+
+    /**
+     * 查询所有房屋（用于导出）
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @param buildingId 楼宇ID
+     * @param status 状态
+     * @param search 搜索关键字
+     * @return 房屋列表
+     */
+    List<PrHouseVo> selectAllForExport(String companyId, String orgId, String buildingId,
+                                       String status, String search);
+
+    /**
+     * 通过其他编码查询房屋
+     * @param otherCode 外部缴费编码
+     * @return 房屋列表
+     */
+    List<PrHouseVo> selectByOtherCode(String otherCode);
+
+    /**
+     * 通过缴费状态查询房屋
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @param buildingId 楼宇ID
+     * @param status 房屋状态
+     * @param payStatus 缴费状态
+     * @param search 搜索关键字
+     * @param pageQuery 分页参数
+     * @return 分页结果
+     */
+    TableDataInfo<PrHouseVo> selectByPayStatus(String companyId, String orgId, String buildingId,
+                                               String status, String payStatus, String search, PageQuery pageQuery);
+
+    /**
+     * 多条件综合搜索房屋
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @param buildingId 楼宇ID
+     * @param type 类型
+     * @param search 搜索关键字
+     * @param pageQuery 分页参数
+     * @return 分页结果
+     */
+    TableDataInfo<PrHouseVo> selectByMultiSearch(String companyId, String orgId, String buildingId,
+                                                 String type, String search, PageQuery pageQuery);
+
+    /**
+     * 设置供热编码
+     * @param id 房屋ID
+     * @param otherCode 外部编码
+     * @return 是否成功
+     */
+    boolean updateOtherCode(String id, String otherCode);
+
+    /**
+     * 查询供热编码
+     * @param id 房屋ID
+     * @return 外部编码
+     */
+    String queryOtherCode(String id);
+
     // ========== 孤岛户功能 ==========
 
     /**
@@ -96,4 +186,21 @@ public interface IPrHouseService extends IService<PrHouse> {
      * @return 是否成功
      */
     boolean setIsolatedHouses(List<PrHouse> houseList, String companyId, String orgId, String buildingId);
+
+    /**
+     * 批量导入房屋数据
+     * @param houseList 房屋数据列表
+     * @return 成功导入的数量
+     */
+    int importAll(List<PrHouseBo> houseList);
+
+    /**
+     * 查询可用于策略绑定的房屋列表
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @param buildingId 楼宇ID
+     * @param search 搜索关键字（房间号）
+     * @return 房屋列表
+     */
+    List<PrHouseVo> selectForStrategyBinding(String companyId, String orgId, String buildingId, String search);
 }
