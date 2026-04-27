@@ -141,6 +141,48 @@ public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany
         return updateById(company);
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean registerCompany(AgCompanyBo companyBo) {
+        // 1. 创建公司
+        AgCompany company = new AgCompany();
+        BeanUtils.copyProperties(companyBo, company);
+        company.setId(java.util.UUID.randomUUID().toString().replace("-", ""));
+        save(company);
+
+        // 2. 创建管理员用户
+        AgUser adminUser = new AgUser();
+        adminUser.setId(java.util.UUID.randomUUID().toString().replace("-", ""));
+        adminUser.setUserName(companyBo.getTele());
+        adminUser.setRealName(companyBo.getPrincipal());
+        adminUser.setPhone(companyBo.getTele());
+        adminUser.setUserPwd(BCrypt.hashpw("123456"));
+        adminUser.setCompanyId(company.getId());
+        adminUser.setIsSuper(1);
+        adminUser.setIsEnabled(1);
+        userMapper.insert(adminUser);
+
+        return true;
+    }
+
+    @Override
+    public boolean canDeleteCompany(String id) {
+        return true;
+    }
+
+    @Override
+    public boolean editDetails(AgCompanyBo companyBo) {
+        AgCompany company = new AgCompany();
+        BeanUtils.copyProperties(companyBo, company);
+        return updateById(company);
+    }
+
+    @Override
+    public String getCompanyDetails(String id) {
+        AgCompany company = getById(id);
+        return company != null ? company.getDescription() : null;
+    }
+
     private void updateAgAdminUserStatus(String companyId, boolean enabled) {
         LambdaUpdateWrapper<AgUser> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(AgUser::getCompanyId, companyId)
