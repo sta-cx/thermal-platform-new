@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrCompany;
 import org.sdkj.thermal.domain.SysOrganization;
@@ -95,5 +96,66 @@ public class PrCompanyController extends BaseController {
             return node;
         }).collect(Collectors.toList());
         return R.ok(TreeUtil.buildByLoop(trees, "-1"));
+    }
+
+    // ==================== 新增端点 ====================
+
+    /**
+     * 含楼栋的组织机构树
+     */
+    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckLogin
+    @GetMapping("/buildingTree")
+    public R<List<TreeNode>> queryBuildingTrees(@RequestParam String companyId) {
+        return R.ok(companyService.queryBuildingTrees(companyId));
+    }
+
+    /**
+     * 获取用户数据权限树
+     */
+    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckLogin
+    @GetMapping("/dataGrantOrg")
+    public R<List<TreeNode>> getDataGrantOrg(@RequestParam String companyId,
+                                             @RequestParam Long userId) {
+        return R.ok(companyService.getDataGrantOrg(companyId, userId));
+    }
+
+    /**
+     * 获取当前用户可访问的小区列表
+     */
+    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckLogin
+    @GetMapping("/userOrg")
+    public R<List<SysOrganization>> getUserOrg() {
+        Long userId = LoginHelper.getUserId();
+        return R.ok(companyService.getUserOrg(userId));
+    }
+
+    /**
+     * 获取用户所属分公司列表
+     */
+    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckLogin
+    @GetMapping("/userOrgBranch")
+    public R<List<SysOrganization>> getUserOrgBranch() {
+        Long userId = LoginHelper.getUserId();
+        return R.ok(companyService.getUserOrgBranch(userId));
+    }
+
+    /**
+     * 级联删除组织机构及其子节点
+     */
+    @SaCheckPermission("thermal:property:company:remove")
+    @SaCheckLogin
+    @Log(title = "组织机构级联删除", businessType = BusinessType.DELETE)
+    @DeleteMapping("/deleteAll/{orgId}")
+    public R<Integer> deleteAllData(@PathVariable Long orgId) {
+        int result = companyService.deleteAllData(orgId);
+        if (result > 0) {
+            return R.ok(result);
+        } else {
+            return R.fail("删除失败：该节点存在下级节点或总公司不可删除");
+        }
     }
 }

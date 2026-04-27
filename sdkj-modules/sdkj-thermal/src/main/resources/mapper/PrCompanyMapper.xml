@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrCompanyMapper">
+
+    <!-- ========== SysOrganization 查询 ========== -->
+
+    <select id="selectOrganizationsByCompanyId" resultType="org.sdkj.thermal.domain.SysOrganization">
+        SELECT *
+        FROM sys_organization
+        WHERE company_id = #{companyId}
+          AND level != '3'
+        ORDER BY code
+    </select>
+
+    <select id="getCompany" resultType="org.sdkj.thermal.domain.SysOrganization">
+        SELECT *
+        FROM sys_organization
+        WHERE company_id = #{companyId}
+          AND parent_id = '-1'
+    </select>
+
+    <select id="selectOrgById" resultType="org.sdkj.thermal.domain.SysOrganization">
+        SELECT a.id,
+               a.name,
+               a.parent_id,
+               a.code,
+               a.company_id,
+               a.level,
+               a.tele,
+               a.address,
+               a.bank_name,
+               a.corpotate_account,
+               a.business_license,
+               a.remark,
+               a.province,
+               a.city,
+               a.county,
+               a.street,
+               a.longitude,
+               a.latitude,
+               (SELECT name FROM sys_organization WHERE id = a.parent_id) AS parentName
+        FROM sys_organization a
+        WHERE a.id = #{id}
+    </select>
+
+    <select id="getDataGrantOrg" resultType="org.sdkj.thermal.domain.SysOrganization">
+        SELECT a.*
+        FROM sys_organization a
+                 LEFT JOIN pr_data_grant b ON b.org_id = a.id AND b.company_id = #{companyId}
+        WHERE a.company_id = #{companyId}
+          AND b.user_id = #{userId}
+          AND a.level != '3'
+    </select>
+
+    <select id="getUserOrgByUserId" resultType="org.sdkj.thermal.domain.SysOrganization">
+        SELECT a.org_id AS 'id',
+               b.name
+        FROM pr_data_grant a
+                 LEFT JOIN sys_organization b ON a.org_id = b.id
+        WHERE a.user_id = #{userId}
+    </select>
+
+    <select id="getUserOrgBranchByUserId" resultType="org.sdkj.thermal.domain.SysOrganization">
+        SELECT *
+        FROM sys_organization
+        WHERE id IN (
+            SELECT DISTINCT b.parent_id
+            FROM pr_data_grant a
+                     LEFT JOIN sys_organization b ON a.org_id = b.id
+            WHERE a.user_id = #{userId}
+        )
+          AND level = '1'
+    </select>
+
+    <!-- ========== 校验方法 ========== -->
+
+    <select id="findChild" resultType="int">
+        SELECT COUNT(1)
+        FROM sys_organization
+        WHERE parent_id = #{id}
+          AND company_id = #{companyId}
+    </select>
+
+    <select id="findBuilding" resultType="int">
+        SELECT COUNT(1)
+        FROM pr_building
+        WHERE org_id = #{id}
+          AND company_id = #{companyId}
+    </select>
+
+    <select id="findDeptById" resultType="int">
+        SELECT COUNT(1)
+        FROM sys_user
+        WHERE dept_id = #{id}
+          AND company_id = #{companyId}
+    </select>
+
+    <!-- ========== 级联删除 ========== -->
+
+    <delete id="deleteOrgById">
+        DELETE FROM sys_organization WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteGrantDataById">
+        DELETE FROM pr_data_grant WHERE org_id = #{id} AND company_id = #{companyId}
+    </delete>
+
+    <delete id="deleteBuildingData">
+        DELETE FROM pr_building WHERE org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteHouseData">
+        DELETE FROM pr_house WHERE org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteUnitData">
+        DELETE FROM pr_unit WHERE org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteUserHouseData">
+        DELETE FROM pr_user_house WHERE org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteValveData">
+        DELETE FROM pr_heat_valve_archive WHERE org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteUnitValveData">
+        DELETE FROM pr_heat_unit_valve_archive WHERE org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteHotData">
+        DELETE FROM pr_heat_hot_archive WHERE org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteUnitHotData">
+        DELETE FROM pr_heat_unit_hot_archive WHERE org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteWcqData">
+        DELETE FROM pr_heat_temp_archive WHERE org_id = #{orgId}
+    </delete>
+
+    <delete id="deleteDtuData">
+        DELETE FROM pr_heat_dtu_archive WHERE org_id = #{orgId}
+    </delete>
+
+</mapper>
