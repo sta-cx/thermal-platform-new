@@ -43,16 +43,29 @@ thermal:
 
   # 微信支付
   wechat:
-    enabled: false  # 迁移到第四阶段时启用
-    app-id:
-    mch-id:
-    api-key:
-    cert-path:
+    enabled: true
+    pay:
+      appid: wx4891a006517c8816
+      app-secret: 0be23fed653d219cf0419ea82009593c
+      mch-id: 1726930188
+      key: S2d0k2j52025P0a9yazpxli0V6s271g8
+      cert-path: ./cert/wxpay_cert.p12
+      notify-url: https://ipm8397.npee.cn/thermal/wechat/pay/notify
+      return-url: https://ipm8397.npee.cn/thermal/wechat/pay/success
+      refund-notify-url: http://ipm8397.npee.cn/thermal/wechat/pay/refundNotify
+      timeout: 20
+      bill-save-path: ./data/wechat/bills/
+    auth:
+      appid: wx4891a006517c8816
+      app-secret: 0be23fed653d219cf0419ea82009593c
+      redirect-uri: https://ipm8397.npee.cn/thermal/wechat/auth/callback
+      frontend-query-page: https://ipm8397.npee.cn/thermal/login
+      scope: snsapi_base
 
   # 微信小程序
   mini-program:
-    app-id:
-    app-secret:
+    app-id: wxe0750852bf821268
+    app-secret: 4abf44d866dbfbcb887d2f991d9cbe80
 
   # 微信公众号
   official-account:
