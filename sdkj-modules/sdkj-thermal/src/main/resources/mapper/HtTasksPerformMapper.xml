@@ -1123,4 +1123,14 @@
         WHERE tasks_id = #{tasksId} AND group_id = #{groupId}
     </select>
 
+    <!-- 查询阀门档案（关联房屋信息） -->
+    <select id="querHeatValveArchive" resultType="org.sdkj.thermal.domain.PrHeatValveArchive">
+        SELECT a.*,
+               b.pay_status AS "prHouse.payStatus",
+               b.is_special AS "prHouse.isSpecial"
+        FROM pr_heat_valve_archive a
+                 LEFT JOIN pr_house b ON b.id = a.house_id
+        WHERE a.meter_num = #{meterNum}
+    </select>
+
 </mapper>

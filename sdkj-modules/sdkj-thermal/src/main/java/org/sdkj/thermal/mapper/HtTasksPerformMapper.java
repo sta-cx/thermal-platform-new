@@ -3,6 +3,7 @@ package org.sdkj.thermal.mapper;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.HtTasksPerform;
+import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.ValveData;
 import org.sdkj.thermal.domain.vo.HtTasksPerformVo;
 
@@ -466,4 +467,10 @@ public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtT
      * 获取任务最后执行的回报率
      */
     Integer getTaskLastPerformReportRate(@Param("tasksId") Integer tasksId, @Param("groupId") String groupId);
+
+    /**
+     * 查询阀门档案（关联房屋信息）
+     * 用于控制反馈时判断缴费状态和是否特殊户
+     */
+    PrHeatValveArchive querHeatValveArchive(@Param("meterNum") String meterNum);
 }
