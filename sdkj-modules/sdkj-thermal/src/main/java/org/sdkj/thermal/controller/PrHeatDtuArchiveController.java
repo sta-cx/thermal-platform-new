@@ -2,6 +2,8 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.idev.excel.EasyExcel;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.MapstructUtils;
@@ -16,6 +18,12 @@ import org.sdkj.thermal.domain.vo.PrHeatDtuArchiveVo;
 import org.sdkj.thermal.service.IPrHeatDtuArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * DTU采集器配表管理
@@ -97,5 +105,39 @@ public class PrHeatDtuArchiveController extends BaseController {
     @PostMapping("/query-meter")
     public R<Void> queryMeter(@Validated @RequestBody PrHeatDtuArchiveBo bo) {
         return toAjax(dtuArchiveService.queryMeter(bo));
+    }
+
+    // ========== 批量操作端点 ==========
+
+    /**
+     * 导出DTU采集器配表 Excel
+     * 旧端点: POST /property/prHeatDtuArchive/exportAll
+     * 新端点: GET /thermal/ht/dtu-archive/export
+     */
+    @SaCheckPermission("thermal:ht:dtu-archive:list")
+    @SaCheckLogin
+    @Log(title = "DTU采集器配表-导出", businessType = BusinessType.EXPORT)
+    @GetMapping("/export")
+    public void exportAll(HttpServletResponse response,
+                           @RequestParam(required = false) String companyId,
+                           @RequestParam(required = false) String orgId) throws IOException {
+        List<PrHeatDtuArchiveVo> list = dtuArchiveService.listAll(companyId, orgId);
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        String fileName = URLEncoder.encode("DTU采集器配表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
+        response.setHeader("Content-disposition", "attachment;filename*=utf-8''" + fileName + ".xlsx");
+        EasyExcel.write(response.getOutputStream(), PrHeatDtuArchiveVo.class).sheet("DTU采集器配表").doWrite(list);
+    }
+
+    /**
+     * 导入DTU采集器配表 Excel
+     * POST /thermal/ht/dtu-archive/import
+     */
+    @SaCheckPermission("thermal:ht:dtu-archive:add")
+    @SaCheckLogin
+    @Log(title = "DTU采集器配表-导入", businessType = BusinessType.IMPORT)
+    @PostMapping("/import")
+    public R<Void> importDtuArchive(@RequestParam("file") MultipartFile file) throws IOException {
+        return dtuArchiveService.importDtuArchive(file);
     }
 }

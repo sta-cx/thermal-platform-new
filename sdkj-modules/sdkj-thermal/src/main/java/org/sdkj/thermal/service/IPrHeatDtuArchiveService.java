@@ -1,13 +1,17 @@
 package org.sdkj.thermal.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.sdkj.common.core.domain.R;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHeatDtuArchive;
 import org.sdkj.thermal.domain.bo.PrHeatDtuArchiveBo;
 import org.sdkj.thermal.domain.vo.PrHeatDtuArchiveVo;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * DTU采集器配表 Service 接口
@@ -37,4 +41,21 @@ public interface IPrHeatDtuArchiveService extends IService<PrHeatDtuArchive> {
      * @return 是否成功
      */
     Boolean queryMeter(PrHeatDtuArchiveBo bo);
+
+    // ========== 批量操作 ==========
+
+    /**
+     * 查询全部DTU档案信息（用于导出）
+     * @param companyId 公司ID
+     * @param orgId 小区ID
+     * @return DTU档案列表
+     */
+    List<PrHeatDtuArchiveVo> listAll(String companyId, String orgId);
+
+    /**
+     * 导入DTU采集器配表
+     * @param file Excel 文件
+     * @return 导入结果
+     */
+    R<Void> importDtuArchive(MultipartFile file) throws IOException;
 }
