@@ -30,4 +30,11 @@
         ORDER BY seq, create_time DESC
     </select>
 
+    <!-- 级联同步名称到 pr_heat_temp_archive -->
+    <update id="syncNameToHeatTempArchive">
+        UPDATE pr_heat_temp_archive
+        SET meter_arc_name = #{name}
+        WHERE archive_id = #{archiveId}
+    </update>
+
 </mapper>

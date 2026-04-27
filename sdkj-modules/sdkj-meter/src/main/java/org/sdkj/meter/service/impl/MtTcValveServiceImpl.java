@@ -66,4 +66,21 @@ public class MtTcValveServiceImpl extends ServiceImpl<MtTcValveMapper, MtTcValve
         return super.removeById(id);
     }
 
+    /**
+     * 更新阀门档案，同时级联同步名称到物业配表记录。
+     * 当 name 字段发生变化时，同步更新 pr_heat_valve_archive 和 pr_heat_unit_valve_archive 的 meter_arc_name。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateById(MtTcValve entity) {
+        MtTcValve old = baseMapper.selectById(entity.getId());
+        boolean updated = super.updateById(entity);
+        if (updated && old != null && entity.getName() != null
+            && !entity.getName().equals(old.getName())) {
+            baseMapper.syncNameToHeatValveArchive(entity.getId(), entity.getName());
+            baseMapper.syncNameToHeatUnitValveArchive(entity.getId(), entity.getName());
+        }
+        return updated;
+    }
+
 }

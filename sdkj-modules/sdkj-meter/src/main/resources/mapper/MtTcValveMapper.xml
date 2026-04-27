@@ -33,4 +33,18 @@
           AND m.meter_type = '31'
     </select>
 
+    <!-- 级联同步名称到 pr_heat_valve_archive -->
+    <update id="syncNameToHeatValveArchive">
+        UPDATE pr_heat_valve_archive
+        SET meter_arc_name = #{name}
+        WHERE archive_id = #{archiveId}
+    </update>
+
+    <!-- 级联同步名称到 pr_heat_unit_valve_archive -->
+    <update id="syncNameToHeatUnitValveArchive">
+        UPDATE pr_heat_unit_valve_archive
+        SET meter_arc_name = #{name}
+        WHERE archive_id = #{archiveId}
+    </update>
+
 </mapper>

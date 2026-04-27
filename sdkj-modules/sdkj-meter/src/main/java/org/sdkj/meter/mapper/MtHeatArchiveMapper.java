@@ -32,4 +32,20 @@ public interface MtHeatArchiveMapper extends BaseMapperPlus<MtHeatArchive, MtHea
      */
     int insertMeterToAgent(@Param("entity") MtHeatArchive entity);
 
+    /**
+     * 级联更新 pr_heat_hot_archive 的 meter_arc_name
+     * @param archiveId 档案ID
+     * @param name 新名称
+     * @return 更新行数
+     */
+    int syncNameToHeatHotArchive(@Param("archiveId") String archiveId, @Param("name") String name);
+
+    /**
+     * 级联更新 pr_heat_unit_hot_archive 的 meter_arc_name
+     * @param archiveId 档案ID
+     * @param name 新名称
+     * @return 更新行数
+     */
+    int syncNameToHeatUnitHotArchive(@Param("archiveId") String archiveId, @Param("name") String name);
+
 }

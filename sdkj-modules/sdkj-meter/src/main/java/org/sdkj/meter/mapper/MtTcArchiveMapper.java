@@ -40,4 +40,12 @@ public interface MtTcArchiveMapper extends BaseMapperPlus<MtTcArchive, MtTcArchi
      */
     List<MtTcArchiveVo> selectAllEnabled();
 
+    /**
+     * 级联更新 pr_heat_temp_archive 的 meter_arc_name
+     * @param archiveId 档案ID
+     * @param name 新名称
+     * @return 更新行数
+     */
+    int syncNameToHeatTempArchive(@Param("archiveId") String archiveId, @Param("name") String name);
+
 }

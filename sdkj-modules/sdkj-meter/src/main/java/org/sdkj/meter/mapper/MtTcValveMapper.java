@@ -41,4 +41,20 @@ public interface MtTcValveMapper extends BaseMapperPlus<MtTcValve, MtTcValveVo> 
      */
     List<MtTcValveVo> selectValvesByUserCompany(@Param("userId") Long userId);
 
+    /**
+     * 级联更新 pr_heat_valve_archive 的 meter_arc_name
+     * @param archiveId 档案ID
+     * @param name 新名称
+     * @return 更新行数
+     */
+    int syncNameToHeatValveArchive(@Param("archiveId") String archiveId, @Param("name") String name);
+
+    /**
+     * 级联更新 pr_heat_unit_valve_archive 的 meter_arc_name
+     * @param archiveId 档案ID
+     * @param name 新名称
+     * @return 更新行数
+     */
+    int syncNameToHeatUnitValveArchive(@Param("archiveId") String archiveId, @Param("name") String name);
+
 }

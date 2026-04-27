@@ -22,4 +22,18 @@
         WHERE code = 'XABL' AND nature = '1'
     </insert>
 
+    <!-- 级联同步名称到 pr_heat_hot_archive -->
+    <update id="syncNameToHeatHotArchive">
+        UPDATE pr_heat_hot_archive
+        SET meter_arc_name = #{name}
+        WHERE archive_id = #{archiveId}
+    </update>
+
+    <!-- 级联同步名称到 pr_heat_unit_hot_archive -->
+    <update id="syncNameToHeatUnitHotArchive">
+        UPDATE pr_heat_unit_hot_archive
+        SET meter_arc_name = #{name}
+        WHERE archive_id = #{archiveId}
+    </update>
+
 </mapper>

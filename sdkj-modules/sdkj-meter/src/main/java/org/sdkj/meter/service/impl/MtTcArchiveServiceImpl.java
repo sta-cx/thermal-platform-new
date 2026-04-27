@@ -60,4 +60,20 @@ public class MtTcArchiveServiceImpl extends ServiceImpl<MtTcArchiveMapper, MtTcA
         return super.removeById(id);
     }
 
+    /**
+     * 更新温控器档案，同时级联同步名称到物业配表记录。
+     * 当 name 字段发生变化时，同步更新 pr_heat_temp_archive 的 meter_arc_name。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateById(MtTcArchive entity) {
+        MtTcArchive old = baseMapper.selectById(entity.getId());
+        boolean updated = super.updateById(entity);
+        if (updated && old != null && entity.getName() != null
+            && !entity.getName().equals(old.getName())) {
+            baseMapper.syncNameToHeatTempArchive(entity.getId(), entity.getName());
+        }
+        return updated;
+    }
+
 }

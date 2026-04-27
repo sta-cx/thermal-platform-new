@@ -12,7 +12,6 @@ import org.sdkj.meter.domain.vo.MtHeatArchiveVo;
 /**
  * 热力表档案
  * 迁移自旧系统 MtHeatArchive
- * TODO: 旧系统中删除热力表时有级联更新 pr_heat_hot_archive 的逻辑，本次迁移暂不实现
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
