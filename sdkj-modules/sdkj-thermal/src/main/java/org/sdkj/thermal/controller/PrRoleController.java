@@ -6,10 +6,13 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.AgRole;
 import org.sdkj.thermal.domain.bo.AgRoleBo;
 import org.sdkj.thermal.service.IAgRoleService;
+import org.sdkj.thermal.service.IPrRoleService;
+import org.sdkj.system.domain.vo.SysMenuVo;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +29,9 @@ import java.util.List;
 public class PrRoleController extends BaseController {
 
     private final IAgRoleService roleService;
+    private final IPrRoleService prRoleService;
+
+    // ========== 基础 CRUD ==========
 
     @SaCheckPermission("thermal:property:role:list")
     @SaCheckLogin
@@ -63,5 +69,80 @@ public class PrRoleController extends BaseController {
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable String id) {
         return toAjax(roleService.deleteRole(id));
+    }
+
+    // ========== 扩展查询 ==========
+
+    @SaCheckPermission("thermal:property:role:query")
+    @SaCheckLogin
+    @GetMapping("/allRoles")
+    public R<List<AgRole>> allRoles(@RequestParam String companyId) {
+        return R.ok(prRoleService.getAllRoles(companyId));
+    }
+
+    @SaCheckPermission("thermal:property:role:query")
+    @SaCheckLogin
+    @GetMapping("/allRolesByCreate")
+    public R<List<AgRole>> allRolesByCreate() {
+        return R.ok(prRoleService.getAllRolesByCreate(LoginHelper.getUserId()));
+    }
+
+    @SaCheckPermission("thermal:property:role:query")
+    @SaCheckLogin
+    @GetMapping("/byUser/{userId}")
+    public R<List<AgRole>> byUser(@PathVariable Long userId) {
+        return R.ok(prRoleService.getRoleByUserId(userId));
+    }
+
+    @SaCheckPermission("thermal:property:role:query")
+    @SaCheckLogin
+    @GetMapping("/verifyIdent")
+    public R<Boolean> verifyIdent(@RequestParam String roleKey,
+                                  @RequestParam(required = false) Long roleId) {
+        return R.ok(!prRoleService.verifyIdent(roleKey, roleId));
+    }
+
+    @SaCheckPermission("thermal:property:role:query")
+    @SaCheckLogin
+    @GetMapping("/verifyName")
+    public R<Boolean> verifyName(@RequestParam String roleName,
+                                 @RequestParam(required = false) Long roleId) {
+        return R.ok(!prRoleService.verifyName(roleName, roleId));
+    }
+
+    @SaCheckPermission("thermal:property:role:query")
+    @SaCheckLogin
+    @GetMapping("/allocatedMenus/{roleId}")
+    public R<List<SysMenuVo>> allocatedMenus(@PathVariable Long roleId) {
+        return R.ok(prRoleService.findAllocatedMenus(roleId));
+    }
+
+    @SaCheckPermission("thermal:property:role:query")
+    @SaCheckLogin
+    @GetMapping("/unallocatedMenus/{roleId}")
+    public R<List<SysMenuVo>> unallocatedMenus(@PathVariable Long roleId) {
+        return R.ok(prRoleService.findUnallocatedMenus(roleId));
+    }
+
+    // ========== 权限分配 ==========
+
+    @SaCheckPermission("thermal:property:role:edit")
+    @SaCheckLogin
+    @Log(title = "物业角色权限", businessType = BusinessType.UPDATE)
+    @PutMapping("/permission/{roleId}")
+    public R<Void> permission(@PathVariable Long roleId, @RequestBody List<Long> menuIds) {
+        prRoleService.permissionUpd(roleId, menuIds);
+        return R.ok();
+    }
+
+    // ========== 批量操作 ==========
+
+    @SaCheckPermission("thermal:property:role:remove")
+    @SaCheckLogin
+    @Log(title = "物业角色", businessType = BusinessType.DELETE)
+    @DeleteMapping("/batch")
+    public R<Void> batchDelete(@RequestBody List<Long> ids) {
+        prRoleService.deleteRolesData(ids);
+        return R.ok();
     }
 }
