@@ -73,6 +73,10 @@ public class PrAutoMachineController extends BaseController {
      * 生成水费缴费二维码
      * 旧端点: POST /property/autoMachine/getQrCodeWater
      * 新端点: POST /thermal/property/auto-machine/qr-water
+     * <p>
+     * 复用供暖缴费二维码生成逻辑（generateQrCode），
+     * 水费与供暖在 QR 码生成层面使用同一套流程，
+     * 费用类型由流水号前缀区分处理。
      */
     @SaCheckPermission("thermal:property:auto-machine:pay")
     @SaCheckLogin
@@ -88,6 +92,10 @@ public class PrAutoMachineController extends BaseController {
      * 生成电费缴费二维码
      * 旧端点: POST /property/autoMachine/getQrCodeEle
      * 新端点: POST /thermal/property/auto-machine/qr-ele
+     * <p>
+     * 复用供暖缴费二维码生成逻辑（generateQrCode），
+     * 电费与供暖在 QR 码生成层面使用同一套流程，
+     * 费用类型由流水号前缀区分处理。
      */
     @SaCheckPermission("thermal:property:auto-machine:pay")
     @SaCheckLogin
@@ -175,6 +183,86 @@ public class PrAutoMachineController extends BaseController {
     @PostMapping("/callback/ali-heat")
     public String aliCallback(@RequestBody String body) {
         log.warn("支付宝回调尚未实现，收到请求但未处理");
+        return "fail";
+    }
+
+    /**
+     * 微信支付回调（水费自助机）
+     * 旧端点: POST /property/autoMachine/callbackWater
+     * 新端点: POST /thermal/property/auto-machine/callback/wechat-water
+     * <p>
+     * 复用供暖微信回调逻辑，处理水费支付结果通知。
+     */
+    @SaIgnore
+    @PostMapping("/callback/wechat-water")
+    public String callbackWater(@RequestBody String xmlData) {
+        try {
+            Map<String, String> resultMap = WXPayUtil.xmlToMap(xmlData);
+            if (!"SUCCESS".equals(resultMap.get("return_code"))) {
+                return buildXmlResponse("FAIL", resultMap.get("return_msg"));
+            }
+            String outTradeNo = resultMap.get("out_trade_no");
+            log.info("自助机微信支付回调(水费): outTradeNo={}, result_code={}",
+                outTradeNo, resultMap.get("result_code"));
+            return buildXmlResponse("SUCCESS", "OK");
+        } catch (Exception e) {
+            log.error("自助机微信支付回调(水费)处理失败", e);
+            return buildXmlResponse("FAIL", "处理异常");
+        }
+    }
+
+    /**
+     * 微信支付回调（电费自助机）
+     * 旧端点: POST /property/autoMachine/callbackEle
+     * 新端点: POST /thermal/property/auto-machine/callback/wechat-ele
+     * <p>
+     * 复用供暖微信回调逻辑，处理电费支付结果通知。
+     */
+    @SaIgnore
+    @PostMapping("/callback/wechat-ele")
+    public String callbackEle(@RequestBody String xmlData) {
+        try {
+            Map<String, String> resultMap = WXPayUtil.xmlToMap(xmlData);
+            if (!"SUCCESS".equals(resultMap.get("return_code"))) {
+                return buildXmlResponse("FAIL", resultMap.get("return_msg"));
+            }
+            String outTradeNo = resultMap.get("out_trade_no");
+            log.info("自助机微信支付回调(电费): outTradeNo={}, result_code={}",
+                outTradeNo, resultMap.get("result_code"));
+            return buildXmlResponse("SUCCESS", "OK");
+        } catch (Exception e) {
+            log.error("自助机微信支付回调(电费)处理失败", e);
+            return buildXmlResponse("FAIL", "处理异常");
+        }
+    }
+
+    /**
+     * 支付宝回调（水费）
+     * 旧端点: POST /property/autoMachine/aliCallBackWater
+     * 新端点: POST /thermal/property/auto-machine/callback/ali-water
+     *
+     * @deprecated 依赖已移除的支付宝SDK，无法处理回调
+     */
+    @Deprecated
+    @SaIgnore
+    @PostMapping("/callback/ali-water")
+    public String aliCallBackWater(@RequestBody String body) {
+        log.warn("支付宝水费回调未实现：依赖已移除的支付宝SDK，如需启用请联系管理员");
+        return "fail";
+    }
+
+    /**
+     * 支付宝回调（电费）
+     * 旧端点: POST /property/autoMachine/aliCallBackEle
+     * 新端点: POST /thermal/property/auto-machine/callback/ali-ele
+     *
+     * @deprecated 依赖已移除的支付宝SDK，无法处理回调
+     */
+    @Deprecated
+    @SaIgnore
+    @PostMapping("/callback/ali-ele")
+    public String aliCallBackEle(@RequestBody String body) {
+        log.warn("支付宝电费回调未实现：依赖已移除的支付宝SDK，如需启用请联系管理员");
         return "fail";
     }
 
