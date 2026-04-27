@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 物业角色管理 Service 实现
@@ -47,10 +46,10 @@ public class PrRoleServiceImpl implements IPrRoleService {
      * 查询用户已拥有的角色
      */
     @Override
-    public List<AgRole> getRoleByUserId(Long userId) {
+    public List<AgRole> getRoleByUserId(String userId) {
         return agRoleService.lambdaQuery()
             .inSql(AgRole::getId,
-                "SELECT ur.role_id FROM sys_user_role ur WHERE ur.user_id = " + userId)
+                "SELECT ur.role_id FROM sys_user_role ur WHERE ur.user_id = '" + userId + "'")
             .list();
     }
 
@@ -59,24 +58,21 @@ public class PrRoleServiceImpl implements IPrRoleService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteRolesData(List<Long> ids) {
+    public void deleteRolesData(List<String> ids) {
         if (ids == null || ids.isEmpty()) {
             return;
         }
-        List<String> idStrs = ids.stream()
-            .map(String::valueOf)
-            .collect(Collectors.toList());
-        agRoleService.removeByIds(idStrs);
+        agRoleService.removeByIds(ids);
     }
 
     /**
      * 校验角色标识是否重复（排除自身）
      */
     @Override
-    public boolean verifyIdent(String roleKey, Long roleId) {
+    public boolean verifyIdent(String roleKey, String roleId) {
         return agRoleService.lambdaQuery()
             .eq(AgRole::getIdentifying, roleKey)
-            .ne(roleId != null, AgRole::getId, String.valueOf(roleId))
+            .ne(roleId != null, AgRole::getId, roleId)
             .exists();
     }
 
@@ -84,10 +80,10 @@ public class PrRoleServiceImpl implements IPrRoleService {
      * 校验角色名称是否重复（排除自身）
      */
     @Override
-    public boolean verifyName(String roleName, Long roleId) {
+    public boolean verifyName(String roleName, String roleId) {
         return agRoleService.lambdaQuery()
             .eq(AgRole::getName, roleName)
-            .ne(roleId != null, AgRole::getId, String.valueOf(roleId))
+            .ne(roleId != null, AgRole::getId, roleId)
             .exists();
     }
 
@@ -95,16 +91,16 @@ public class PrRoleServiceImpl implements IPrRoleService {
      * 查询角色已分配的菜单列表
      */
     @Override
-    public List<SysMenuVo> findAllocatedMenus(Long roleId) {
-        return agRoleService.listYesMenus(String.valueOf(roleId));
+    public List<SysMenuVo> findAllocatedMenus(String roleId) {
+        return agRoleService.listYesMenus(roleId);
     }
 
     /**
      * 查询角色未分配的菜单列表
      */
     @Override
-    public List<SysMenuVo> findUnallocatedMenus(Long roleId) {
-        return agRoleService.listNoMenus(String.valueOf(roleId));
+    public List<SysMenuVo> findUnallocatedMenus(String roleId) {
+        return agRoleService.listNoMenus(roleId);
     }
 
     /**
@@ -112,16 +108,16 @@ public class PrRoleServiceImpl implements IPrRoleService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void permissionUpd(Long roleId, List<Long> menuIds) {
+    public void permissionUpd(String roleId, List<Long> menuIds) {
         // 1. 删除角色已有菜单关联
-        agRoleMapper.removeRoleMenu(String.valueOf(roleId));
+        agRoleMapper.removeRoleMenu(roleId);
 
         // 2. 批量插入新菜单关联
         if (menuIds != null && !menuIds.isEmpty()) {
             String[] ids = menuIds.stream()
                 .map(String::valueOf)
                 .toArray(String[]::new);
-            agRoleMapper.batchInsertRoleMenu(String.valueOf(roleId), ids);
+            agRoleMapper.batchInsertRoleMenu(roleId, ids);
         }
 
         // 权限变更后，已被加载到 SaSession 的用户需重新登录才能获取新权限

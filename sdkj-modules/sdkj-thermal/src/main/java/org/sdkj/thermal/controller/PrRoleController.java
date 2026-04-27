@@ -90,7 +90,7 @@ public class PrRoleController extends BaseController {
     @SaCheckPermission("thermal:property:role:query")
     @SaCheckLogin
     @GetMapping("/byUser/{userId}")
-    public R<List<AgRole>> byUser(@PathVariable Long userId) {
+    public R<List<AgRole>> byUser(@PathVariable String userId) {
         return R.ok(prRoleService.getRoleByUserId(userId));
     }
 
@@ -98,7 +98,7 @@ public class PrRoleController extends BaseController {
     @SaCheckLogin
     @GetMapping("/verifyIdent")
     public R<Boolean> verifyIdent(@RequestParam String roleKey,
-                                  @RequestParam(required = false) Long roleId) {
+                                  @RequestParam(required = false) String roleId) {
         return R.ok(!prRoleService.verifyIdent(roleKey, roleId));
     }
 
@@ -106,21 +106,21 @@ public class PrRoleController extends BaseController {
     @SaCheckLogin
     @GetMapping("/verifyName")
     public R<Boolean> verifyName(@RequestParam String roleName,
-                                 @RequestParam(required = false) Long roleId) {
+                                 @RequestParam(required = false) String roleId) {
         return R.ok(!prRoleService.verifyName(roleName, roleId));
     }
 
     @SaCheckPermission("thermal:property:role:query")
     @SaCheckLogin
     @GetMapping("/allocatedMenus/{roleId}")
-    public R<List<SysMenuVo>> allocatedMenus(@PathVariable Long roleId) {
+    public R<List<SysMenuVo>> allocatedMenus(@PathVariable String roleId) {
         return R.ok(prRoleService.findAllocatedMenus(roleId));
     }
 
     @SaCheckPermission("thermal:property:role:query")
     @SaCheckLogin
     @GetMapping("/unallocatedMenus/{roleId}")
-    public R<List<SysMenuVo>> unallocatedMenus(@PathVariable Long roleId) {
+    public R<List<SysMenuVo>> unallocatedMenus(@PathVariable String roleId) {
         return R.ok(prRoleService.findUnallocatedMenus(roleId));
     }
 
@@ -130,7 +130,7 @@ public class PrRoleController extends BaseController {
     @SaCheckLogin
     @Log(title = "物业角色权限", businessType = BusinessType.UPDATE)
     @PutMapping("/permission/{roleId}")
-    public R<Void> permission(@PathVariable Long roleId, @RequestBody List<Long> menuIds) {
+    public R<Void> permission(@PathVariable String roleId, @RequestBody List<Long> menuIds) {
         prRoleService.permissionUpd(roleId, menuIds);
         return R.ok();
     }
@@ -141,7 +141,7 @@ public class PrRoleController extends BaseController {
     @SaCheckLogin
     @Log(title = "物业角色", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
-    public R<Void> batchDelete(@RequestBody List<Long> ids) {
+    public R<Void> batchDelete(@RequestBody List<String> ids) {
         prRoleService.deleteRolesData(ids);
         return R.ok();
     }
