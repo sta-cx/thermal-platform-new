@@ -1,14 +1,20 @@
 package org.sdkj.thermal.quartz;
 
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.common.core.utils.SpringUtils;
+import org.sdkj.common.tenant.core.TenantContextHolder;
 import org.sdkj.thermal.domain.HtTasks;
 import org.sdkj.thermal.service.IHtTasksService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import javax.sql.DataSource;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -22,8 +28,38 @@ public class QuartzJobInitRunner implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Initializing Quartz jobs from database...");
+        int totalScheduled = 0;
+
+        // 从 master 库获取所有启用的租户
+        List<Map<String, Object>> tenants = getAllTenants();
+
+        for (Map<String, Object> tenant : tenants) {
+            String tenantId = tenant.get("tenant_id").toString();
+            String dsName = "tenant_" + tenantId;
+            int scheduled = initTenantJobs(tenantId, dsName);
+            totalScheduled += scheduled;
+        }
+
+        log.info("Quartz job initialization complete. {} tasks scheduled across {} tenants.", totalScheduled, tenants.size());
+    }
+
+    private List<Map<String, Object>> getAllTenants() {
         try {
-            // Load all active thermal tasks that have a cron expression
+            DataSource masterDs = SpringUtils.getBean(DataSource.class);
+            JdbcTemplate jdbc = new JdbcTemplate(masterDs);
+            return jdbc.queryForList(
+                "SELECT tenant_id FROM sys_tenant WHERE status = '0' AND del_flag = '0' AND db_url IS NOT NULL"
+            );
+        } catch (Exception e) {
+            log.error("Failed to query tenant list", e);
+            return List.of();
+        }
+    }
+
+    private int initTenantJobs(String tenantId, String dsName) {
+        TenantContextHolder.setTenantCode(tenantId);
+        DynamicDataSourceContextHolder.push(dsName);
+        try {
             List<HtTasks> activeTasks = tasksService.lambdaQuery()
                 .eq(HtTasks::getStatus, 1)
                 .isNotNull(HtTasks::getCronExpression)
@@ -34,14 +70,18 @@ public class QuartzJobInitRunner implements CommandLineRunner {
                 try {
                     thermalJobManager.addJob(task.getId());
                     successCount++;
-                    log.info("Scheduled thermal task: id={}, name={}", task.getId(), task.getName());
                 } catch (Exception e) {
-                    log.error("Failed to schedule task id={}: {}", task.getId(), e.getMessage());
+                    log.error("Failed to schedule task id={} for tenant {}: {}", task.getId(), tenantId, e.getMessage());
                 }
             }
-            log.info("Quartz job initialization complete. {}/{} tasks scheduled.", successCount, activeTasks.size());
+            log.info("Tenant {}: {}/{} tasks scheduled.", tenantId, successCount, activeTasks.size());
+            return successCount;
         } catch (Exception e) {
-            log.error("Quartz job initialization failed", e);
+            log.error("Failed to init jobs for tenant {}", tenantId, e);
+            return 0;
+        } finally {
+            DynamicDataSourceContextHolder.poll();
+            TenantContextHolder.clear();
         }
     }
 }
