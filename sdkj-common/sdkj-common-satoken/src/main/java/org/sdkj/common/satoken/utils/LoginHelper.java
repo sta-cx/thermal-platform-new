@@ -201,6 +201,17 @@ public class LoginHelper {
     }
 
     /**
+     * 获取当前用户的租户编码（独立库模式下的 tenantCode）
+     */
+    public static String getTenantCode() {
+        try {
+            return (String) StpUtil.getSession().get("tenantCode");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * 检查当前用户是否已登录
      *
      * @return 结果
