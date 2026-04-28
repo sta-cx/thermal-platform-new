@@ -5,16 +5,16 @@
     <select id="queryOrgNum" resultType="string">
         SELECT ifnull(COUNT(*), '0') as 'orgNum'
         from sys_organization a
-                 left join pr_data_grant b on b.org_id = a.id and b.user_id = #{userId}
+                 left join pr_data_grant b on b.org_id = a.id and b.user_id = CAST(#{userId} AS CHAR)
         where a.company_id = #{companyId}
           and a.level = 2
-          and b.user_id = #{userId}
+          and b.user_id = CAST(#{userId} AS CHAR)
     </select>
 
     <select id="queryOrgStationNum" resultType="string">
         SELECT ifnull(count(1),0) as 'orgStationNum' FROM pr_data_grant a
         LEFT JOIN pr_heat_station_org b on a.org_id = b.org_id
-        where a.user_id = #{userId}
+        where a.user_id = CAST(#{userId} AS CHAR)
         <if test="stationId != null and stationId != ''">
             and b.station_id=#{stationId}
         </if>
@@ -48,7 +48,7 @@
         SELECT ifnull(COUNT(*), '0') as 'stationPartitionNum'
         from
             (SELECT DISTINCT a.id FROM pr_heat_station_partition a
-              LEFT JOIN pr_data_grant b on b.user_id = #{userId}
+              LEFT JOIN pr_data_grant b on b.user_id = CAST(#{userId} AS CHAR)
               LEFT JOIN pr_heat_station_org c on c.org_id = b.org_id and a.station_id = c.station_id
              where a.company_id = #{companyId}
                and a.is_deleted = '0'
@@ -73,10 +73,10 @@
     <select id="queryPrUserNum" resultType="string">
         SELECT ifnull(COUNT(*), '0') as 'prUserNum'
         FROM pr_house a
-                 left join pr_data_grant d on d.org_id = a.org_id and d.user_id = #{userId}
+                 left join pr_data_grant d on d.org_id = a.org_id and d.user_id = CAST(#{userId} AS CHAR)
         where a.company_id = #{companyId}
           and a.is_deleted = '0'
-          and d.user_id = #{userId}
+          and d.user_id = CAST(#{userId} AS CHAR)
     </select>
 
     <select id="queryHeatingArea" resultType="string">
@@ -375,7 +375,7 @@
         left join pr_data_grant e on e.org_id = a.org_id
         left join pr_heat_station_org f on f.org_id = a.org_id
         where a.company_id = #{companyId}
-          and e.user_id = #{userId}
+          and e.user_id = CAST(#{userId} AS CHAR)
         <if test="stationId != null and stationId != ''">
             and f.station_id=#{stationId}
         </if>
@@ -387,7 +387,7 @@
         left join pr_data_grant e on e.org_id = a.org_id
         left join pr_heat_station_org f on f.org_id = a.org_id
         where a.company_id = #{companyId}
-          and e.user_id = #{userId}
+          and e.user_id = CAST(#{userId} AS CHAR)
           and a.status = '1'
         <if test="stationId != null and stationId != ''">
             and f.station_id=#{stationId}
@@ -667,7 +667,7 @@
         AND t4.out_temperature > 0
         AND t4.is_changed = '0'
         AND t1.is_deleted = '0'
-        AND t5.user_id = #{userId}
+        AND t5.user_id = CAST(#{userId} AS CHAR)
         <if test="stationPartitionId != null and stationPartitionId != ''">
             AND t2.id = #{stationPartitionId}
         </if>
