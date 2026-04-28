@@ -132,6 +132,26 @@ public class SysTenantBo extends BaseEntity {
     private String domain;
 
     /**
+     * 租户数据库连接URL
+     */
+    private String dbUrl;
+
+    /**
+     * 租户数据库用户名
+     */
+    private String dbUsername;
+
+    /**
+     * 租户数据库密码
+     */
+    private String dbPassword;
+
+    /**
+     * 租户数据库驱动
+     */
+    private String dbDriver;
+
+    /**
      * 企业简介
      */
     private String intro;
