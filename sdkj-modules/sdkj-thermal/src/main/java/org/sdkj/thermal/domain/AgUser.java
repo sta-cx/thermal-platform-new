@@ -18,7 +18,7 @@ import java.util.Date;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("sys_user")
+@TableName("ag_user")
 @AutoMapper(target = AgUserVo.class)
 public class AgUser extends BaseEntity {
 

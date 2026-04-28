@@ -38,7 +38,7 @@ public class MtMeterSortController extends BaseController {
      */
     @SaCheckPermission("thermal:meter:sort:list")
     @SaCheckLogin
-    @GetMapping("/pageList")
+    @GetMapping({"/pageList", "/list"})
     public TableDataInfo<MtMeterSortVo> pageList(MtMeterSortBo sort, PageQuery pageQuery) {
         LambdaQueryWrapper<MtMeterSort> lqw = new LambdaQueryWrapper<>();
         lqw.like(sort.getName() != null && !sort.getName().isEmpty(), MtMeterSort::getName, sort.getName());

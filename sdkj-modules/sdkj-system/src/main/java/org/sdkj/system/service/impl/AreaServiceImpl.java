@@ -15,7 +15,7 @@ import java.util.List;
  *
  * @author sdkj
  */
-@Service
+@Service("systemAreaServiceImpl")
 @RequiredArgsConstructor
 public class AreaServiceImpl extends ServiceImpl<AreaMapper, Area> implements IAreaService {
 

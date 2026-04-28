@@ -171,4 +171,9 @@ public class WechatAuthController {
             return R.fail("登录失败: " + e.getMessage());
         }
     }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(wechatAuthService.list());
+    }
 }

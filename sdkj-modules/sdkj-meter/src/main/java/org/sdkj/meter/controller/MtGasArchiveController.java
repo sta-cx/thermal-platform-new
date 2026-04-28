@@ -39,7 +39,7 @@ public class MtGasArchiveController extends BaseController {
      */
     @SaCheckPermission("thermal:meter:gas:list")
     @SaCheckLogin
-    @GetMapping("/pageList")
+    @GetMapping({"/pageList", "/list"})
     public TableDataInfo<MtGasArchiveVo> pageList(@RequestParam @NotBlank String sortId,
                                                    @RequestParam(required = false) String search,
                                                    PageQuery pageQuery) {

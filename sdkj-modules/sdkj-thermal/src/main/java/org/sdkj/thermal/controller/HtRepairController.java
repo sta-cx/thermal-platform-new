@@ -65,6 +65,20 @@ public class HtRepairController extends BaseController {
     }
 
     /**
+     * 根据报修编号查询报修详情
+     * 新端点: GET /thermal/ht/repair/{repairNo}
+     */
+    @SaCheckPermission("thermal:ht:repair:query")
+    @SaCheckLogin
+    @GetMapping("/{repairNo}")
+    public R<HtRepair> getInfo(@PathVariable String repairNo) {
+        LambdaQueryWrapper<HtRepair> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(HtRepair::getRepairNo, repairNo);
+        lqw.eq(HtRepair::getIsDelete, 0);
+        return R.ok(htRepairService.getOne(lqw));
+    }
+
+    /**
      * 新增报修记录
      * 旧端点: POST /htRepair/insertData
      * 新端点: POST /thermal/ht/repair

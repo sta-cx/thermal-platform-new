@@ -41,6 +41,16 @@ public class AgUserController extends BaseController {
     }
 
     /**
+     * 根据ID查询用户详情
+     */
+    @SaCheckPermission("thermal:agent:user:query")
+    @SaCheckLogin
+    @GetMapping("/{id}")
+    public R<AgUserVo> getInfo(@PathVariable String id) {
+        return R.ok(userService.selectUserById(id));
+    }
+
+    /**
      * 校验手机号是否已被注册
      */
     @SaCheckLogin
@@ -113,5 +123,16 @@ public class AgUserController extends BaseController {
     @PostMapping("/role")
     public R<Void> assignRoles(@RequestParam String userId, @RequestParam String roleIds) {
         return toAjax(userService.assignRoles(userId, roleIds));
+    }
+
+    /**
+     * 重置密码
+     */
+    @SaCheckPermission("thermal:agent:user:edit")
+    @SaCheckLogin
+    @Log(title = "重置代理商用户密码", businessType = BusinessType.UPDATE)
+    @PutMapping("/resetPwd")
+    public R<Void> resetPwd(@RequestBody AgUserBo userBo) {
+        return toAjax(userService.resetPassword(userBo.getId(), userBo.getUserPwd()));
     }
 }

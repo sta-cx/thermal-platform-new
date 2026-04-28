@@ -31,4 +31,9 @@ public class AgReaderParamController {
             new LambdaQueryWrapper<AgReaderParam>().eq(AgReaderParam::getCode, code));
         return param != null ? R.ok(param) : R.fail("未找到参数配置");
     }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(service.list());
+    }
 }

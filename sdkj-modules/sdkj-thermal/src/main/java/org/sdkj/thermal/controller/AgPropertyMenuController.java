@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/thermal/agent/property-menu")
+@RequestMapping({"/thermal/agent/property-menu", "/thermal/agent/menu"})
 public class AgPropertyMenuController {
 
     private final IAgPropertyMenuService menuService;
@@ -35,7 +35,7 @@ public class AgPropertyMenuController {
     @SaCheckPermission("thermal:agent:property:menu:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<List<TreeNode>> list(@RequestParam String companyId) {
+    public R<List<TreeNode>> list(@RequestParam(required = false) String companyId) {
         List<AgPropertyMenuVo> menus = menuService.selectAssignedMenus(companyId);
         List<TreeNode> trees = menus.stream()
             .map(this::convertToTreeNode)
@@ -49,7 +49,7 @@ public class AgPropertyMenuController {
     @SaCheckPermission("thermal:agent:property:menu:list")
     @SaCheckLogin
     @GetMapping("/unassigned")
-    public R<List<TreeNode>> unassigned(@RequestParam String companyId) {
+    public R<List<TreeNode>> unassigned(@RequestParam(required = false) String companyId) {
         List<AgPropertyMenuVo> menus = menuService.selectUnassignedMenus(companyId);
         List<TreeNode> trees = menus.stream()
             .map(this::convertToTreeNode)

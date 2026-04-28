@@ -88,6 +88,17 @@ public class HtAlertController extends BaseController {
     }
 
     /**
+     * 根据ID查询报警详情
+     * 新端点: GET /thermal/ht/alert/{id}
+     */
+    @SaCheckPermission("thermal:ht:alert:query")
+    @SaCheckLogin
+    @GetMapping("/{id}")
+    public R<HtAlert> getInfo(@PathVariable String id) {
+        return R.ok(htAlertService.getById(id));
+    }
+
+    /**
      * 查询仪表的异常报警列表
      * 旧端点: GET /htAlert/queryAbnormalAlarmList
      * 新端点: GET /thermal/ht/alert/abnormal

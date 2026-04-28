@@ -8,6 +8,8 @@ import org.sdkj.common.core.domain.R;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
+import org.sdkj.thermal.service.IPrHeatValveArchiveService;
 import org.sdkj.thermal.utils.HeatMeterControl;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,7 @@ public class PrHeatControlController extends BaseController {
     private static final String CMD_QUERY_STATUS = "2004";
 
     private final HeatMeterControl heatMeterControl;
+    private final IPrHeatValveArchiveService valveArchiveService;
 
     private String now() {
         return LocalDateTime.now().format(DATE_FMT);
@@ -135,5 +138,25 @@ public class PrHeatControlController extends BaseController {
                                      @RequestParam(defaultValue = "1") Integer effect) {
         String cmd = heatMeterControl.generateCommand(num, meterNum, type, interval, unit, effect);
         return R.ok(cmd.toUpperCase());
+    }
+
+    @SaCheckLogin
+    @GetMapping("/valveList")
+    public TableDataInfo<PrHeatValveArchiveVo> valveList(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            PageQuery pageQuery) {
+        return valveArchiveService.selectPageList(companyId, orgId, null, null, null, search, pageQuery);
+    }
+
+    @SaCheckLogin
+    @GetMapping("/list")
+    public TableDataInfo<PrHeatValveArchiveVo> list(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String companyId,
+            @RequestParam(required = false) String orgId,
+            PageQuery pageQuery) {
+        return valveArchiveService.selectPageList(companyId, orgId, null, null, null, search, pageQuery);
     }
 }

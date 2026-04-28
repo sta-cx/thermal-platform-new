@@ -21,7 +21,7 @@
     <select id="selectUserPage" resultMap="BaseResultMap">
         SELECT id, user_name, phone, real_name, nick_name, idcard, sex, email, wx_number,
                company_id, is_enabled, is_super, create_time
-        FROM sys_user
+        FROM ag_user
         WHERE company_id = #{companyId}
           AND is_deleted = '0'
           AND is_super = '0'
@@ -32,21 +32,21 @@
     </select>
 
     <select id="checkPhone" resultType="int">
-        SELECT COUNT(1) FROM sys_user WHERE phone = #{phone}
+        SELECT COUNT(1) FROM ag_user WHERE phone = #{phone}
     </select>
 
     <select id="hasUserRole" resultType="int">
-        SELECT COUNT(1) FROM sys_user_role WHERE user_id = #{userId}
+        SELECT COUNT(1) FROM ag_user_role WHERE user_id = #{userId}
     </select>
 
     <delete id="deleteUserRole">
-        DELETE FROM sys_user_role WHERE user_id = #{userId}
+        DELETE FROM ag_user_role WHERE user_id = #{userId}
     </delete>
 
     <insert id="saveUserRole">
-        INSERT INTO sys_user_role (user_id, role_id) VALUES
+        INSERT INTO ag_user_role (id, user_id, role_id) VALUES
         <foreach collection="roleIds" item="roleId" separator=",">
-            (#{userId}, #{roleId})
+            (REPLACE(UUID(), '-', ''), #{userId}, #{roleId})
         </foreach>
     </insert>
 

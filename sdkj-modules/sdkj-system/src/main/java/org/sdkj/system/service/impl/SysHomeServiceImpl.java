@@ -14,7 +14,7 @@ import java.util.Map;
  * 顺序执行数据库查询，避免跨模块异步复杂性
  */
 @Slf4j
-@Service
+@Service("systemSysHomeServiceImpl")
 @RequiredArgsConstructor
 public class SysHomeServiceImpl implements ISysHomeService {
 

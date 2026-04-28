@@ -27,7 +27,7 @@ import java.nio.charset.StandardCharsets;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/thermal/ht/heat-daily")
+@RequestMapping({"/thermal/ht/heat-daily", "/thermal/ht/heat-usage"})
 public class PrHeatDailyController extends BaseController {
 
     private final IPrHeatDailyService heatDailyService;

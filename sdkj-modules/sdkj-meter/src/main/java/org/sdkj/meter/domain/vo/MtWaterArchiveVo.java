@@ -53,4 +53,7 @@ public class MtWaterArchiveVo {
     /** 是否启用 (0=禁用 1=启用) */
     private Integer isEnabled;
 
+    /** 创建时间 */
+    private java.util.Date createTime;
+
 }

@@ -81,4 +81,10 @@ public class AccessCodeController {
             return R.ok("操作成功", result);
         }
     }
+
+    @SaCheckLogin
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok();
+    }
 }

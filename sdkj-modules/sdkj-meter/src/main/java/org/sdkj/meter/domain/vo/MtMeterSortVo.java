@@ -20,4 +20,7 @@ public class MtMeterSortVo {
     private String measureType;
     private String seq;
     private String meterType;
+
+    /** 创建时间 */
+    private java.util.Date createTime;
 }

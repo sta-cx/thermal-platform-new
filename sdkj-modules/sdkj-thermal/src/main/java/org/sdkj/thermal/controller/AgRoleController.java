@@ -33,6 +33,16 @@ public class AgRoleController {
     private final IAgRoleService roleService;
 
     /**
+     * 根据ID查询角色详情
+     */
+    @SaCheckPermission("thermal:agent:role:query")
+    @SaCheckLogin
+    @GetMapping("/{id}")
+    public R<AgRole> getInfo(@PathVariable String id) {
+        return R.ok(roleService.getById(id));
+    }
+
+    /**
      * 分页查询角色列表
      */
     @SaCheckPermission("thermal:agent:role:list")

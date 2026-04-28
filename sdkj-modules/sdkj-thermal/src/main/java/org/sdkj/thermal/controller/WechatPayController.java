@@ -155,4 +155,9 @@ public class WechatPayController {
         }
         return R.ok(refund);
     }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(wechatPayService.list());
+    }
 }

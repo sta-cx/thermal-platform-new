@@ -104,4 +104,22 @@ public class AgUserServiceImpl extends ServiceImpl<AgUserMapper, AgUser> impleme
         String[] roleIdArray = roleIds.split(",");
         return userMapper.saveUserRole(userId, roleIdArray) > 0;
     }
+
+    @Override
+    public AgUserVo selectUserById(String id) {
+        AgUser user = getById(id);
+        if (user == null) return null;
+        AgUserVo vo = new AgUserVo();
+        BeanUtils.copyProperties(user, vo);
+        return vo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean resetPassword(String id, String password) {
+        AgUser user = new AgUser();
+        user.setId(id);
+        user.setUserPwd(BCrypt.hashpw(password.trim()));
+        return updateById(user);
+    }
 }

@@ -69,4 +69,9 @@ public class PrWechatBindRecordController extends BaseController {
         }
         return R.fail("绑定数据存储失败");
     }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(wechatBindRecordService.list());
+    }
 }

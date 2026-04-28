@@ -25,6 +25,9 @@ public class MtElectricArchiveVo {
     /** 名称 */
     private String name;
 
+    /** 通讯方式 (1=卡式 2=远传 3=手工抄表) */
+    private Integer msgType;
+
     /** 规格 */
     private String specification;
 
@@ -66,5 +69,8 @@ public class MtElectricArchiveVo {
 
     /** 最大金额 */
     private BigDecimal maxAmount;
+
+    /** 创建时间 */
+    private java.util.Date createTime;
 
 }

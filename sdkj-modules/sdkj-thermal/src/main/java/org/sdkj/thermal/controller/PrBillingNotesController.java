@@ -53,4 +53,9 @@ public class PrBillingNotesController extends BaseController {
             @RequestParam String serialNum) {
         return toAjax(billingNotesService.reprint(recordId, serialNum));
     }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(billingNotesService.list());
+    }
 }

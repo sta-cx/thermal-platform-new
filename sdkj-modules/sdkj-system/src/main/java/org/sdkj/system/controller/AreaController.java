@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Validated
 @RequiredArgsConstructor
-@RestController
+@RestController("systemAreaController")
 @RequestMapping("/system/area")
 public class AreaController extends BaseController {
 

@@ -39,7 +39,7 @@ public class MtCentratorArchiveController extends BaseController {
      */
     @SaCheckPermission("thermal:meter:centrator:list")
     @SaCheckLogin
-    @GetMapping("/pageList")
+    @GetMapping({"/pageList", "/list"})
     public TableDataInfo<MtCentratorArchiveVo> pageList(@RequestParam @NotBlank String sortId,
                                                          @RequestParam(required = false) String search,
                                                          PageQuery pageQuery) {

@@ -35,7 +35,7 @@ public class HtStrategyPerformController extends BaseController {
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<HtStrategyPerformVo> list(
-            @RequestParam Long strategyId,
+            @RequestParam(required = false) Long strategyId,
             PageQuery pageQuery) {
         return htStrategyPerformService.selectPageList(strategyId, pageQuery);
     }
@@ -58,7 +58,7 @@ public class HtStrategyPerformController extends BaseController {
     @Log(title = "策略执行记录", businessType = BusinessType.UPDATE)
     @PostMapping
     public R<Void> insertBatch(
-            @RequestParam Long strategyId,
+            @RequestParam(required = false) Long strategyId,
             @Validated @RequestBody List<HtStrategyPerformBo> list) {
         htStrategyPerformService.insertBatch(strategyId, list);
         return R.ok();

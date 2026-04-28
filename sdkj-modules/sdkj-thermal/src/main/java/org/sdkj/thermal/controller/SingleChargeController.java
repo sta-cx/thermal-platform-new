@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/thermal/property/single-charge")
+@RequestMapping({"/thermal/property/single-charge", "/thermal/property/singleCharge"})
 public class SingleChargeController extends BaseController {
 
     private final ISingleChargeService singleChargeService;
@@ -145,5 +145,10 @@ public class SingleChargeController extends BaseController {
     @GetMapping("/pay-record/{houseId}")
     public R<?> queryPayByHouseId(@PathVariable String houseId) {
         return R.ok(singleChargeService.queryPayByHouseId(houseId));
+    }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(java.util.Collections.emptyList());
     }
 }

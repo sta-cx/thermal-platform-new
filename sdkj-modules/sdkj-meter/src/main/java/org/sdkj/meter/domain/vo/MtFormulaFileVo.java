@@ -18,4 +18,7 @@ public class MtFormulaFileVo {
     private String eformula;
     private String seq;
     private String isEnabled;
+
+    /** 创建时间 */
+    private java.util.Date createTime;
 }

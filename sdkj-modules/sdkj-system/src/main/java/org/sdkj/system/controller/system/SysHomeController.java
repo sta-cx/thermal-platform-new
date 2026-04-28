@@ -17,7 +17,7 @@ import java.util.Map;
  */
 @Slf4j
 @RequiredArgsConstructor
-@RestController
+@RestController("systemSysHomeController")
 @RequestMapping("/system/home")
 public class SysHomeController {
 

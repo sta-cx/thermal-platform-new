@@ -15,7 +15,7 @@ import org.sdkj.thermal.domain.vo.AgRoleVo;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@TableName("sys_role")
+@TableName("ag_role")
 @AutoMapper(target = AgRoleVo.class)
 public class AgRole extends BaseEntity {
 

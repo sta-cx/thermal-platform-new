@@ -4,11 +4,11 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.service.ISysHomeService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * 首页数据大屏
@@ -16,7 +16,7 @@ import java.util.concurrent.CompletableFuture;
  */
 @Slf4j
 @RequiredArgsConstructor
-@RestController
+@RestController("thermalSysHomeController")
 @RequestMapping("/thermal/home")
 public class SysHomeController {
 
@@ -28,7 +28,8 @@ public class SysHomeController {
                                              @RequestParam(required = false) String stationId,
                                              @RequestParam(required = false) String stationPartitionId) {
         try {
-            Map<String, Object> result = sysHomeService.aggregateHomeData(companyId, stationId, stationPartitionId);
+            Long userId = LoginHelper.getUserId();
+            Map<String, Object> result = sysHomeService.aggregateHomeData(userId, companyId, stationId, stationPartitionId);
             return R.ok(result);
         } catch (Exception e) {
             log.error("查询首页数据失败", e);

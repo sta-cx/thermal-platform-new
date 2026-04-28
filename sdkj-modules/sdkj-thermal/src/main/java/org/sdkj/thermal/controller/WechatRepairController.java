@@ -28,7 +28,7 @@ public class WechatRepairController extends BaseController {
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrRepairRecord> list(
-            @RequestParam String userId,
+            @RequestParam(required = false) String userId,
             PageQuery pageQuery) {
         Page<PrRepairRecord> page = pageQuery.build();
         LambdaQueryWrapper<PrRepairRecord> lqw = new LambdaQueryWrapper<>();

@@ -51,4 +51,14 @@ public interface IAgUserService extends IService<AgUser> {
      * 分配角色
      */
     boolean assignRoles(String userId, String roleIds);
+
+    /**
+     * 根据ID查询用户
+     */
+    AgUserVo selectUserById(String id);
+
+    /**
+     * 重置密码
+     */
+    boolean resetPassword(String id, String password);
 }

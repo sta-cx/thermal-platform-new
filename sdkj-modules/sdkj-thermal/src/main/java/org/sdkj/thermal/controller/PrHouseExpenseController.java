@@ -35,6 +35,16 @@ public class PrHouseExpenseController extends BaseController {
     private final IPrHouseExpenseService houseExpenseService;
 
     /**
+     * 根据ID查询绑定详情
+     */
+    @SaCheckPermission("thermal:property:houseExpense:query")
+    @SaCheckLogin
+    @GetMapping("/{id}")
+    public R<PrHouseExpense> getInfo(@PathVariable String id) {
+        return R.ok(houseExpenseService.getById(id));
+    }
+
+    /**
      * 分页查询房屋-费目绑定列表
      * 旧端点: POST /property/houseExpense/pageList
      * 新端点: GET /thermal/property/house-expense/list

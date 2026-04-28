@@ -7,6 +7,7 @@ import org.sdkj.common.core.domain.R;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
+import org.sdkj.thermal.domain.PrTransactionRecord;
 import org.sdkj.thermal.domain.vo.PrTransactionRecordSubVo;
 import org.sdkj.thermal.domain.vo.PrTransactionRecordVo;
 import org.sdkj.thermal.service.IPrTransactionRecordService;
@@ -23,6 +24,13 @@ import java.util.Map;
 public class PrTransactionRecordController extends BaseController {
 
     private final IPrTransactionRecordService transactionRecordService;
+
+    @SaCheckPermission("thermal:property:transaction:query")
+    @SaCheckLogin
+    @GetMapping("/{id}")
+    public R<PrTransactionRecord> getInfo(@PathVariable String id) {
+        return R.ok(transactionRecordService.getById(id));
+    }
 
     @SaCheckPermission("thermal:property:transaction:list")
     @SaCheckLogin

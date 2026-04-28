@@ -72,4 +72,9 @@ public class AgMeterController extends BaseController {
         agMeterService.allocateMeters(companyId, archiveIds, meterType);
         return R.ok();
     }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(java.util.Collections.emptyList());
+    }
 }

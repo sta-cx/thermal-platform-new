@@ -25,7 +25,7 @@ import java.util.Map;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/thermal/ht/tasksPerform")
+@RequestMapping({"/thermal/ht/tasksPerform", "/thermal/ht/tasks-perform"})
 public class HtTasksPerformController extends BaseController {
 
     private final IHtTasksPerformService tasksPerformService;
@@ -103,5 +103,10 @@ public class HtTasksPerformController extends BaseController {
     @GetMapping("/statusSummary")
     public R<Map<String, Object>> statusSummary() {
         return R.ok(tasksPerformService.selectGlobalStatusSummary());
+    }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(tasksPerformService.list());
     }
 }

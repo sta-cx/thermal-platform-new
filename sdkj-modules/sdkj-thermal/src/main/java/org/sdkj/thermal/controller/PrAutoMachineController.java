@@ -365,4 +365,9 @@ public class PrAutoMachineController extends BaseController {
         }
         return R.ok();
     }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(java.util.Collections.emptyList());
+    }
 }

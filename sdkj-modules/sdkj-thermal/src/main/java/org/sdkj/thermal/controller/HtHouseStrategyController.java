@@ -30,7 +30,7 @@ import java.util.List;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/thermal/ht/houseStrategy")
+@RequestMapping({"/thermal/ht/houseStrategy", "/thermal/ht/house-strategy"})
 public class HtHouseStrategyController extends BaseController {
 
     private final IHtHouseStrategyService houseStrategyService;

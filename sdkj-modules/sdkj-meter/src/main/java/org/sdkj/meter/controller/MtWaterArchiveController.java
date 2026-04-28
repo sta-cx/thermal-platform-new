@@ -39,7 +39,7 @@ public class MtWaterArchiveController extends BaseController {
      */
     @SaCheckPermission("thermal:meter:water:list")
     @SaCheckLogin
-    @GetMapping("/pageList")
+    @GetMapping({"/pageList", "/list"})
     public TableDataInfo<MtWaterArchiveVo> pageList(@RequestParam @NotBlank String sortId,
                                                      @RequestParam(required = false) String search,
                                                      PageQuery pageQuery) {

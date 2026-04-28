@@ -46,4 +46,10 @@ public class PrRegionalController extends BaseController {
         result.put("daily", transactionService.daily(companyId, orgId, date));
         return R.ok(result);
     }
+
+    @SaCheckLogin
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(transactionService.list());
+    }
 }

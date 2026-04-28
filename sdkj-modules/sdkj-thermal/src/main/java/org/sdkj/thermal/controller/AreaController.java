@@ -4,8 +4,8 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.web.core.BaseController;
-import org.sdkj.thermal.domain.Area;
-import org.sdkj.thermal.service.IAreaService;
+import org.sdkj.system.domain.Area;
+import org.sdkj.system.service.IAreaService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +43,6 @@ public class AreaController extends BaseController {
     @SaCheckLogin
     @GetMapping("/districts/{cityId}")
     public R<List<Area>> districtList(@PathVariable String cityId) {
-        return R.ok(areaService.getDistricts(cityId));
+        return R.ok(areaService.getCounties(cityId));
     }
 }

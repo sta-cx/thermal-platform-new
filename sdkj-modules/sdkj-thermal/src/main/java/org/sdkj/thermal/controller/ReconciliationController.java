@@ -95,4 +95,9 @@ public class ReconciliationController extends BaseController {
         log.info("查询未处理对账差异");
         return R.ok(reconciliationService.queryUnHandleDiffs());
     }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(java.util.Collections.emptyList());
+    }
 }

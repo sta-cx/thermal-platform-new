@@ -36,4 +36,9 @@ public class HtScopeController extends BaseController {
             @RequestParam(required = false) Integer scopeType) {
         return R.ok(scopeService.getHouseListByTaskId(orgId, taskId, scopeType));
     }
+
+    @GetMapping("/list")
+    public R<?> list() {
+        return R.ok(scopeService.list());
+    }
 }

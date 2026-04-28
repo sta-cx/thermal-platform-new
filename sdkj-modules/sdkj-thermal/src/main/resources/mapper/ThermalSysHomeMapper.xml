@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.thermal.mapper.SysHomeMapper">
+<mapper namespace="org.sdkj.thermal.mapper.ThermalSysHomeMapper">
 
     <select id="queryOrgNum" resultType="string">
         SELECT ifnull(COUNT(*), '0') as 'orgNum'
@@ -625,7 +625,7 @@
         </if>
     </select>
 
-    <select id="queryHeatValveArchiveList" resultType="com.thermal.entity.PrHeatValveArchive">
+    <select id="queryHeatValveArchiveList" resultType="org.sdkj.thermal.domain.PrHeatValveArchive">
         SELECT a.* from pr_heat_valve_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
         LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
