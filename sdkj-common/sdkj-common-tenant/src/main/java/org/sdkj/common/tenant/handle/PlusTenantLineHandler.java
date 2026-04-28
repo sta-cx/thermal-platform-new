@@ -26,13 +26,9 @@ public class PlusTenantLineHandler implements TenantLineHandler {
 
     @Override
     public Expression getTenantId() {
-        String tenantId = TenantHelper.getTenantId();
-        if (StringUtils.isBlank(tenantId)) {
-            log.error("无法获取有效的租户id -> Null");
-            return new NullValue();
-        }
-        // 返回固定租户
-        return new StringValue(tenantId);
+        // 独立库模式下不再通过 tenant_id 字段过滤
+        // 租户隔离已由数据源级别实现
+        return new NullValue();
     }
 
     @Override

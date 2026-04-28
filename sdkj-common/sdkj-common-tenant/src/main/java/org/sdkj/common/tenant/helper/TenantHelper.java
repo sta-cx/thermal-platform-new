@@ -16,6 +16,7 @@ import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.core.utils.reflect.ReflectUtils;
 import org.sdkj.common.redis.utils.RedisUtils;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.common.tenant.core.TenantContextHolder;
 
 import java.util.Stack;
 import java.util.function.Supplier;
@@ -215,9 +216,15 @@ public class TenantHelper {
     }
 
     /**
-     * 获取当前租户id(动态租户优先)
+     * 获取当前租户id（独立库模式下从 TenantContextHolder 获取）
      */
     public static String getTenantId() {
+        // 独立库模式：优先从 TenantContextHolder 获取
+        String tenantCode = TenantContextHolder.getTenantCode();
+        if (StringUtils.isNotBlank(tenantCode)) {
+            return tenantCode;
+        }
+        // 兼容旧的 tenant_id 模式
         if (!isEnable()) {
             return null;
         }
