@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS sys_tenant_user (
 
 -- Step 3: 为现有用户建立默认租户映射 (tenant_id = '000000')
 INSERT INTO sys_tenant_user (id, user_id, tenant_id, create_time)
-SELECT id, id, '000000', NOW()
+SELECT user_id, user_id, '000000', NOW()
 FROM sys_user
 WHERE del_flag = '0' AND status = '0';
 
