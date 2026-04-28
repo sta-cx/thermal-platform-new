@@ -72,6 +72,7 @@ public class TenantFilter {
                 || path.startsWith("/swagger-")
                 || path.startsWith("/v3/")
                 || path.startsWith("/favicon.ico")
+                || path.startsWith("/api/iot/")
                 || path.startsWith("/thermal/iot/")
                 || path.startsWith("/thermal/wechat/")
                 || path.startsWith("/thermal/wxma/");

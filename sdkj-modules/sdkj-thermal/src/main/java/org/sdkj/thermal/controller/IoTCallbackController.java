@@ -4,10 +4,12 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
+import org.sdkj.common.tenant.core.TenantContextHolder;
 import org.sdkj.thermal.domain.dto.NbValvePayload;
 import org.sdkj.thermal.service.IIoTDataService;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,6 +52,7 @@ public class IoTCallbackController {
     @PostMapping("/nb-valve")
     public R<Integer> nbValve(HttpServletResponse response,
                                @RequestHeader(value = "X-IoT-Token", required = false) String token,
+                               @RequestHeader(value = "X-Tenant-Code", required = false) String tenantCode,
                                @RequestBody String msg) {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Connection", "close");
@@ -59,6 +62,7 @@ public class IoTCallbackController {
             return R.fail("认证失败");
         }
 
+        setupTenantContext(tenantCode);
         try {
             JSONObject jsonObject = JSONUtil.parseObj(msg);
             log.info("NB阀门接收电信平台数据: {}", jsonObject);
@@ -87,6 +91,8 @@ public class IoTCallbackController {
         } catch (Exception e) {
             log.error("NB阀门数据处理异常", e);
             return R.fail("处理异常: " + e.getMessage());
+        } finally {
+            clearTenantContext();
         }
     }
 
@@ -99,6 +105,7 @@ public class IoTCallbackController {
     @PostMapping("/mbus-valve")
     public R<Boolean> mbusValve(HttpServletResponse response,
                                  @RequestHeader(value = "X-IoT-Token", required = false) String token,
+                                 @RequestHeader(value = "X-Tenant-Code", required = false) String tenantCode,
                                  @RequestBody String args) {
         response.setCharacterEncoding("UTF-8");
         response.setHeader("Connection", "close");
@@ -111,6 +118,7 @@ public class IoTCallbackController {
             return R.fail("认证失败");
         }
 
+        setupTenantContext(tenantCode);
         try {
             if (jsonObject.containsKey("data")) {
                 JSONArray dataArray = jsonObject.getJSONArray("data");
@@ -180,6 +188,8 @@ public class IoTCallbackController {
         } catch (Exception e) {
             log.error("Mbus数据处理异常", e);
             return R.fail("解析错误 failure");
+        } finally {
+            clearTenantContext();
         }
         return R.fail("解析错误 failure");
     }
@@ -194,11 +204,14 @@ public class IoTCallbackController {
     @RequestMapping("/mobile-valve")
     public String mobileValve(String msg, String nonce, String signature,
                               @RequestHeader(value = "X-IoT-Token", required = false) String token,
+                              @RequestHeader(value = "X-Tenant-Code", required = false) String tenantCode,
                               @RequestBody(required = false) String args) {
         if (!verifyCallbackToken(token)) {
             log.warn("移动平台回调: token验证失败");
             return "auth fail";
         }
+
+        setupTenantContext(tenantCode);
 
         try {
             if (StrUtil.isNotBlank(args)) {
@@ -230,7 +243,28 @@ public class IoTCallbackController {
         } catch (Exception e) {
             log.error("移动平台数据处理异常", e);
             return msg;
+        } finally {
+            clearTenantContext();
         }
+    }
+
+    // ========== 租户上下文 ==========
+
+    /**
+     * 为第三方回调设置租户数据源。
+     * IoT/微信等外部回调没有用户会话，需通过请求头 X-Tenant-Code 指定租户。
+     */
+    private void setupTenantContext(String tenantCode) {
+        if (StrUtil.isNotBlank(tenantCode)) {
+            TenantContextHolder.setTenantCode(tenantCode);
+            DynamicDataSourceContextHolder.push("tenant_" + tenantCode);
+            log.info("IoT回调切换到租户数据源: tenant_{}", tenantCode);
+        }
+    }
+
+    private void clearTenantContext() {
+        DynamicDataSourceContextHolder.poll();
+        TenantContextHolder.clear();
     }
 
     // ========== 认证方法 ==========
