@@ -1,7 +1,8 @@
 package org.sdkj.thermal.quartz;
 
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.extern.slf4j.Slf4j;
-import org.sdkj.common.tenant.helper.TenantHelper;
+import org.sdkj.common.tenant.core.TenantContextHolder;
 import org.sdkj.thermal.service.impl.ThermalRegulationEngine;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -20,18 +21,21 @@ public class ThermalJob implements Job {
     public void execute(JobExecutionContext context) {
         Integer taskId = context.getJobDetail().getJobDataMap().getInt("taskId");
         String taskName = context.getJobDetail().getJobDataMap().getString("taskName");
-        String tenantId = context.getMergedJobDataMap().getString("tenantId");
+        String tenantCode = context.getMergedJobDataMap().getString("tenantCode");
 
-        log.info("Quartz triggered thermal regulation task: {} (ID: {}, Tenant: {})", taskName, taskId, tenantId);
+        log.info("Quartz triggered thermal regulation task: {} (ID: {}, Tenant: {})", taskName, taskId, tenantCode);
 
         try {
-            if (tenantId != null && !tenantId.isEmpty()) {
-                TenantHelper.dynamic(tenantId, () -> doExecute(context, taskId, taskName));
-            } else {
-                doExecute(context, taskId, taskName);
+            if (tenantCode != null && !tenantCode.isEmpty()) {
+                TenantContextHolder.setTenantCode(tenantCode);
+                DynamicDataSourceContextHolder.push("tenant_" + tenantCode);
             }
+            doExecute(context, taskId, taskName);
         } catch (Exception e) {
             log.error("Thermal regulation task failed: {} (ID: {})", taskName, taskId, e);
+        } finally {
+            DynamicDataSourceContextHolder.poll();
+            TenantContextHolder.clear();
         }
     }
 
