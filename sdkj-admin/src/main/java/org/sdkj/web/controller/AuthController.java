@@ -30,9 +30,11 @@ import org.sdkj.common.social.utils.SocialUtils;
 import org.sdkj.common.sse.dto.SseMessageDto;
 import org.sdkj.common.sse.utils.SseMessageUtils;
 import org.sdkj.common.tenant.helper.TenantHelper;
+import org.sdkj.system.domain.SysTenantUser;
 import org.sdkj.system.domain.bo.SysTenantBo;
 import org.sdkj.system.domain.vo.SysClientVo;
 import org.sdkj.system.domain.vo.SysTenantVo;
+import org.sdkj.system.mapper.SysTenantUserMapper;
 import org.sdkj.system.service.ISysClientService;
 import org.sdkj.system.service.ISysConfigService;
 import org.sdkj.system.service.ISysSocialService;
@@ -75,6 +77,7 @@ public class AuthController {
     private final ISysSocialService socialUserService;
     private final ISysClientService clientService;
     private final ScheduledExecutorService scheduledExecutorService;
+    private final SysTenantUserMapper tenantUserMapper;
 
 
     /**
@@ -104,7 +107,16 @@ public class AuthController {
         // 登录
         LoginVo loginVo = IAuthStrategy.login(body, client, grantType);
 
+        // 登录成功后绑定租户信息到 session
         Long userId = LoginHelper.getUserId();
+        SysTenantUser tenantUser = tenantUserMapper.selectByUserId(userId);
+        if (tenantUser != null) {
+            SysTenantVo tenant = tenantService.queryByTenantId(tenantUser.getTenantId());
+            if (tenant != null) {
+                StpUtil.getSession().set("tenantCode", tenant.getTenantId());
+                StpUtil.getSession().set("tenantName", tenant.getCompanyName());
+            }
+        }
         scheduledExecutorService.schedule(() -> {
             SseMessageDto dto = new SseMessageDto();
             dto.setMessage(DateUtils.getTodayHour(new Date()) + "好，欢迎登录 SDKJ 智慧供热综合管理平台");
