@@ -45,13 +45,17 @@ public class TenantFilter {
                 }
 
                 if (StpUtil.isLogin()) {
-                    Object tenantCode = StpUtil.getSession().get("tenantCode");
-                    if (tenantCode != null) {
-                        String code = tenantCode.toString();
-                        TenantContextHolder.setTenantCode(code);
-                        String dsName = "tenant_" + code;
-                        DynamicDataSourceContextHolder.push(dsName);
-                        pushed = true;
+                    try {
+                        Object tenantCode = StpUtil.getSession().get("tenantCode");
+                        if (tenantCode != null) {
+                            String code = tenantCode.toString();
+                            TenantContextHolder.setTenantCode(code);
+                            String dsName = "tenant_" + code;
+                            DynamicDataSourceContextHolder.push(dsName);
+                            pushed = true;
+                        }
+                    } catch (Exception e) {
+                        log.warn("获取租户上下文失败: {}", e.getMessage());
                     }
                 }
                 chain.doFilter(request, response);
