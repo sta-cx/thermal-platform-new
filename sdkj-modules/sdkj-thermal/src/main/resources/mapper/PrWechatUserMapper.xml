@@ -4,12 +4,12 @@
 
     <select id="selectByOpenId" resultType="org.sdkj.thermal.domain.PrWechatUser">
         SELECT * FROM pr_wechat_user
-        WHERE open_id = #{openId} AND is_deleted = 0
+        WHERE open_id = #{openId} AND del_flag = 0
     </select>
 
     <select id="selectByOpenIdAndOtherCode" resultType="org.sdkj.thermal.domain.PrWechatUser">
         SELECT * FROM pr_wechat_user
-        WHERE open_id = #{openId} AND other_code = #{otherCode} AND is_deleted = 0
+        WHERE open_id = #{openId} AND other_code = #{otherCode} AND del_flag = 0
     </select>
 
 </mapper>

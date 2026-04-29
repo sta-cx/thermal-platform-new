@@ -19,7 +19,7 @@
         FROM ag_company_property ap
         INNER JOIN sys_company sc ON ap.property_company_id = sc.id
         WHERE ap.agent_company_id = #{agentCode}
-          AND sc.is_deleted = '0'
+          AND sc.del_flag = '0'
         <if test="isEnabled != null and isEnabled != ''">
             AND ap.is_enabled = #{isEnabled}
         </if>
@@ -37,7 +37,7 @@
         SELECT sc.id, sc.name AS property_name, sc.code AS property_code
         FROM sys_company sc
         WHERE sc.nature = '2'
-          AND sc.is_deleted = '0'
+          AND sc.del_flag = '0'
           AND sc.id NOT IN (
               SELECT property_company_id
               FROM ag_company_property
@@ -58,7 +58,7 @@
         FROM ag_company_property ap
         INNER JOIN sys_company sc ON ap.property_company_id = sc.id
         WHERE ap.id = #{id}
-          AND sc.is_deleted = '0'
+          AND sc.del_flag = '0'
     </select>
 
     <!-- 更新审核状态 -->

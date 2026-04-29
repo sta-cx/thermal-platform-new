@@ -36,7 +36,7 @@
           and a.type = '0'
           and a.create_by = #{create}
           and b.company_id = #{companyId}
-          and b.is_deleted = '0'
+          and b.del_flag = '0'
           and a.room_num = b.room_num
           and a.building_name = b.building_name
           and a.org_name = b.org_name
@@ -156,7 +156,7 @@
         from pr_house
         where company_id = #{companyId}
           and org_id = #{orgId}
-          and is_deleted = '0'
+          and del_flag = '0'
     </select>
 
     <delete id="deleteData">

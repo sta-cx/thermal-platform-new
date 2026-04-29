@@ -15,7 +15,7 @@
         FROM ag_property_menu a
         LEFT JOIN sys_menu m ON a.menu_id = m.id
         WHERE a.company_id = #{companyId}
-          AND m.is_deleted = '0'
+          AND m.del_flag = '0'
           AND m.nature = '2'
         ORDER BY m.seq
     </select>
@@ -23,7 +23,7 @@
     <select id="selectUnassignedMenus" resultMap="BaseResultMap">
         SELECT m.id, m.name as menu_name, m.code as menu_code
         FROM sys_menu m
-        WHERE m.is_deleted = '0'
+        WHERE m.del_flag = '0'
           AND m.nature = '2'
           AND m.id NOT IN (
               SELECT menu_id FROM ag_property_menu WHERE company_id = #{companyId}

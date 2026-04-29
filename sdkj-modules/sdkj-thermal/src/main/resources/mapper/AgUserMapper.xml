@@ -23,7 +23,7 @@
                company_id, is_enabled, is_super, create_time
         FROM ag_user
         WHERE company_id = #{companyId}
-          AND is_deleted = '0'
+          AND del_flag = '0'
           AND is_super = '0'
         <if test="name != null and name != ''">
             AND real_name LIKE CONCAT('%', #{name}, '%')

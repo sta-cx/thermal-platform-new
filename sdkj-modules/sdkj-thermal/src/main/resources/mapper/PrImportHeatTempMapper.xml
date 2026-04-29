@@ -22,7 +22,7 @@
             left join pr_house b on a.room_num = b.room_num
         set a.house_id = b.id, a.org_id = b.org_id
         where a.company_id = #{companyId} and a.type = '0' and a.create_by = #{create}
-          and b.company_id = #{companyId} and b.is_deleted = '0'
+          and b.company_id = #{companyId} and b.del_flag = '0'
     </update>
 
     <update id="updateMeter">
@@ -69,7 +69,7 @@
 
     <select id="selectByCompanyIdOrgId" resultType="org.sdkj.thermal.domain.PrImportHeatTemp">
         select org_name, building_name, room_num from pr_house
-        where company_id = #{companyId} and org_id = #{orgId} and is_deleted = '0'
+        where company_id = #{companyId} and org_id = #{orgId} and del_flag = '0'
     </select>
 
     <delete id="deleteData">

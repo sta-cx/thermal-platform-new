@@ -1067,11 +1067,6 @@
           AND a.alert_type IN ('2', '3', '4', '5', '6')
     </insert>
 
-    <!-- 更新任务执行次数（number+1） -->
-    <update id="updateHtasks">
-        UPDATE ht_tasks SET number = number + 1, last_time = NOW() WHERE id = CAST(#{tasksId} AS UNSIGNED)
-    </update>
-
     <!-- 更新控制范围状态（从临时表同步alert_type） -->
     <update id="updateHtScope">
         UPDATE ht_scope a

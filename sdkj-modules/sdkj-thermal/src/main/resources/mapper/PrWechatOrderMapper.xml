@@ -4,25 +4,25 @@
 
     <select id="selectByOutTradeNo" resultType="org.sdkj.thermal.domain.PrWechatOrder">
         SELECT * FROM pr_wechat_order
-        WHERE out_trade_no = #{outTradeNo} AND is_deleted = 0
+        WHERE out_trade_no = #{outTradeNo} AND del_flag = 0
     </select>
 
     <select id="selectByTransactionId" resultType="org.sdkj.thermal.domain.PrWechatOrder">
         SELECT * FROM pr_wechat_order
-        WHERE transaction_id = #{transactionId} AND is_deleted = 0
+        WHERE transaction_id = #{transactionId} AND del_flag = 0
     </select>
 
     <select id="selectByDateRange" resultType="org.sdkj.thermal.domain.PrWechatOrder">
         SELECT * FROM pr_wechat_order
         WHERE create_time &gt;= #{startTime} AND create_time &lt; #{endTime}
-        AND is_deleted = 0
+        AND del_flag = 0
     </select>
 
     <select id="selectExpiredOrders" resultType="org.sdkj.thermal.domain.PrWechatOrder">
         SELECT * FROM pr_wechat_order
         WHERE order_status = #{pendingStatus}
         AND expire_time &lt; #{now}
-        AND is_deleted = 0
+        AND del_flag = 0
     </select>
 
     <insert id="insertPrTransactionRecordByWechat">
@@ -31,7 +31,7 @@
             record_time, bill_num, serial_num, charge_serial,
             payment_balance, recharge_balance, is_charge, is_finished,
             payment_method1, payment_money1, payment_method2, payment_money2,
-            is_deleted, trade_type, trade_sources, charge_time, create_by, create_time
+            del_flag, trade_type, trade_sources, charge_time, create_by, create_time
         ) values (
             #{id}, #{houseId}, #{paidIn}, '0.0000', #{paidIn},
             NOW(), #{billNum}, #{transactionId}, #{transactionId},

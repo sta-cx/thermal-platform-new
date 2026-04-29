@@ -14,7 +14,7 @@
     <select id="selectByOtherCode" resultType="org.sdkj.thermal.domain.vo.PrHouseVo">
         SELECT h.* FROM pr_house h
         WHERE h.other_code = #{otherCode}
-          AND h.is_deleted = 0
+          AND h.del_flag = 0
     </select>
 
     <!-- ========== 孤岛户功能 ========== -->
@@ -25,7 +25,7 @@
         WHERE h.company_id = #{companyId}
           AND h.org_id = #{orgId}
           AND h.building_id = #{buildingId}
-          AND h.is_deleted = 0
+          AND h.del_flag = 0
           AND h.room_num REGEXP '^[0-9]+-[0-9]+-[0-9]+$'
         ORDER BY h.seq, h.room_num
     </select>
@@ -50,7 +50,7 @@
         WHERE company_id = #{companyId}
           AND org_id = #{orgId}
           AND building_id = #{buildingId}
-          AND is_deleted = 0
+          AND del_flag = 0
     </update>
 
     <!-- 微信支付成功后更新房屋缴费状态 -->
@@ -59,7 +59,7 @@
         SET is_charged = 1,
             update_time = NOW()
         WHERE id = #{houseId}
-          AND is_deleted = 0
+          AND del_flag = 0
     </update>
 
 </mapper>
