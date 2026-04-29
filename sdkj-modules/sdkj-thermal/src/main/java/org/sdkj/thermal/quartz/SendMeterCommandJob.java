@@ -29,6 +29,7 @@ public class SendMeterCommandJob implements Job {
 
         log.info("仪表指令下发 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgId);
 
+        boolean tenantPushed = TenantQuartzContext.push(context);
         try {
             ApplicationContext ctx = (ApplicationContext) context.getScheduler()
                 .getContext().get("applicationContext");
@@ -38,6 +39,8 @@ public class SendMeterCommandJob implements Job {
             log.info("仪表指令下发 Job 完成: {} (公司: {}, 小区: {})", jobName, companyId, orgId);
         } catch (Exception e) {
             log.error("仪表指令下发 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgId, e);
+        } finally {
+            TenantQuartzContext.clear(tenantPushed);
         }
     }
 }

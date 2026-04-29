@@ -1,10 +1,9 @@
 package org.sdkj.thermal.quartz;
 
-import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.utils.SpringUtils;
-import org.sdkj.common.tenant.core.TenantContextHolder;
+import org.sdkj.common.tenant.core.TenantDataSourceHelper;
 import org.sdkj.thermal.domain.HtTasks;
 import org.sdkj.thermal.service.IHtTasksService;
 import org.springframework.boot.CommandLineRunner;
@@ -35,8 +34,7 @@ public class QuartzJobInitRunner implements CommandLineRunner {
 
         for (Map<String, Object> tenant : tenants) {
             String tenantId = tenant.get("tenant_id").toString();
-            String dsName = "tenant_" + tenantId;
-            int scheduled = initTenantJobs(tenantId, dsName);
+            int scheduled = initTenantJobs(tenantId);
             totalScheduled += scheduled;
         }
 
@@ -56,9 +54,8 @@ public class QuartzJobInitRunner implements CommandLineRunner {
         }
     }
 
-    private int initTenantJobs(String tenantId, String dsName) {
-        TenantContextHolder.setTenantCode(tenantId);
-        DynamicDataSourceContextHolder.push(dsName);
+    private int initTenantJobs(String tenantId) {
+        boolean tenantPushed = TenantDataSourceHelper.pushTenant(tenantId);
         try {
             List<HtTasks> activeTasks = tasksService.lambdaQuery()
                 .eq(HtTasks::getStatus, 1)
@@ -80,8 +77,7 @@ public class QuartzJobInitRunner implements CommandLineRunner {
             log.error("Failed to init jobs for tenant {}", tenantId, e);
             return 0;
         } finally {
-            DynamicDataSourceContextHolder.poll();
-            TenantContextHolder.clear();
+            TenantDataSourceHelper.clearTenant(tenantPushed);
         }
     }
 }

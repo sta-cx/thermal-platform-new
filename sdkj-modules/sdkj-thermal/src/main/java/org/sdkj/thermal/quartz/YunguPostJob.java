@@ -45,6 +45,7 @@ public class YunguPostJob implements Job {
         log.info("云谷协议数据推送 Job 启动: {} (公司: {}, 小区: {}, 楼栋: {})",
             jobName, companyId, orgId, branchId);
 
+        boolean tenantPushed = TenantQuartzContext.push(context);
         try {
             ApplicationContext ctx = (ApplicationContext) context.getScheduler()
                 .getContext().get("applicationContext");
@@ -69,6 +70,8 @@ public class YunguPostJob implements Job {
             log.info("云谷协议数据推送 Job 完成: {}", jobName);
         } catch (Exception e) {
             log.error("云谷协议数据推送 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgId, e);
+        } finally {
+            TenantQuartzContext.clear(tenantPushed);
         }
     }
 

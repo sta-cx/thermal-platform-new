@@ -34,6 +34,7 @@ public class HongshunPaymentSyncJob implements Job {
 
         log.info("宏顺支付缴费状态同步 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr);
 
+        boolean tenantPushed = TenantQuartzContext.push(context);
         try {
             ApplicationContext ctx = (ApplicationContext) context.getScheduler()
                 .getContext().get("applicationContext");
@@ -57,6 +58,8 @@ public class HongshunPaymentSyncJob implements Job {
             log.info("宏顺支付缴费状态同步 Job 完成: {} (公司: {})", jobName, companyId);
         } catch (Exception e) {
             log.error("宏顺支付缴费状态同步 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr, e);
+        } finally {
+            TenantQuartzContext.clear(tenantPushed);
         }
     }
 

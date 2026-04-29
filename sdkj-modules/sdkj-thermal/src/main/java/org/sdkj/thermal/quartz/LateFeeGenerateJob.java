@@ -28,6 +28,7 @@ public class LateFeeGenerateJob implements Job {
 
         log.info("滞纳金生成 Job 启动: {} (公司: {}, 小区: {}, 类型: {})", jobName, companyId, orgId, type);
 
+        boolean tenantPushed = TenantQuartzContext.push(context);
         try {
             ApplicationContext ctx = (ApplicationContext) context.getScheduler()
                 .getContext().get("applicationContext");
@@ -47,6 +48,8 @@ public class LateFeeGenerateJob implements Job {
             log.info("滞纳金生成 Job 完成: {} (结果: {})", jobName, result);
         } catch (Exception e) {
             log.error("滞纳金生成 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgId, e);
+        } finally {
+            TenantQuartzContext.clear(tenantPushed);
         }
     }
 }

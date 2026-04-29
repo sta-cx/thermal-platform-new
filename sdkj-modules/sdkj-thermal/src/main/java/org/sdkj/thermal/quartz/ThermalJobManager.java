@@ -30,13 +30,12 @@ public class ThermalJobManager {
             return false;
         }
 
-        JobKey jobKey = new JobKey("thermal_" + taskId, JOB_GROUP);
+        String tenantCode = TenantContextHolder.getTenantCode();
+        JobKey jobKey = jobKey(tenantCode, taskId);
 
         if (scheduler.checkExists(jobKey)) {
             scheduler.deleteJob(jobKey);
         }
-
-        String tenantCode = TenantContextHolder.getTenantCode();
 
         JobDetail jobDetail = JobBuilder.newJob(ThermalJob.class)
             .withIdentity(jobKey)
@@ -52,7 +51,7 @@ public class ThermalJobManager {
             .withMisfireHandlingInstructionDoNothing();
 
         CronTrigger trigger = TriggerBuilder.newTrigger()
-            .withIdentity("trigger_" + taskId, TRIGGER_GROUP)
+            .withIdentity(triggerKey(tenantCode, taskId))
             .withSchedule(cronBuilder)
             .build();
 
@@ -67,7 +66,7 @@ public class ThermalJobManager {
     }
 
     public boolean resumeJob(Integer taskId) throws SchedulerException {
-        JobKey jobKey = new JobKey("thermal_" + taskId, JOB_GROUP);
+        JobKey jobKey = jobKey(TenantContextHolder.getTenantCode(), taskId);
         if (!scheduler.checkExists(jobKey)) {
             return addJob(taskId);
         }
@@ -77,7 +76,7 @@ public class ThermalJobManager {
     }
 
     public boolean pauseJob(Integer taskId) throws SchedulerException {
-        JobKey jobKey = new JobKey("thermal_" + taskId, JOB_GROUP);
+        JobKey jobKey = jobKey(TenantContextHolder.getTenantCode(), taskId);
         if (scheduler.checkExists(jobKey)) {
             scheduler.pauseJob(jobKey);
             log.info("暂停调控任务: {}", taskId);
@@ -86,7 +85,7 @@ public class ThermalJobManager {
     }
 
     public boolean deleteJob(Integer taskId) throws SchedulerException {
-        JobKey jobKey = new JobKey("thermal_" + taskId, JOB_GROUP);
+        JobKey jobKey = jobKey(TenantContextHolder.getTenantCode(), taskId);
         if (scheduler.checkExists(jobKey)) {
             scheduler.deleteJob(jobKey);
             log.info("删除调控任务: {}", taskId);
@@ -95,12 +94,24 @@ public class ThermalJobManager {
     }
 
     public boolean triggerJob(Integer taskId) throws SchedulerException {
-        JobKey jobKey = new JobKey("thermal_" + taskId, JOB_GROUP);
+        JobKey jobKey = jobKey(TenantContextHolder.getTenantCode(), taskId);
         if (scheduler.checkExists(jobKey)) {
             scheduler.triggerJob(jobKey);
             log.info("立即触发调控任务: {}", taskId);
             return true;
         }
         return addJob(taskId);
+    }
+
+    private JobKey jobKey(String tenantCode, Integer taskId) {
+        return new JobKey("thermal_" + tenantKey(tenantCode) + "_" + taskId, JOB_GROUP);
+    }
+
+    private TriggerKey triggerKey(String tenantCode, Integer taskId) {
+        return new TriggerKey("trigger_" + tenantKey(tenantCode) + "_" + taskId, TRIGGER_GROUP);
+    }
+
+    private String tenantKey(String tenantCode) {
+        return tenantCode == null || tenantCode.isEmpty() ? "master" : tenantCode;
     }
 }

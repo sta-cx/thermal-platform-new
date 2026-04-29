@@ -25,6 +25,7 @@ public class ExpenseGenerateJob implements Job {
 
         log.info("费用生成 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgId);
 
+        boolean tenantPushed = TenantQuartzContext.push(context);
         try {
             ApplicationContext ctx = (ApplicationContext) context.getScheduler()
                 .getContext().get("applicationContext");
@@ -34,6 +35,8 @@ public class ExpenseGenerateJob implements Job {
             log.info("费用生成 Job 完成: {} (公司: {}, 小区: {})", jobName, companyId, orgId);
         } catch (Exception e) {
             log.error("费用生成 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgId, e);
+        } finally {
+            TenantQuartzContext.clear(tenantPushed);
         }
     }
 }

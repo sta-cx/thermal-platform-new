@@ -1,8 +1,7 @@
 package org.sdkj.thermal.quartz;
 
-import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.extern.slf4j.Slf4j;
-import org.sdkj.common.tenant.core.TenantContextHolder;
+import org.sdkj.common.tenant.core.TenantDataSourceHelper;
 import org.sdkj.thermal.service.impl.ThermalRegulationEngine;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -25,17 +24,18 @@ public class ThermalJob implements Job {
 
         log.info("Quartz triggered thermal regulation task: {} (ID: {}, Tenant: {})", taskName, taskId, tenantCode);
 
+        boolean tenantPushed = false;
         try {
-            if (tenantCode != null && !tenantCode.isEmpty()) {
-                TenantContextHolder.setTenantCode(tenantCode);
-                DynamicDataSourceContextHolder.push("tenant_" + tenantCode);
+            tenantPushed = TenantDataSourceHelper.pushTenant(tenantCode);
+            if (!tenantPushed) {
+                log.error("Thermal regulation task skipped because tenantCode is missing: {} (ID: {})", taskName, taskId);
+                return;
             }
             doExecute(context, taskId, taskName);
         } catch (Exception e) {
             log.error("Thermal regulation task failed: {} (ID: {})", taskName, taskId, e);
         } finally {
-            DynamicDataSourceContextHolder.poll();
-            TenantContextHolder.clear();
+            TenantDataSourceHelper.clearTenant(tenantPushed);
         }
     }
 

@@ -42,6 +42,7 @@ public class ValveStatusQueryJob implements Job {
 
         log.info("阀门状态查询 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr);
 
+        boolean tenantPushed = TenantQuartzContext.push(context);
         try {
             ApplicationContext ctx = (ApplicationContext) context.getScheduler()
                 .getContext().get("applicationContext");
@@ -68,6 +69,8 @@ public class ValveStatusQueryJob implements Job {
             log.info("阀门状态查询 Job 完成: {} (公司: {})", jobName, companyId);
         } catch (Exception e) {
             log.error("阀门状态查询 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr, e);
+        } finally {
+            TenantQuartzContext.clear(tenantPushed);
         }
     }
 
