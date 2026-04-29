@@ -1,5 +1,6 @@
 package org.sdkj.common.tenant.core;
 
+import cn.dev33.satoken.SaManager;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import jakarta.servlet.*;
@@ -24,7 +25,8 @@ public class TenantFilter {
         FilterRegistrationBean<TenantFilterInner> registration = new FilterRegistrationBean<>();
         registration.setFilter(new TenantFilterInner());
         registration.addUrlPatterns("/*");
-        registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        // 在 SaToken 过滤器之后执行，确保 SaToken 上下文已初始化
+        registration.setOrder(Ordered.LOWEST_PRECEDENCE - 1);
         registration.setName("tenantFilter");
         return registration;
     }
@@ -39,23 +41,20 @@ public class TenantFilter {
             boolean pushed = false;
 
             try {
-                if (isPublicPath(path)) {
-                    chain.doFilter(request, response);
-                    return;
-                }
-
-                if (StpUtil.isLogin()) {
-                    try {
-                        Object tenantCode = StpUtil.getSession().get("tenantCode");
+                if (!isPublicPath(path)) {
+                    String tokenName = SaManager.getConfig().getTokenName();
+                    String tokenValue = req.getHeader(tokenName);
+                    if (tokenValue == null) {
+                        tokenValue = req.getParameter(tokenName);
+                    }
+                    if (tokenValue != null) {
+                        Object tenantCode = StpUtil.getTokenSessionByToken(tokenValue).get("tenantCode");
                         if (tenantCode != null) {
                             String code = tenantCode.toString();
                             TenantContextHolder.setTenantCode(code);
-                            String dsName = "tenant_" + code;
-                            DynamicDataSourceContextHolder.push(dsName);
+                            DynamicDataSourceContextHolder.push("tenant_" + code);
                             pushed = true;
                         }
-                    } catch (Exception e) {
-                        log.warn("获取租户上下文失败: {}", e.getMessage());
                     }
                 }
                 chain.doFilter(request, response);
