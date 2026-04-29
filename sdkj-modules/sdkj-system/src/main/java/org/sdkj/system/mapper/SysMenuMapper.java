@@ -23,20 +23,41 @@ public interface SysMenuMapper extends BaseMapperPlus<SysMenu, SysMenuVo> {
      * 构建用户权限菜单 SQL
      *
      * <p>
-     * 查询用户所属角色所拥有的菜单权限，用于权限判断、菜单加载等场景
+     * 查询用户所属角色所拥有的菜单权限，并限定在租户套餐的菜单范围内。
+     * 即：用户菜单 = 角色菜单 ∩ 租户套餐菜单
      * </p>
      *
      * @param userId 用户ID
+     * @param tenantPackageMenuIds 租户套餐允许的菜单ID集合，为 null 时不做租户过滤（超级管理员场景）
      * @return SQL 字符串，用于 inSql 条件
      */
-    default String buildMenuByUserSql(Long userId) {
-        return """
+    default String buildMenuByUserSql(Long userId, Set<Long> tenantPackageMenuIds) {
+        // tenantPackageMenuIds 来自数据库 Long 类型，直接拼接无注入风险
+        String roleMenuSql = """
                 select menu_id from sys_role_menu where role_id in (
                     select sur.role_id from sys_user_role sur
                         left join sys_role sr on sr.role_id = sur.role_id
                         where sur.user_id = %d and sr.status = '0'
                 )
             """.formatted(userId);
+        if (tenantPackageMenuIds == null || tenantPackageMenuIds.isEmpty()) {
+            return roleMenuSql;
+        }
+        String ids = StringUtils.join(tenantPackageMenuIds, ",");
+        return """
+                select menu_id from sys_role_menu where role_id in (
+                    select sur.role_id from sys_user_role sur
+                        left join sys_role sr on sr.role_id = sur.role_id
+                        where sur.user_id = %d and sr.status = '0'
+                ) and menu_id in (%s)
+            """.formatted(userId, ids);
+    }
+
+    /**
+     * 构建用户权限菜单 SQL（无租户过滤，仅按角色查）
+     */
+    default String buildMenuByUserSql(Long userId) {
+        return buildMenuByUserSql(userId, null);
     }
 
     /**
@@ -86,10 +107,14 @@ public interface SysMenuMapper extends BaseMapperPlus<SysMenu, SysMenuVo> {
      * @return 权限列表
      */
     default Set<String> selectMenuPermsByUserId(Long userId) {
+        return selectMenuPermsByUserId(userId, null);
+    }
+
+    default Set<String> selectMenuPermsByUserId(Long userId, Set<Long> tenantPackageMenuIds) {
         List<String> list = this.selectObjs(
             new LambdaQueryWrapper<SysMenu>()
                 .select(SysMenu::getPerms)
-                .inSql(SysMenu::getMenuId, this.buildMenuByUserSql(userId))
+                .inSql(SysMenu::getMenuId, this.buildMenuByUserSql(userId, tenantPackageMenuIds))
                 .isNotNull(SysMenu::getPerms)
         );
         return new HashSet<>(StreamUtils.filter(list, StringUtils::isNotBlank));

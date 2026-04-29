@@ -17,6 +17,7 @@ import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.system.domain.SysMenu;
 import org.sdkj.system.domain.SysRole;
 import org.sdkj.system.domain.SysRoleMenu;
+import org.sdkj.system.domain.SysTenant;
 import org.sdkj.system.domain.SysTenantPackage;
 import org.sdkj.system.domain.bo.SysMenuBo;
 import org.sdkj.system.domain.vo.MetaVo;
@@ -25,12 +26,14 @@ import org.sdkj.system.domain.vo.SysMenuVo;
 import org.sdkj.system.mapper.SysMenuMapper;
 import org.sdkj.system.mapper.SysRoleMapper;
 import org.sdkj.system.mapper.SysRoleMenuMapper;
+import org.sdkj.system.mapper.SysTenantMapper;
 import org.sdkj.system.mapper.SysTenantPackageMapper;
 import org.sdkj.system.service.ISysMenuService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -48,6 +51,7 @@ public class SysMenuServiceImpl implements ISysMenuService {
     private final SysMenuMapper baseMapper;
     private final SysRoleMapper roleMapper;
     private final SysRoleMenuMapper roleMenuMapper;
+    private final SysTenantMapper tenantMapper;
     private final SysTenantPackageMapper tenantPackageMapper;
 
     /**
@@ -95,7 +99,35 @@ public class SysMenuServiceImpl implements ISysMenuService {
      */
     @Override
     public Set<String> selectMenuPermsByUserId(Long userId) {
-        return baseMapper.selectMenuPermsByUserId(userId);
+        if (LoginHelper.isSuperAdmin(userId)) {
+            return baseMapper.selectMenuPermsByUserId(userId);
+        }
+        Set<Long> packageMenuIds = getTenantPackageMenuIds();
+        return baseMapper.selectMenuPermsByUserId(userId, packageMenuIds);
+    }
+
+    /**
+     * 获取当前登录用户所属租户的套餐菜单ID集合
+     * TODO 后续可用 Redis 缓存（key: tenant:package:menus:{tenantId}）减少每次登录的额外 DB 查询
+     *
+     * @return 租户套餐允许的菜单ID集合，超级管理员或未配置套餐时返回 null（不做过滤）
+     */
+    private Set<Long> getTenantPackageMenuIds() {
+        String tenantId = LoginHelper.getTenantId();
+        if (StringUtils.isBlank(tenantId)) {
+            return null;
+        }
+        SysTenant tenant = tenantMapper.selectOne(
+            new LambdaQueryWrapper<SysTenant>().eq(SysTenant::getTenantId, tenantId));
+        if (tenant == null || tenant.getPackageId() == null) {
+            return null;
+        }
+        SysTenantPackage tenantPackage = tenantPackageMapper.selectById(tenant.getPackageId());
+        if (tenantPackage == null || StringUtils.isBlank(tenantPackage.getMenuIds())) {
+            return null;
+        }
+        List<Long> menuIds = StringUtils.splitTo(tenantPackage.getMenuIds(), Convert::toLong);
+        return CollUtil.isEmpty(menuIds) ? null : new HashSet<>(menuIds);
     }
 
     /**
@@ -121,11 +153,12 @@ public class SysMenuServiceImpl implements ISysMenuService {
         if (LoginHelper.isSuperAdmin(userId)) {
             menus = baseMapper.selectMenuTreeAll();
         } else {
+            Set<Long> packageMenuIds = getTenantPackageMenuIds();
             LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
             menus = baseMapper.selectList(
                 wrapper.in(SysMenu::getMenuType, SystemConstants.TYPE_DIR, SystemConstants.TYPE_MENU)
                     .eq(SysMenu::getStatus, SystemConstants.NORMAL)
-                    .inSql(SysMenu::getMenuId, baseMapper.buildMenuByUserSql(userId))
+                    .inSql(SysMenu::getMenuId, baseMapper.buildMenuByUserSql(userId, packageMenuIds))
                     .orderByAsc(SysMenu::getParentId)
                     .orderByAsc(SysMenu::getOrderNum));
         }
