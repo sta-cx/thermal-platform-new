@@ -26,9 +26,9 @@ SELECT user_id, user_id, '000000', NOW()
 FROM sys_user
 WHERE del_flag = '0' AND status = '0';
 
--- Step 4: 更新默认租户的数据库连接（临时指向当前 ry-vue 库）
+-- Step 4: 更新默认租户的数据库连接
 UPDATE sys_tenant
-SET db_url = 'jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8',
+SET db_url = 'jdbc:mysql://localhost:3306/tenant_000000?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8',
     db_username = 'root',
     db_password = 'root'
 WHERE tenant_id = '000000';

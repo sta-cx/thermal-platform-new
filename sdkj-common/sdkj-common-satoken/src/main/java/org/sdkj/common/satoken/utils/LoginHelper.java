@@ -12,6 +12,7 @@ import org.sdkj.common.core.constant.SystemConstants;
 import org.sdkj.common.core.constant.TenantConstants;
 import org.sdkj.common.core.domain.model.LoginUser;
 import org.sdkj.common.core.enums.UserType;
+import org.sdkj.common.core.utils.StringUtils;
 
 import java.util.Set;
 
@@ -109,6 +110,10 @@ public class LoginHelper {
      * 获取租户ID
      */
     public static String getTenantId() {
+        String tenantCode = getTenantCode();
+        if (StringUtils.isNotBlank(tenantCode)) {
+            return tenantCode;
+        }
         return Convert.toStr(getExtra(TENANT_KEY));
     }
 
@@ -205,8 +210,15 @@ public class LoginHelper {
      */
     public static String getTenantCode() {
         try {
-            return (String) StpUtil.getSession().get("tenantCode");
-        } catch (Exception e) {
+            String tenantCode = Convert.toStr(StpUtil.getTokenSession().get("tenantCode"));
+            if (StringUtils.isNotBlank(tenantCode)) {
+                return tenantCode;
+            }
+        } catch (Exception ignored) {
+        }
+        try {
+            return Convert.toStr(StpUtil.getSession().get("tenantCode"));
+        } catch (Exception ignored) {
             return null;
         }
     }

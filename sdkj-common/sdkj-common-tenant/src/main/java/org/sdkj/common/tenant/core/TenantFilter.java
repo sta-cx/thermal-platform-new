@@ -1,11 +1,14 @@
 package org.sdkj.common.tenant.core;
 
 import cn.dev33.satoken.SaManager;
+import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
-import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.common.core.domain.model.LoginUser;
+import org.sdkj.common.core.utils.StringUtils;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,33 +40,62 @@ public class TenantFilter {
         public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
                 throws IOException, ServletException {
             HttpServletRequest req = (HttpServletRequest) request;
-            String path = req.getRequestURI();
+            String path = normalizePath(req);
             boolean pushed = false;
 
             try {
-                if (!isPublicPath(path)) {
-                    String tokenName = SaManager.getConfig().getTokenName();
-                    String tokenValue = req.getHeader(tokenName);
-                    if (tokenValue == null) {
-                        tokenValue = req.getParameter(tokenName);
+                if (isTenantRoute(path)) {
+                    String tenantCode = req.getHeader(TenantDataSourceHelper.TENANT_HEADER);
+                    if (StringUtils.isBlank(tenantCode) && !isPublicPath(path)) {
+                        tenantCode = resolveTenantCode(req);
                     }
-                    if (tokenValue != null) {
-                        Object tenantCode = StpUtil.getTokenSessionByToken(tokenValue).get("tenantCode");
-                        if (tenantCode != null) {
-                            String code = tenantCode.toString();
-                            TenantContextHolder.setTenantCode(code);
-                            DynamicDataSourceContextHolder.push("tenant_" + code);
-                            pushed = true;
-                        }
-                    }
+                    pushed = TenantDataSourceHelper.pushTenant(tenantCode);
                 }
                 chain.doFilter(request, response);
             } finally {
-                if (pushed) {
-                    DynamicDataSourceContextHolder.poll();
-                }
-                TenantContextHolder.clear();
+                TenantDataSourceHelper.clearTenant(pushed);
             }
+        }
+
+        private String resolveTenantCode(HttpServletRequest req) {
+            String tokenName = SaManager.getConfig().getTokenName();
+            String tokenValue = req.getHeader(tokenName);
+            if (StringUtils.isBlank(tokenValue)) {
+                tokenValue = req.getParameter(tokenName);
+            }
+            if (StringUtils.isBlank(tokenValue)) {
+                return null;
+            }
+            try {
+                SaSession tokenSession = StpUtil.getTokenSessionByToken(tokenValue);
+                Object tenantCode = tokenSession.get("tenantCode");
+                if (tenantCode == null) {
+                    Object loginUser = tokenSession.get(LoginHelper.LOGIN_USER_KEY);
+                    if (loginUser instanceof LoginUser user) {
+                        tenantCode = user.getTenantId();
+                    }
+                }
+                return tenantCode == null ? null : tenantCode.toString();
+            } catch (Exception e) {
+                log.debug("无法从 token 解析租户上下文: {}", e.getMessage());
+                return null;
+            }
+        }
+
+        private String normalizePath(HttpServletRequest req) {
+            String path = req.getRequestURI();
+            String contextPath = req.getContextPath();
+            if (StringUtils.isNotBlank(contextPath) && path.startsWith(contextPath)) {
+                path = path.substring(contextPath.length());
+            }
+            return StringUtils.isBlank(path) ? "/" : path;
+        }
+
+        private boolean isTenantRoute(String path) {
+            return path.startsWith("/thermal/")
+                || path.startsWith("/dashboard/")
+                || path.startsWith("/api/iot/")
+                || path.startsWith("/api/returnControl/");
         }
 
         private boolean isPublicPath(String path) {
@@ -76,9 +108,10 @@ public class TenantFilter {
                 || path.startsWith("/v3/")
                 || path.startsWith("/favicon.ico")
                 || path.startsWith("/api/iot/")
+                || path.startsWith("/api/returnControl/")
                 || path.startsWith("/thermal/iot/")
-                || path.startsWith("/thermal/wechat/")
-                || path.startsWith("/thermal/wxma/");
+                || path.equals("/thermal/wechat/pay/notify")
+                || path.equals("/thermal/wechat/pay/refundNotify");
         }
     }
 }

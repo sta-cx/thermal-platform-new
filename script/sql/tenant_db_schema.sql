@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `ag_company_property` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL COMMENT '更新者',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `is_deleted` tinyint DEFAULT '0' COMMENT '是否删除',
+  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商关联物业表';
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `ag_property_menu` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL COMMENT '更新者',
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `is_deleted` tinyint DEFAULT '0' COMMENT '是否删除',
+  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商物业菜单关联表';
 
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `ag_role` (
   `name` varchar(32) NOT NULL COMMENT '角色名称',
   `identifying` varchar(32) NOT NULL COMMENT '角色标识',
   `nature` tinyint DEFAULT NULL COMMENT '角色性质',
-  `is_deleted` tinyint DEFAULT '0' COMMENT '是否删除',
+  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `role_desc` varchar(255) DEFAULT NULL COMMENT '角色描述',
   `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `is_super` tinyint DEFAULT '0' COMMENT '是否超级管理员',
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `ag_user` (
   `id_department` varchar(64) DEFAULT NULL COMMENT '签发机关',
   `is_super` int DEFAULT '0' COMMENT '是否超级管理员',
   `dept_id` varchar(32) DEFAULT NULL COMMENT '部门ID',
-  `is_deleted` varchar(1) DEFAULT '0' COMMENT '是否删除',
+  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -1067,6 +1067,7 @@ CREATE TABLE IF NOT EXISTS `pr_building` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  `del_flag` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '删除标志',
   PRIMARY KEY (`id`),
   KEY `idx_org_id` (`org_id`),
   KEY `idx_company_id` (`company_id`),
@@ -1084,6 +1085,7 @@ CREATE TABLE IF NOT EXISTS `pr_data_grant` (
   `update_by` varchar(64) DEFAULT NULL COMMENT '修改者',
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(125) DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_company_org` (`company_id`,`org_id`)
@@ -1705,6 +1707,15 @@ CREATE TABLE IF NOT EXISTS `pr_heat_station` (
   KEY `idx_org_id` (`org_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='换热站表';
 
+-- Table: pr_heat_station_org
+CREATE TABLE IF NOT EXISTS `pr_heat_station_org` (
+  `station_id` varchar(32) NOT NULL COMMENT '换热站ID',
+  `org_id` varchar(32) NOT NULL COMMENT '所属小区ID',
+  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
+  KEY `idx_station_org_station` (`station_id`, `org_id`),
+  KEY `idx_station_org_org` (`org_id`, `station_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='换热站所属小区表';
+
 -- Table: pr_heat_station_partition
 CREATE TABLE IF NOT EXISTS `pr_heat_station_partition` (
   `id` varchar(32) NOT NULL COMMENT '主键',
@@ -2029,7 +2040,6 @@ CREATE TABLE IF NOT EXISTS `pr_house` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   `del_flag` char(1) COLLATE utf8mb4_general_ci DEFAULT '0',
-  `is_deleted` tinyint DEFAULT '0' COMMENT '逻辑删除',
   `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_building_unit` (`building_id`,`unit_code`),
@@ -2968,6 +2978,7 @@ CREATE TABLE IF NOT EXISTS `pr_unit` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
+  `del_flag` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '删除标志',
   PRIMARY KEY (`id`),
   KEY `idx_building_id` (`building_id`),
   KEY `idx_org_id` (`org_id`),
@@ -3086,7 +3097,7 @@ CREATE TABLE IF NOT EXISTS `pr_wechat_bill` (
   `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `operator` varchar(40) DEFAULT NULL COMMENT '操作人',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  `is_deleted` char(1) DEFAULT '0' COMMENT '删除标志',
+  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -3150,7 +3161,6 @@ CREATE TABLE IF NOT EXISTS `pr_wechat_order` (
   `bank_type` varchar(255) DEFAULT NULL,
   `attach` varchar(255) DEFAULT NULL,
   `operator` varchar(255) DEFAULT NULL,
-  `is_deleted` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_company_org` (`company_id`,`org_id`),
   KEY `idx_house_id` (`house_id`),
@@ -3197,7 +3207,7 @@ CREATE TABLE IF NOT EXISTS `pr_wechat_user` (
   `bind_status` tinyint DEFAULT NULL COMMENT '绑定状态: 0=未绑定 1=已绑定',
   `session_key` varchar(255) DEFAULT NULL COMMENT '会话密钥',
   `union_id` varchar(64) DEFAULT NULL COMMENT '微信unionId',
-  `is_deleted` char(1) DEFAULT '0' COMMENT '删除标志',
+  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',

@@ -109,14 +109,27 @@ public class AuthController {
 
         // 登录成功后绑定租户信息到 session
         Long userId = LoginHelper.getUserId();
-        SysTenantUser tenantUser = tenantUserMapper.selectByUserId(userId);
-        if (tenantUser != null) {
-            SysTenantVo tenant = tenantService.queryByTenantId(tenantUser.getTenantId());
-            if (tenant != null) {
-                StpUtil.getSession().set("tenantCode", tenant.getTenantId());
-                StpUtil.getSession().set("tenantName", tenant.getCompanyName());
-            }
+        String requestedTenantId = loginBody.getTenantId();
+        SysTenantUser tenantUser = StringUtils.isNotBlank(requestedTenantId)
+            ? tenantUserMapper.selectByUserIdAndTenantId(userId, requestedTenantId)
+            : tenantUserMapper.selectByUserId(userId);
+        if (tenantUser == null) {
+            StpUtil.logout();
+            return R.fail("当前用户未绑定租户");
         }
+        SysTenantVo tenant = tenantService.queryByTenantId(tenantUser.getTenantId());
+        if (tenant == null) {
+            StpUtil.logout();
+            return R.fail("当前用户绑定的租户不存在");
+        }
+        if (!SystemConstants.NORMAL.equals(tenant.getStatus())) {
+            StpUtil.logout();
+            return R.fail("当前用户绑定的租户已停用");
+        }
+        StpUtil.getSession().set("tenantCode", tenant.getTenantId());
+        StpUtil.getSession().set("tenantName", tenant.getCompanyName());
+        StpUtil.getTokenSession().set("tenantCode", tenant.getTenantId());
+        StpUtil.getTokenSession().set("tenantName", tenant.getCompanyName());
         scheduledExecutorService.schedule(() -> {
             SseMessageDto dto = new SseMessageDto();
             dto.setMessage(DateUtils.getTodayHour(new Date()) + "好，欢迎登录 SDKJ 智慧供热综合管理平台");
