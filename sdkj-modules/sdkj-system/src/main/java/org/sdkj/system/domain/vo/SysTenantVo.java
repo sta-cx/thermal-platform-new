@@ -157,6 +157,21 @@ public class SysTenantVo implements Serializable {
     private String dbDriver;
 
     /**
+     * 数据库主机（从 dbUrl 解析）
+     */
+    private String dbHost;
+
+    /**
+     * 数据库端口（从 dbUrl 解析）
+     */
+    private Integer dbPort;
+
+    /**
+     * 数据库名称（从 dbUrl 解析）
+     */
+    private String dbName;
+
+    /**
      * 企业简介
      */
     @ExcelProperty(value = "企业简介")

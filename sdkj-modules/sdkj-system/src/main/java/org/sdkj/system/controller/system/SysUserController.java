@@ -305,4 +305,13 @@ public class SysUserController extends BaseController {
         return R.ok(userService.selectUserListByDept(deptId));
     }
 
+    /**
+     * 查询用户所属的租户列表
+     */
+    @SaCheckPermission("system:user:query")
+    @GetMapping("/tenants/{userId}")
+    public R<List<SysTenantVo>> userTenants(@PathVariable Long userId) {
+        return R.ok(tenantService.getTenantsByUser(userId));
+    }
+
 }

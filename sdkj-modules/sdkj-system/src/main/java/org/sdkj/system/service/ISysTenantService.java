@@ -2,91 +2,54 @@ package org.sdkj.system.service;
 
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.system.domain.bo.CreateDatabaseBo;
+import org.sdkj.system.domain.bo.DbConnectionBo;
 import org.sdkj.system.domain.bo.SysTenantBo;
 import org.sdkj.system.domain.vo.SysTenantVo;
+import org.sdkj.system.domain.vo.SysUserVo;
 
 import java.util.Collection;
 import java.util.List;
 
-/**
- * 租户Service接口
- *
- * @author Michelle.Chung
- */
 public interface ISysTenantService {
 
-    /**
-     * 查询租户
-     */
     SysTenantVo queryById(Long id);
 
-    /**
-     * 基于租户ID查询租户
-     */
     SysTenantVo queryByTenantId(String tenantId);
 
-    /**
-     * 查询租户列表
-     */
     TableDataInfo<SysTenantVo> queryPageList(SysTenantBo bo, PageQuery pageQuery);
 
-    /**
-     * 查询租户列表
-     */
     List<SysTenantVo> queryList(SysTenantBo bo);
 
-    /**
-     * 新增租户
-     */
     Boolean insertByBo(SysTenantBo bo);
 
-    /**
-     * 修改租户
-     */
     Boolean updateByBo(SysTenantBo bo);
 
-    /**
-     * 修改租户状态
-     */
     int updateTenantStatus(SysTenantBo bo);
 
-    /**
-     * 校验租户是否允许操作
-     */
     void checkTenantAllowed(String tenantId);
 
-    /**
-     * 校验并批量删除租户信息
-     */
     Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid);
 
-    /**
-     * 校验企业名称是否唯一
-     */
     boolean checkCompanyNameUnique(SysTenantBo bo);
 
-    /**
-     * 校验账号余额
-     */
     boolean checkAccountBalance(String tenantId);
 
-    /**
-     * 校验有效期
-     */
     boolean checkExpireTime(String tenantId);
 
-    /**
-     * 同步租户套餐
-     */
     Boolean syncTenantPackage(String tenantId, Long packageId);
 
-    /**
-     * 同步租户字典
-     */
-    void syncTenantDict();
+    boolean testConnection(DbConnectionBo bo);
 
-    /**
-     * 同步租户参数配置
-     */
-    void syncTenantConfig();
+    List<String> listDatabases(DbConnectionBo bo);
+
+    boolean createDatabase(CreateDatabaseBo bo);
+
+    boolean bindUser(Long userId, String tenantId);
+
+    boolean unbindUser(Long userId, String tenantId);
+
+    List<SysUserVo> getUsersByTenant(String tenantId);
+
+    List<SysTenantVo> getTenantsByUser(Long userId);
 }

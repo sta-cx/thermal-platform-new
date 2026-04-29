@@ -1,7 +1,7 @@
 package org.sdkj.web.controller;
 
 import cn.dev33.satoken.annotation.SaIgnore;
-import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.collection.CollUtil;
@@ -21,17 +21,14 @@ import org.sdkj.common.core.domain.model.SocialLoginBody;
 import org.sdkj.common.core.utils.*;
 import org.sdkj.common.encrypt.annotation.ApiEncrypt;
 import org.sdkj.common.json.utils.JsonUtils;
-import org.sdkj.common.ratelimiter.annotation.RateLimiter;
-import org.sdkj.common.ratelimiter.enums.LimitType;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.social.config.properties.SocialLoginConfigProperties;
 import org.sdkj.common.social.config.properties.SocialProperties;
 import org.sdkj.common.social.utils.SocialUtils;
 import org.sdkj.common.sse.dto.SseMessageDto;
 import org.sdkj.common.sse.utils.SseMessageUtils;
-import org.sdkj.common.tenant.helper.TenantHelper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.sdkj.system.domain.SysTenantUser;
-import org.sdkj.system.domain.bo.SysTenantBo;
 import org.sdkj.system.domain.vo.SysClientVo;
 import org.sdkj.system.domain.vo.SysTenantVo;
 import org.sdkj.system.mapper.SysTenantUserMapper;
@@ -39,18 +36,16 @@ import org.sdkj.system.service.ISysClientService;
 import org.sdkj.system.service.ISysConfigService;
 import org.sdkj.system.service.ISysSocialService;
 import org.sdkj.system.service.ISysTenantService;
-import org.sdkj.web.domain.vo.LoginTenantVo;
 import org.sdkj.web.domain.vo.LoginVo;
-import org.sdkj.web.domain.vo.TenantListVo;
 import org.sdkj.web.service.IAuthStrategy;
 import org.sdkj.web.service.SysLoginService;
 import org.sdkj.web.service.SysRegisterService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Objects;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,54 +77,55 @@ public class AuthController {
 
     /**
      * 登录方法
-     *
-     * @param body 登录信息
-     * @return 结果
      */
     @ApiEncrypt
     @PostMapping("/login")
     public R<LoginVo> login(@RequestBody String body) {
         LoginBody loginBody = JsonUtils.parseObject(body, LoginBody.class);
         ValidatorUtils.validate(loginBody);
-        // 授权类型和客户端id
         String clientId = loginBody.getClientId();
         String grantType = loginBody.getGrantType();
         SysClientVo client = clientService.queryByClientId(clientId);
-        // 查询不到 client 或 client 内不包含 grantType
         if (ObjectUtil.isNull(client) || !StringUtils.contains(client.getGrantType(), grantType)) {
             log.info("客户端id: {} 认证类型：{} 异常!.", clientId, grantType);
             return R.fail(MessageUtils.message("auth.grant.type.error"));
         } else if (!SystemConstants.NORMAL.equals(client.getStatus())) {
             return R.fail(MessageUtils.message("auth.grant.type.blocked"));
         }
-        // 校验租户
-        loginService.checkTenant(loginBody.getTenantId());
-        // 登录
         LoginVo loginVo = IAuthStrategy.login(body, client, grantType);
 
-        // 登录成功后绑定租户信息到 session
+        // 登录成功后查询租户绑定
         Long userId = LoginHelper.getUserId();
-        String requestedTenantId = loginBody.getTenantId();
-        SysTenantUser tenantUser = StringUtils.isNotBlank(requestedTenantId)
-            ? tenantUserMapper.selectByUserIdAndTenantId(userId, requestedTenantId)
-            : tenantUserMapper.selectByUserId(userId);
-        if (tenantUser == null) {
+        List<SysTenantUser> tenantUsers = tenantUserMapper.selectList(
+            new LambdaQueryWrapper<SysTenantUser>()
+                .eq(SysTenantUser::getUserId, userId));
+        if (CollUtil.isEmpty(tenantUsers)) {
             StpUtil.logout();
             return R.fail("当前用户未绑定租户");
         }
-        SysTenantVo tenant = tenantService.queryByTenantId(tenantUser.getTenantId());
-        if (tenant == null) {
-            StpUtil.logout();
-            return R.fail("当前用户绑定的租户不存在");
-        }
-        if (!SystemConstants.NORMAL.equals(tenant.getStatus())) {
+        List<SysTenantVo> tenants = tenantUsers.stream()
+            .map(tu -> tenantService.queryByTenantId(tu.getTenantId()))
+            .filter(t -> t != null && SystemConstants.NORMAL.equals(t.getStatus()))
+            .toList();
+        if (CollUtil.isEmpty(tenants)) {
             StpUtil.logout();
             return R.fail("当前用户绑定的租户已停用");
         }
-        StpUtil.getSession().set("tenantCode", tenant.getTenantId());
-        StpUtil.getSession().set("tenantName", tenant.getCompanyName());
-        StpUtil.getTokenSession().set("tenantCode", tenant.getTenantId());
-        StpUtil.getTokenSession().set("tenantName", tenant.getCompanyName());
+        if (tenants.size() == 1) {
+            SysTenantVo tenant = tenants.get(0);
+            StpUtil.getSession().set("tenantCode", tenant.getTenantId());
+            StpUtil.getSession().set("tenantName", tenant.getCompanyName());
+            StpUtil.getTokenSession().set("tenantCode", tenant.getTenantId());
+            StpUtil.getTokenSession().set("tenantName", tenant.getCompanyName());
+        } else {
+            loginVo.setNeedSelectTenant(true);
+            loginVo.setTenantList(tenants.stream().map(t -> {
+                Map<String, String> item = new HashMap<>();
+                item.put("tenantId", t.getTenantId());
+                item.put("companyName", t.getCompanyName());
+                return item;
+            }).toList());
+        }
         scheduledExecutorService.schedule(() -> {
             SseMessageDto dto = new SseMessageDto();
             dto.setMessage(DateUtils.getTodayHour(new Date()) + "好，欢迎登录 SDKJ 智慧供热综合管理平台");
@@ -141,9 +137,6 @@ public class AuthController {
 
     /**
      * 获取跳转URL
-     *
-     * @param source 登录来源
-     * @return 结果
      */
     @GetMapping("/binding/{source}")
     public R<String> authBinding(@PathVariable("source") String source,
@@ -163,20 +156,14 @@ public class AuthController {
 
     /**
      * 前端回调绑定授权(需要token)
-     *
-     * @param loginBody 请求体
-     * @return 结果
      */
     @PostMapping("/social/callback")
     public R<Void> socialCallback(@RequestBody SocialLoginBody loginBody) {
-        // 校验token
         StpUtil.checkLogin();
-        // 获取第三方登录信息
         AuthResponse<AuthUser> response = SocialUtils.loginAuth(
             loginBody.getSource(), loginBody.getSocialCode(),
             loginBody.getSocialState(), socialProperties);
         AuthUser authUserData = response.getData();
-        // 判断授权响应是否成功
         if (!response.ok()) {
             return R.fail(response.getMsg());
         }
@@ -184,20 +171,15 @@ public class AuthController {
         return R.ok();
     }
 
-
     /**
      * 取消授权(需要token)
-     *
-     * @param socialId socialId
      */
     @DeleteMapping(value = "/unlock/{socialId}")
     public R<Void> unlockSocial(@PathVariable Long socialId) {
-        // 校验token
         StpUtil.checkLogin();
         Boolean rows = socialUserService.deleteWithValidById(socialId);
         return rows ? R.ok() : R.fail("取消授权失败");
     }
-
 
     /**
      * 退出登录
@@ -222,47 +204,57 @@ public class AuthController {
     }
 
     /**
-     * 登录页面租户下拉框
-     *
-     * @return 租户列表
+     * 查询当前用户可用的租户列表（需登录）
      */
-    @RateLimiter(time = 60, count = 20, limitType = LimitType.IP)
+    @SaCheckLogin
     @GetMapping("/tenant/list")
-    public R<LoginTenantVo> tenantList(HttpServletRequest request) throws Exception {
-        // 返回对象
-        LoginTenantVo result = new LoginTenantVo();
-        boolean enable = TenantHelper.isEnable();
-        result.setTenantEnabled(enable);
-        // 如果未开启租户这直接返回
-        if (!enable) {
-            return R.ok(result);
-        }
+    public R<List<Map<String, String>>> tenantList() {
+        Long userId = LoginHelper.getUserId();
+        List<SysTenantUser> tenantUsers = tenantUserMapper.selectList(
+            new LambdaQueryWrapper<SysTenantUser>()
+                .eq(SysTenantUser::getUserId, userId));
+        List<Map<String, String>> list = tenantUsers.stream()
+            .map(tu -> {
+                SysTenantVo t = tenantService.queryByTenantId(tu.getTenantId());
+                if (t != null && SystemConstants.NORMAL.equals(t.getStatus())) {
+                    Map<String, String> item = new HashMap<>();
+                    item.put("tenantId", t.getTenantId());
+                    item.put("companyName", t.getCompanyName());
+                    return item;
+                }
+                return null;
+            })
+            .filter(Objects::nonNull)
+            .toList();
+        return R.ok(list);
+    }
 
-        List<SysTenantVo> tenantList = tenantService.queryList(new SysTenantBo());
-        List<TenantListVo> voList = MapstructUtils.convert(tenantList, TenantListVo.class);
-        try {
-            // 如果只超管返回所有租户
-            if (LoginHelper.isSuperAdmin()) {
-                result.setVoList(voList);
-                return R.ok(result);
-            }
-        } catch (NotLoginException ignored) {
+    /**
+     * 登录后选择租户（多租户用户）
+     */
+    @PostMapping("/tenant/select")
+    public R<Void> selectTenant(@RequestBody Map<String, String> params) {
+        String tenantId = params.get("tenantId");
+        if (StringUtils.isBlank(tenantId)) {
+            return R.fail("请选择租户");
         }
-
-        // 获取域名
-        String host;
-        String referer = request.getHeader("referer");
-        if (StringUtils.isNotBlank(referer)) {
-            // 这里从referer中取值是为了本地使用hosts添加虚拟域名，方便本地环境调试
-            host = referer.split("//")[1].split("/")[0];
-        } else {
-            host = new URL(request.getRequestURL().toString()).getHost();
+        Long userId = LoginHelper.getUserId();
+        SysTenantUser tenantUser = tenantUserMapper.selectByUserIdAndTenantId(userId, tenantId);
+        if (tenantUser == null) {
+            return R.fail("当前用户未绑定该租户");
         }
-        // 根据域名进行筛选
-        List<TenantListVo> list = StreamUtils.filter(voList, vo ->
-            StringUtils.equalsIgnoreCase(vo.getDomain(), host));
-        result.setVoList(CollUtil.isNotEmpty(list) ? list : voList);
-        return R.ok(result);
+        SysTenantVo tenant = tenantService.queryByTenantId(tenantId);
+        if (tenant == null || !SystemConstants.NORMAL.equals(tenant.getStatus())) {
+            return R.fail("租户不存在或已停用");
+        }
+        if (tenant.getExpireTime() != null && new Date().after(tenant.getExpireTime())) {
+            return R.fail("租户服务已过期");
+        }
+        StpUtil.getSession().set("tenantCode", tenant.getTenantId());
+        StpUtil.getSession().set("tenantName", tenant.getCompanyName());
+        StpUtil.getTokenSession().set("tenantCode", tenant.getTenantId());
+        StpUtil.getTokenSession().set("tenantName", tenant.getCompanyName());
+        return R.ok();
     }
 
 }

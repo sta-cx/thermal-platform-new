@@ -3,6 +3,9 @@ package org.sdkj.web.domain.vo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 登录验证信息
  *
@@ -50,5 +53,15 @@ public class LoginVo {
      * 用户 openid
      */
     private String openid;
+
+    /**
+     * 是否需要选择租户
+     */
+    private Boolean needSelectTenant = false;
+
+    /**
+     * 可选租户列表（needSelectTenant=true 时有值）
+     */
+    private List<Map<String, String>> tenantList;
 
 }

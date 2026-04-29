@@ -54,17 +54,9 @@ public class SysTenantBo extends BaseEntity {
     private String companyName;
 
     /**
-     * 用户名（创建系统用户）
+     * 管理员用户ID（绑定到 sys_tenant_user）
      */
-    @NotBlank(message = "用户名不能为空", groups = { AddGroup.class })
-    private String username;
-
-    /**
-     * 密码（创建系统用户）
-     */
-    @NotBlank(message = "密码不能为空", groups = { AddGroup.class })
-//    @Pattern(regexp = RegexConstants.PASSWORD, message = "{user.password.format.valid}", groups = { AddGroup.class })
-    private String password;
+    private Long adminUserId;
 
     /**
      * 统一社会信用代码
@@ -150,6 +142,21 @@ public class SysTenantBo extends BaseEntity {
      * 租户数据库驱动
      */
     private String dbDriver;
+
+    /**
+     * 数据库主机（前端传入，用于组装 dbUrl）
+     */
+    private String dbHost;
+
+    /**
+     * 数据库端口（前端传入，用于组装 dbUrl）
+     */
+    private Integer dbPort;
+
+    /**
+     * 数据库名称（前端传入，用于组装 dbUrl）
+     */
+    private String dbName;
 
     /**
      * 企业简介
