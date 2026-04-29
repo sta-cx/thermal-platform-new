@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.common.core.utils.SpringUtils;
+import org.sdkj.common.tenant.core.TenantDataSourceHelper;
 import org.sdkj.thermal.config.WechatPayConfig;
 import org.sdkj.thermal.domain.PrTransactionRecord;
 import org.sdkj.thermal.domain.PrWechatOrder;
@@ -19,11 +21,13 @@ import org.sdkj.thermal.wechat.wxPay.WXPay;
 import org.sdkj.thermal.wechat.wxPay.WXPayConfigImpl;
 import org.sdkj.thermal.wechat.wxPay.WXPayConstants;
 import org.sdkj.thermal.wechat.wxPay.WXPayUtil;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
+import javax.sql.DataSource;
 import java.io.BufferedReader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -122,7 +126,7 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
             order.setTradeType("JSAPI");
             order.setAttach(attach);
             order.setOperator(operator);
-            order.setIsDeleted(0);
+            order.setDelFlag("0");
             baseMapper.insert(order);
 
             // 6. 生成前端调起 JSAPI 支付的参数
@@ -435,8 +439,19 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
      * 每天凌晨2点执行
      */
     @Scheduled(cron = "0 0 2 * * ?")
-    @Transactional(rollbackFor = Exception.class)
     public void cancelExpiredOrders() {
+        List<String> tenantCodes = queryEnabledTenantCodes();
+        for (String tenantCode : tenantCodes) {
+            boolean tenantPushed = TenantDataSourceHelper.pushTenant(tenantCode);
+            try {
+                cancelExpiredOrdersForTenant(tenantCode);
+            } finally {
+                TenantDataSourceHelper.clearTenant(tenantPushed);
+            }
+        }
+    }
+
+    private void cancelExpiredOrdersForTenant(String tenantCode) {
         try {
             Date expireThreshold = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
             List<PrWechatOrder> expiredOrders = lambdaQuery()
@@ -445,7 +460,7 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
                     .list();
 
             if (expiredOrders.isEmpty()) {
-                log.debug("没有需要取消的过期订单");
+                log.debug("租户 {} 没有需要取消的过期订单", tenantCode);
                 return;
             }
 
@@ -457,9 +472,23 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
                         order.getOutTradeNo(), order.getCreateTime());
             }
 
-            log.info("过期订单取消完成，共取消 {} 笔订单", expiredOrders.size());
+            log.info("租户 {} 过期订单取消完成，共取消 {} 笔订单", tenantCode, expiredOrders.size());
         } catch (Exception e) {
-            log.error("取消过期订单任务执行失败", e);
+            log.error("租户 {} 取消过期订单任务执行失败", tenantCode, e);
+        }
+    }
+
+    private List<String> queryEnabledTenantCodes() {
+        try {
+            DataSource dataSource = SpringUtils.getBean(DataSource.class);
+            JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+            return jdbcTemplate.queryForList(
+                "SELECT tenant_id FROM sys_tenant WHERE status = '0' AND del_flag = '0' AND db_url IS NOT NULL",
+                String.class
+            );
+        } catch (Exception e) {
+            log.error("查询启用租户列表失败，跳过微信过期订单取消任务", e);
+            return List.of();
         }
     }
 

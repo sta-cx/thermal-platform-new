@@ -4,12 +4,11 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
-import org.sdkj.common.tenant.core.TenantContextHolder;
+import org.sdkj.common.tenant.core.TenantDataSourceHelper;
 import org.sdkj.thermal.domain.dto.NbValvePayload;
 import org.sdkj.thermal.service.IIoTDataService;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +61,7 @@ public class IoTCallbackController {
             return R.fail("认证失败");
         }
 
-        setupTenantContext(tenantCode);
+        boolean tenantPushed = setupTenantContext(tenantCode);
         try {
             JSONObject jsonObject = JSONUtil.parseObj(msg);
             log.info("NB阀门接收电信平台数据: {}", jsonObject);
@@ -92,7 +91,7 @@ public class IoTCallbackController {
             log.error("NB阀门数据处理异常", e);
             return R.fail("处理异常: " + e.getMessage());
         } finally {
-            clearTenantContext();
+            clearTenantContext(tenantPushed);
         }
     }
 
@@ -118,7 +117,7 @@ public class IoTCallbackController {
             return R.fail("认证失败");
         }
 
-        setupTenantContext(tenantCode);
+        boolean tenantPushed = setupTenantContext(tenantCode);
         try {
             if (jsonObject.containsKey("data")) {
                 JSONArray dataArray = jsonObject.getJSONArray("data");
@@ -189,7 +188,7 @@ public class IoTCallbackController {
             log.error("Mbus数据处理异常", e);
             return R.fail("解析错误 failure");
         } finally {
-            clearTenantContext();
+            clearTenantContext(tenantPushed);
         }
         return R.fail("解析错误 failure");
     }
@@ -211,7 +210,7 @@ public class IoTCallbackController {
             return "auth fail";
         }
 
-        setupTenantContext(tenantCode);
+        boolean tenantPushed = setupTenantContext(tenantCode);
 
         try {
             if (StrUtil.isNotBlank(args)) {
@@ -244,7 +243,7 @@ public class IoTCallbackController {
             log.error("移动平台数据处理异常", e);
             return msg;
         } finally {
-            clearTenantContext();
+            clearTenantContext(tenantPushed);
         }
     }
 
@@ -254,17 +253,17 @@ public class IoTCallbackController {
      * 为第三方回调设置租户数据源。
      * IoT/微信等外部回调没有用户会话，需通过请求头 X-Tenant-Code 指定租户。
      */
-    private void setupTenantContext(String tenantCode) {
+    private boolean setupTenantContext(String tenantCode) {
         if (StrUtil.isNotBlank(tenantCode)) {
-            TenantContextHolder.setTenantCode(tenantCode);
-            DynamicDataSourceContextHolder.push("tenant_" + tenantCode);
+            boolean pushed = TenantDataSourceHelper.pushTenant(tenantCode);
             log.info("IoT回调切换到租户数据源: tenant_{}", tenantCode);
+            return pushed;
         }
+        return false;
     }
 
-    private void clearTenantContext() {
-        DynamicDataSourceContextHolder.poll();
-        TenantContextHolder.clear();
+    private void clearTenantContext(boolean tenantPushed) {
+        TenantDataSourceHelper.clearTenant(tenantPushed);
     }
 
     // ========== 认证方法 ==========

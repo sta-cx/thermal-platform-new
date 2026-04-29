@@ -63,7 +63,7 @@ public class PrReconciliationServiceImpl implements IPrReconciliationService {
         bill.setDownloadTime(new Date());
         bill.setCheckStatus(0);
         bill.setOperator(operator);
-        bill.setIsDeleted(0);
+        bill.setDelFlag("0");
         bill.setTotalCount(0);
         bill.setSuccessCount(0);
         bill.setDiffCount(0);

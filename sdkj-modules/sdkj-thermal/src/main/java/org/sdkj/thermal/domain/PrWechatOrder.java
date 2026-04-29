@@ -49,7 +49,7 @@ public class PrWechatOrder extends BaseEntity {
     private String companyId;
     private String operator;
     private String remark;
-    private Integer isDeleted;
+    private String delFlag;
 
     @TableField(exist = false)
     private String orgId;

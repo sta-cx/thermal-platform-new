@@ -78,5 +78,5 @@ public class AgUser extends BaseEntity {
 
     private String deptId;
 
-    private String isDeleted;
+    private String delFlag;
 }

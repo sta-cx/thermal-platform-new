@@ -40,7 +40,7 @@ public class AgUserServiceImpl extends ServiceImpl<AgUserMapper, AgUser> impleme
     public boolean insertUser(AgUserBo userBo) {
         AgUser user = new AgUser();
         BeanUtils.copyProperties(userBo, user);
-        user.setIsDeleted("0");
+        user.setDelFlag("0");
         user.setIsEnabled(0);
         user.setIsSuper(0);
         user.setIsRealname(1);

@@ -74,7 +74,7 @@ public class PrWechatAuthServiceImpl extends ServiceImpl<PrWechatUserMapper, PrW
         LambdaQueryWrapper<PrWechatUser> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(PrWechatUser::getOpenId, openId)
                 .eq(PrWechatUser::getOtherCode, otherCode)
-                .eq(PrWechatUser::getIsDeleted, 0);
+                .eq(PrWechatUser::getDelFlag, 0);
         PrWechatUser existingUser = baseMapper.selectOne(queryWrapper);
         if (existingUser != null) {
             return existingUser;
@@ -87,7 +87,7 @@ public class PrWechatAuthServiceImpl extends ServiceImpl<PrWechatUserMapper, PrW
         wechatUser.setUserName(userName);
         wechatUser.setPhone(phone);
         wechatUser.setBindStatus(1);
-        wechatUser.setIsDeleted(0);
+        wechatUser.setDelFlag("0");
         wechatUser.setCreateTime(new java.util.Date());
         wechatUser.setUpdateTime(new java.util.Date());
 
@@ -122,7 +122,7 @@ public class PrWechatAuthServiceImpl extends ServiceImpl<PrWechatUserMapper, PrW
             return false;
         }
         user.setBindStatus(0);
-        user.setIsDeleted(1);
+        user.setDelFlag("1");
         user.setUpdateTime(new java.util.Date());
         return baseMapper.updateById(user) > 0;
     }

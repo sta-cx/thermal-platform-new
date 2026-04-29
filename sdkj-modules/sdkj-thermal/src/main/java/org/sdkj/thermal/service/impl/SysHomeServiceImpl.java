@@ -2,13 +2,13 @@ package org.sdkj.thermal.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.common.tenant.core.TenantDataSourceHelper;
 import org.sdkj.thermal.mapper.ThermalSysHomeMapper;
 import org.sdkj.thermal.service.ISysHomeService;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -22,22 +22,32 @@ public class SysHomeServiceImpl implements ISysHomeService {
     @Override
     public Map<String, Object> aggregateHomeData(Long userId, String companyId, String stationId, String stationPartitionId) {
         Map<String, Object> result = new HashMap<>();
+        String tenantCode = LoginHelper.getTenantCode();
 
         CompletableFuture<Void> f1 = CompletableFuture.runAsync(() ->
-                result.putAll(queryBlock1(userId, companyId, stationId, stationPartitionId)));
+                withTenant(tenantCode, () -> result.putAll(queryBlock1(userId, companyId, stationId, stationPartitionId))));
         CompletableFuture<Void> f2 = CompletableFuture.runAsync(() ->
-                result.putAll(queryBlock2(userId, companyId, stationId, stationPartitionId)));
+                withTenant(tenantCode, () -> result.putAll(queryBlock2(userId, companyId, stationId, stationPartitionId))));
         CompletableFuture<Void> f3 = CompletableFuture.runAsync(() ->
-                result.putAll(queryBlock3(userId, companyId, stationId, stationPartitionId)));
+                withTenant(tenantCode, () -> result.putAll(queryBlock3(userId, companyId, stationId, stationPartitionId))));
         CompletableFuture<Void> f4 = CompletableFuture.runAsync(() ->
-                result.putAll(queryBlock4(userId, companyId, stationId, stationPartitionId)));
+                withTenant(tenantCode, () -> result.putAll(queryBlock4(userId, companyId, stationId, stationPartitionId))));
         CompletableFuture<Void> f6 = CompletableFuture.runAsync(() ->
-                result.putAll(queryBlock6(userId, companyId, stationId, stationPartitionId)));
+                withTenant(tenantCode, () -> result.putAll(queryBlock6(userId, companyId, stationId, stationPartitionId))));
         CompletableFuture<Void> f7 = CompletableFuture.runAsync(() ->
-                result.putAll(queryBlock7(userId, companyId, stationId, stationPartitionId)));
+                withTenant(tenantCode, () -> result.putAll(queryBlock7(userId, companyId, stationId, stationPartitionId))));
 
         CompletableFuture.allOf(f1, f2, f3, f4, f6, f7).join();
         return result;
+    }
+
+    private void withTenant(String tenantCode, Runnable action) {
+        boolean pushed = TenantDataSourceHelper.pushTenant(tenantCode);
+        try {
+            action.run();
+        } finally {
+            TenantDataSourceHelper.clearTenant(pushed);
+        }
     }
 
     private Map<String, Object> queryBlock1(Long userId, String companyId, String stationId, String stationPartitionId) {

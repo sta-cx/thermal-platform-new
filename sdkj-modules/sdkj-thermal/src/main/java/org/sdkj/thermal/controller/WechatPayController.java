@@ -2,7 +2,6 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaIgnore;
-import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
-import org.sdkj.common.tenant.core.TenantContextHolder;
+import org.sdkj.common.tenant.core.TenantDataSourceHelper;
 import org.sdkj.thermal.domain.PrWechatOrder;
 import org.sdkj.thermal.domain.PrWechatRefund;
 import org.sdkj.thermal.service.IPrWechatPayService;
@@ -75,7 +74,7 @@ public class WechatPayController {
     @PostMapping("/notify")
     public void handlePayNotify(@RequestHeader(value = "X-Tenant-Code", required = false) String tenantCode,
                                 HttpServletRequest request, HttpServletResponse response) throws IOException {
-        setupTenantContext(tenantCode);
+        boolean tenantPushed = setupTenantContext(tenantCode);
         try {
             log.info("微信支付回调处理开始");
             String result = wechatPayService.handlePayNotify(request);
@@ -83,7 +82,7 @@ public class WechatPayController {
             response.setContentType("application/xml;charset=UTF-8");
             response.getWriter().write(result);
         } finally {
-            clearTenantContext();
+            clearTenantContext(tenantPushed);
         }
     }
 
@@ -144,7 +143,7 @@ public class WechatPayController {
     @PostMapping("/refundNotify")
     public void handleRefundNotify(@RequestHeader(value = "X-Tenant-Code", required = false) String tenantCode,
                                    HttpServletRequest request, HttpServletResponse response) throws IOException {
-        setupTenantContext(tenantCode);
+        boolean tenantPushed = setupTenantContext(tenantCode);
         try {
             log.info("微信退款回调处理开始");
             String result = wechatPayService.handleRefundNotify(request);
@@ -152,7 +151,7 @@ public class WechatPayController {
             response.setContentType("application/xml;charset=UTF-8");
             response.getWriter().write(result);
         } finally {
-            clearTenantContext();
+            clearTenantContext(tenantPushed);
         }
     }
 
@@ -175,15 +174,14 @@ public class WechatPayController {
         return R.ok(wechatPayService.list());
     }
 
-    private void setupTenantContext(String tenantCode) {
+    private boolean setupTenantContext(String tenantCode) {
         if (tenantCode != null && !tenantCode.isEmpty()) {
-            TenantContextHolder.setTenantCode(tenantCode);
-            DynamicDataSourceContextHolder.push("tenant_" + tenantCode);
+            return TenantDataSourceHelper.pushTenant(tenantCode);
         }
+        return false;
     }
 
-    private void clearTenantContext() {
-        DynamicDataSourceContextHolder.poll();
-        TenantContextHolder.clear();
+    private void clearTenantContext(boolean tenantPushed) {
+        TenantDataSourceHelper.clearTenant(tenantPushed);
     }
 }

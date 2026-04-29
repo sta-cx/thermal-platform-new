@@ -95,7 +95,7 @@ public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany
         adminUser.setCompanyId(company.getId());
         adminUser.setIsSuper(1);
         adminUser.setIsRealname(1);
-        adminUser.setIsDeleted("0");
+        adminUser.setDelFlag("0");
         adminUser.setIsEnabled(1);
         adminUser.setUserPwd(BCrypt.hashpw("123456"));
         userMapper.insert(adminUser);

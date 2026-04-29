@@ -32,5 +32,5 @@ public class PrWechatBill extends BaseEntity {
     private String companyId;
     private String operator;
     private String remark;
-    private Integer isDeleted;
+    private String delFlag;
 }

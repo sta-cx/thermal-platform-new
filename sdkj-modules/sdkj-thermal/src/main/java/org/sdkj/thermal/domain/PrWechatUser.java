@@ -23,5 +23,5 @@ public class PrWechatUser extends BaseEntity {
     private Integer bindStatus;
     private String sessionKey;
     private String unionId;
-    private Integer isDeleted;
+    private String delFlag;
 }
