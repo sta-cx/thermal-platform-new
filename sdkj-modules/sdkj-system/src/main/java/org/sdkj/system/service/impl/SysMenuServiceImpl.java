@@ -77,8 +77,9 @@ public class SysMenuServiceImpl implements ISysMenuService {
         LambdaQueryWrapper<SysMenu> wrapper = new LambdaQueryWrapper<>();
         // 管理员显示所有菜单信息 不是管理员 按用户id过滤菜单
         if (!LoginHelper.isSuperAdmin(userId)) {
-            // 通过用户id获取角色id 通过角色id获取菜单id 然后in菜单
-            wrapper.inSql(SysMenu::getMenuId, baseMapper.buildMenuByUserSql(userId));
+            // 通过用户id获取角色id 通过角色id获取菜单id 并限定在租户套餐范围内
+            Set<Long> packageMenuIds = getTenantPackageMenuIds();
+            wrapper.inSql(SysMenu::getMenuId, baseMapper.buildMenuByUserSql(userId, packageMenuIds));
         }
         menuList = baseMapper.selectVoList(
             wrapper.like(StringUtils.isNotBlank(menu.getMenuName()), SysMenu::getMenuName, menu.getMenuName())
