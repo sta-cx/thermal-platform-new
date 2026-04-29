@@ -42,11 +42,13 @@ public class MtTcValveController extends BaseController {
     @SaCheckPermission("thermal:meter:valve:list")
     @SaCheckLogin
     @GetMapping("/pageList")
-    public TableDataInfo<MtTcValveVo> pageList(@RequestParam @NotBlank String sortId,
+    public TableDataInfo<MtTcValveVo> pageList(@RequestParam(required = false) String sortId,
                                                 @RequestParam(required = false) String name,
                                                 PageQuery pageQuery) {
         LambdaQueryWrapper<MtTcValve> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(MtTcValve::getSortId, sortId);
+        if (sortId != null && !sortId.trim().isEmpty()) {
+            lqw.eq(MtTcValve::getSortId, sortId);
+        }
         if (name != null && !name.trim().isEmpty()) {
             lqw.like(MtTcValve::getName, name.trim());
         }

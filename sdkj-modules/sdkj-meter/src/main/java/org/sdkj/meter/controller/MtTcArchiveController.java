@@ -42,11 +42,13 @@ public class MtTcArchiveController extends BaseController {
     @SaCheckPermission("thermal:meter:tc:list")
     @SaCheckLogin
     @GetMapping("/pageList")
-    public TableDataInfo<MtTcArchiveVo> pageList(@RequestParam @NotBlank String sortId,
+    public TableDataInfo<MtTcArchiveVo> pageList(@RequestParam(required = false) String sortId,
                                                   @RequestParam(required = false) String name,
                                                   PageQuery pageQuery) {
         LambdaQueryWrapper<MtTcArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(MtTcArchive::getSortId, sortId);
+        if (sortId != null && !sortId.trim().isEmpty()) {
+            lqw.eq(MtTcArchive::getSortId, sortId);
+        }
         if (name != null && !name.trim().isEmpty()) {
             lqw.like(MtTcArchive::getName, name.trim());
         }

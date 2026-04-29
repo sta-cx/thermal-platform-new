@@ -43,11 +43,13 @@ public class MtHeatArchiveController extends BaseController {
     @SaCheckPermission("thermal:meter:heat:list")
     @SaCheckLogin
     @GetMapping("/pageList")
-    public TableDataInfo<MtHeatArchiveVo> pageList(@RequestParam @NotBlank String sortId,
+    public TableDataInfo<MtHeatArchiveVo> pageList(@RequestParam(required = false) String sortId,
                                                     @RequestParam(required = false) String search,
                                                     PageQuery pageQuery) {
         LambdaQueryWrapper<MtHeatArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(MtHeatArchive::getSortId, sortId);
+        if (sortId != null && !sortId.trim().isEmpty()) {
+            lqw.eq(MtHeatArchive::getSortId, sortId);
+        }
         if (search != null && !search.trim().isEmpty()) {
             lqw.and(w -> w.eq(MtHeatArchive::getCode, search.trim())
                           .or().eq(MtHeatArchive::getName, search.trim()));

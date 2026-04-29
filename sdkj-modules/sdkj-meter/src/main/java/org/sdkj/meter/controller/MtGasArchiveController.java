@@ -40,11 +40,13 @@ public class MtGasArchiveController extends BaseController {
     @SaCheckPermission("thermal:meter:gas:list")
     @SaCheckLogin
     @GetMapping({"/pageList", "/list"})
-    public TableDataInfo<MtGasArchiveVo> pageList(@RequestParam @NotBlank String sortId,
+    public TableDataInfo<MtGasArchiveVo> pageList(@RequestParam(required = false) String sortId,
                                                    @RequestParam(required = false) String search,
                                                    PageQuery pageQuery) {
         LambdaQueryWrapper<MtGasArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(MtGasArchive::getSortId, sortId);
+        if (sortId != null && !sortId.trim().isEmpty()) {
+            lqw.eq(MtGasArchive::getSortId, sortId);
+        }
         if (search != null && !search.trim().isEmpty()) {
             lqw.and(w -> w.eq(MtGasArchive::getCode, search.trim())
                           .or().eq(MtGasArchive::getName, search.trim()));

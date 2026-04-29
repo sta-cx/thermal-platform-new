@@ -40,11 +40,13 @@ public class MtCentratorArchiveController extends BaseController {
     @SaCheckPermission("thermal:meter:centrator:list")
     @SaCheckLogin
     @GetMapping({"/pageList", "/list"})
-    public TableDataInfo<MtCentratorArchiveVo> pageList(@RequestParam @NotBlank String sortId,
+    public TableDataInfo<MtCentratorArchiveVo> pageList(@RequestParam(required = false) String sortId,
                                                          @RequestParam(required = false) String search,
                                                          PageQuery pageQuery) {
         LambdaQueryWrapper<MtCentratorArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(MtCentratorArchive::getSortId, sortId);
+        if (sortId != null && !sortId.trim().isEmpty()) {
+            lqw.eq(MtCentratorArchive::getSortId, sortId);
+        }
         if (search != null && !search.trim().isEmpty()) {
             lqw.and(w -> w.eq(MtCentratorArchive::getCode, search.trim())
                           .or().eq(MtCentratorArchive::getName, search.trim()));
