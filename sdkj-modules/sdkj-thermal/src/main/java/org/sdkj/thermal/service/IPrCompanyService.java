@@ -58,7 +58,9 @@ public interface IPrCompanyService extends IService<PrCompany> {
      */
     void deleteOrganization(String id);
 
-    List<String> getUserOrgIds(Long userId);
+    List<String> getUserOrgIds(Long userId, String companyId);
+
+    String getUserCompanyId(Long userId);
 
     void saveUserOrg(Long userId, String companyId, List<String> orgIds);
 

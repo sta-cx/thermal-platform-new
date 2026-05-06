@@ -15,6 +15,7 @@ import org.sdkj.thermal.mapper.PrDataGrantMapper;
 import org.sdkj.thermal.service.IPrCompanyService;
 import org.sdkj.thermal.vo.TreeNode;
 import org.sdkj.thermal.vo.TreeUtil;
+import org.sdkj.common.core.exception.ServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -164,12 +165,23 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
     }
 
     @Override
-    public List<String> getUserOrgIds(Long userId) {
+    public List<String> getUserOrgIds(Long userId, String companyId) {
         List<PrDataGrant> grants = prDataGrantMapper.selectList(
             new LambdaQueryWrapper<PrDataGrant>()
                 .eq(PrDataGrant::getUserId, userId)
+                .eq(PrDataGrant::getCompanyId, companyId)
         );
         return grants.stream().map(PrDataGrant::getOrgId).collect(Collectors.toList());
+    }
+
+    @Override
+    public String getUserCompanyId(Long userId) {
+        List<PrDataGrant> grants = prDataGrantMapper.selectList(
+            new LambdaQueryWrapper<PrDataGrant>()
+                .eq(PrDataGrant::getUserId, userId)
+                .last("LIMIT 1")
+        );
+        return grants.isEmpty() ? null : grants.get(0).getCompanyId();
     }
 
     @Override
@@ -219,14 +231,14 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
     public void deleteOrganization(String id) {
         SysOrganization org = prCompanyMapper.selectOrgById(id);
         if (org == null) {
-            throw new RuntimeException("组织机构不存在");
+            throw new ServiceException("组织机构不存在");
         }
         if ("0".equals(org.getLevel())) {
-            throw new RuntimeException("总公司不可删除");
+            throw new ServiceException("总公司不可删除");
         }
         int childCount = prCompanyMapper.findChild(id, org.getCompanyId());
         if (childCount > 0) {
-            throw new RuntimeException("存在下级节点，不可删除");
+            throw new ServiceException("存在下级节点，不可删除");
         }
         prCompanyMapper.deleteOrgById(id);
         prCompanyMapper.deleteGrantDataById(id, org.getCompanyId());

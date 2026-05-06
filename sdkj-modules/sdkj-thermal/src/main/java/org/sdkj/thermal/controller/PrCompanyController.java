@@ -160,8 +160,16 @@ public class PrCompanyController extends BaseController {
     @SaCheckPermission("thermal:property:company:edit")
     @SaCheckLogin
     @GetMapping("/userOrgIds/{userId}")
-    public R<List<String>> getUserOrgIds(@PathVariable Long userId) {
-        return R.ok(companyService.getUserOrgIds(userId));
+    public R<List<String>> getUserOrgIds(@PathVariable Long userId,
+                                          @RequestParam String companyId) {
+        return R.ok(companyService.getUserOrgIds(userId, companyId));
+    }
+
+    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckLogin
+    @GetMapping("/userCompanyId/{userId}")
+    public R<String> getUserCompanyId(@PathVariable Long userId) {
+        return R.ok("操作成功", companyService.getUserCompanyId(userId));
     }
 
     // ==================== 组织机构 CRUD ====================
