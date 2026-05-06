@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import org.sdkj.common.core.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.domain.PrAccountBalance;
@@ -40,12 +41,12 @@ public class PrAccountServiceImpl implements IPrAccountService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean insertData(List<String> houseIds, String itemGroup, String itemCode, String payment) {
+    public boolean insertData(List<Long> houseIds, String itemGroup, String itemCode, String payment) {
         if (houseIds == null || houseIds.isEmpty()) return false;
         Date now = new Date();
         Long userId = LoginHelper.getUserId();
 
-        for (String houseId : houseIds) {
+        for (Long houseId : houseIds) {
             PrAccountBalance balance = new PrAccountBalance();
             balance.setHouseId(houseId);
             balance.setItemGroup(itemGroup);
@@ -98,13 +99,18 @@ public class PrAccountServiceImpl implements IPrAccountService {
         Long userId = LoginHelper.getUserId();
 
         for (Map<String, String> house : houses) {
-            String houseId = house.get("houseId");
+            String houseIdStr = house.get("houseId");
             String amountStr = house.get("amount");
-            if (houseId == null || amountStr == null) continue;
+            if (houseIdStr == null || amountStr == null) {
+                continue;
+            }
+            Long houseId = Long.valueOf(houseIdStr);
 
             BigDecimal amount = new BigDecimal(amountStr);
+            String houseUserIdStr = house.get("userId");
+            Long houseUserId = houseUserIdStr != null ? Long.valueOf(houseUserIdStr) : null;
             balanceMapper.updateBalance(
-                house.get("userId"), houseId, itemGroup, itemCode, amount);
+                houseUserId, houseId, itemGroup, itemCode, amount);
 
             PrTransactionRecord record = new PrTransactionRecord();
             record.setSerialNum("RCH" + System.currentTimeMillis());
@@ -114,7 +120,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
             record.setPaidAmount(amount);
             record.setStatus(0);
             record.setHouseId(houseId);
-            record.setUserId(house.get("userId"));
+            record.setUserId(houseUserId);
             record.setItemGroup(itemGroup);
             record.setItemCode(itemCode);
             record.setTransactionTime(now);
@@ -134,8 +140,9 @@ public class PrAccountServiceImpl implements IPrAccountService {
         BigDecimal amount = bo.getAmount() != null ? bo.getAmount() : BigDecimal.ZERO;
 
         for (Map.Entry<String, String> entry : bo.getHouses().entrySet()) {
-            String houseId = entry.getKey();
-            String houseUserId = entry.getValue();
+            if (entry.getKey() == null || entry.getValue() == null) continue;
+            Long houseId = Long.valueOf(entry.getKey());
+            Long houseUserId = Long.valueOf(entry.getValue());
 
             balanceMapper.updateBalance(houseUserId, houseId,
                 bo.getItemGroup(), bo.getItemCode(), amount.negate());
@@ -159,14 +166,14 @@ public class PrAccountServiceImpl implements IPrAccountService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean transfer(List<String> houseIds, String payment, String itemGroup, String itemCode,
+    public boolean transfer(List<Long> houseIds, String payment, String itemGroup, String itemCode,
             String makeInvoice, String invoice) {
         if (houseIds == null || houseIds.isEmpty()) return false;
         Date now = new Date();
         Long userId = LoginHelper.getUserId();
         int paymentType = payment != null ? Integer.parseInt(payment) : 1;
 
-        for (String houseId : houseIds) {
+        for (Long houseId : houseIds) {
             // Query existing balance records for this house
             LambdaQueryWrapper<PrAccountBalance> qw = new LambdaQueryWrapper<>();
             qw.eq(PrAccountBalance::getHouseId, houseId);
@@ -253,7 +260,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
     }
 
     @Override
-    public BigDecimal getPersonAccount(String companyId, String orgId, String userId) {
+    public BigDecimal getPersonAccount(String companyId, String orgId, Long userId) {
         return balanceMapper.selectBalanceByUser(companyId, orgId, userId);
     }
 
@@ -273,19 +280,23 @@ public class PrAccountServiceImpl implements IPrAccountService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Map<String, Object> saveDeposit(Map<String, Object> depositVo) {
-        String houseId = (String) depositVo.get("houseId");
-        String userId = (String) depositVo.get("userId");
+        Object houseIdObj = depositVo.get("houseId");
+        Long houseId = houseIdObj instanceof Long ? (Long) houseIdObj :
+                       houseIdObj != null ? Long.valueOf(houseIdObj.toString()) : null;
+        Object userIdObj = depositVo.get("userId");
+        Long userId = userIdObj instanceof Long ? (Long) userIdObj :
+                      userIdObj != null ? Long.valueOf(userIdObj.toString()) : null;
         String itemGroup = (String) depositVo.get("itemGroup");
         String itemCode = (String) depositVo.get("itemCode");
         String paymentStr = (String) depositVo.get("payment");
         String orgId = (String) depositVo.get("orgId");
         String companyId = (String) depositVo.get("companyId");
 
-        if (houseId == null || houseId.isEmpty()) {
-            throw new RuntimeException("房屋ID不能为空");
+        if (houseId == null) {
+            throw new ServiceException("房屋ID不能为空");
         }
         if (itemGroup == null || itemGroup.isEmpty()) {
-            throw new RuntimeException("费用分组不能为空");
+            throw new ServiceException("费用分组不能为空");
         }
 
         Object amountObj = depositVo.get("amount");
@@ -325,7 +336,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
         // 更新或创建账户余额
         LambdaQueryWrapper<PrAccountBalance> qw = new LambdaQueryWrapper<>();
         qw.eq(PrAccountBalance::getHouseId, houseId);
-        if (userId != null && !userId.isEmpty()) {
+        if (userId != null) {
             qw.eq(PrAccountBalance::getUserId, userId);
         }
         qw.eq(PrAccountBalance::getItemGroup, itemGroup);
@@ -393,7 +404,10 @@ public class PrAccountServiceImpl implements IPrAccountService {
                     @SuppressWarnings("unchecked")
                     var row = (Map<String, Object>) obj;
                     PrAccountBalance balance = new PrAccountBalance();
-                    balance.setHouseId(String.valueOf(row.getOrDefault("houseId", "")));
+                    Object houseIdVal = row.get("houseId");
+                    balance.setHouseId(houseIdVal instanceof Long ? (Long) houseIdVal :
+                        houseIdVal instanceof Number ? ((Number) houseIdVal).longValue() :
+                        houseIdVal != null ? Long.valueOf(houseIdVal.toString()) : null);
                     balance.setItemGroup(String.valueOf(row.getOrDefault("itemGroup", "")));
                     balance.setItemCode(String.valueOf(row.getOrDefault("itemCode", "")));
                     balance.setBalance(java.math.BigDecimal.ZERO);

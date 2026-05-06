@@ -22,7 +22,7 @@ public class MtMeterMatchServiceImpl extends ServiceImpl<MtMeterMatchMapper, MtM
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void batchAllocate(String companyId, List<String> archiveIds, String meterType) {
+    public void batchAllocate(String companyId, List<Long> archiveIds, String meterType) {
         // 删除该公司该类型的所有分配
         baseMapper.delete(
             new LambdaQueryWrapper<MtMeterMatch>()
@@ -30,11 +30,13 @@ public class MtMeterMatchServiceImpl extends ServiceImpl<MtMeterMatchMapper, MtM
                 .eq(MtMeterMatch::getMeterType, meterType)
         );
         // 批量新增分配
-        for (String archiveId : archiveIds) {
-            if (archiveId == null || archiveId.isBlank()) continue;
+        for (Long archiveId : archiveIds) {
+            if (archiveId == null) {
+                continue;
+            }
             MtMeterMatch match = new MtMeterMatch();
             match.setCompanyId(companyId);
-            match.setArchiveId(archiveId.trim());
+            match.setArchiveId(archiveId);
             match.setMeterType(meterType);
             baseMapper.insert(match);
         }

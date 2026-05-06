@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -19,8 +18,8 @@ import org.sdkj.thermal.domain.vo.PrFamilyVo;
 @AutoMapper(target = PrFamilyVo.class)
 public class PrFamily extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 客户证件号 */
     private String userIdNo;
@@ -44,6 +43,6 @@ public class PrFamily extends BaseEntity {
     private String relationType;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
 }

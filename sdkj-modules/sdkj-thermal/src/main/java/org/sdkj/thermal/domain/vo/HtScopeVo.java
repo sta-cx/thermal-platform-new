@@ -11,15 +11,15 @@ import org.sdkj.thermal.domain.HtScope;
 @AutoMapper(target = HtScope.class)
 public class HtScopeVo {
 
-    private String id;
-    private String tasksId;
+    private Long id;
+    private Long tasksId;
     private String orgId;
-    private String buildingId;
-    private String unitId;
+    private Long buildingId;
+    private Long unitId;
     private String companyId;
-    private String houseId;
+    private Long houseId;
     private String meterNum;
-    private String meterId;
+    private Long meterId;
     private String meterArcCode;
     private String concentratorCode;
     private String imei;

@@ -18,13 +18,13 @@ public interface HtStrategySubMapper extends BaseMapperPlus<HtStrategySub, HtStr
      * @param strategyId 策略ID
      * @return 子表记录列表
      */
-    List<HtStrategySubVo> selectByStrategyId(@Param("strategyId") String strategyId);
+    List<HtStrategySubVo> selectByStrategyId(@Param("strategyId") Long strategyId);
 
     /**
      * 根据策略ID删除子表记录
      * @param strategyId 策略ID
      * @return 删除记录数
      */
-    int deleteByStrategyId(@Param("strategyId") String strategyId);
+    int deleteByStrategyId(@Param("strategyId") Long strategyId);
 
 }

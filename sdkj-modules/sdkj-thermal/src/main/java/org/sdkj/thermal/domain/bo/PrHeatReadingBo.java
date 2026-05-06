@@ -19,7 +19,7 @@ import java.util.Date;
 public class PrHeatReadingBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 厂家反馈的产品代码 */
     private String manuId;

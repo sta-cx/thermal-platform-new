@@ -31,7 +31,7 @@ public class PrUseCardLogServiceImpl extends ServiceImpl<PrUseCardLogMapper, PrU
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean changeValveStatus(String meterId, Integer valveStatus) {
+    public boolean changeValveStatus(Long meterId, Integer valveStatus) {
         // TODO: 实际阀门状态变更需要通过 MBus 通信
         PrUseCardLog log = new PrUseCardLog();
         log.setMeterId(meterId);

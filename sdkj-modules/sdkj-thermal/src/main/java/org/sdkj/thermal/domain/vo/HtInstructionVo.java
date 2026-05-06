@@ -12,7 +12,7 @@ import org.sdkj.thermal.domain.HtInstruction;
 @AutoMapper(target = HtInstruction.class)
 public class HtInstructionVo {
 
-    private String id;
+    private Long id;
 
     /** 指令名称 */
     private String name;

@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -20,11 +19,11 @@ import java.util.Date;
 @TableName("pr_heat_real_data")
 public class PrHeatRealData extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 小区ID */
     private String orgId;
@@ -33,7 +32,7 @@ public class PrHeatRealData extends BaseEntity {
     private String companyId;
 
     /** 楼栋ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 楼栋名称 */
     private String buildingName;

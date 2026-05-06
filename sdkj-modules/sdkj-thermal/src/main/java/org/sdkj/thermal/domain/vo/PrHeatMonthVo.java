@@ -19,7 +19,7 @@ public class PrHeatMonthVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private Long id;
 
     /** 表号 */
     private String meterNum;
@@ -28,7 +28,7 @@ public class PrHeatMonthVo implements Serializable {
     private String cardNum;
 
     /** 配表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 热表档案编号 */
     private String meterArcCode;
@@ -55,7 +55,7 @@ public class PrHeatMonthVo implements Serializable {
     private String statisticsType;
 
     /** 收费标准ID */
-    private String standardId;
+    private Long standardId;
 
     /** 总金额 */
     private BigDecimal totalMoney;
@@ -85,7 +85,7 @@ public class PrHeatMonthVo implements Serializable {
     private BigDecimal addAdvances;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 小区ID */
     private String orgId;

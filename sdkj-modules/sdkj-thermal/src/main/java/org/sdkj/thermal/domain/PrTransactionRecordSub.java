@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -20,14 +19,14 @@ import java.math.BigDecimal;
 @AutoMapper(target = PrTransactionRecordSubVo.class)
 public class PrTransactionRecordSub extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 主记录ID */
-    private String mainId;
+    private Long mainId;
 
     /** 费用明细ID */
-    private String expenseId;
+    private Long expenseId;
 
     /** 金额 */
     private BigDecimal amount;
@@ -45,7 +44,7 @@ public class PrTransactionRecordSub extends BaseEntity {
     private String itemCode;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 费用名称 */
     private String itemName;

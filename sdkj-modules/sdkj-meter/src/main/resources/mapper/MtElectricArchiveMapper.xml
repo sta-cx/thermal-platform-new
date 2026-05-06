@@ -17,7 +17,7 @@
     <!-- 将仪表分配给代理商公司 -->
     <insert id="insertMeterToAgent">
         INSERT INTO mt_meter_match (id, archive_id, company_id, meter_type, create_by, create_time)
-        SELECT REPLACE(UUID(), '-', ''), #{entity.id}, id, '01', #{entity.createBy}, NOW()
+        SELECT CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{entity.id}, id, '01', #{entity.createBy}, NOW()
         FROM sys_company
         WHERE code = 'XABL' AND nature = '1'
     </insert>

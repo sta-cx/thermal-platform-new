@@ -1,5 +1,6 @@
 package org.sdkj.thermal.wechat.utils;
 
+import org.sdkj.common.core.exception.ServiceException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -59,7 +60,7 @@ public class WeixinAPIHelper {
     public static OauthInfo getOauthInfo(String appid, String secret, String code) {
         OauthInfo oauthInfo = null;
         try {
-            log.info("getAccessToken start.{appid=" + appid + ",secret:" + secret + "}");
+            log.info("getAccessToken start.appid={},secret={}", appid, secret);
             String url = MessageFormat.format(auth_openid_url, appid, secret, code);
             String response = HttpUtil.doGet(url);
             JsonNode jsonObject = mapper.readTree(response);
@@ -69,8 +70,10 @@ public class WeixinAPIHelper {
             oauthInfo.setRefreshToken(jsonObject.path("refresh_token").asText());
             oauthInfo.setOpenId(jsonObject.path("openid").asText());
             oauthInfo.setScope(jsonObject.path("scope").asText());
-        } catch (Exception e) {
-            log.error("get access token exception", e);
+        } catch (IOException e) {
+            log.error("get access token failed: network error", e);
+        } catch (NullPointerException e) {
+            log.error("get access token failed: unexpected response structure", e);
         }
         return oauthInfo;
     }
@@ -78,60 +81,56 @@ public class WeixinAPIHelper {
     public static String getAccessToken(String appid, String secret) {
         String accessToken = null;
         try {
-            log.info("getAccessToken start.{appid=" + appid + ",secret:" + secret + "}");
+            log.info("getAccessToken start.appid={},secret={}", appid, secret);
             String url = MessageFormat.format(getTokenUrl, appid, secret);
             String response = HttpUtil.doGet(url);
             accessToken = mapper.readTree(response).path("access_token").asText();
-        } catch (Exception e) {
-            log.error("get access token exception", e);
+        } catch (IOException e) {
+            log.error("get access token failed: network error", e);
         }
         return accessToken;
     }
 
     public static String sendMessage(String token, String msg) {
         try {
-            log.info("sendMessage start.token:" + token + ",msg:" + msg);
+            log.info("sendMessage start.token:{},msg:{}", token, msg);
             String url = MessageFormat.format(sendMsgUrl, token);
-            String response = HttpUtil.doPost(url, msg);
-            return response;
+            return HttpUtil.doPost(url, msg);
         } catch (Exception e) {
-            log.error("send message exception", e);
+            log.error("send message failed", e);
             return null;
         }
     }
 
     public static String sendTemplateMessage(String token, String msg) {
         try {
-            log.info("sendTemplateMessage start.token:" + token + ",msg:" + msg);
+            log.info("sendTemplateMessage start.token:{},msg:{}", token, msg);
             String url = MessageFormat.format(sendTemplateMsgUrl, token);
-            String response = HttpUtil.doPost(url, msg);
-            return response;
+            return HttpUtil.doPost(url, msg);
         } catch (Exception e) {
-            log.error("send template message exception", e);
+            log.error("send template message failed", e);
             return null;
         }
     }
 
     public static String createMenu(String token, String menu) {
         try {
-            log.info("createMenu start.token:" + token + ",menu:" + menu);
+            log.info("createMenu start.token:{},menu:{}", token, menu);
             String url = MessageFormat.format(createMenuUrl, token);
-            String response = HttpUtil.doPost(url, menu);
-            return response;
+            return HttpUtil.doPost(url, menu);
         } catch (Exception e) {
-            log.error("create menu exception", e);
+            log.error("create menu failed", e);
             return null;
         }
     }
 
     public static String deleteMenu(String token) {
         try {
-            log.info("deleteMenu start.token:" + token);
+            log.info("deleteMenu start.token:{}", token);
             String url = MessageFormat.format(deleteMenuUrl, token);
-            String response = HttpUtil.doGet(url);
-            return response;
+            return HttpUtil.doGet(url);
         } catch (Exception e) {
-            log.error("delete menu exception", e);
+            log.error("delete menu failed", e);
             return null;
         }
     }
@@ -140,7 +139,7 @@ public class WeixinAPIHelper {
         WeixinUser weixinUserInfo = null;
         JsonNode jsonObject = null;
         try {
-            log.info("getUserInfo start.{token:" + token + ",openid:" + openid + "}");
+            log.info("getUserInfo start.token:{},openid:{}", token, openid);
             String url = MessageFormat.format(getUserInfoUrl, token, openid);
             String response = HttpUtil.doGet(url);
             jsonObject = mapper.readTree(response);
@@ -157,10 +156,12 @@ public class WeixinAPIHelper {
                 weixinUserInfo.setCity(jsonObject.path("city").asText());
                 weixinUserInfo.setLanguage(jsonObject.path("language").asText());
                 weixinUserInfo.setHeadImgUrl(jsonObject.path("headimgurl").asText());
-                weixinUserInfo.setGroupId(String.valueOf(jsonObject.path("groupid").asInt()));
+                weixinUserInfo.setGroupId((long) jsonObject.path("groupid").asInt());
             }
-        } catch (Exception e) {
-            log.error("get user info exception", e);
+        } catch (IOException e) {
+            log.error("get user info failed: network error", e);
+        } catch (NullPointerException e) {
+            log.error("get user info failed: unexpected response structure");
             if (weixinUserInfo != null && weixinUserInfo.getSubscribe() == 0) {
                 log.error("用户{}已取消关注", weixinUserInfo.getOpenId());
             } else if (jsonObject != null) {
@@ -184,8 +185,8 @@ public class WeixinAPIHelper {
             if (root.has("code")) {
                 code = root.get("code").asText();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            log.error("获取微信授权码失败: network error", e);
         }
         return code;
     }
@@ -193,25 +194,24 @@ public class WeixinAPIHelper {
     public static String getopendid(String code) {
         String openid = "";
         try {
-            log.info("getUserInfo start.{code:" + code + "}");
+            log.info("getUserInfo start.code:{}", code);
             String url = MessageFormat.format(auth_openid_url, APPID, SECRET, code);
             String jsonStr = HttpUtil.doGet(url);
             JsonNode root = mapper.readTree(jsonStr);
             if (root.has("openid")) {
                 openid = root.get("openid").asText();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            log.error("获取openid失败: network error", e);
         }
         return openid;
     }
 
     public static List<String> getUserInfo2(String token, String openid) {
-        WeixinUser weixinUserInfo = null;
         JsonNode jsonObject = null;
         List<String> openids = new ArrayList<>();
         try {
-            log.info("getUserInfo start.{token:" + token + ",openid:" + openid + "}");
+            log.info("getUserInfo start.token:{},openid:{}", token, openid);
             String url = MessageFormat.format(getUserInfoUrl2, token, openid);
             String response = HttpUtil.doGet(url);
             jsonObject = mapper.readTree(response);
@@ -224,13 +224,8 @@ public class WeixinAPIHelper {
                     }
                 }
             }
-        } catch (Exception e) {
-            log.error("get user info exception", e);
-            if (weixinUserInfo != null && weixinUserInfo.getSubscribe() == 0) {
-                log.error("用户{}已取消关注", weixinUserInfo.getOpenId());
-            } else if (jsonObject != null) {
-                log.error("获取用户信息失败");
-            }
+        } catch (IOException e) {
+            log.error("获取用户列表失败: network error", e);
         }
         return openids;
     }
@@ -246,8 +241,8 @@ public class WeixinAPIHelper {
             if (root.has("groupid")) {
                 str = root.get("groupid").asText();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            log.error("获取用户分组失败: network error", e);
         }
         return str;
     }
@@ -257,7 +252,7 @@ public class WeixinAPIHelper {
         try {
             result = URLEncoder.encode(source, "utf-8");
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            log.error("操作异常", e);
         }
         return result;
     }
@@ -271,7 +266,7 @@ public class WeixinAPIHelper {
             byte[] cipherdata = cipher.doFinal(data);
             return Base64.getEncoder().encodeToString(cipherdata);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException("当前Java环境不支持RSA v1.5/OAEP", e);
+            throw new ServiceException("当前Java环境不支持RSA v1.5/OAEP", e);
         } catch (InvalidKeyException e) {
             throw new IllegalArgumentException("无效的公钥", e);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
@@ -288,7 +283,7 @@ public class WeixinAPIHelper {
             byte[] cipherdata = cipher.doFinal(data);
             return Base64.getEncoder().encodeToString(cipherdata);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException("当前Java环境不支持RSA v1.5/OAEP", e);
+            throw new ServiceException("当前Java环境不支持RSA v1.5/OAEP", e);
         } catch (InvalidKeyException e) {
             throw new IllegalArgumentException("无效的证书", e);
         } catch (IllegalBlockSizeException | BadPaddingException e) {
@@ -304,7 +299,7 @@ public class WeixinAPIHelper {
             byte[] data = Base64.getDecoder().decode(ciphertext);
             return new String(cipher.doFinal(data), "utf-8");
         } catch (NoSuchPaddingException | NoSuchAlgorithmException e) {
-            throw new RuntimeException("当前Java环境不支持RSA v1.5/OAEP", e);
+            throw new ServiceException("当前Java环境不支持RSA v1.5/OAEP", e);
         } catch (InvalidKeyException e) {
             throw new IllegalArgumentException("无效的私钥", e);
         } catch (BadPaddingException | IllegalBlockSizeException e) {

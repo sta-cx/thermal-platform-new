@@ -61,7 +61,7 @@ public class HtTasksPerformController extends BaseController {
     @SaCheckPermission("thermal:ht:tasksPerform:edit")
     @SaCheckLogin
     @PutMapping("/status")
-    public R<Void> updateStatus(@RequestParam String performId, @RequestParam Integer status) {
+    public R<Void> updateStatus(@RequestParam Long performId, @RequestParam Integer status) {
         return toAjax(tasksPerformService.updateInstructionStatus(performId, status));
     }
 

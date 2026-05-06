@@ -242,7 +242,7 @@
 
     <insert id="insertUserHouse">
         insert into pr_user_house (id, user_id, house_id, company_id)
-        select replace(uuid(), '-', ''), user_id, house_id, company_id
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), user_id, house_id, company_id
         from pr_import_basic_data
         where company_id = #{companyId} and create_by = #{create}
           and type = '0' and user_id is not null and house_id is not null
@@ -250,7 +250,7 @@
 
     <insert id="insertHouseChange">
         insert into pr_house_change (id, house_id, org_id, user_id, change_type, create_time, company_id)
-        select replace(uuid(), '-', ''), house_id, org_id, user_id, '0', now(), company_id
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), house_id, org_id, user_id, '0', now(), company_id
         from pr_import_basic_data
         where company_id = #{companyId} and create_by = #{create}
           and type = '0' and user_id is not null
@@ -258,7 +258,7 @@
 
     <insert id="insertHouseExpense">
         insert into pr_house_expense (id, house_id, standard_id, company_id, create_by, create_time)
-        select replace(uuid(), '-', ''), house_id, standard_id, company_id, create_by, now()
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), house_id, standard_id, company_id, create_by, now()
         from pr_import_basic_data
         where company_id = #{companyId} and create_by = #{create}
           and type = '0' and standard_id is not null
@@ -287,7 +287,7 @@
 
     <insert id="insertUserHouseRelation">
         insert into pr_user_house (id, user_id, house_id, company_id, create_by, create_time)
-        select replace(uuid(), '-', ''), #{userId}, #{houseId}, #{companyId}, #{createBy}, #{createTime}
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{userId}, #{houseId}, #{companyId}, #{createBy}, #{createTime}
         where not exists (
             select 1 from pr_user_house where user_id = #{userId} and house_id = #{houseId}
         )
@@ -295,7 +295,7 @@
 
     <insert id="insertHouseExpenseByCode">
         insert into pr_house_expense (id, house_id, standard_id, item_group, item_code, company_id, create_by, create_time)
-        select replace(uuid(), '-', ''), #{houseId}, s.id, s.item_group, s.item_code, #{companyId}, #{createBy}, #{createTime}
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{houseId}, s.id, s.item_group, s.item_code, #{companyId}, #{createBy}, #{createTime}
         from pr_standard s
         where s.name = #{standardName}
           and s.company_id = #{companyId}
@@ -308,7 +308,7 @@
 
     <insert id="updateAccountBalance">
         insert into pr_account_balance (id, user_id, house_id, item_group, item_code, balance, company_id, create_by, create_time)
-        select replace(uuid(), '-', ''), #{userId}, #{houseId}, e.item_group, e.item_code, #{account}, #{companyId}, #{createBy}, #{createTime}
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{userId}, #{houseId}, e.item_group, e.item_code, #{account}, #{companyId}, #{createBy}, #{createTime}
         from pr_house_expense he
         left join pr_standard e on he.standard_id = e.id
         where he.house_id = #{houseId}

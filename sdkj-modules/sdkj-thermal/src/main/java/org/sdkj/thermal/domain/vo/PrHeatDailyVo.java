@@ -19,10 +19,10 @@ public class PrHeatDailyVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private Long id;
 
     /** 配表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 表号 */
     private String meterNum;
@@ -82,7 +82,7 @@ public class PrHeatDailyVo implements Serializable {
     private Date calcDate;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 小区ID */
     private String orgId;

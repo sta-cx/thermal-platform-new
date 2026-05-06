@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,10 +13,10 @@ import org.springframework.format.annotation.DateTimeFormat;
 @TableName("pr_wechat_bind_record")
 public class PrWechatBindRecord extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
-    private String houseId;
+    private Long houseId;
     private String heatPayCode;
     private String wxOpenId;
     private String companyId;

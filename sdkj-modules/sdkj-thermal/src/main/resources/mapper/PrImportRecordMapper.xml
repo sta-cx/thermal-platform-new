@@ -83,7 +83,7 @@
         (id, company_id, org_id, house_id, item_id, standard_price, card_num,
          trade_times, qty, receivable, payment_balance, paid_in, trade_time,
          allow_amount, deduction, create_by, create_time)
-        select replace(uuid(), '-', ''), company_id, org_id, house_id, item_id,
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), company_id, org_id, house_id, item_id,
                standard_price, card_num, trade_times, qty, receivable,
                payment_balance, paid_in, trade_time, allow_amount, deduction,
                create_by, now()

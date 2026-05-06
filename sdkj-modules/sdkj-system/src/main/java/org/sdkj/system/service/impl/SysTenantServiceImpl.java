@@ -35,6 +35,8 @@ import org.sdkj.system.service.ISysTenantService;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.EncodedResource;
+import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -275,13 +277,9 @@ public class SysTenantServiceImpl implements ISysTenantService {
                 var resource = new ClassPathResource("sql/tenant_db_schema.sql");
                 if (resource.exists()) {
                     conn.setCatalog(bo.getDbName());
-                    String sql = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-                    for (String s : sql.split(";")) {
-                        String trimmed = s.trim();
-                        if (!trimmed.isEmpty() && !trimmed.startsWith("--") && !trimmed.startsWith("/*")) {
-                            conn.createStatement().execute(trimmed);
-                        }
-                    }
+                    ScriptUtils.executeSqlScript(conn, new EncodedResource(resource, StandardCharsets.UTF_8));
+                } else {
+                    log.warn("租户数据库初始化脚本不存在: sql/tenant_db_schema.sql，跳过表结构初始化");
                 }
             }
             return true;

@@ -227,7 +227,7 @@
         (id, company_id, org_id, unit_id, archive_id, meter_arc_code, meter_arc_name,
          meter_num, card_num, dtu_num, dtu_type, chan_num, device_id, meter_serial,
          concentrator_code, caliber, create_by, create_time)
-        select replace(uuid(), '-', ''),
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
                company_id,
                org_id,
                unit_id,

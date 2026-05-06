@@ -15,7 +15,7 @@ import org.sdkj.thermal.domain.HtStrategy;
 public class HtStrategyBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 策略名称 */
     private String name;

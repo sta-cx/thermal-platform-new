@@ -9,12 +9,12 @@ import java.time.LocalDateTime;
  */
 @Data
 public class PrWechatOrderVo {
-    private String id;
+    private Long id;
     private String outTradeNo;
     private String transactionId;
     private String openId;
     private String otherCode;
-    private String houseId;
+    private Long houseId;
     private String houseAddress;
     private BigDecimal totalFee;
     private String body;

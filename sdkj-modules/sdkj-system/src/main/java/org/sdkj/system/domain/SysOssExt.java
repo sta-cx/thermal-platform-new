@@ -65,7 +65,7 @@ public class SysOssExt implements Serializable {
     /**
      * 是否为临时文件，用于区分正式或待清理
      */
-    private Boolean isTemp;
+    private Boolean temp;
 
     /**
      * 文件MD5值（可用于去重或校验）

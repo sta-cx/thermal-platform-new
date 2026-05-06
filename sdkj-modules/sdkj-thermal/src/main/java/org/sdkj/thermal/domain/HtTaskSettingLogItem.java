@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -18,14 +17,14 @@ import org.sdkj.thermal.domain.vo.HtTaskSettingLogItemVo;
 @AutoMapper(target = HtTaskSettingLogItemVo.class)
 public class HtTaskSettingLogItem extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 主表ID */
-    private String mainId;
+    private Long mainId;
 
     /** 房屋/单元ID */
-    private String scopeId;
+    private Long scopeId;
 
     /** 仪表号 */
     private String meterNum;

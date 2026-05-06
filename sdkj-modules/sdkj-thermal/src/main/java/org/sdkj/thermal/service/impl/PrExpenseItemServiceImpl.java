@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import org.sdkj.common.core.exception.ServiceException;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -85,7 +86,7 @@ public class PrExpenseItemServiceImpl extends ServiceImpl<PrExpenseItemMapper, P
         // 检查该收费项目下是否存在收费标准
         long count = standardMapper.countByItemCode(itemCode, orgId);
         if (count > 0) {
-            throw new RuntimeException("该收费项目下存在收费标准，无法删除！");
+            throw new ServiceException("该收费项目下存在收费标准，无法删除！");
         }
         return removeById(id);
     }

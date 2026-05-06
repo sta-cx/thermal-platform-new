@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -20,14 +19,14 @@ import java.util.Date;
 @TableName("ht_tasks_perform_last")
 public class HtTasksPerformLast extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 控制任务ID */
-    private String tasksId;
+    private Long tasksId;
 
     /** 指令ID */
-    private String instructionId;
+    private Long instructionId;
 
     /** 指令顺序 */
     private Integer orderr;
@@ -75,7 +74,7 @@ public class HtTasksPerformLast extends BaseEntity {
     private String meterNum;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 档案编号 */
     private String meterArcCode;
@@ -123,10 +122,10 @@ public class HtTasksPerformLast extends BaseEntity {
     private BigDecimal refHeat;
 
     /** 策略ID */
-    private String groupId;
+    private Long groupId;
 
     /** 任务组ID */
-    private String strategyId;
+    private Long strategyId;
 
     /** 任务指令顺序号 */
     private Integer commandIndex;

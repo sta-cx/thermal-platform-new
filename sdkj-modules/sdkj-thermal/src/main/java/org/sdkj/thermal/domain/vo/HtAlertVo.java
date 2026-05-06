@@ -15,19 +15,19 @@ import java.util.Date;
 @AutoMapper(target = HtAlert.class)
 public class HtAlertVo {
 
-    private String id;
+    private Long id;
 
     /** 楼栋ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 单元ID */
-    private String unitId;
+    private Long unitId;
 
     /** 户ID */
-    private String houseId;
+    private Long houseId;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 是否收费 */
     private Integer isCharged;

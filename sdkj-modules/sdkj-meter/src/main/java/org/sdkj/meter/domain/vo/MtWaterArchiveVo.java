@@ -12,10 +12,10 @@ import org.sdkj.meter.domain.MtWaterArchive;
 @AutoMapper(target = MtWaterArchive.class)
 public class MtWaterArchiveVo {
 
-    private String id;
+    private Long id;
 
     /** 分类ID */
-    private String sortId;
+    private Long sortId;
 
     /** 编号 */
     private String code;

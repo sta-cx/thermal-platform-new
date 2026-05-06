@@ -60,7 +60,7 @@ public class HtStrategyController extends BaseController {
     @SaCheckPermission("thermal:ht:strategy:query")
     @SaCheckLogin
     @GetMapping("/{id}")
-    public R<HtStrategyVo> getInfo(@PathVariable String id) {
+    public R<HtStrategyVo> getInfo(@PathVariable Long id) {
         return R.ok(htStrategyService.selectDetailById(id));
     }
 

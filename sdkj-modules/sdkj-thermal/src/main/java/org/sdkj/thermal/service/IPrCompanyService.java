@@ -37,4 +37,30 @@ public interface IPrCompanyService extends IService<PrCompany> {
      * 级联删除组织机构及其子节点
      */
     int deleteAllData(String orgId);
+
+    /**
+     * 根据ID查询组织机构
+     */
+    SysOrganization getOrganizationById(String id);
+
+    /**
+     * 新增组织机构
+     */
+    void addOrganization(SysOrganization org);
+
+    /**
+     * 修改组织机构
+     */
+    void updateOrganization(SysOrganization org);
+
+    /**
+     * 删除组织机构（带层级校验）
+     */
+    void deleteOrganization(String id);
+
+    List<String> getUserOrgIds(Long userId);
+
+    void saveUserOrg(Long userId, String companyId, List<String> orgIds);
+
+    void clearUserOrg(Long userId);
 }

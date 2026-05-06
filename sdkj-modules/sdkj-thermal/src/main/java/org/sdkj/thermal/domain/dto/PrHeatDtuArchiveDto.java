@@ -12,7 +12,7 @@ import java.util.Date;
 @Data
 public class PrHeatDtuArchiveDto implements Serializable {
 
-    private String id;
+    private Long id;
     private String dtuNum;
     private String installSite;
     private String status;

@@ -18,7 +18,7 @@ import java.util.Date;
 public class PrHeatDtuArchiveBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** DTU编号 */
     @NotBlank(message = "DTU编号不能为空")

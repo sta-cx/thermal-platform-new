@@ -24,7 +24,7 @@
             chan_num
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             4,
             0,
             0,
@@ -71,7 +71,7 @@
             chan_num
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             4,
             0,
             0,
@@ -119,7 +119,7 @@
             chan_num
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             4,
             0,
             0,
@@ -168,7 +168,7 @@
             chan_num
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             4,
             0,
             0,

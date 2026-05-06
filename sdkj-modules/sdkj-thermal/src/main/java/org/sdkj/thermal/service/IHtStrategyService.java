@@ -28,7 +28,7 @@ public interface IHtStrategyService extends IService<HtStrategy> {
      * @param id 策略ID
      * @return 策略详情
      */
-    HtStrategyVo selectDetailById(String id);
+    HtStrategyVo selectDetailById(Long id);
 
     /**
      * 查询所有策略

@@ -3,7 +3,6 @@ package org.sdkj.thermal.domain;
 import cn.idev.excel.annotation.ExcelIgnore;
 import cn.idev.excel.annotation.ExcelProperty;
 import cn.idev.excel.annotation.write.style.ColumnWidth;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -16,7 +15,7 @@ import java.util.Date;
 @TableName("pr_import_basic_data")
 public class PrImportBasicData {
 
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id")
     @ExcelIgnore
     private Long id;
 
@@ -32,13 +31,13 @@ public class PrImportBasicData {
     private String buildingName;
 
     @ExcelIgnore
-    private String buildingId;
+    private Long buildingId;
 
     @ExcelIgnore
     private String buildingCode;
 
     @ExcelIgnore
-    private String stationId;
+    private Long stationId;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {TITLE, "房号*"}, index = 2)
@@ -60,10 +59,10 @@ public class PrImportBasicData {
     private String substationId;
 
     @ExcelIgnore
-    private String houseId;
+    private Long houseId;
 
     @ExcelIgnore
-    private String unitId;
+    private Long unitId;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {TITLE, "单元号*"}, index = 6)
@@ -138,7 +137,7 @@ public class PrImportBasicData {
     private String itemCode;
 
     @ExcelIgnore
-    private String standardId;
+    private Long standardId;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {TITLE, "标准名称"}, index = 20)

@@ -192,7 +192,7 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
      * 新增用户和阀门信息（事务性：PrHouse + PrFamily + PrHeatValveArchive）
      */
     String insertUserAndValveInfo(String companyId, String orgId, String orgName,
-                                  String buildingId, String buildingName, String unitCode,
+                                  Long buildingId, String buildingName, String unitCode,
                                   String roomNum, String floor, String otherCode, String payStatus,
                                   String userName, String phone,
                                   String gfloorArea, String nfloorArea, String heatingArea,
@@ -208,6 +208,6 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
      * @param outTemperature 出水温度
      * @param actualOpen 实际开度（可选）
      */
-    void updateHouseTemperature(String houseId, BigDecimal inTemperature,
+    void updateHouseTemperature(Long houseId, BigDecimal inTemperature,
                                  BigDecimal outTemperature, Integer actualOpen);
 }

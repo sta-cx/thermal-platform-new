@@ -11,7 +11,7 @@ import org.sdkj.meter.domain.MtFormulaFile;
 @AutoMapper(target = MtFormulaFile.class)
 public class MtFormulaFileVo {
 
-    private String id;
+    private Long id;
     private String name;
     private String type;
     private String cformula;

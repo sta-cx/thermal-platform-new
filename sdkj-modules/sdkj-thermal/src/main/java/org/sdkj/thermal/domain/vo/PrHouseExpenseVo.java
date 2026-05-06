@@ -1,5 +1,7 @@
 package org.sdkj.thermal.domain.vo;
 
+import org.sdkj.common.sensitive.annotation.Sensitive;
+import org.sdkj.common.sensitive.core.SensitiveStrategy;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import org.sdkj.thermal.domain.PrHouseExpense;
@@ -18,11 +20,11 @@ public class PrHouseExpenseVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
-    private String houseId;
+    private Long id;
+    private Long houseId;
     private String itemGroup;
     private String itemCode;
-    private String standardId;
+    private Long standardId;
     private String orgId;
     private String companyId;
     private String itemName;
@@ -32,6 +34,7 @@ public class PrHouseExpenseVo implements Serializable {
     private String name;
     private String roomNum;
     private String userName;
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String phone;
     private String userId;
     private BigDecimal money;

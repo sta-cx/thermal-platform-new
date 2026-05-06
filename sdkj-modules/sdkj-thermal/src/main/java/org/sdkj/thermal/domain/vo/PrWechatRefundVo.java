@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class PrWechatRefundVo {
-    private String id;
+    private Long id;
     private String outTradeNo;
     private String transactionId;
     private String outRefundNo;
@@ -21,6 +21,6 @@ public class PrWechatRefundVo {
     private String refundChannel;
     private LocalDateTime refundTime;
     private String openId;
-    private String houseId;
+    private Long houseId;
     private String operator;
 }

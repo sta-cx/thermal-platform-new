@@ -260,7 +260,7 @@
          concentrator_code, install_site, standard_id, standard_price, opened_time,
          create_by, create_time, start_reading, current_reading, total_used,
          trade_times, total_money, total_recharge, current_balance, is_steps)
-        select replace(uuid(), '-', ''),
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
                company_id, org_id, unit_id, archive_id, meter_arc_code, meter_name,
                meter_num, card_num, imei, dtu_num, chan_num, device_id, meter_serial,
                concentrator_code, install_site, standard_id, standard_price, opened_time,

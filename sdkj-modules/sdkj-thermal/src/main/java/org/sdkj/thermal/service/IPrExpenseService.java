@@ -35,7 +35,7 @@ public interface IPrExpenseService extends IService<PrExpense> {
     /**
      * 查询房屋取暖费明细
      */
-    PrExpenseVo selectHeatExpenseByHouseId(String houseId);
+    PrExpenseVo selectHeatExpenseByHouseId(Long houseId);
 
     /**
      * 生成取暖费明细
@@ -110,7 +110,7 @@ public interface IPrExpenseService extends IService<PrExpense> {
     /**
      * 设置计算状态
      */
-    boolean setCalStatus(String houseId);
+    boolean setCalStatus(Long houseId);
 
     /**
      * 批量更新阶梯单价
@@ -159,27 +159,27 @@ public interface IPrExpenseService extends IService<PrExpense> {
     /**
      * 滞纳金计算 - 起收日期
      */
-    boolean updateLatefeeQs(String companyId, String orgId, String latefeeFormula, String standardId);
+    boolean updateLatefeeQs(String companyId, String orgId, String latefeeFormula, Long standardId);
 
     /**
      * 滞纳金计算 - 到期日期
      */
-    boolean updateLatefeeJs(String companyId, String orgId, String latefeeFormula, String standardId);
+    boolean updateLatefeeJs(String companyId, String orgId, String latefeeFormula, Long standardId);
 
     /**
      * 滞纳金计算 - 指定日期
      */
-    boolean updateLatefeeZd(String companyId, String orgId, String latefeeFormula, String standardId,
+    boolean updateLatefeeZd(String companyId, String orgId, String latefeeFormula, Long standardId,
                              java.util.Date latefeeStartdate);
 
     /**
      * 滞纳金计算 - 数据核查
      */
-    boolean updateLatefeeSJHC(String companyId, String orgId, String latefeeFormula, String standardId,
+    boolean updateLatefeeSJHC(String companyId, String orgId, String latefeeFormula, Long standardId,
                               String year, String month);
 
     /**
      * 滞纳金计算后更新最终金额
      */
-    boolean updateFinalMoneyAfterLateFee(String companyId, String orgId, String standardId);
+    boolean updateFinalMoneyAfterLateFee(String companyId, String orgId, Long standardId);
 }

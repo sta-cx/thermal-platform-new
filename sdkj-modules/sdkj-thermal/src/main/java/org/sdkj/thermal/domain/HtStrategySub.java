@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -19,14 +18,14 @@ import org.sdkj.thermal.domain.vo.HtStrategySubVo;
 @AutoMapper(target = HtStrategySubVo.class)
 public class HtStrategySub extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 策略ID */
-    private String strategyId;
+    private Long strategyId;
 
     /** 指令ID */
-    private String instructionId;
+    private Long instructionId;
 
     /** 排序 */
     private Integer sort;

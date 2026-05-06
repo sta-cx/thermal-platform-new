@@ -3,6 +3,7 @@ package org.sdkj.thermal.mapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.PrExpenseItem;
 import org.sdkj.thermal.domain.PrStandard;
 import org.sdkj.thermal.domain.PrStandardPrice;
@@ -15,6 +16,7 @@ import java.util.List;
  * 收费标准 Mapper
  * 迁移自旧系统 PrStandardMapper
  */
+@OrgPermission
 public interface PrStandardMapper extends BaseMapperPlus<PrStandard, PrStandardVo> {
 
     /**
@@ -55,12 +57,12 @@ public interface PrStandardMapper extends BaseMapperPlus<PrStandard, PrStandardV
     /**
      * 查询标准单价列表（grade=1）
      */
-    List<PrStandardPrice> selectPriceList(@Param("standardId") String standardId);
+    List<PrStandardPrice> selectPriceList(@Param("standardId") Long standardId);
 
     /**
      * 查询标准单价完整列表（所有 grade，包含 step12）
      */
-    List<PrStandardPrice> selectPriceListAll(@Param("standardId") String standardId);
+    List<PrStandardPrice> selectPriceListAll(@Param("standardId") Long standardId);
 
     /**
      * 检查标准名称是否重复
@@ -111,12 +113,12 @@ public interface PrStandardMapper extends BaseMapperPlus<PrStandard, PrStandardV
     /**
      * 检查收费标准是否被房屋关联
      */
-    int countHouseBindings(@Param("id") String id);
+    int countHouseBindings(@Param("id") Long id);
 
     /**
      * 删除标准单价
      */
-    int deletePricesByStandardId(@Param("id") String id);
+    int deletePricesByStandardId(@Param("id") Long id);
 
     /**
      * 批量插入标准单价

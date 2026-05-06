@@ -117,7 +117,7 @@ public class ValvePaymentControlJob implements Job {
         Date now = new Date();
         for (PrHeatValveArchive archive : archives) {
             HtTasksPerform task = new HtTasksPerform();
-            task.setId(cn.hutool.core.util.IdUtil.fastSimpleUUID());
+            task.setId(cn.hutool.core.util.IdUtil.getSnowflakeNextId());
             task.setInstructionType(1); // 1=开阀
             task.setInstruction(instruction);
             task.setNumber(0);
@@ -133,7 +133,7 @@ public class ValvePaymentControlJob implements Job {
             task.setDtuNum(archive.getDtuNum());
             task.setConcentratorCode(archive.getConcentratorCode());
             task.setChanNum(archive.getChanNum());
-            task.setInstructionId("valve_pay_open_" + orgId);
+            task.setInstructionId(cn.hutool.core.util.IdUtil.getSnowflakeNextId());
             task.setCreateTime(now);
             tasks.add(task);
         }

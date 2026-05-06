@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -22,8 +21,8 @@ import java.math.BigDecimal;
 @AutoMapper(target = PrUnitVo.class)
 public class PrUnit extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 单元编码 */
     private String code;
@@ -32,7 +31,7 @@ public class PrUnit extends BaseEntity {
     private String name;
 
     /** 楼宇ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 地上楼层 */
     private Integer onFloor;
@@ -53,7 +52,7 @@ public class PrUnit extends BaseEntity {
     private String seq;
 
     /** 热力站ID */
-    private String stationId;
+    private Long stationId;
 
     /** 小区ID */
     private String orgId;

@@ -25,7 +25,7 @@ public interface IPrReconciliationService {
     /**
      * 查询对账差异记录
      */
-    List<PrReconciliationDiff> queryDiffs(String billId);
+    List<PrReconciliationDiff> queryDiffs(Long billId);
 
     /**
      * 处理对账差异

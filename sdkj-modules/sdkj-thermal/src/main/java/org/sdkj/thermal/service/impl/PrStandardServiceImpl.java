@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import org.sdkj.common.core.exception.ServiceException;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -59,7 +60,7 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
     public boolean updateData(PrStandard standard) {
         PrStandard existing = getById(standard.getId());
         if (existing == null) {
-            throw new RuntimeException("收费标准不存在");
+            throw new ServiceException("收费标准不存在");
         }
         boolean updated = updateById(standard);
         if (updated) {
@@ -78,11 +79,11 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteData(String id) {
+    public boolean deleteData(Long id) {
         // 检查是否被房屋、水表、电表、热表关联
         int houseCount = baseMapper.countHouseBindings(id);
         if (houseCount > 0) {
-            throw new RuntimeException("该收费标准已关联房屋，无法删除");
+            throw new ServiceException("该收费标准已关联房屋，无法删除");
         }
         // 删除关联的单价
         baseMapper.deletePricesByStandardId(id);
@@ -90,7 +91,7 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
     }
 
     @Override
-    public PrStandard selectDetailById(String id) {
+    public PrStandard selectDetailById(Long id) {
         PrStandard standard = getById(id);
         if (standard != null) {
             List<PrStandardPrice> prices = baseMapper.selectPriceListAll(id);

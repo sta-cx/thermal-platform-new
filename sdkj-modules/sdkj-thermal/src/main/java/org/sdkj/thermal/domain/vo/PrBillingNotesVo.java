@@ -10,7 +10,7 @@ import org.sdkj.thermal.domain.PrBillingNotes;
 @Data
 @AutoMapper(target = PrBillingNotes.class)
 public class PrBillingNotesVo {
-    private String id;
+    private Long id;
     private String serialNum;
     private String notes;
 }

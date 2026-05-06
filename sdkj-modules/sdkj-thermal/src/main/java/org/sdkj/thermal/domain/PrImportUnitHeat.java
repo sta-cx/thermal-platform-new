@@ -3,7 +3,6 @@ package org.sdkj.thermal.domain;
 import cn.idev.excel.annotation.ExcelIgnore;
 import cn.idev.excel.annotation.ExcelProperty;
 import cn.idev.excel.annotation.write.style.ColumnWidth;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -16,9 +15,9 @@ import java.util.Date;
 @TableName("pr_import_unit_heat")
 public class PrImportUnitHeat {
 
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id")
     @ExcelIgnore
-    private Integer id;
+    private Long id;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {title, "小区名称*"}, index = 0)
@@ -26,7 +25,7 @@ public class PrImportUnitHeat {
     private String orgName;
 
     @ExcelIgnore
-    private String buildingId;
+    private Long buildingId;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {title, "楼宇名称*"}, index = 1)
@@ -34,7 +33,7 @@ public class PrImportUnitHeat {
     private String buildingName;
 
     @ExcelIgnore
-    private String unitId;
+    private Long unitId;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {title, "单元名称*"}, index = 2)
@@ -42,7 +41,7 @@ public class PrImportUnitHeat {
     private String unitName;
 
     @ExcelIgnore
-    private String archiveId;
+    private Long archiveId;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {title, "仪表名称*"}, index = 3)
@@ -117,7 +116,7 @@ public class PrImportUnitHeat {
     private BigDecimal currentBalance;
 
     @ExcelIgnore
-    private String standardId;
+    private Long standardId;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {title, "单价名称"}, index = 20)

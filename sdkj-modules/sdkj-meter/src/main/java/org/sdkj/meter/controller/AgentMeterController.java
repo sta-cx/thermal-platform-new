@@ -98,7 +98,7 @@ public class AgentMeterController extends BaseController {
             @RequestParam String companyId,
             @RequestParam String archiveIds,
             @RequestParam String meterType) {
-        List<String> ids = Arrays.asList(archiveIds.split(","));
+        List<Long> ids = Arrays.stream(archiveIds.split(",")).map(String::trim).map(Long::valueOf).toList();
         meterMatchService.batchAllocate(companyId, ids, meterType);
         return R.ok();
     }

@@ -61,7 +61,7 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateInstructionStatus(String performId, Integer status) {
+    public boolean updateInstructionStatus(Long performId, Integer status) {
         HtTasksPerform perform = new HtTasksPerform();
         perform.setId(performId);
         perform.setStatus(status);
@@ -140,7 +140,6 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
     public boolean batchCreateValveControlTasks(List<ValveArchiveInfo> archives, String orgId, String companyId, int instruction) {
         List<HtTasksPerform> tasks = archives.stream().map(info -> {
             HtTasksPerform task = new HtTasksPerform();
-            task.setId(UUID.randomUUID().toString().replace("-", ""));
             task.setInstructionType(3);
             task.setInstruction(instruction);
             task.setNumber(0);

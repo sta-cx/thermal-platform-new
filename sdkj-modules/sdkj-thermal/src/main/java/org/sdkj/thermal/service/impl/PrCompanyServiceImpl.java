@@ -1,14 +1,17 @@
 package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.thermal.domain.PrBuilding;
 import org.sdkj.thermal.domain.PrCompany;
+import org.sdkj.thermal.domain.PrDataGrant;
 import org.sdkj.thermal.domain.SysOrganization;
 import org.sdkj.thermal.mapper.PrBuildingMapper;
 import org.sdkj.thermal.mapper.PrCompanyMapper;
+import org.sdkj.thermal.mapper.PrDataGrantMapper;
 import org.sdkj.thermal.service.IPrCompanyService;
 import org.sdkj.thermal.vo.TreeNode;
 import org.sdkj.thermal.vo.TreeUtil;
@@ -27,6 +30,7 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
 
     private final PrCompanyMapper prCompanyMapper;
     private final PrBuildingMapper prBuildingMapper;
+    private final PrDataGrantMapper prDataGrantMapper;
 
     @Override
     public List<PrCompany> listCompanies() {
@@ -65,7 +69,7 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
         // 将楼栋转换为虚拟 TreeNode（作为对应的 org 的子节点）
         for (PrBuilding b : buildings) {
             TreeNode node = new TreeNode();
-            node.setId(b.getId());
+            node.setId(String.valueOf(b.getId()));
             node.setLabel(b.getName());
             node.setParentId(b.getOrgId());
             nodes.add(node);
@@ -78,19 +82,19 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
     @Override
     public List<TreeNode> getDataGrantOrg(String companyId, Long userId) {
         List<SysOrganization> orgs = prCompanyMapper.getDataGrantOrg(
-                companyId, String.valueOf(userId));
+                companyId, userId);
 
         return TreeUtil.buildByLoop(TreeUtil.fromSysOrganizationList(orgs), "-1");
     }
 
     @Override
     public List<SysOrganization> getUserOrg(Long userId) {
-        return prCompanyMapper.getUserOrgByUserId(String.valueOf(userId));
+        return prCompanyMapper.getUserOrgByUserId(userId);
     }
 
     @Override
     public List<SysOrganization> getUserOrgBranch(Long userId) {
-        return prCompanyMapper.getUserOrgBranchByUserId(String.valueOf(userId));
+        return prCompanyMapper.getUserOrgBranchByUserId(userId);
     }
 
     @Override
@@ -157,5 +161,74 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
         }
 
         return 0;
+    }
+
+    @Override
+    public List<String> getUserOrgIds(Long userId) {
+        List<PrDataGrant> grants = prDataGrantMapper.selectList(
+            new LambdaQueryWrapper<PrDataGrant>()
+                .eq(PrDataGrant::getUserId, userId)
+        );
+        return grants.stream().map(PrDataGrant::getOrgId).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void saveUserOrg(Long userId, String companyId, List<String> orgIds) {
+        prDataGrantMapper.delete(
+            new LambdaQueryWrapper<PrDataGrant>().eq(PrDataGrant::getUserId, userId)
+        );
+        if (!orgIds.isEmpty()) {
+            List<PrDataGrant> grants = orgIds.stream().map(orgId -> {
+                PrDataGrant g = new PrDataGrant();
+                g.setUserId(userId);
+                g.setCompanyId(companyId);
+                g.setOrgId(orgId);
+                return g;
+            }).collect(Collectors.toList());
+            prDataGrantMapper.insertBatch(grants);
+        }
+    }
+
+    @Override
+    public void clearUserOrg(Long userId) {
+        prDataGrantMapper.delete(
+            new LambdaQueryWrapper<PrDataGrant>().eq(PrDataGrant::getUserId, userId)
+        );
+    }
+
+    @Override
+    public SysOrganization getOrganizationById(String id) {
+        return prCompanyMapper.selectOrgById(id);
+    }
+
+    @Override
+    public void addOrganization(SysOrganization org) {
+        if (org.getId() == null) {
+            org.setId(IdWorker.getIdStr(org));
+        }
+        prCompanyMapper.insertOrganization(org);
+    }
+
+    @Override
+    public void updateOrganization(SysOrganization org) {
+        prCompanyMapper.updateOrganization(org);
+    }
+
+    @Override
+    public void deleteOrganization(String id) {
+        SysOrganization org = prCompanyMapper.selectOrgById(id);
+        if (org == null) {
+            throw new RuntimeException("组织机构不存在");
+        }
+        if ("0".equals(org.getLevel())) {
+            throw new RuntimeException("总公司不可删除");
+        }
+        int childCount = prCompanyMapper.findChild(id, org.getCompanyId());
+        if (childCount > 0) {
+            throw new RuntimeException("存在下级节点，不可删除");
+        }
+        prCompanyMapper.deleteOrgById(id);
+        prCompanyMapper.deleteGrantDataById(id, org.getCompanyId());
     }
 }

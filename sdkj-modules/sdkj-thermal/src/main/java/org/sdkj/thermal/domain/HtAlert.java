@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -22,20 +21,20 @@ import java.util.Date;
 @AutoMapper(target = HtAlertVo.class)
 public class HtAlert extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 楼栋ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 单元ID */
-    private String unitId;
+    private Long unitId;
 
     /** 户ID */
-    private String houseId;
+    private Long houseId;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 是否收费 */
     private Integer isCharged;

@@ -10,10 +10,10 @@ import java.util.Date;
 @AutoMapper(target = HtTasksPerform.class)
 public class HtTasksPerformVo {
 
-    private String id;
-    private String instructionId;
-    private String groupId;
-    private String strategyId;
+    private Long id;
+    private Long instructionId;
+    private Long groupId;
+    private Long strategyId;
     private Integer commandIndex;
     private Integer orderr;
     private Integer instructionType;
@@ -28,12 +28,12 @@ public class HtTasksPerformVo {
     private String concentratorCode;
     private String deviceId;
     private String meterNum;
-    private String meterId;
+    private Long meterId;
     private String meterArcCode;
     private Integer status;
     private Integer instructionStatus;
     private Date sendTime;
-    private String tasksId;
+    private Long tasksId;
     private BigDecimal inTemp;
     private BigDecimal outTemp;
     private BigDecimal roomTemp;

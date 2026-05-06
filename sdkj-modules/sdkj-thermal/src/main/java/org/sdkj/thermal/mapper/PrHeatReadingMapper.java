@@ -3,6 +3,7 @@ package org.sdkj.thermal.mapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.PrHeatReading;
 import org.sdkj.thermal.domain.vo.PrHeatReadingCopy1Vo;
 import org.sdkj.thermal.domain.vo.PrHeatReadingLabelVo;
@@ -13,6 +14,7 @@ import java.util.List;
 /**
  * 热表抄表记录 Mapper
  */
+@OrgPermission
 public interface PrHeatReadingMapper extends BaseMapperPlus<PrHeatReading, PrHeatReadingVo> {
 
     /**

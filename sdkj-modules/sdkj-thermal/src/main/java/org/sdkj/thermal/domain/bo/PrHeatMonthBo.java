@@ -2,6 +2,7 @@ package org.sdkj.thermal.domain.bo;
 
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.sdkj.common.mybatis.core.domain.BaseEntity;
@@ -19,7 +20,7 @@ import java.util.Date;
 public class PrHeatMonthBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 表号 */
     @NotBlank(message = "表号不能为空")
@@ -29,7 +30,7 @@ public class PrHeatMonthBo extends BaseEntity {
     private String cardNum;
 
     /** 配表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 热表档案编号 */
     @NotBlank(message = "热表档案编号不能为空")
@@ -57,7 +58,7 @@ public class PrHeatMonthBo extends BaseEntity {
     private String statisticsType;
 
     /** 收费标准ID */
-    private String standardId;
+    private Long standardId;
 
     /** 总金额 */
     private BigDecimal totalMoney;
@@ -87,8 +88,8 @@ public class PrHeatMonthBo extends BaseEntity {
     private BigDecimal addAdvances;
 
     /** 房屋ID */
-    @NotBlank(message = "房屋ID不能为空")
-    private String houseId;
+    @NotNull(message = "房屋ID不能为空")
+    private Long houseId;
 
     /** 小区ID */
     @NotBlank(message = "小区ID不能为空")

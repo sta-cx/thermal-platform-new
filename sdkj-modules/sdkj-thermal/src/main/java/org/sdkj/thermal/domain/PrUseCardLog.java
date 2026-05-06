@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -20,11 +19,11 @@ import java.util.Date;
 @AutoMapper(target = PrUseCardLogVo.class)
 public class PrUseCardLog extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 仪表编号 */
     private String meterNum;

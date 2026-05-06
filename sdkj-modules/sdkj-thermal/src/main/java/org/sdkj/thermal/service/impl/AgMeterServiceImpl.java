@@ -7,6 +7,7 @@ import org.sdkj.common.core.exception.ServiceException;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.common.mybatis.utils.IdGeneratorUtil;
 import org.sdkj.thermal.mapper.AgMeterMapper;
 import org.sdkj.thermal.service.IAgMeterService;
 import org.springframework.stereotype.Service;
@@ -64,9 +65,10 @@ public class AgMeterServiceImpl implements IAgMeterService {
         }
 
         // 3. 解析逗号分隔的档案ID列表
-        List<String> ids = Arrays.stream(archiveIds.split(","))
+        List<Long> ids = Arrays.stream(archiveIds.split(","))
             .map(String::trim)
             .filter(s -> !s.isEmpty())
+            .map(Long::valueOf)
             .toList();
 
         if (ids.isEmpty()) {
@@ -75,6 +77,7 @@ public class AgMeterServiceImpl implements IAgMeterService {
 
         // 4. 批量插入新的分配记录
         String username = StpUtil.getLoginIdAsString();
-        agMeterMapper.insertMeterMatch(companyId, ids, meterType, username);
+        List<Long> matchIds = ids.stream().map(i -> IdGeneratorUtil.nextLongId()).toList();
+        agMeterMapper.insertMeterMatch(companyId, ids, matchIds, meterType, username);
     }
 }

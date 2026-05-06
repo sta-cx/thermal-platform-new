@@ -69,7 +69,7 @@ public interface SysPostMapper extends BaseMapperPlus<SysPost, SysPostVo> {
      */
     default List<SysPostVo> selectPostsByUserId(Long userId) {
         return this.selectVoList(new LambdaQueryWrapper<SysPost>()
-            .inSql(SysPost::getPostId, "select post_id from sys_user_post where user_id = " + userId));
+            .apply("post_id IN (SELECT post_id FROM sys_user_post WHERE user_id = {0})", userId));
     }
 
 }

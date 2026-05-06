@@ -16,7 +16,7 @@ public class PrHeatReadingLabelVo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /** 标签ID */
-    private String id;
+    private Long id;
 
     /** 标签值（房间号/表号等） */
     private String label;

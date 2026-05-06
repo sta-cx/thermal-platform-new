@@ -26,6 +26,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * 费用明细 Service 实现
@@ -37,6 +38,14 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     private final PrExpenseMapper baseMapper;
     private final org.sdkj.thermal.mapper.PrStandardMapper standardMapper;
+
+    private static final Pattern FORMULA_PATTERN = Pattern.compile("^[a-zA-Z0-9._+\\-*/()\\s]+$");
+
+    private void validateFormula(String formula) {
+        if (formula == null || !FORMULA_PATTERN.matcher(formula).matches()) {
+            throw new IllegalArgumentException("公式格式不合法: " + formula);
+        }
+    }
 
     @Override
     public TableDataInfo<PrExpenseVo> selectPageList(String companyId, String orgId, String buildingId, String unitCode,
@@ -56,7 +65,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     }
 
     @Override
-    public PrExpenseVo selectHeatExpenseByHouseId(String houseId) {
+    public PrExpenseVo selectHeatExpenseByHouseId(Long houseId) {
         return baseMapper.selectHeatExpenseByHouseId(houseId);
     }
 
@@ -67,16 +76,20 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
         List<PrExpense> expenses = new ArrayList<>();
         Date now = new Date();
-        String userId = String.valueOf(LoginHelper.getUserId());
+        Long userId = LoginHelper.getUserId();
 
         for (PrHouseExpense he : list) {
             if (he.getHouseId() == null || he.getStandardId() == null) continue;
 
             PrStandard std = baseMapper.selectStandardById(he.getStandardId());
-            if (std == null) continue;
+            if (std == null) {
+                continue;
+            }
 
             int months = calcCycleMonths(he.getOpenTime(), he.getCloseTime());
-            if (months <= 0) continue;
+            if (months <= 0) {
+                continue;
+            }
 
             for (int i = 0; i < months; i++) {
                 PrExpense e = new PrExpense();
@@ -100,7 +113,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                 e.setIsCalc("0");
                 e.setOrgId(he.getOrgId());
                 e.setCompanyId(he.getCompanyId());
-                e.setRecordId("");
+                e.setRecordId(null);
                 e.setChargedTime(null);
                 e.setPaidIn(BigDecimal.ZERO);
                 e.setReceivable(BigDecimal.ZERO);
@@ -110,7 +123,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                 e.setLatefee(BigDecimal.ZERO);
                 e.setFinalMoney(BigDecimal.ZERO);
                 e.setOverdueDay(0);
-                e.setCreateBy(Long.valueOf(userId));
+                e.setCreateBy(userId);
                 e.setCreateTime(now);
 
                 expenses.add(e);
@@ -143,13 +156,15 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
         List<PrExpense> expenses = new ArrayList<>();
         Date now = new Date();
-        String userId = String.valueOf(LoginHelper.getUserId());
+        Long userId = LoginHelper.getUserId();
 
         for (PrHouseExpense he : list) {
             if (he.getHouseId() == null || he.getStandardId() == null) continue;
 
             PrStandard std = baseMapper.selectStandardById(he.getStandardId());
-            if (std == null) continue;
+            if (std == null) {
+                continue;
+            }
 
             // 获取标准单价列表
             List<PrStandardPrice> priceList = standardMapper.selectPriceListAll(he.getStandardId());
@@ -213,7 +228,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                     e.setFinalMoney(BigDecimal.ZERO);
                     e.setReceivable(BigDecimal.ZERO);
                     e.setOverdueDay(0);
-                    e.setCreateBy(Long.valueOf(userId));
+                    e.setCreateBy(userId);
                     e.setCreateTime(now);
 
                     expenses.add(e);
@@ -251,7 +266,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                 e.setDeduction(BigDecimal.ZERO);
                 e.setLatefee(BigDecimal.ZERO);
                 e.setOverdueDay(0);
-                e.setCreateBy(Long.valueOf(userId));
+                e.setCreateBy(userId);
                 e.setCreateTime(now);
 
                 // 设置年月
@@ -305,7 +320,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                     e.setFinalMoney(BigDecimal.ZERO);
                     e.setReceivable(BigDecimal.ZERO);
                     e.setOverdueDay(0);
-                    e.setCreateBy(Long.valueOf(userId));
+                    e.setCreateBy(userId);
                     e.setCreateTime(now);
 
                     expenses.add(e);
@@ -352,7 +367,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                     e.setFinalMoney(BigDecimal.ZERO);
                     e.setReceivable(BigDecimal.ZERO);
                     e.setOverdueDay(0);
-                    e.setCreateBy(Long.valueOf(userId));
+                    e.setCreateBy(userId);
                     e.setCreateTime(now);
 
                     expenses.add(e);
@@ -399,7 +414,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                     e.setFinalMoney(BigDecimal.ZERO);
                     e.setReceivable(BigDecimal.ZERO);
                     e.setOverdueDay(0);
-                    e.setCreateBy(Long.valueOf(userId));
+                    e.setCreateBy(userId);
                     e.setCreateTime(now);
 
                     expenses.add(e);
@@ -426,7 +441,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
         List<PrExpense> expenses = new ArrayList<>();
         Date now = new Date();
-        String userId = String.valueOf(LoginHelper.getUserId());
+        Long userId = LoginHelper.getUserId();
 
         for (PrHouseExpense he : list) {
             PrExpense e = new PrExpense();
@@ -449,7 +464,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
             e.setDeduction(BigDecimal.ZERO);
             e.setLatefee(BigDecimal.ZERO);
             e.setFinalMoney(BigDecimal.ZERO);
-            e.setCreateBy(Long.valueOf(userId));
+            e.setCreateBy(userId);
             e.setCreateTime(now);
             expenses.add(e);
         }
@@ -462,7 +477,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
         if (list == null || list.isEmpty()) return false;
         List<PrExpense> expenses = new ArrayList<>();
         Date now = new Date();
-        String userId = String.valueOf(LoginHelper.getUserId());
+        Long userId = LoginHelper.getUserId();
 
         for (PmParkingSpace space : list) {
             PrExpense e = new PrExpense();
@@ -490,7 +505,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
             e.setLatefee(BigDecimal.ZERO);
             e.setFinalMoney(BigDecimal.ZERO);
             e.setOverdueDay(0);
-            e.setCreateBy(Long.valueOf(userId));
+            e.setCreateBy(userId);
             e.setCreateTime(now);
             expenses.add(e);
         }
@@ -626,7 +641,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteDate(List<PrExpense> list) {
         if (list == null || list.isEmpty()) return false;
-        List<String> ids = list.stream().map(PrExpense::getId).toList();
+        List<Long> ids = list.stream().map(PrExpense::getId).toList();
         return removeByIds(ids);
     }
 
@@ -658,7 +673,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean setCalStatus(String houseId) {
+    public boolean setCalStatus(Long houseId) {
         return baseMapper.updateCalStatus(houseId) > 0;
     }
 
@@ -673,7 +688,9 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
         boolean result = true;
         for (org.sdkj.thermal.domain.vo.PrStandardVo standardVo : standardList) {
             PrStandard standard = standardMapper.selectById(standardVo.getId());
-            if (standard == null) continue;
+            if (standard == null) {
+                continue;
+            }
 
             // 取暖费、临时费用不计算单价
             if ("6".equals(standard.getItemGroup()) || "3".equals(standard.getItemGroup())) {
@@ -761,7 +778,8 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     // ========== 滞纳金计算方法实现 ==========
 
     @Override
-    public boolean updateLatefeeQs(String companyId, String orgId, String latefeeFormula, String standardId) {
+    public boolean updateLatefeeQs(String companyId, String orgId, String latefeeFormula, Long standardId) {
+        validateFormula(latefeeFormula);
         boolean result = baseMapper.updateLatefeeQs(companyId, orgId, latefeeFormula, standardId) > 0;
         // 计算滞纳金后更新最终金额
         if (result) {
@@ -771,7 +789,8 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     }
 
     @Override
-    public boolean updateLatefeeJs(String companyId, String orgId, String latefeeFormula, String standardId) {
+    public boolean updateLatefeeJs(String companyId, String orgId, String latefeeFormula, Long standardId) {
+        validateFormula(latefeeFormula);
         boolean result = baseMapper.updateLatefeeJs(companyId, orgId, latefeeFormula, standardId) > 0;
         // 计算滞纳金后更新最终金额
         if (result) {
@@ -781,8 +800,9 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     }
 
     @Override
-    public boolean updateLatefeeZd(String companyId, String orgId, String latefeeFormula, String standardId,
+    public boolean updateLatefeeZd(String companyId, String orgId, String latefeeFormula, Long standardId,
                                     java.util.Date latefeeStartdate) {
+        validateFormula(latefeeFormula);
         boolean result = baseMapper.updateLatefeeZd(companyId, orgId, latefeeFormula, standardId, latefeeStartdate) > 0;
         // 计算滞纳金后更新最终金额
         if (result) {
@@ -792,8 +812,9 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     }
 
     @Override
-    public boolean updateLatefeeSJHC(String companyId, String orgId, String latefeeFormula, String standardId,
+    public boolean updateLatefeeSJHC(String companyId, String orgId, String latefeeFormula, Long standardId,
                                       String year, String month) {
+        validateFormula(latefeeFormula);
         boolean result = baseMapper.updateLatefeeSJHC(companyId, orgId, latefeeFormula, standardId, year, month) > 0;
         // 计算滞纳金后更新最终金额
         if (result) {
@@ -803,7 +824,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     }
 
     @Override
-    public boolean updateFinalMoneyAfterLateFee(String companyId, String orgId, String standardId) {
+    public boolean updateFinalMoneyAfterLateFee(String companyId, String orgId, Long standardId) {
         return baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId) > 0;
     }
 }

@@ -18,19 +18,19 @@ import java.util.Date;
 public class HtAlertBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 楼栋ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 单元ID */
-    private String unitId;
+    private Long unitId;
 
     /** 户ID */
-    private String houseId;
+    private Long houseId;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 是否收费 */
     private Integer isCharged;

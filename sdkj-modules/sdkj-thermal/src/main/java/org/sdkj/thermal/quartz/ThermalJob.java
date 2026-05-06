@@ -1,5 +1,6 @@
 package org.sdkj.thermal.quartz;
 
+import org.sdkj.common.core.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.tenant.core.TenantDataSourceHelper;
 import org.sdkj.thermal.service.impl.ThermalRegulationEngine;
@@ -18,7 +19,7 @@ public class ThermalJob implements Job {
 
     @Override
     public void execute(JobExecutionContext context) {
-        Integer taskId = context.getJobDetail().getJobDataMap().getInt("taskId");
+        Long taskId = context.getJobDetail().getJobDataMap().getLong("taskId");
         String taskName = context.getJobDetail().getJobDataMap().getString("taskName");
         String tenantCode = context.getMergedJobDataMap().getString("tenantCode");
 
@@ -39,7 +40,7 @@ public class ThermalJob implements Job {
         }
     }
 
-    private void doExecute(JobExecutionContext context, Integer taskId, String taskName) {
+    private void doExecute(JobExecutionContext context, Long taskId, String taskName) {
         try {
             Object bean = context.getScheduler().getContext().get("applicationContext");
             if (bean instanceof org.springframework.context.ApplicationContext ctx) {
@@ -59,7 +60,8 @@ public class ThermalJob implements Job {
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed during thermal regulation execution", e);
+            log.error("Failed during thermal regulation execution", e);
+            throw new ServiceException("Failed during thermal regulation execution");
         }
     }
 }

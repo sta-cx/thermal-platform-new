@@ -18,10 +18,10 @@ import java.util.Date;
 public class HtRepairBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 楼宇ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 楼宇名称 */
     private String buildingName;
@@ -30,13 +30,13 @@ public class HtRepairBo extends BaseEntity {
     private String unitCode;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 房号 */
     private String roomNum;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 仪表号 */
     private String meterNum;

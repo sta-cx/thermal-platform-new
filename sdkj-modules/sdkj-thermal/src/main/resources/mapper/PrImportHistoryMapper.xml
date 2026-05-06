@@ -59,7 +59,7 @@
         insert into pr_transaction_record
         (id, company_id, org_id, house_id, standard_id, standard_price,
          qty, receivable, deduction, paid_in, payment_balance, create_by, create_time)
-        select replace(uuid(), '-', ''), company_id, org_id, house_id, standard_id,
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), company_id, org_id, house_id, standard_id,
                standard_price, qty, receivable, deduction, paid_in, payment_balance,
                create_by, now()
         from pr_import_history

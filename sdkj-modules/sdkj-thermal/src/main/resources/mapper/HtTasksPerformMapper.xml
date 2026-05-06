@@ -236,7 +236,7 @@
          in_temperature, out_temperature, diff_temperature, voltage,
          read_time, reporting_interval, reporting_unit, valid_time, total_degree,
          csq, flow_rate, create_time, type)
-        VALUES (REPLACE(UUID(), '-', ''),
+        VALUES (#{id},
                 meter_arc_code,
                 #{meterNum},
                 #{valveStatus},
@@ -265,7 +265,7 @@
          csq, create_time, type)
         VALUES
         <foreach collection="valveDataList" item="item" index="index" separator=",">
-            (REPLACE(UUID(), '-', ''),
+            (#{item.id},
              meter_arc_code,
              #{item.meterNum},
              #{item.valveStatus},
@@ -291,7 +291,7 @@
         (id, meter_num, type, st, setting_status, valve_status, in_temperature, out_temperature, voltage,
          read_time, reporting_interval, reporting_unit, csq, valve_model, user_set_temp, room_temp,
          avg_temp, work_time, total_open_time, cold_flg, wkq_lock, temp_low, temp_high, ins_flow, create_time)
-        VALUES (REPLACE(UUID(), '-', ''),
+        VALUES (#{id},
                 #{meterNum},
                 '1',
                 #{valveStatus},
@@ -323,7 +323,7 @@
         (id, meter_num, temperature, humi, voltage, read_time, reporting_interval, reporting_unit,
          valid_time, csq, total_degree, report_succ_num, collect_interval, collect_unit, collect_time,
          create_time, type, mov_place, valve_status)
-        VALUES (REPLACE(UUID(), '-', ''),
+        VALUES (#{id},
                 #{meterNum},
                 #{temperature},
                 #{humi},
@@ -348,7 +348,7 @@
         INSERT INTO pr_heat_reading
         (id, meter_num, out_temperature, in_temperature, voltage, read_time, power_state, st,
          total_flow, csq, total_heat, flow_rate, current_flow, heat_power, current_power, create_time, rb_status1, type)
-        VALUES (REPLACE(UUID(), '-', ''),
+        VALUES (#{id},
                 #{meterNum},
                 #{outTemp},
                 #{inTemp},
@@ -882,7 +882,7 @@
     <insert id="inserHtAlert">
         INSERT INTO ht_alert (id, meter_id, is_charged, alert_type, alert_time, org_id, company_id,
                              valve, in_temp, out_temp, room_temp, create_time)
-        SELECT REPLACE(UUID(), '-', ''),
+        SELECT CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
                a.id,
                c.pay_status,
                #{valveStatus},
@@ -902,7 +902,7 @@
     <insert id="inserHtAlertUnit">
         INSERT INTO ht_alert (id, meter_id, alert_type, alert_time, org_id, company_id, valve,
                              in_temp, out_temp, room_temp, create_time)
-        SELECT REPLACE(UUID(), '-', ''),
+        SELECT CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
                a.id,
                a.actual_status,
                NOW(),
@@ -1050,7 +1050,7 @@
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
             <if test="item.instructionType == 1 or item.instructionType == 2 or item.instructionType == 3 or item.instructionType == 5 or item.instructionType == 6">
-                (SELECT REPLACE(UUID(), '-', ''),
+                (#{item.id},
                        #{item.instructionType},
                        #{item.meterNum},
                        CASE #{item.instructionType}

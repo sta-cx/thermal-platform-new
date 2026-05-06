@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import org.sdkj.common.core.exception.ServiceException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +81,7 @@ public class PrReconciliationServiceImpl implements IPrReconciliationService {
         // 1. 确保账单已下载
         PrWechatBill wechatBill = downloadBill(billDate, billType, operator);
         if (wechatBill.getDownloadStatus() == null || wechatBill.getDownloadStatus() != 1) {
-            throw new RuntimeException("账单未下载成功，无法对账");
+            throw new ServiceException("账单未下载成功，无法对账");
         }
 
         // 2. TODO: Phase 6 — 解析微信账单文件，获取账单明细列表
@@ -138,7 +139,7 @@ public class PrReconciliationServiceImpl implements IPrReconciliationService {
     }
 
     @Override
-    public List<PrReconciliationDiff> queryDiffs(String billId) {
+    public List<PrReconciliationDiff> queryDiffs(Long billId) {
         return diffMapper.selectByBillId(billId);
     }
 
@@ -147,7 +148,7 @@ public class PrReconciliationServiceImpl implements IPrReconciliationService {
     public void handleDiff(String diffId, String handleRemark, String handler) {
         PrReconciliationDiff diff = diffMapper.selectById(diffId);
         if (diff == null) {
-            throw new RuntimeException("差异记录不存在");
+            throw new ServiceException("差异记录不存在");
         }
         diff.setHandleStatus("1");
         diff.setHandleRemark(handleRemark);

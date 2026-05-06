@@ -12,9 +12,11 @@ import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerIntercept
 import org.sdkj.common.core.factory.YmlPropertySourceFactory;
 import org.sdkj.common.core.utils.SpringUtils;
 import org.sdkj.common.mybatis.aspect.DataPermissionPointcutAdvisor;
+import org.sdkj.common.mybatis.aspect.OrgPermissionPointcutAdvisor;
 import org.sdkj.common.mybatis.handler.InjectionMetaObjectHandler;
 import org.sdkj.common.mybatis.handler.MybatisExceptionHandler;
 import org.sdkj.common.mybatis.handler.PlusPostInitTableInfoHandler;
+import org.sdkj.common.mybatis.interceptor.OrgPermissionInterceptor;
 import org.sdkj.common.mybatis.interceptor.PlusDataPermissionInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.BeansException;
@@ -46,6 +48,8 @@ public class MybatisPlusConfig {
         }
         // 数据权限处理
         interceptor.addInnerInterceptor(dataPermissionInterceptor());
+        // 组织级数据权限
+        interceptor.addInnerInterceptor(orgPermissionInterceptor());
         // 分页插件
         interceptor.addInnerInterceptor(paginationInnerInterceptor());
         // 乐观锁插件
@@ -58,6 +62,22 @@ public class MybatisPlusConfig {
      */
     public PlusDataPermissionInterceptor dataPermissionInterceptor() {
         return new PlusDataPermissionInterceptor();
+    }
+
+    /**
+     * 组织级数据权限拦截器
+     */
+    public OrgPermissionInterceptor orgPermissionInterceptor() {
+        return new OrgPermissionInterceptor();
+    }
+
+    /**
+     * 组织级数据权限切面处理器
+     */
+    @Bean
+    @Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+    public OrgPermissionPointcutAdvisor orgPermissionPointcutAdvisor() {
+        return new OrgPermissionPointcutAdvisor();
     }
 
     /**

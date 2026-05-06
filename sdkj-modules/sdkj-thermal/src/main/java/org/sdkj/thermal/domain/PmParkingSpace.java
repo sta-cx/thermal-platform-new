@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -18,8 +17,8 @@ import java.math.BigDecimal;
 @TableName("pm_parking_space")
 public class PmParkingSpace extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 车位编号 */
     private String parkingCode;
@@ -34,7 +33,7 @@ public class PmParkingSpace extends BaseEntity {
     private String companyId;
 
     /** 收费标准ID */
-    private String standardId;
+    private Long standardId;
 
     /** 单价 */
     private BigDecimal standardPrice;

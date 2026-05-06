@@ -134,9 +134,9 @@ public class PrHouseController extends BaseController {
     @GetMapping("/validate")
     public R<Boolean> validate(
             @RequestParam String roomNum,
-            @RequestParam String buildingId,
+            @RequestParam Long buildingId,
             @RequestParam(required = false) String unitCode,
-            @RequestParam(required = false) String id) {
+            @RequestParam(required = false) Long id) {
         return R.ok(houseService.validateRoomNum(roomNum, buildingId, unitCode, id));
     }
 

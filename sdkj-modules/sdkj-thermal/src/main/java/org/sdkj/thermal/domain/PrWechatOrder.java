@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -19,14 +18,14 @@ import java.util.Date;
 @TableName("pr_wechat_order")
 public class PrWechatOrder extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     private String outTradeNo;
     private String transactionId;
     private String openId;
     private String otherCode;
-    private String houseId;
+    private Long houseId;
     private String houseAddress;
     private BigDecimal totalFee;
     private String body;
@@ -58,7 +57,7 @@ public class PrWechatOrder extends BaseEntity {
     private String orgName;
 
     @TableField(exist = false)
-    private String buildingId;
+    private Long buildingId;
 
     @TableField(exist = false)
     private String buildingName;

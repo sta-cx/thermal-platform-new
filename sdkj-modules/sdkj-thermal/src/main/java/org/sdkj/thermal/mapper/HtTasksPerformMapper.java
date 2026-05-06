@@ -127,7 +127,7 @@ public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtT
     /**
      * 插入阀门回读数据
      */
-    void insertReading(@Param("meterNum") String meterNum, @Param("valveStatus") String valveStatus,
+    void insertReading(@Param("id") Long id, @Param("meterNum") String meterNum, @Param("valveStatus") String valveStatus,
                        @Param("settingStatus") String settingStatus, @Param("actualStatus") String actualStatus,
                        @Param("inTemp") BigDecimal inTemp, @Param("outTemp") BigDecimal outTemp,
                        @Param("voltage") BigDecimal voltage, @Param("valveTime") String valveTime,
@@ -144,7 +144,7 @@ public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtT
     /**
      * 插入YT系列阀门回读数据
      */
-    void insertYTReading(@Param("meterNum") String meterNum, @Param("valveStatus") String valveStatus,
+    void insertYTReading(@Param("id") Long id, @Param("meterNum") String meterNum, @Param("valveStatus") String valveStatus,
                          @Param("settingStatus") String settingStatus, @Param("actualStatus") String actualStatus,
                          @Param("inTemp") BigDecimal inTemp, @Param("outTemp") BigDecimal outTemp,
                          @Param("voltage") BigDecimal voltage, @Param("valveTime") String valveTime,
@@ -159,7 +159,7 @@ public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtT
     /**
      * 插入温度回读数据
      */
-    void insertTempReading(@Param("meterNum") String meterNum, @Param("temperature") BigDecimal temperature,
+    void insertTempReading(@Param("id") Long id, @Param("meterNum") String meterNum, @Param("temperature") BigDecimal temperature,
                            @Param("humi") Integer humi, @Param("voltage") BigDecimal voltage,
                            @Param("readTime") String readTime, @Param("reportingInterval") Integer reportingInterval,
                            @Param("reportingUnit") Integer reportingUnit, @Param("validTime") Integer validTime,
@@ -172,7 +172,7 @@ public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtT
     /**
      * 插入热力回读数据
      */
-    void insertHotReading(@Param("meterNum") String meterNum, @Param("outTemp") BigDecimal outTemp,
+    void insertHotReading(@Param("id") Long id, @Param("meterNum") String meterNum, @Param("outTemp") BigDecimal outTemp,
                           @Param("inTemp") BigDecimal inTemp, @Param("voltage") BigDecimal voltage,
                           @Param("readTime") String readTime, @Param("voltageStatus") Integer voltageStatus,
                           @Param("valveStatus") Integer valveStatus, @Param("totalFlow") BigDecimal totalFlow,
@@ -461,12 +461,12 @@ public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtT
     /**
      * 查询最新的任务执行记录
      */
-    HtTasksPerform queryLatestTasksPerform(@Param("tasksId") Integer tasksId, @Param("groupId") String groupId);
+    HtTasksPerform queryLatestTasksPerform(@Param("tasksId") Long tasksId, @Param("groupId") String groupId);
 
     /**
      * 获取任务最后执行的回报率
      */
-    Integer getTaskLastPerformReportRate(@Param("tasksId") Integer tasksId, @Param("groupId") String groupId);
+    Integer getTaskLastPerformReportRate(@Param("tasksId") Long tasksId, @Param("groupId") String groupId);
 
     /**
      * 查询阀门档案（关联房屋信息）

@@ -14,7 +14,7 @@ public interface PrReconciliationDiffMapper extends BaseMapperPlus<PrReconciliat
     /**
      * 通过账单ID查询差异记录
      */
-    List<PrReconciliationDiff> selectByBillId(@Param("billId") String billId);
+    List<PrReconciliationDiff> selectByBillId(@Param("billId") Long billId);
 
     /**
      * 查询未处理的差异记录

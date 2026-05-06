@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -16,11 +15,11 @@ import org.sdkj.common.mybatis.core.domain.BaseEntity;
 @TableName("ht_scope_dtu")
 public class HtScopeDtu extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 任务主表ID */
-    private String tasksId;
+    private Long tasksId;
 
     /** 小区ID */
     private String orgId;

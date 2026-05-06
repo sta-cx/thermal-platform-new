@@ -12,10 +12,10 @@ import java.math.BigDecimal;
 @AutoMapper(target = HtHouseStrategy.class)
 public class HtHouseStrategyVo {
 
-    private String id;
-    private String tasksId;
+    private Long id;
+    private Long tasksId;
     private Integer type;
-    private String strategyId;
+    private Long strategyId;
     private String name;
     private String remark;
     private Integer adjustBasis;

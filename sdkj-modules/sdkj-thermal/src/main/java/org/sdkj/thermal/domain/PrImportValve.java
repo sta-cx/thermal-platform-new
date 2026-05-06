@@ -3,7 +3,6 @@ package org.sdkj.thermal.domain;
 import cn.idev.excel.annotation.ExcelIgnore;
 import cn.idev.excel.annotation.ExcelProperty;
 import cn.idev.excel.annotation.write.style.ColumnWidth;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -22,9 +21,9 @@ public class PrImportValve {
     /**
      * 主键
      */
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
+    @TableId(value = "id")
     @ExcelIgnore
-    private String id;
+    private Long id;
 
     /**
      * 小区名称
@@ -46,7 +45,7 @@ public class PrImportValve {
      * 房屋id
      */
     @ExcelIgnore
-    private String houseId;
+    private Long houseId;
 
     /**
      * 房号
@@ -60,7 +59,7 @@ public class PrImportValve {
      * 仪表id
      */
     @ExcelIgnore
-    private String archiveId;
+    private Long archiveId;
 
     /**
      * 仪表名称

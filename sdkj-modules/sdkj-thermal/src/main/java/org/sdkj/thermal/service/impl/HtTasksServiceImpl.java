@@ -1,5 +1,7 @@
 package org.sdkj.thermal.service.impl;
 
+import org.sdkj.common.core.exception.ServiceException;
+import org.sdkj.common.mybatis.utils.IdGeneratorUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -56,16 +58,18 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean saveWithScope(HtTasks entity, List<String> scopeIds) {
+    public boolean saveWithScope(HtTasks entity, List<Long> scopeIds) {
         boolean saved = save(entity);
         if (saved && entity.getCronExpression() != null && !entity.getCronExpression().isEmpty()) {
             addToScheduler(entity.getId());
         }
         if (saved && scopeIds != null && !scopeIds.isEmpty()) {
-            for (String scopeId : scopeIds) {
-                if (scopeId == null || scopeId.isBlank()) continue;
+            for (Long scopeId : scopeIds) {
+                if (scopeId == null) {
+                    continue;
+                }
                 HtScope scope = new HtScope();
-                scope.setTasksId(String.valueOf(entity.getId()));
+                scope.setTasksId(entity.getId());
                 scope.setId(scopeId);
                 scopeMapper.insert(scope);
             }
@@ -75,20 +79,22 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean updateWithScope(HtTasks entity, List<String> scopeIds) {
+    public boolean updateWithScope(HtTasks entity, List<Long> scopeIds) {
         // 在事务内检查状态，防止 TOCTOU 竞争
         HtTasks existing = getById(entity.getId());
         if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
-            throw new RuntimeException("修改之前请先停止任务！");
+            throw new ServiceException("修改之前请先停止任务！");
         }
         boolean updated = updateById(entity);
         if (updated) {
             baseMapper.deleteScopeByTaskId(entity.getId());
             if (scopeIds != null && !scopeIds.isEmpty()) {
-                for (String scopeId : scopeIds) {
-                    if (scopeId == null || scopeId.isBlank()) continue;
+                for (Long scopeId : scopeIds) {
+                    if (scopeId == null) {
+                        continue;
+                    }
                     HtScope scope = new HtScope();
-                    scope.setTasksId(String.valueOf(entity.getId()));
+                    scope.setTasksId(entity.getId());
                     scope.setId(scopeId);
                     scopeMapper.insert(scope);
                 }
@@ -100,11 +106,11 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean removeById(java.io.Serializable id) {
-        HtTasks existing = getById((Integer) id);
+        HtTasks existing = getById(id);
         if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
-            throw new RuntimeException("删除前请先停止任务！");
+            throw new ServiceException("删除前请先停止任务！");
         }
-        removeFromScheduler((Integer) id);
+        removeFromScheduler((Long) id);
         return super.removeById(id);
     }
 
@@ -112,9 +118,9 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     @Transactional(rollbackFor = Exception.class)
     public boolean removeByIds(java.util.Collection<?> idList) {
         for (Object id : idList) {
-            HtTasks existing = getById((Integer) id);
+            HtTasks existing = getById((java.io.Serializable) id);
             if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
-                throw new RuntimeException("任务[ID:" + id + "]正在运行，删除前请先停止！");
+                throw new ServiceException("任务[ID:" + id + "]正在运行，删除前请先停止！");
             }
         }
         return super.removeByIds(idList);
@@ -122,7 +128,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean changeStatus(Integer id, Integer status) {
+    public boolean changeStatus(Long id, Integer status) {
         HtTasks task = getById(id);
         if (task == null) return false;
 
@@ -133,7 +139,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                 jobManager.pauseJob(id);
             }
         } catch (Exception e) {
-            throw new RuntimeException("调度器操作失败: " + e.getMessage(), e);
+            throw new ServiceException("调度器操作失败: " + e.getMessage(), e);
         }
 
         return baseMapper.updateTaskStatus(id, status) > 0;
@@ -141,17 +147,17 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean runTask(Integer id) {
+    public boolean runTask(Long id) {
         HtTasks task = getById(id);
         if (task == null) return false;
         if (task.getStatus() == null || task.getStatus() != 1) {
-            throw new RuntimeException("请先启动任务！");
+            throw new ServiceException("请先启动任务！");
         }
 
         try {
             jobManager.triggerJob(id);
         } catch (Exception e) {
-            throw new RuntimeException("触发任务失败: " + e.getMessage(), e);
+            throw new ServiceException("触发任务失败: " + e.getMessage(), e);
         }
 
         baseMapper.updateLastTime(id);
@@ -160,46 +166,46 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean markSpecial(List<String> scopeIds, String val, String remark) {
+    public boolean markSpecial(List<Long> scopeIds, String val, String remark) {
         return baseMapper.markScopeAsSpecial(scopeIds, val, remark) > 0;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean markSpecialUnit(List<String> scopeIds, String val, String remark) {
+    public boolean markSpecialUnit(List<Long> scopeIds, String val, String remark) {
         return baseMapper.markUnitAsSpecial(scopeIds, val, remark) > 0;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean markPayStatus(List<String> scopeIds, String val) {
+    public boolean markPayStatus(List<Long> scopeIds, String val) {
         return baseMapper.markPayStatus(scopeIds, val) > 0;
     }
 
     @Override
-    public double refreshBalanceRate(String taskId) {
+    public double refreshBalanceRate(Long taskId) {
         double rate = baseMapper.queryBalanceRate(taskId);
         return Math.round(rate * 100.0) / 100.0;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean saveValveAngle(String taskId, String scopeType) {
-        HtTasks task = getById(Integer.parseInt(taskId));
-        if (task == null) throw new RuntimeException("任务不存在");
+    public boolean saveValveAngle(Long taskId, String scopeType) {
+        HtTasks task = getById(taskId);
+        if (task == null) throw new ServiceException("任务不存在");
 
         // 终止条件检查：天数/平衡率/次数
         if (checkTerminationConditions(task)) {
             return true; // 任务已自动停止，不再生成指令
         }
 
-        if (task.getStrategyId() == null || task.getStrategyId().isEmpty()) {
-            throw new RuntimeException("该任务未关联策略，无法生成指令");
+        if (task.getStrategyId() == null) {
+            throw new ServiceException("该任务未关联策略，无法生成指令");
         }
 
         List<HtStrategySubVo> subList = strategySubMapper.selectByStrategyId(task.getStrategyId());
         if (subList == null || subList.isEmpty()) {
-            throw new RuntimeException("关联策略下无指令明细，无法生成开度");
+            throw new ServiceException("关联策略下无指令明细，无法生成开度");
         }
 
         List<Map<String, Object>> scopeData = "2".equals(scopeType)
@@ -222,10 +228,10 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                 record.setTasksId(taskId);
                 record.setStrategyId(task.getStrategyId());
                 record.setInstructionId(sub.getInstructionId());
-                record.setGroupId(task.getCuGroupId());
+                record.setGroupId(task.getCuGroupId() != null && !task.getCuGroupId().isBlank() ? Long.valueOf(task.getCuGroupId()) : null);
                 record.setCommandIndex(commandIndex++);
                 record.setOrderr(sub.getSort());
-                record.setMeterId(row.get("meter_id") != null ? row.get("meter_id").toString() : null);
+                record.setMeterId(row.get("meter_id") != null ? Long.valueOf(row.get("meter_id").toString()) : null);
                 record.setMeterNum(row.get("meter_num") != null ? row.get("meter_num").toString() : null);
                 record.setDeviceId(row.get("device_id") != null ? row.get("device_id").toString() : null);
                 record.setImei(row.get("imei") != null ? row.get("imei").toString() : null);
@@ -280,21 +286,21 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean addToScheduler(Integer id) {
+    public boolean addToScheduler(Long id) {
         try {
             return jobManager.addJob(id);
         } catch (Exception e) {
-            throw new RuntimeException("添加调度任务失败: " + e.getMessage(), e);
+            throw new ServiceException("添加调度任务失败: " + e.getMessage(), e);
         }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean removeFromScheduler(Integer id) {
+    public boolean removeFromScheduler(Long id) {
         try {
             return jobManager.deleteJob(id);
         } catch (Exception e) {
-            throw new RuntimeException("删除调度任务失败: " + e.getMessage(), e);
+            throw new ServiceException("删除调度任务失败: " + e.getMessage(), e);
         }
     }
 
@@ -311,17 +317,18 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateValveAngleLog(String logId, String scopeType) {
-        String newMainId = UUID.randomUUID().toString().replace("-", "");
+        Long parsedLogId = Long.valueOf(logId);
+        Long newMainId = IdGeneratorUtil.nextLongId();
         Long userId = LoginHelper.getUserId();
         String createBy = userId != null ? userId.toString() : null;
 
         if ("1".equals(scopeType)) {
-            baseMapper.insertSettingLogMainH(logId, newMainId, createBy);
-            baseMapper.insertSettingLogItemH(logId, newMainId);
+            baseMapper.insertSettingLogMainH(parsedLogId, newMainId, createBy);
+            baseMapper.insertSettingLogItemH(parsedLogId, newMainId);
             return baseMapper.updateValveSettingStatusH(newMainId) > 0;
         } else if ("2".equals(scopeType)) {
-            baseMapper.insertSettingLogMainD(logId, newMainId, createBy);
-            baseMapper.insertSettingLogItemD(logId, newMainId);
+            baseMapper.insertSettingLogMainD(parsedLogId, newMainId, createBy);
+            baseMapper.insertSettingLogItemD(parsedLogId, newMainId);
             return baseMapper.updateValveSettingStatusD(newMainId) > 0;
         }
         return false;
@@ -366,9 +373,9 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
             // 判断控制范围类型--3 户阀
             if (htTasks.getScopeType() == 3) {
                 // 根据组号计算调控范围内的平均回水温度（不包括特殊户）
-                pjhsVoList = baseMapper.queryHtTasksPJHSDTU(htTasks.getId().toString());
+                pjhsVoList = baseMapper.queryHtTasksPJHSDTU(htTasks.getId());
                 if (!pjhsVoList.isEmpty()) {
-                    baseMapper.queryHtTasksPJHSDTU(htTasks.getId().toString());
+                    baseMapper.queryHtTasksPJHSDTU(htTasks.getId());
                 }
             }
 
@@ -377,7 +384,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                 .collect(Collectors.toMap(PJHSVo::getChanNum, PJHSVo::getOutTempPJ));
 
             // 必须有策略
-            if (htTasks.getStrategyId() != null && !"".equals(htTasks.getStrategyId())) {
+            if (htTasks.getStrategyId() != null) {
 
                 HtStrategy htStrategy = htStrategyMapper.selectById(htTasks.getStrategyId());
 
@@ -395,14 +402,14 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                 commandIndex = commandIndex + 1;
 
                 HtStrategyPerform htStrategyPerform = htStrategyPerformMapper.queryStrategyPerformListByTasksIdAndIndex(
-                    Long.valueOf(htTasks.getId()), commandIndex);
+                    htTasks.getId(), commandIndex);
 
                 if (htStrategyPerform == null) {
                     log.error("未获取到指令或指令序列已完成！");
                     return false;
                 }
 
-                List<HtScopeDtu> htScopeDtuList = htScopeDtuMapper.queryHtScopeDtuListByTasksId(htTasks.getId().toString());
+                List<HtScopeDtu> htScopeDtuList = htScopeDtuMapper.queryHtScopeDtuListByTasksId(htTasks.getId());
 
                 if (htScopeDtuList == null || htScopeDtuList.isEmpty()) {
                     log.error("未获取到调控范围数据！");
@@ -415,10 +422,9 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                 for (HtScopeDtu scopeDtu : htScopeDtuList) {
                     htScopeDtu = scopeDtu;
                     HtTasksPerform htTasksPerform = new HtTasksPerform();
-                    htTasksPerform.setId(UUID.randomUUID().toString().replace("-", ""));
-                    htTasksPerform.setGroupId(htTasks.getCuGroupId());
+                    htTasksPerform.setGroupId(htTasks.getCuGroupId() != null ? Long.valueOf(htTasks.getCuGroupId()) : null);
                     htTasksPerform.setStrategyId(htTasks.getStrategyId());
-                    htTasksPerform.setInstructionId(String.valueOf(htStrategyPerform.getInstructionId()));
+                    htTasksPerform.setInstructionId(htStrategyPerform.getInstructionId());
                     htTasksPerform.setInstructionType(htStrategyPerform.getType());
                     try {
                         htTasksPerform.setInstruction(Integer.parseInt(htStrategyPerform.getInstruction()));
@@ -435,9 +441,9 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                     htTasksPerform.setMeterNum("AAAAAAAAAAAAAAAA");
                     htTasksPerform.setMeterArcCode(htScopeDtu.getMeterArcCode());
                     htTasksPerform.setStatus(0);
-                    htTasksPerform.setMeterId("");
+                    htTasksPerform.setMeterId(null);
                     htTasksPerform.setInstructionStatus(0);
-                    htTasksPerform.setTasksId(htTasks.getId().toString());
+                    htTasksPerform.setTasksId(htTasks.getId());
                     htTasksPerform.setOrderr(htStrategyPerform.getOrderr());
                     htTasksPerform.setForeStart(htStrategyPerform.getXunhuan());
                     htTasksPerform.setCreateTime(new Date());
@@ -461,9 +467,9 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                     // 下发控制指令
                     baseMapper.insertTasksPerformBatch(htTasksPerformList);
                     // 更新执行次数
-                    baseMapper.updateHtasks(htTasks.getId().toString());
+                    baseMapper.updateHtasks(htTasks.getId());
                     // 插入指令表每个阀门信息（不下发，仅作为界面查询展示用）
-                    baseMapper.insertHtTasksPerformByRadio(htTasks.getId().toString(), commandIndex);
+                    baseMapper.insertHtTasksPerformByRadio(htTasks.getId(), commandIndex);
                 } else {
                     log.error("无可下发指令，跳过调控次数累计！");
                 }
@@ -486,7 +492,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
      */
     private boolean checkTerminationConditions(HtTasks task) {
         if (task == null) return true;
-        Integer taskId = task.getId();
+        Long taskId = task.getId();
 
         // ---- 条件1: 调控天数检查 ----
         if (task.getDays() != null && task.getDays() > 0 && task.getLastTime() != null) {
@@ -501,7 +507,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
 
         // ---- 条件2: 平衡率达标检查 ----
         if (task.getStandard() != null && task.getStandard() > 0) {
-            double currentBalanceRate = baseMapper.queryBalanceRate(String.valueOf(taskId));
+            double currentBalanceRate = baseMapper.queryBalanceRate(taskId);
             if (currentBalanceRate >= task.getStandard()) {
                 stopTask(taskId, "平衡率已达标（当前 " + currentBalanceRate + "%，目标 " + task.getStandard() + "%）");
                 return true;
@@ -525,7 +531,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
      * @param taskId 任务ID
      * @param reason 停止原因（用于日志）
      */
-    private void stopTask(Integer taskId, String reason) {
+    private void stopTask(Long taskId, String reason) {
         // 更新状态为停止
         lambdaUpdate().eq(HtTasks::getId, taskId)
             .set(HtTasks::getStatus, 0)

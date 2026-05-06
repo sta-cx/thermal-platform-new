@@ -82,7 +82,7 @@
         (id, company_id, org_id, house_id, archive_id, meter_arc_code, meter_arc_name,
          meter_num, card_num, imei_num, dtu_num, dtu_type, chan_num, device_id,
          meter_serial, concentrator_code, caliber, specification, model, create_by, create_time)
-        select replace(uuid(), '-', ''), company_id, org_id, house_id, archive_id,
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), company_id, org_id, house_id, archive_id,
                meter_arc_code, meter_name, meter_num, card_num, imei, dtu_num, dtu_type,
                chan_num, device_id, meter_serial, concentrator_code, caliber,
                specification, model, create_by, create_time

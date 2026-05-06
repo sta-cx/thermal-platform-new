@@ -12,10 +12,10 @@ import org.sdkj.meter.domain.MtHeatArchive;
 @AutoMapper(target = MtHeatArchive.class)
 public class MtHeatArchiveVo {
 
-    private String id;
+    private Long id;
 
     /** 分类ID */
-    private String sortId;
+    private Long sortId;
 
     /** 编号 */
     private String code;

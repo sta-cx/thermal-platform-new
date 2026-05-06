@@ -11,8 +11,8 @@ import java.math.BigDecimal;
 @Data
 public class PrHeatUnitHotArchiveDto implements Serializable {
 
-    private String id;
-    private String archiveId;
+    private Long id;
+    private Long archiveId;
     private String meterNum;
     private String cardNum;
     private String meterArcCode;
@@ -22,7 +22,7 @@ public class PrHeatUnitHotArchiveDto implements Serializable {
     private String productId;
     private String deviceId;
     private Integer meterSerial;
-    private String unitId;
+    private Long unitId;
     private String orgId;
     private String companyId;
     private String valveStatus;
@@ -50,7 +50,7 @@ public class PrHeatUnitHotArchiveDto implements Serializable {
     private BigDecimal alarmValue;
     private Long closeValue;
     private String measurement;
-    private String standardId;
+    private Long standardId;
     private BigDecimal standardPrice;
     private Integer isSteps;
     private BigDecimal startReading;

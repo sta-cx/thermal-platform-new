@@ -15,7 +15,7 @@ import org.sdkj.thermal.domain.PrOptionsHeat;
 public class PrOptionsHeatBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 供热周期开始日期 */
     private String heatStartDate;

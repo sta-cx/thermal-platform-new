@@ -426,8 +426,8 @@ public class PrHeatValveArchiveController extends BaseController {
         if (valves.isEmpty()) {
             return R.fail("未找到对应的阀门档案");
         }
-        String houseId = valves.get(0).getHouseId();
-        if (StringUtils.isBlank(houseId)) {
+        Long houseId = valves.get(0).getHouseId();
+        if (houseId == null) {
             return R.fail("该阀门未关联房屋");
         }
         return R.ok(houseService.selectById(houseId));
@@ -545,7 +545,7 @@ public class PrHeatValveArchiveController extends BaseController {
             @RequestParam String companyId,
             @RequestParam String orgId,
             @RequestParam(required = false) String orgName,
-            @RequestParam String buildingId,
+            @RequestParam Long buildingId,
             @RequestParam(required = false) String buildingName,
             @RequestParam(required = false) String unitCode,
             @RequestParam String roomNum,
@@ -833,7 +833,7 @@ public class PrHeatValveArchiveController extends BaseController {
                 lqw.last("LIMIT 1");
                 PrHeatValveArchive archive = valveArchiveService.getOne(lqw);
 
-                if (archive != null && StringUtils.isNotBlank(archive.getHouseId())) {
+                if (archive != null && archive.getHouseId() != null) {
                     valveArchiveService.updateHouseTemperature(
                         archive.getHouseId(), inTemperature, outTemperature, actualOpen);
                 }
@@ -892,7 +892,7 @@ public class PrHeatValveArchiveController extends BaseController {
                                 .last("LIMIT 1")
                         );
 
-                        if (hotArchive != null && StringUtils.isNotBlank(hotArchive.getHouseId())) {
+                        if (hotArchive != null && hotArchive.getHouseId() != null) {
                             valveArchiveService.updateHouseTemperature(
                                 hotArchive.getHouseId(), supplyTemp, returnTemp, null);
                         }
@@ -921,6 +921,7 @@ public class PrHeatValveArchiveController extends BaseController {
                                     valveOpening = "100";
                                 }
                             } catch (NumberFormatException ignored) {
+                                log.debug("数值解析失败, 使用默认值", ignored);
                                 valveOpening = "0";
                             }
                         }
@@ -933,7 +934,7 @@ public class PrHeatValveArchiveController extends BaseController {
                         lqw.last("LIMIT 1");
                         PrHeatValveArchive archive = valveArchiveService.getOne(lqw);
 
-                        if (archive != null && StringUtils.isNotBlank(archive.getHouseId())) {
+                        if (archive != null && archive.getHouseId() != null) {
                             Integer actualOpen = StringUtils.isNotBlank(valveOpening)
                                 ? Integer.parseInt(valveOpening) : null;
                             valveArchiveService.updateHouseTemperature(

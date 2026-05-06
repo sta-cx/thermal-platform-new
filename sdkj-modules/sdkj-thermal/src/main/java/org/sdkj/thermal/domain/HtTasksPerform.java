@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -20,12 +19,12 @@ import java.util.Date;
 @AutoMapper(target = HtTasksPerformVo.class)
 public class HtTasksPerform extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
-    private String instructionId;
-    private String groupId;
-    private String strategyId;
+    private Long instructionId;
+    private Long groupId;
+    private Long strategyId;
     private Integer commandIndex;
     private Integer orderr;
     private Integer instructionType;
@@ -40,12 +39,12 @@ public class HtTasksPerform extends BaseEntity {
     private String concentratorCode;
     private String deviceId;
     private String meterNum;
-    private String meterId;
+    private Long meterId;
     private String meterArcCode;
     private Integer status;
     private Integer instructionStatus;
     private Date sendTime;
-    private String tasksId;
+    private Long tasksId;
     private BigDecimal inTemp;
     private BigDecimal outTemp;
     private BigDecimal roomTemp;

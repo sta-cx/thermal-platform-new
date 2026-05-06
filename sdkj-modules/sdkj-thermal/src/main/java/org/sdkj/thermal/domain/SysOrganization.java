@@ -18,25 +18,18 @@ public class SysOrganization extends BaseEntity {
     @TableId(value = "id", type = IdType.ASSIGN_UUID)
     private String id;
 
-    private String name;
-    private String companyId;
     private String parentId;
-    private String code;
     private String level;
+    private String name;
+    private String code;
+    private String orgId;
+    private String leader;
+    private String phone;
     private String address;
-    private String tele;
-    private String bankName;
-    private String corpotateAccount;
-    private String businessLicense;
-    private String parentName;
-    private String province;
-    private String city;
-    private String county;
-    private String street;
-    private Boolean disabled;
-    private String type;
-    private String longitude;
-    private String latitude;
+    private Integer sort;
+    private Integer status;
+    private String companyId;
+    private String remark;
 
     @TableField(exist = false)
     private List<SysOrganization> children;

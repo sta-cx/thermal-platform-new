@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ServiceException.class)
     public R<Void> handleServiceException(ServiceException e, HttpServletRequest request) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         Integer code = e.getCode();
         return ObjectUtil.isNotNull(code) ? R.fail(code, e.getMessage()) : R.fail(e.getMessage());
     }
@@ -88,7 +88,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BaseException.class)
     public R<Void> handleBaseException(BaseException e, HttpServletRequest request) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         return R.fail(e.getMessage());
     }
 
@@ -168,7 +168,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(BindException.class)
     public R<Void> handleBindException(BindException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         String message = StreamUtils.join(e.getAllErrors(), DefaultMessageSourceResolvable::getDefaultMessage, ", ");
         return R.fail(message);
     }
@@ -178,7 +178,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public R<Void> constraintViolationException(ConstraintViolationException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         String message = StreamUtils.join(e.getConstraintViolations(), ConstraintViolation::getMessage, ", ");
         return R.fail(message);
     }
@@ -188,7 +188,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public R<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         String message = StreamUtils.join(e.getBindingResult().getAllErrors(), DefaultMessageSourceResolvable::getDefaultMessage, ", ");
         return R.fail(message);
     }
@@ -198,7 +198,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
     public R<Void> handlerMethodValidationException(HandlerMethodValidationException e) {
-        log.error(e.getMessage());
+        log.error(e.getMessage(), e);
         String message = StreamUtils.join(e.getAllErrors(), MessageSourceResolvable::getDefaultMessage, ", ");
         return R.fail(message);
     }

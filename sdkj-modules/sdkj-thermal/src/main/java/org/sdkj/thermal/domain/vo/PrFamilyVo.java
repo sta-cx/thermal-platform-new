@@ -11,7 +11,7 @@ import org.sdkj.thermal.domain.PrFamily;
 @AutoMapper(target = PrFamily.class)
 public class PrFamilyVo {
 
-    private String id;
+    private Long id;
 
     /** 客户证件号 */
     private String userIdNo;
@@ -35,6 +35,6 @@ public class PrFamilyVo {
     private String relationType;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
 }

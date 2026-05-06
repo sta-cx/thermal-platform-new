@@ -19,10 +19,10 @@ import java.util.Date;
 public class PrHeatValveArchiveBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 档案ID */
-    private String archiveId;
+    private Long archiveId;
 
     /** 表号 */
     @NotBlank(message = "表号不能为空")
@@ -54,7 +54,7 @@ public class PrHeatValveArchiveBo extends BaseEntity {
     private String meterSerial;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 小区ID */
     private String orgId;
@@ -114,7 +114,7 @@ public class PrHeatValveArchiveBo extends BaseEntity {
     private Date chanNumSyncTime;
 
     /** 最后执行ID */
-    private String lastPerformId;
+    private Long lastPerformId;
 
     /** DTU编号 */
     private String dtuNum;

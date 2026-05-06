@@ -2,6 +2,7 @@ package org.sdkj.thermal.mapper;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrExpense;
 import org.sdkj.thermal.domain.PrStandard;
@@ -14,6 +15,7 @@ import java.util.Map;
  * 费用明细 Mapper
  * 迁移自旧系统 PrExpenseMapper
  */
+@OrgPermission
 public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> {
 
     /**
@@ -38,7 +40,7 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
     /**
      * 查询房屋取暖费明细
      */
-    PrExpenseVo selectHeatExpenseByHouseId(@Param("houseId") String houseId);
+    PrExpenseVo selectHeatExpenseByHouseId(@Param("houseId") Long houseId);
 
     /**
      * 查询已有费用明细的 houseId 列表
@@ -68,17 +70,17 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
     /**
      * 设置房屋缴费状态
      */
-    int updateHousePayStatus(@Param("houseIds") List<String> houseIds);
+    int updateHousePayStatus(@Param("houseIds") List<Long> houseIds);
 
     /**
      * 设置计算状态
      */
-    int updateCalStatus(@Param("houseId") String houseId);
+    int updateCalStatus(@Param("houseId") Long houseId);
 
     /**
      * 根据ID查询收费标准
      */
-    PrStandard selectStandardById(@Param("standardId") String standardId);
+    PrStandard selectStandardById(@Param("standardId") Long standardId);
 
     /** 车位费用分页查询 */
     List<PrExpenseVo> selectParkingPageList(
@@ -124,9 +126,9 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
      * 微信支付成功后更新费用明细
      * 将指定房屋指定年份的未缴费明细标记为已缴费
      */
-    int updateExpenseByWechat(@Param("houseId") String houseId,
+    int updateExpenseByWechat(@Param("houseId") Long houseId,
                               @Param("paidIn") java.math.BigDecimal paidIn,
-                              @Param("recordId") String recordId,
+                              @Param("recordId") Long recordId,
                               @Param("openId") String openId,
                               @Param("year") String year);
 
@@ -135,17 +137,17 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
     /**
      * 设置建筑面积阶梯单价
      */
-    int setStandardPriceJzmj(@Param("standardId") String standardId);
+    int setStandardPriceJzmj(@Param("standardId") Long standardId);
 
     /**
      * 设置使用面积阶梯单价
      */
-    int setStandardPriceSymj(@Param("standardId") String standardId);
+    int setStandardPriceSymj(@Param("standardId") Long standardId);
 
     /**
      * 设置楼层阶梯单价
      */
-    int setStandardPriceLc(@Param("standardId") String standardId);
+    int setStandardPriceLc(@Param("standardId") Long standardId);
 
     // ========== 滞纳金计算方法 ==========
 
@@ -153,31 +155,31 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
      * 滞纳金计算 - 起收日期
      */
     int updateLatefeeQs(@Param("companyId") String companyId, @Param("orgId") String orgId,
-                        @Param("latefeeFormula") String latefeeFormula, @Param("standardId") String standardId);
+                        @Param("latefeeFormula") String latefeeFormula, @Param("standardId") Long standardId);
 
     /**
      * 滞纳金计算 - 到期日期
      */
     int updateLatefeeJs(@Param("companyId") String companyId, @Param("orgId") String orgId,
-                        @Param("latefeeFormula") String latefeeFormula, @Param("standardId") String standardId);
+                        @Param("latefeeFormula") String latefeeFormula, @Param("standardId") Long standardId);
 
     /**
      * 滞纳金计算 - 指定日期
      */
     int updateLatefeeZd(@Param("companyId") String companyId, @Param("orgId") String orgId,
-                        @Param("latefeeFormula") String latefeeFormula, @Param("standardId") String standardId,
+                        @Param("latefeeFormula") String latefeeFormula, @Param("standardId") Long standardId,
                         @Param("latefeeStartdate") java.util.Date latefeeStartdate);
 
     /**
      * 滞纳金计算 - 数据核查
      */
     int updateLatefeeSJHC(@Param("companyId") String companyId, @Param("orgId") String orgId,
-                          @Param("latefeeFormula") String latefeeFormula, @Param("standardId") String standardId,
+                          @Param("latefeeFormula") String latefeeFormula, @Param("standardId") Long standardId,
                           @Param("year") String year, @Param("month") String month);
 
     /**
      * 滞纳金计算后更新最终金额
      */
     int updateFinalMoneyAfterLateFee(@Param("companyId") String companyId, @Param("orgId") String orgId,
-                                      @Param("standardId") String standardId);
+                                      @Param("standardId") Long standardId);
 }

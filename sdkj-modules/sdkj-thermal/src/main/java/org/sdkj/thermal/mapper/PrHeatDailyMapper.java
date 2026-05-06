@@ -2,6 +2,7 @@ package org.sdkj.thermal.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.PrHeatDaily;
 import org.sdkj.thermal.domain.PrHeatMonth;
 import org.sdkj.thermal.domain.vo.PrHeatDailyVo;
@@ -12,6 +13,7 @@ import java.util.List;
 /**
  * 热表日记录 Mapper
  */
+@OrgPermission
 public interface PrHeatDailyMapper extends BaseMapperPlus<PrHeatDaily, PrHeatDailyVo> {
 
     /**

@@ -1,6 +1,5 @@
 package org.sdkj.common.tenant.core;
 
-import cn.dev33.satoken.SaManager;
 import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
 import jakarta.servlet.*;
@@ -58,11 +57,7 @@ public class TenantFilter {
         }
 
         private String resolveTenantCode(HttpServletRequest req) {
-            String tokenName = SaManager.getConfig().getTokenName();
-            String tokenValue = req.getHeader(tokenName);
-            if (StringUtils.isBlank(tokenValue)) {
-                tokenValue = req.getParameter(tokenName);
-            }
+            String tokenValue = StpUtil.getTokenValue();
             if (StringUtils.isBlank(tokenValue)) {
                 return null;
             }

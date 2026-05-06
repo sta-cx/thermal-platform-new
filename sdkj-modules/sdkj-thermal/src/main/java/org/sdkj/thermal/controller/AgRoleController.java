@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
+import org.sdkj.common.core.constant.BusinessStatus;
 import org.sdkj.thermal.domain.AgRole;
 import org.sdkj.thermal.domain.bo.AgRoleBo;
 import org.sdkj.thermal.service.IAgRoleService;
@@ -149,7 +150,7 @@ public class AgRoleController {
         List<TreeNode> nodes = menus.stream()
             .map(this::convertToTreeNode)
             .collect(Collectors.toList());
-        return R.ok(TreeUtil.buildByLoop(nodes, "0"));
+        return R.ok(TreeUtil.buildByLoop(nodes, BusinessStatus.ROOT_PARENT_ID));
     }
 
     /**
@@ -164,7 +165,7 @@ public class AgRoleController {
         List<TreeNode> nodes = menus.stream()
             .map(this::convertToTreeNode)
             .collect(Collectors.toList());
-        return R.ok(TreeUtil.buildByLoop(nodes, "0"));
+        return R.ok(TreeUtil.buildByLoop(nodes, BusinessStatus.ROOT_PARENT_ID));
     }
 
     /**

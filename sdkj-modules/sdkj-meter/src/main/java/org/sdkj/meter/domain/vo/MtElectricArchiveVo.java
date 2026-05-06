@@ -14,10 +14,10 @@ import java.math.BigDecimal;
 @AutoMapper(target = MtElectricArchive.class)
 public class MtElectricArchiveVo {
 
-    private String id;
+    private Long id;
 
     /** 分类ID */
-    private String sortId;
+    private Long sortId;
 
     /** 编号 */
     private String code;

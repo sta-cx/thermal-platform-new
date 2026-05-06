@@ -13,7 +13,7 @@ import java.util.Date;
 @AutoMapper(target = PrBuilding.class)
 public class PrBuildingVo {
 
-    private String id;
+    private Long id;
 
     /** 楼宇编码 */
     private String code;
@@ -43,7 +43,7 @@ public class PrBuildingVo {
     private Date deliveryTime;
 
     /** 热力站ID */
-    private String stationId;
+    private Long stationId;
 
     /** 小区ID */
     private String orgId;

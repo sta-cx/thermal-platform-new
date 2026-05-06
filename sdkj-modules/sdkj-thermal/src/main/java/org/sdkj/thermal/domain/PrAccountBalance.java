@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -20,12 +19,12 @@ import java.math.BigDecimal;
 @AutoMapper(target = PrAccountBalanceVo.class)
 public class PrAccountBalance extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
-    private String userId;
+    private Long userId;
 
-    private String houseId;
+    private Long houseId;
 
     private String itemGroup;
 

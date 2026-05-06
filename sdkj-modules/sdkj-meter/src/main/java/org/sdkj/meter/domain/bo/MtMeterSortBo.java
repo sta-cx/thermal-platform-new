@@ -16,7 +16,7 @@ import org.sdkj.meter.domain.MtMeterSort;
 public class MtMeterSortBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 编号 */
     @NotBlank(message = "编号不能为空")
@@ -30,7 +30,7 @@ public class MtMeterSortBo extends BaseEntity {
     private String model;
 
     /** 厂商ID */
-    private String vendorId;
+    private Long vendorId;
 
     /** 是否一卡通 */
     private Integer isOnecard;

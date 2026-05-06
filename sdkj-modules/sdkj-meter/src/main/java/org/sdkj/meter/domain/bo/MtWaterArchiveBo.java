@@ -2,6 +2,7 @@ package org.sdkj.meter.domain.bo;
 
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.sdkj.common.mybatis.core.domain.BaseEntity;
@@ -16,11 +17,11 @@ import org.sdkj.meter.domain.MtWaterArchive;
 public class MtWaterArchiveBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 分类ID */
-    @NotBlank(message = "分类ID不能为空")
-    private String sortId;
+    @NotNull(message = "分类ID不能为空")
+    private Long sortId;
 
     /** 编号 */
     @NotBlank(message = "编号不能为空")

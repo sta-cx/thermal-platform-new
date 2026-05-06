@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -21,8 +20,8 @@ import java.util.Date;
 @AutoMapper(target = HtTasksVo.class)
 public class HtTasks extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 当前任务组ID */
     private String cuGroupId;
@@ -37,7 +36,7 @@ public class HtTasks extends BaseEntity {
     private String cronExpression;
 
     /** 策略ID */
-    private String strategyId;
+    private Long strategyId;
 
     /** 优先级 */
     private Integer priority;

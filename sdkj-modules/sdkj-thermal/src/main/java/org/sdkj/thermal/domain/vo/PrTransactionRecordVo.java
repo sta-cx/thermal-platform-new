@@ -15,14 +15,14 @@ import java.util.List;
 @AutoMapper(target = PrTransactionRecord.class)
 public class PrTransactionRecordVo {
 
-    private String id;
+    private Long id;
     private String serialNum;
     private Integer transactionType;
     private Integer paymentType;
     private BigDecimal amount;
     private BigDecimal paidAmount;
     private Integer status;
-    private String houseId;
+    private Long houseId;
     private String userId;
     private String orgId;
     private String companyId;
@@ -31,7 +31,7 @@ public class PrTransactionRecordVo {
     private Date transactionTime;
     private String operatorId;
     private String notes;
-    private String originalRecordId;
+    private Long originalRecordId;
     private String invoiceNo;
 
     /** 房间号（关联查询） */

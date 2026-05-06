@@ -25,7 +25,7 @@ public class PrHeatVo implements Serializable {
     private PrHeatDtuArchiveDto prHeatDtuArchive;
 
     /** ID */
-    private String id;
+    private Long id;
 
     /** 表号 */
     private String meterNum;

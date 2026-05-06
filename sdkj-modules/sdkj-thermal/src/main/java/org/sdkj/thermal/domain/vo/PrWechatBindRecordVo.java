@@ -8,8 +8,8 @@ import java.util.Date;
  */
 @Data
 public class PrWechatBindRecordVo {
-    private String id;
-    private String houseId;
+    private Long id;
+    private Long houseId;
     private String heatPayCode;
     private String wxOpenId;
     private String companyId;

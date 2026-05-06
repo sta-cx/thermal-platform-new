@@ -1,61 +1,43 @@
 package org.sdkj.thermal.wechat.utils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+@Slf4j
 public class DateUtil {
-	/**
-	 * 时间戳转换成日期格式字符串
-	 * @param seconds 精确到秒的字符串
-	 * @param format
-	 * @return
-	 */
-	public static String timeStamp2Date(String seconds,String format) {
-		if(seconds == null || seconds.isEmpty() || seconds.equals("null")){
+	private static final String DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+	public static String timeStamp2Date(String seconds, String format) {
+		if (seconds == null || seconds.isEmpty() || seconds.equals("null")) {
 			return "";
 		}
-		if(format == null || format.isEmpty()){
-			format = "yyyy-MM-dd HH:mm:ss";
+		if (format == null || format.isEmpty()) {
+			format = DEFAULT_FORMAT;
 		}
-		SimpleDateFormat sdf = new SimpleDateFormat(format);
-		return sdf.format(new Date(Long.valueOf(seconds+"000")));
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
+		return dtf.format(LocalDateTime.ofInstant(
+			Instant.ofEpochMilli(Long.parseLong(seconds) * 1000), ZoneId.systemDefault()));
 	}
-	/**
-	 * 日期格式字符串转换成时间戳
-	 * @param date_str 字符串日期
-	 * @param format 如：yyyy-MM-dd HH:mm:ss
-	 * @return
-	 */
-	public static String date2TimeStamp(String date_str,String format){
+
+	public static String date2TimeStamp(String dateStr, String format) {
+		if (format == null || format.isEmpty()) {
+			format = DEFAULT_FORMAT;
+		}
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat(format);
-			return String.valueOf(sdf.parse(date_str).getTime()/1000);
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern(format);
+			LocalDateTime ldt = LocalDateTime.parse(dateStr, dtf);
+			return String.valueOf(ldt.atZone(ZoneId.systemDefault()).toEpochSecond());
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.warn("日期转换失败: dateStr={}, format={}", dateStr, format, e);
 		}
 		return "";
 	}
 
-	/**
-	 * 取得当前时间戳（精确到秒）
-	 * @return
-	 */
-	public static String timeStamp(){
-		long time = System.currentTimeMillis();
-		String t = String.valueOf(time/1000);
-		return t;
-	}
-
-	public static void main(String[] args) {
-		String timeStamp = timeStamp();
-		System.out.println("timeStamp="+timeStamp); //运行输出:timeStamp=1470278082
-		System.out.println(System.currentTimeMillis());//运行输出:1470278082980
-		//该方法的作用是返回当前的计算机时间，时间的表达格式为当前计算机时间和GMT时间(格林威治时间)1970年1月1号0时0分0秒所差的毫秒数
-
-		String date = timeStamp2Date(timeStamp, "yyyy-MM-dd HH:mm:ss");
-		System.out.println("date="+date);//运行输出:date=2016-08-04 10:34:42
-
-		String timeStamp2 = date2TimeStamp(date, "yyyy-MM-dd HH:mm:ss");
-		System.out.println(timeStamp2);  //运行输出:1470278082
+	public static String timeStamp() {
+		return String.valueOf(System.currentTimeMillis() / 1000);
 	}
 }

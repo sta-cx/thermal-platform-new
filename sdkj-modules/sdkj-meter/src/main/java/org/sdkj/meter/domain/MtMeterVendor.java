@@ -1,6 +1,5 @@
 package org.sdkj.meter.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -19,8 +18,8 @@ import org.sdkj.meter.domain.vo.MtMeterVendorVo;
 @AutoMapper(target = MtMeterVendorVo.class)
 public class MtMeterVendor extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 厂商编码 */
     private String code;

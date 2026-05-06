@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  */
 @Data
 public class PrWechatBillVo {
-    private String id;
+    private Long id;
     private String billDate;
     private String billType;
     private String billUrl;

@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -18,32 +17,32 @@ import org.sdkj.thermal.domain.vo.HtScopeVo;
 @AutoMapper(target = HtScopeVo.class)
 public class HtScope extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 任务主表ID */
-    private String tasksId;
+    private Long tasksId;
 
     /** 小区ID */
     private String orgId;
 
     /** 楼宇ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 单元ID */
-    private String unitId;
+    private Long unitId;
 
     /** 公司ID */
     private String companyId;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 仪表号 */
     private String meterNum;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 档案编号 */
     private String meterArcCode;

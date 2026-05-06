@@ -35,12 +35,12 @@ public interface IPrStandardService extends IService<PrStandard> {
     /**
      * 删除收费标准
      */
-    boolean deleteData(String id);
+    boolean deleteData(Long id);
 
     /**
      * 查询收费标准详情（含子表单价）
      */
-    PrStandard selectDetailById(String id);
+    PrStandard selectDetailById(Long id);
 
     /**
      * 根据 itemCode 查询收费标准

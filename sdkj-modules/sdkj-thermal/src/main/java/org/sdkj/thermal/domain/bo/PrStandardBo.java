@@ -18,7 +18,7 @@ import java.util.Date;
 public class PrStandardBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 标准名称 */
     private String name;

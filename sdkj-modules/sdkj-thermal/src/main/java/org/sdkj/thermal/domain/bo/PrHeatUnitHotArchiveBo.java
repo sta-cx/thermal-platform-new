@@ -19,10 +19,10 @@ import java.util.Date;
 public class PrHeatUnitHotArchiveBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 档案ID */
-    private String archiveId;
+    private Long archiveId;
 
     /** 表计档案编码 */
     @NotBlank(message = "表计档案编码不能为空")
@@ -66,7 +66,7 @@ public class PrHeatUnitHotArchiveBo extends BaseEntity {
     private String installSite;
 
     /** 收费标准ID */
-    private String standardId;
+    private Long standardId;
 
     /** 收费标准价格 */
     private BigDecimal standardPrice;
@@ -159,7 +159,7 @@ public class PrHeatUnitHotArchiveBo extends BaseEntity {
     private Integer isStop;
 
     /** 单元ID */
-    private String unitId;
+    private Long unitId;
 
     /** 公司ID */
     private String companyId;

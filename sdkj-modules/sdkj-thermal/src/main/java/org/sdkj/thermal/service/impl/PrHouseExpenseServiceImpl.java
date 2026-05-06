@@ -73,7 +73,7 @@ public class PrHouseExpenseServiceImpl extends ServiceImpl<PrHouseExpenseMapper,
     @Transactional(rollbackFor = Exception.class)
     public boolean batchDelete(List<PrHouseExpense> list) {
         if (list == null || list.isEmpty()) return false;
-        List<String> ids = list.stream().map(PrHouseExpense::getId).toList();
+        List<Long> ids = list.stream().map(PrHouseExpense::getId).toList();
         return removeByIds(ids);
     }
 }

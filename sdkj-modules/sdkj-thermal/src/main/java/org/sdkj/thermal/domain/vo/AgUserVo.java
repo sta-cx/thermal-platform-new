@@ -1,5 +1,7 @@
 package org.sdkj.thermal.domain.vo;
 
+import org.sdkj.common.sensitive.annotation.Sensitive;
+import org.sdkj.common.sensitive.core.SensitiveStrategy;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,6 +17,7 @@ public class AgUserVo implements Serializable {
 
     private String userName;
 
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String phone;
 
     private String realName;

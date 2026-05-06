@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -13,10 +12,10 @@ import org.sdkj.common.mybatis.core.domain.BaseEntity;
 @TableName("pr_house_log")
 public class PrHouseLog extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
-    private String houseId;
+    private Long houseId;
     private String changeType;
     private Integer changeVal;
     private String orgId;

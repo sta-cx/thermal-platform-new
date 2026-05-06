@@ -11,6 +11,7 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.common.core.utils.MapstructUtils;
+import org.sdkj.common.core.constant.BusinessStatus;
 import org.sdkj.meter.domain.MtFormulaFile;
 import org.sdkj.meter.domain.bo.MtFormulaFileBo;
 import org.sdkj.meter.domain.vo.MtFormulaFileVo;
@@ -68,7 +69,7 @@ public class MtFormulaFileController extends BaseController {
     @PostMapping
     public R<Void> add(@Validated @RequestBody MtFormulaFileBo bo) {
         MtFormulaFile formula = MapstructUtils.convert(bo, MtFormulaFile.class);
-        formula.setIsEnabled("1");
+        formula.setIsEnabled(BusinessStatus.IS_ENABLED_YES);
         return toAjax(formulaService.save(formula));
     }
 
@@ -102,8 +103,8 @@ public class MtFormulaFileController extends BaseController {
     @SaCheckLogin
     @Log(title = "公式档案", businessType = BusinessType.UPDATE)
     @PutMapping("/enable/{id}")
-    public R<Void> enable(@PathVariable String id) {
-        return toAjax(formulaService.toggleEnabled(id, "1"));
+    public R<Void> enable(@PathVariable Long id) {
+        return toAjax(formulaService.toggleEnabled(id, BusinessStatus.IS_ENABLED_YES));
     }
 
     /**
@@ -113,8 +114,8 @@ public class MtFormulaFileController extends BaseController {
     @SaCheckLogin
     @Log(title = "公式档案", businessType = BusinessType.UPDATE)
     @PutMapping("/disable/{id}")
-    public R<Void> disable(@PathVariable String id) {
-        return toAjax(formulaService.toggleEnabled(id, "0"));
+    public R<Void> disable(@PathVariable Long id) {
+        return toAjax(formulaService.toggleEnabled(id, BusinessStatus.IS_ENABLED_NO));
     }
 
     /**

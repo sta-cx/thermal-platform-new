@@ -20,7 +20,7 @@ public class PrHeatReadingCopy1Vo implements Serializable {
     // ========== pr_heat_reading_copy1 表字段 ==========
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 房号 */
     private String roomNum;
@@ -87,7 +87,7 @@ public class PrHeatReadingCopy1Vo implements Serializable {
     private String floor;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 子表序号 */
     private Integer meterSerial;

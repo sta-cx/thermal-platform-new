@@ -20,12 +20,12 @@ public class PrExpenseVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
-    private String houseId;
+    private Long id;
+    private Long houseId;
     private String itemGroup;
     private String itemCode;
     private String itemName;
-    private String standardId;
+    private Long standardId;
     private Date startDate;
     private Date expireDate;
     private Date lastDate;
@@ -50,7 +50,7 @@ public class PrExpenseVo implements Serializable {
     private Integer overdueDay;
     private Integer isCharged;
     private Date chargedTime;
-    private String recordId;
+    private Long recordId;
     private Date delayDate;
     private Integer heatUsage;
     private String isCalc;
@@ -59,7 +59,7 @@ public class PrExpenseVo implements Serializable {
     private String month;
     private String orgId;
     private String companyId;
-    private String parkingSpaceId;
+    private Long parkingSpaceId;
     private String roomNum;
     private String orgName;
     private String buildingName;
@@ -75,7 +75,7 @@ public class PrExpenseVo implements Serializable {
     private List<PrExpenseVo> lists;
 
     /** 业主ID */
-    private String userId;
+    private Long userId;
 
     /** 是否打印 0否 1是 */
     private String isPrint;

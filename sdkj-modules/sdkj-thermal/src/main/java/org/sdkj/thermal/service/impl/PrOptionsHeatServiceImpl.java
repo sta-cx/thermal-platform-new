@@ -43,7 +43,6 @@ public class PrOptionsHeatServiceImpl extends ServiceImpl<PrOptionsHeatMapper, P
                 if (companyOptions != null) {
                     // 复制公司配置作为小区配置的默认值
                     options = new PrOptionsHeat();
-                    options.setId(UUID.randomUUID().toString().replace("-", ""));
                     options.setCompanyId(companyId);
                     options.setOrgId(orgId);
                     options.setLevel("1");
@@ -81,7 +80,6 @@ public class PrOptionsHeatServiceImpl extends ServiceImpl<PrOptionsHeatMapper, P
 
         // 创建新配置
         PrOptionsHeat options = new PrOptionsHeat();
-        options.setId(UUID.randomUUID().toString().replace("-", ""));
         options.setCompanyId(companyId);
         options.setOrgId(orgId);
         options.setLevel(StringUtils.isBlank(orgId) ? "0" : "1");

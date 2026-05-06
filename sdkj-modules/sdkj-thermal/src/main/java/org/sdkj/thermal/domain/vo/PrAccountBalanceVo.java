@@ -13,11 +13,11 @@ import java.math.BigDecimal;
 @AutoMapper(target = PrAccountBalance.class)
 public class PrAccountBalanceVo {
 
-    private String id;
+    private Long id;
 
     private String userId;
 
-    private String houseId;
+    private Long houseId;
 
     private String itemGroup;
 

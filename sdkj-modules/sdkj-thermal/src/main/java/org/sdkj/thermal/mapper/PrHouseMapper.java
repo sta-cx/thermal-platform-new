@@ -1,6 +1,7 @@
 package org.sdkj.thermal.mapper;
 
 import org.apache.ibatis.annotations.Param;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * 房屋 Mapper
  */
+@OrgPermission
 public interface PrHouseMapper extends BaseMapperPlus<PrHouse, PrHouseVo> {
 
     /**
@@ -64,5 +66,5 @@ public interface PrHouseMapper extends BaseMapperPlus<PrHouse, PrHouseVo> {
      * @param houseId 房屋ID
      * @return 更新行数
      */
-    int updateHouseIsCharged(@Param("houseId") String houseId);
+    int updateHouseIsCharged(@Param("houseId") Long houseId);
 }

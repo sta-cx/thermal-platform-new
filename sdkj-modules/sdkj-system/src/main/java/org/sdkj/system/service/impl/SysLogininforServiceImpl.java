@@ -23,6 +23,7 @@ import org.sdkj.system.domain.vo.SysClientVo;
 import org.sdkj.system.domain.vo.SysLogininforVo;
 import org.sdkj.system.mapper.SysLogininforMapper;
 import org.sdkj.system.service.ISysClientService;
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import org.sdkj.system.service.ISysLogininforService;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -140,7 +141,12 @@ public class SysLogininforServiceImpl implements ISysLogininforService {
     public void insertLogininfor(SysLogininforBo bo) {
         SysLogininfor logininfor = MapstructUtils.convert(bo, SysLogininfor.class);
         logininfor.setLoginTime(new Date());
-        baseMapper.insert(logininfor);
+        DynamicDataSourceContextHolder.push("master");
+        try {
+            baseMapper.insert(logininfor);
+        } finally {
+            DynamicDataSourceContextHolder.poll();
+        }
     }
 
     /**

@@ -13,7 +13,7 @@ import java.util.Date;
 @AutoMapper(target = HtStrategyPerform.class)
 public class HtStrategyPerformVo {
 
-    private String id;
+    private Long id;
 
     /** 任务ID */
     private Long tasksId;

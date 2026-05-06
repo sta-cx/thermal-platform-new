@@ -44,7 +44,7 @@ public class TreeUtil {
      */
     public static TreeNode fromPrCompany(PrCompany company) {
         TreeNode node = new TreeNode();
-        node.setId(company.getId());
+        node.setId(String.valueOf(company.getId()));
         node.setParentId(company.getParentId() != null ? company.getParentId() : "-1");
         node.setLabel(company.getName());
         return node;
@@ -63,7 +63,7 @@ public class TreeUtil {
         List<TreeNode> result = new ArrayList<>();
         for (TreeNode tree : trees) {
             String pid = tree.getParentId();
-            if (parentId.equals(pid)) {
+            if (parentId != null && parentId.equals(pid)) {
                 result.add(tree);
             } else {
                 TreeNode parent = map.get(pid);

@@ -8,9 +8,9 @@ import org.sdkj.thermal.domain.HtTaskSettingLogItem;
 @AutoMapper(target = HtTaskSettingLogItem.class)
 public class HtTaskSettingLogItemVo {
 
-    private String id;
-    private String mainId;
-    private String scopeId;
+    private Long id;
+    private Long mainId;
+    private Long scopeId;
     private String meterNum;
     private Integer oldAngle;
     private Integer newAngle;

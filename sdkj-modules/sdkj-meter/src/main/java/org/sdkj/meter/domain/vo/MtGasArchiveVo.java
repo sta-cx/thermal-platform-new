@@ -12,10 +12,10 @@ import org.sdkj.meter.domain.MtGasArchive;
 @AutoMapper(target = MtGasArchive.class)
 public class MtGasArchiveVo {
 
-    private String id;
+    private Long id;
 
     /** 分类ID */
-    private String sortId;
+    private Long sortId;
 
     /** 编号 */
     private String code;

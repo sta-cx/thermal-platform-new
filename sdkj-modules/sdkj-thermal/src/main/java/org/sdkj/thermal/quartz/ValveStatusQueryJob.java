@@ -127,7 +127,7 @@ public class ValveStatusQueryJob implements Job {
         Date now = new Date();
         for (PrHeatValveArchive archive : archives) {
             HtTasksPerform task = new HtTasksPerform();
-            task.setId(cn.hutool.core.util.IdUtil.fastSimpleUUID());
+            task.setId(cn.hutool.core.util.IdUtil.getSnowflakeNextId());
             task.setInstructionType(4); // 4=查询
             task.setInstruction(0);
             task.setNumber(0);
@@ -143,7 +143,7 @@ public class ValveStatusQueryJob implements Job {
             task.setDtuNum(archive.getDtuNum());
             task.setConcentratorCode(archive.getConcentratorCode());
             task.setChanNum(archive.getChanNum());
-            task.setInstructionId(instructionIdPrefix + orgId);
+            task.setInstructionId(cn.hutool.core.util.IdUtil.getSnowflakeNextId());
             task.setCreateTime(now);
             tasks.add(task);
         }

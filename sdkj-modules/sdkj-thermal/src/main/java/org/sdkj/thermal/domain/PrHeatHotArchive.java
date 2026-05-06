@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -22,11 +21,11 @@ import java.util.Date;
 @AutoMapper(target = PrHeatHotArchiveVo.class)
 public class PrHeatHotArchive extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 档案ID */
-    private String archiveId;
+    private Long archiveId;
 
     /** 仪表档案编码 */
     private String meterArcCode;
@@ -68,7 +67,7 @@ public class PrHeatHotArchive extends BaseEntity {
     private String installSite;
 
     /** 收费标准ID */
-    private String standardId;
+    private Long standardId;
 
     /** 标准单价 */
     private BigDecimal standardPrice;
@@ -161,7 +160,7 @@ public class PrHeatHotArchive extends BaseEntity {
     private Integer isStop;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 公司ID */
     private String companyId;

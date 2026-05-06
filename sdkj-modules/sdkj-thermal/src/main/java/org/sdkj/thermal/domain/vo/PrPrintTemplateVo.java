@@ -10,7 +10,7 @@ import org.sdkj.thermal.domain.PrPrintTemplate;
 @Data
 @AutoMapper(target = PrPrintTemplate.class)
 public class PrPrintTemplateVo {
-    private String id;
+    private Long id;
     private String name;
     private String templateContent;
     private String serialNum;

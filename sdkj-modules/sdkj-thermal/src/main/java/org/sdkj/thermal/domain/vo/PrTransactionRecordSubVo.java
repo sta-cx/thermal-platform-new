@@ -13,9 +13,9 @@ import java.math.BigDecimal;
 @AutoMapper(target = PrTransactionRecordSub.class)
 public class PrTransactionRecordSubVo {
 
-    private String id;
-    private String mainId;
-    private String expenseId;
+    private Long id;
+    private Long mainId;
+    private Long expenseId;
     private BigDecimal amount;
     private BigDecimal balanceBefore;
     private BigDecimal balanceAfter;

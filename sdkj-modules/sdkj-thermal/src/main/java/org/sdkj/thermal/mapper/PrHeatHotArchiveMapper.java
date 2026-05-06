@@ -2,6 +2,7 @@ package org.sdkj.thermal.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.PrHeatHotArchive;
 import org.sdkj.thermal.domain.vo.PrHeatHotArchiveVo;
 
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * 热力热量档案 Mapper
  */
+@OrgPermission
 public interface PrHeatHotArchiveMapper extends BaseMapperPlus<PrHeatHotArchive, PrHeatHotArchiveVo> {
 
     /**

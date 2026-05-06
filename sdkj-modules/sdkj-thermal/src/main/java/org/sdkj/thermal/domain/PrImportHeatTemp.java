@@ -3,7 +3,6 @@ package org.sdkj.thermal.domain;
 import cn.idev.excel.annotation.ExcelIgnore;
 import cn.idev.excel.annotation.ExcelProperty;
 import cn.idev.excel.annotation.write.style.ColumnWidth;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -15,9 +14,9 @@ import java.util.Date;
 @TableName("pr_import_heat_temp")
 public class PrImportHeatTemp {
 
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id")
     @ExcelIgnore
-    private Integer id;
+    private Long id;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {title, "小区名称*"}, index = 0)
@@ -28,14 +27,14 @@ public class PrImportHeatTemp {
     private String buildingName;
 
     @ExcelIgnore
-    private String houseId;
+    private Long houseId;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {title, "房号*"}, index = 2)
     private String roomNum;
 
     @ExcelIgnore
-    private String archiveId;
+    private Long archiveId;
 
     @ColumnWidth(15)
     @ExcelProperty(value = {title, "仪表名称*"}, index = 3)

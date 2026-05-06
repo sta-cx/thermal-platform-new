@@ -17,16 +17,16 @@ import java.math.BigDecimal;
 public class HtHouseStrategyBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 房屋/单元ID */
-    private String tasksId;
+    private Long tasksId;
 
     /** 类型 1=房屋 2=单元 */
     private Integer type;
 
     /** 策略ID */
-    private String strategyId;
+    private Long strategyId;
 
     /** 策略名称 */
     private String name;

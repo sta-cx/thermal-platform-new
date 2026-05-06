@@ -23,7 +23,7 @@ public class LateFeeGenerateJob implements Job {
         String companyId = data.getString("companyId");
         String orgId = data.getString("orgId");
         String latefeeFormula = data.getString("latefeeFormula");
-        String standardId = data.getString("standardId");
+        Long standardId = Long.parseLong(data.getString("standardId"));
         String type = data.getString("type");
 
         log.info("滞纳金生成 Job 启动: {} (公司: {}, 小区: {}, 类型: {})", jobName, companyId, orgId, type);

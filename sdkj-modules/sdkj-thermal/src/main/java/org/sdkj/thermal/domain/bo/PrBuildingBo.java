@@ -18,7 +18,7 @@ import java.util.Date;
 public class PrBuildingBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 楼宇编码 */
     @NotBlank(message = "楼宇编码不能为空")
@@ -50,7 +50,7 @@ public class PrBuildingBo extends BaseEntity {
     private Date deliveryTime;
 
     /** 热力站ID */
-    private String stationId;
+    private Long stationId;
 
     /** 小区ID */
     private String orgId;

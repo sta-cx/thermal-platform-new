@@ -50,8 +50,8 @@ public class ThermalRegulationEngine {
      * @param scopeType the scope type (1=house valve, 2=unit valve, 3=DTU, 4=mixed)
      */
     @Transactional(rollbackFor = Exception.class)
-    public void executeRegulation(Integer taskId, Integer scopeType) {
-        String tasksIdStr = String.valueOf(taskId);
+    public void executeRegulation(Long taskId, Integer scopeType) {
+        
         log.info("Thermal regulation engine started for task {} scopeType {}", taskId, scopeType);
 
         // 1. Load task
@@ -72,7 +72,7 @@ public class ThermalRegulationEngine {
 
         // 2. Load strategy
         HtStrategy strategy = null;
-        if (task.getStrategyId() != null && !task.getStrategyId().isEmpty()) {
+        if (task.getStrategyId() != null) {
             strategy = strategyMapper.selectById(task.getStrategyId());
         }
 
@@ -96,16 +96,16 @@ public class ThermalRegulationEngine {
             if (adjustBasis == 0 || adjustBasis == 1 || adjustBasis == 3 || adjustBasis == 4) {
                 if (scopeType == 1 || scopeType == 3) {
                     // House valve average return water temperature
-                    average = tasksMapper.queryHtTasksPJHS(tasksIdStr);
+                    average = tasksMapper.queryHtTasksPJHS(taskId);
                 } else if (scopeType == 2) {
                     // Unit valve average return water temperature
-                    average = tasksMapper.queryHtTasksPJHSD(tasksIdStr);
+                    average = tasksMapper.queryHtTasksPJHSD(taskId);
                 }
             }
         }
 
         // 5. Update execution stats on task (execution_time, out_temp_pj)
-        tasksMapper.updateExecutionTime(tasksIdStr, executionTime, average);
+        tasksMapper.updateExecutionTime(taskId, executionTime, average);
 
         // 6. Check termination: elapsed days exceeded
         if (task.getDays() != null && task.getDays() > 0 && elapsedDays >= task.getDays()) {
@@ -116,10 +116,10 @@ public class ThermalRegulationEngine {
         // 7. Check balance rate
         int currentBalanceRate = 0;
         if (scopeType == 1 || scopeType == 2) {
-            currentBalanceRate = tasksMapper.queryStandard(tasksIdStr);
+            currentBalanceRate = tasksMapper.queryStandard(taskId);
         } else if (scopeType == 3) {
-            tasksMapper.updateDtuScopeStatus(tasksIdStr);
-            currentBalanceRate = tasksMapper.queryDtuStandard(tasksIdStr);
+            tasksMapper.updateDtuScopeStatus(taskId);
+            currentBalanceRate = tasksMapper.queryDtuStandard(taskId);
         }
 
         // Determine if regulation should proceed
@@ -150,7 +150,7 @@ public class ThermalRegulationEngine {
         if (scopeType == 1 || scopeType == 2 || scopeType == 4) {
             // Single valve regulation: 5-step process
             if (currentNumber <= maxNumbers) {
-                executeSingleValveRegulation(tasksIdStr, task, strategy, average);
+                executeSingleValveRegulation(taskId, task, strategy, average);
             } else {
                 log.info("Task {} regulation count reached limit ({}/{}), skipping instruction generation",
                     taskId, currentNumber, maxNumbers);
@@ -175,7 +175,7 @@ public class ThermalRegulationEngine {
      * Step 4: updateInstructionGeneration - Determine next instruction sequence
      * Step 5: insertHtTasksPerform - Finalize and move to execution tables
      */
-    private void executeSingleValveRegulation(String tasksId, HtTasks task, HtStrategy strategy, double average) {
+    private void executeSingleValveRegulation(Long tasksId, HtTasks task, HtStrategy strategy, double average) {
         log.info("Single valve regulation started for task {}", tasksId);
 
         // Step 1: Clear temp table
@@ -227,7 +227,7 @@ public class ThermalRegulationEngine {
      *   5 = temperature alarm (exceeded regulation count)
      *   9 = regulation complete (temperature in range)
      */
-    private void executeInstructionGeneration(String tasksId, HtTasks task, HtStrategy strategy, double average) {
+    private void executeInstructionGeneration(Long tasksId, HtTasks task, HtStrategy strategy, double average) {
         int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : 0;
 
         switch (adjustBasis) {
@@ -272,14 +272,14 @@ public class ThermalRegulationEngine {
      * For adjustBasis 3/4 (avg return water temp): determines direction (increase/decrease valve angle).
      * For no strategy (strategyId null): uses default up/down logic.
      */
-    private void executeUpdateInstructionGeneration(String tasksId, HtTasks task, HtStrategy strategy, double average) {
+    private void executeUpdateInstructionGeneration(Long tasksId, HtTasks task, HtStrategy strategy, double average) {
         // Update exception records (retry failed executions)
         tasksMapper.updateInstructionGenerationyC(tasksId);
 
         int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : 0;
         int currentNumber = task.getNumber() != null ? task.getNumber() : 0;
 
-        if (task.getStrategyId() == null || task.getStrategyId().isEmpty()) {
+        if (task.getStrategyId() == null) {
             // No strategy: default up/down adjustment
             tasksMapper.updateInstructionGenerationD(tasksId);
             tasksMapper.updateInstructionGenerationX(tasksId);
@@ -338,11 +338,11 @@ public class ThermalRegulationEngine {
      * - Backing up to perform_last table
      * - Cleaning up temp table
      */
-    private void executeInsertHtTasksPerform(String tasksId, HtTasks task, HtStrategy strategy, double average) {
+    private void executeInsertHtTasksPerform(Long tasksId, HtTasks task, HtStrategy strategy, double average) {
         int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : 0;
 
         // Boundary checks for valve angle limits
-        if (task.getStrategyId() == null || task.getStrategyId().isEmpty()) {
+        if (task.getStrategyId() == null) {
             tasksMapper.updateInstructionGenerationDMax(tasksId);
             tasksMapper.updateInstructionGenerationDMin(tasksId);
             tasksMapper.updateInstructionGenerationHPEQUJ(tasksId);
@@ -418,7 +418,7 @@ public class ThermalRegulationEngine {
     /**
      * Stop a task: update status to stopped, remove Quartz job, set end time.
      */
-    private void stopTask(Integer taskId, String reason) {
+    private void stopTask(Long taskId, String reason) {
         log.info("Stopping task {}: {}", taskId, reason);
 
         // Update status and end time

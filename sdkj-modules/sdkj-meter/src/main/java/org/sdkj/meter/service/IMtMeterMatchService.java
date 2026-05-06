@@ -15,5 +15,5 @@ public interface IMtMeterMatchService extends IService<MtMeterMatch> {
      * 批量分配仪表给公司（原子操作：先删后插）
      */
     @Transactional(rollbackFor = Exception.class)
-    void batchAllocate(String companyId, List<String> archiveIds, String meterType);
+    void batchAllocate(String companyId, List<Long> archiveIds, String meterType);
 }

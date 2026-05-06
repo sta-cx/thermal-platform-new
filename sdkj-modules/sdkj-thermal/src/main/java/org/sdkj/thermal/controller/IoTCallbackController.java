@@ -167,6 +167,7 @@ public class IoTCallbackController {
                                         valveOpening = "100";
                                     }
                                 } catch (NumberFormatException ignored) {
+                                log.debug("数值解析失败, 使用默认值", ignored);
                                 }
                             }
                         } else {
@@ -200,7 +201,7 @@ public class IoTCallbackController {
      * 1. 平台验证模式: 只传 msg 参数，直接返回 msg 字符串
      * 2. 数据接收模式: 通过 RequestBody 传递 args，解析其中的设备数据
      */
-    @RequestMapping("/mobile-valve")
+    @PostMapping("/mobile-valve")
     public String mobileValve(String msg, String nonce, String signature,
                               @RequestHeader(value = "X-IoT-Token", required = false) String token,
                               @RequestHeader(value = "X-Tenant-Code", required = false) String tenantCode,
@@ -271,8 +272,8 @@ public class IoTCallbackController {
     private boolean verifyCallbackToken(String token) {
         String expectedToken = iotCallbackToken;
         if (StrUtil.isBlank(expectedToken)) {
-            log.warn("IoT callback token not configured, skipping validation");
-            return true;
+            log.error("IoT callback token not configured, rejecting all requests");
+            return false;
         }
         if (StrUtil.isBlank(token)) {
             log.warn("IoT callback request missing token");

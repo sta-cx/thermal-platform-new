@@ -16,14 +16,14 @@ public interface MtHeatArchiveMapper extends BaseMapperPlus<MtHeatArchive, MtHea
      * @param archiveId 档案ID
      * @return 分配数量
      */
-    int countAllocatedToOtherCompany(@Param("archiveId") String archiveId);
+    int countAllocatedToOtherCompany(@Param("archiveId") Long archiveId);
 
     /**
      * 删除仪表匹配记录
      * @param archiveId 档案ID
      * @return 删除数量
      */
-    int deleteMeterMatch(@Param("archiveId") String archiveId);
+    int deleteMeterMatch(@Param("archiveId") Long archiveId);
 
     /**
      * 将仪表分配给代理商公司
@@ -38,7 +38,7 @@ public interface MtHeatArchiveMapper extends BaseMapperPlus<MtHeatArchive, MtHea
      * @param name 新名称
      * @return 更新行数
      */
-    int syncNameToHeatHotArchive(@Param("archiveId") String archiveId, @Param("name") String name);
+    int syncNameToHeatHotArchive(@Param("archiveId") Long archiveId, @Param("name") String name);
 
     /**
      * 级联更新 pr_heat_unit_hot_archive 的 meter_arc_name
@@ -46,6 +46,6 @@ public interface MtHeatArchiveMapper extends BaseMapperPlus<MtHeatArchive, MtHea
      * @param name 新名称
      * @return 更新行数
      */
-    int syncNameToHeatUnitHotArchive(@Param("archiveId") String archiveId, @Param("name") String name);
+    int syncNameToHeatUnitHotArchive(@Param("archiveId") Long archiveId, @Param("name") String name);
 
 }

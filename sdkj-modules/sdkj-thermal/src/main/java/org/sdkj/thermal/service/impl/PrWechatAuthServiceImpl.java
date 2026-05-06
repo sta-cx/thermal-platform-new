@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import org.sdkj.common.core.exception.ServiceException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +43,7 @@ public class PrWechatAuthServiceImpl extends ServiceImpl<PrWechatUserMapper, PrW
                     wechatAuthConfig.getAppid(), encodedRedirectUri, SCOPE_BASE, state);
         } catch (Exception e) {
             log.error("构建微信授权URL失败", e);
-            throw new RuntimeException("授权链接生成失败");
+            throw new ServiceException("授权链接生成失败");
         }
     }
 
@@ -57,13 +58,13 @@ public class PrWechatAuthServiceImpl extends ServiceImpl<PrWechatUserMapper, PrW
 
             if (oauthInfo == null || oauthInfo.getOpenId() == null) {
                 log.error("获取OpenID失败");
-                throw new RuntimeException("获取用户信息失败");
+                throw new ServiceException("获取用户信息失败");
             }
 
             return oauthInfo.getOpenId();
         } catch (Exception e) {
             log.error("获取OpenID异常", e);
-            throw new RuntimeException("获取用户信息异常");
+            throw new ServiceException("获取用户信息异常");
         }
     }
 

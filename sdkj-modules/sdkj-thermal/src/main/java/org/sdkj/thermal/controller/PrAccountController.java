@@ -59,7 +59,7 @@ public class PrAccountController extends BaseController {
     @SaCheckLogin
     @Log(title = "开户", businessType = BusinessType.INSERT)
     @PostMapping("/open")
-    public R<Void> openAccount(@RequestBody List<String> houseIds,
+    public R<Void> openAccount(@RequestBody List<Long> houseIds,
                                @RequestParam String itemGroup,
                                @RequestParam String itemCode,
                                @RequestParam String payment) {
@@ -144,7 +144,7 @@ public class PrAccountController extends BaseController {
     @SaCheckLogin
     @Log(title = "转存", businessType = BusinessType.UPDATE)
     @PostMapping("/transfer")
-    public R<Void> transfer(@RequestBody List<String> houseIds,
+    public R<Void> transfer(@RequestBody List<Long> houseIds,
                             @RequestParam String payment,
                             @RequestParam String itemGroup,
                             @RequestParam String itemCode,
@@ -164,7 +164,7 @@ public class PrAccountController extends BaseController {
     public R<BigDecimal> getPersonAccount(
             @RequestParam String companyId,
             @RequestParam String orgId,
-            @RequestParam String userId) {
+            @RequestParam Long userId) {
         return R.ok(accountService.getPersonAccount(companyId, orgId, userId));
     }
 

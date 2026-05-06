@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import org.sdkj.common.core.exception.ServiceException;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class PrTransactionRecordServiceImpl extends ServiceImpl<PrTransactionRec
     public boolean revocation(String recordId) {
         int rows = baseMapper.revokeRecord(recordId);
         if (rows == 0) {
-            throw new RuntimeException("撤销失败：记录不存在、已撤销/作废，或已跨月");
+            throw new ServiceException("撤销失败：记录不存在、已撤销/作废，或已跨月");
         }
         return true;
     }
@@ -51,7 +52,7 @@ public class PrTransactionRecordServiceImpl extends ServiceImpl<PrTransactionRec
     public boolean invalid(String recordId) {
         int rows = baseMapper.invalidRecord(recordId);
         if (rows == 0) {
-            throw new RuntimeException("作废失败：记录不存在或已作废");
+            throw new ServiceException("作废失败：记录不存在或已作废");
         }
         return true;
     }

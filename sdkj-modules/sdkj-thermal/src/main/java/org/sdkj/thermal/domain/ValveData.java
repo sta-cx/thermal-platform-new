@@ -11,6 +11,9 @@ import java.math.BigDecimal;
 @Data
 public class ValveData {
 
+    /** 主键ID（Java 层预生成） */
+    private Long id;
+
     /** GUID */
     private String guid;
 

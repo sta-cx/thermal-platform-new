@@ -1,5 +1,6 @@
 package org.sdkj.thermal.utils;
 
+import org.sdkj.common.core.exception.ServiceException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
@@ -62,7 +63,7 @@ public class YunGuUtils {
             }
             return md5;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new ServiceException("加密计算失败: " + e.getMessage());
         }
     }
 

@@ -14,6 +14,7 @@ import org.sdkj.system.domain.SysOperLog;
 import org.sdkj.system.domain.bo.SysOperLogBo;
 import org.sdkj.system.domain.vo.SysOperLogVo;
 import org.sdkj.system.mapper.SysOperLogMapper;
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import org.sdkj.system.service.ISysOperLogService;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -94,7 +95,12 @@ public class SysOperLogServiceImpl implements ISysOperLogService {
     public void insertOperlog(SysOperLogBo bo) {
         SysOperLog operLog = MapstructUtils.convert(bo, SysOperLog.class);
         operLog.setOperTime(new Date());
-        baseMapper.insert(operLog);
+        DynamicDataSourceContextHolder.push("master");
+        try {
+            baseMapper.insert(operLog);
+        } finally {
+            DynamicDataSourceContextHolder.poll();
+        }
     }
 
     /**

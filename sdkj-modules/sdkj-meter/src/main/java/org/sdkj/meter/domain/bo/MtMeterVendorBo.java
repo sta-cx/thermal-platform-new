@@ -16,7 +16,7 @@ import org.sdkj.meter.domain.MtMeterVendor;
 public class MtMeterVendorBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 厂商编码 */
     @NotBlank(message = "厂商编码不能为空")

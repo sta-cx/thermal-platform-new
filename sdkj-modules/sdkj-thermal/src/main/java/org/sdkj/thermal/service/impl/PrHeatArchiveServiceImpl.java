@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import org.sdkj.common.core.exception.ServiceException;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 房屋热表配表 Service 实现
@@ -101,7 +103,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         // 获取旧表信息
         PrHeatArchive oldHeatArchive = getById(newHeatArchive.getId());
         if (oldHeatArchive == null) {
-            throw new RuntimeException("旧表信息不存在");
+            throw new ServiceException("旧表信息不存在");
         }
 
         Long creater = LoginHelper.getUserId();
@@ -131,7 +133,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         updateById(oldHeatArchive);
 
         // 新表信息
-        newHeatArchive.setId(IdUtil.simpleUUID());
         newHeatArchive.setCurrentReading(zero);
         newHeatArchive.setTotalMoney(zero);
         newHeatArchive.setTotalUsed(zero);
@@ -145,9 +146,8 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         if (type && newHeatArchive.getCurrentBalance() != null
                 && newHeatArchive.getCurrentBalance().compareTo(BigDecimal.ZERO) > 0) {
             String serialNum = DateUtil.format(date, "yyyyMMddHHmmss")
-                + String.format("%06d", new Random().nextInt(1000000));
+                + String.format("%06d", ThreadLocalRandom.current().nextInt(1000000));
             PrTransactionRecord record = new PrTransactionRecord();
-            record.setId(IdUtil.simpleUUID());
             record.setSerialNum(serialNum);
             record.setTransactionType(3);
             record.setPaymentType(4);
@@ -165,7 +165,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
             prTransactionRecordMapper.insert(record);
 
             PrTransactionRecordSub sub = new PrTransactionRecordSub();
-            sub.setId(IdUtil.simpleUUID());
             sub.setMainId(record.getId());
             sub.setAmount(newHeatArchive.getCurrentBalance());
             sub.setBalanceBefore(BigDecimal.ZERO);
@@ -188,7 +187,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
 
         PrHeatArchive archive = getById(heatArchive.getId());
         if (archive == null) {
-            throw new RuntimeException("配表记录不存在");
+            throw new ServiceException("配表记录不存在");
         }
 
         String serialNum = DateUtil.format(now, "yyyyMMddHHmmss")
@@ -206,7 +205,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         updateById(archive);
 
         PrTransactionRecord record = new PrTransactionRecord();
-        record.setId(IdUtil.simpleUUID());
         record.setSerialNum(serialNum);
         record.setTransactionType(1);
         record.setPaymentType(Integer.parseInt(paymentMethod != null ? paymentMethod : "1"));
@@ -223,7 +221,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         prTransactionRecordMapper.insert(record);
 
         PrTransactionRecordSub sub = new PrTransactionRecordSub();
-        sub.setId(IdUtil.simpleUUID());
         sub.setMainId(record.getId());
         sub.setAmount(rechargeAmount);
         sub.setBalanceBefore(archive.getCurrentBalance().subtract(rechargeAmount));
@@ -243,7 +240,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
                                   String orgId, String companyId, String intervall, String unit, String duration) {
         PrOptionsHeat prOptionsHeat = prOptionsHeatService.getDataById(orgId, companyId, "2");
         if (prOptionsHeat == null) {
-            throw new RuntimeException("未找到调控配置");
+            throw new ServiceException("未找到调控配置");
         }
 
         Integer min = prOptionsHeat.getControlMin();
@@ -620,7 +617,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     private HtTasksPerform createBaseTask(String orgId, String companyId, Long create, Date now,
                                            PrOptionsHeat prOptionsHeat) {
         HtTasksPerform task = new HtTasksPerform();
-        task.setId(IdUtil.simpleUUID());
         task.setOrgId(orgId);
         task.setCompanyId(companyId);
         task.setCreateBy(create);
@@ -708,7 +704,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         Date now = new Date();
         for (PrHeatVo vo : prHeatVoList) {
             HtTasksPerform task = new HtTasksPerform();
-            task.setId(IdUtil.simpleUUID());
             task.setOrgId(orgId);
             task.setCompanyId(companyId);
             task.setCreateBy(create);
@@ -742,7 +737,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         Date now = new Date();
         for (PrHeatVo vo : prHeatVoList) {
             HtTasksPerform task = new HtTasksPerform();
-            task.setId(IdUtil.simpleUUID());
             task.setOrgId(orgId);
             task.setCompanyId(companyId);
             task.setCreateBy(create);

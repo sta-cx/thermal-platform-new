@@ -38,7 +38,7 @@ public class MtFormulaFileServiceImpl extends ServiceImpl<MtFormulaFileMapper, M
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean toggleEnabled(String id, String value) {
+    public boolean toggleEnabled(Long id, String value) {
         MtFormulaFile entity = new MtFormulaFile();
         entity.setId(id);
         entity.setIsEnabled(value);

@@ -14,7 +14,7 @@ import java.util.List;
 @AutoMapper(target = HtStrategy.class)
 public class HtStrategyVo {
 
-    private String id;
+    private Long id;
 
     /** 策略名称 */
     private String name;

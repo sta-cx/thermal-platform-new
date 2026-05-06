@@ -11,6 +11,7 @@ import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrCompany;
 import org.sdkj.thermal.domain.SysOrganization;
+import org.sdkj.thermal.domain.bo.UserOrgBo;
 import org.sdkj.thermal.service.IPrCompanyService;
 import org.sdkj.thermal.vo.TreeNode;
 import org.sdkj.thermal.vo.TreeUtil;
@@ -18,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 物业公司管理
@@ -35,15 +37,17 @@ public class PrCompanyController extends BaseController {
     @SaCheckPermission("thermal:property:company:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<List<TreeNode>> list(@RequestParam(required = false) String companyId) {
+    public R<List<PrCompany>> list() {
         List<PrCompany> companies = companyService.listCompanies();
-        List<TreeNode> trees = TreeUtil.fromPrCompanyList(companies);
-        String parentId = "-1";
-        if (companyId != null && !companyId.isEmpty()) {
-            PrCompany c = companyService.getById(companyId);
-            if (c != null && c.getParentId() != null) parentId = c.getParentId();
-        }
-        return R.ok(TreeUtil.buildByLoop(trees, parentId));
+        return R.ok(buildCompanyTree(companies, null));
+    }
+
+    private List<PrCompany> buildCompanyTree(List<PrCompany> all, String parentId) {
+        return all.stream()
+                .filter(c -> (parentId == null && c.getParentId() == null)
+                        || (parentId != null && parentId.equals(c.getParentId())))
+                .peek(c -> c.setChildren(buildCompanyTree(all, String.valueOf(c.getId()))))
+                .collect(Collectors.toList());
     }
 
     @SaCheckPermission("thermal:property:company:query")
@@ -80,9 +84,16 @@ public class PrCompanyController extends BaseController {
     @SaCheckPermission("thermal:property:company:query")
     @SaCheckLogin
     @GetMapping("/organizationTree")
-    public R<List<TreeNode>> organizationTree(@RequestParam String companyId) {
+    public R<List<SysOrganization>> organizationTree(@RequestParam String companyId) {
         List<SysOrganization> orgs = companyService.getOrganizationsByCompanyId(companyId);
-        return R.ok(TreeUtil.buildByLoop(TreeUtil.fromSysOrganizationList(orgs), "-1"));
+        return R.ok(buildOrgTree(orgs, "-1"));
+    }
+
+    private List<SysOrganization> buildOrgTree(List<SysOrganization> all, String parentId) {
+        return all.stream()
+                .filter(o -> parentId.equals(o.getParentId()))
+                .peek(o -> o.setChildren(buildOrgTree(all, o.getId())))
+                .collect(Collectors.toList());
     }
 
     // ==================== 新增端点 ====================
@@ -144,5 +155,66 @@ public class PrCompanyController extends BaseController {
         } else {
             return R.fail("删除失败：该节点存在下级节点或总公司不可删除");
         }
+    }
+
+    @SaCheckPermission("thermal:property:company:edit")
+    @SaCheckLogin
+    @GetMapping("/userOrgIds/{userId}")
+    public R<List<String>> getUserOrgIds(@PathVariable Long userId) {
+        return R.ok(companyService.getUserOrgIds(userId));
+    }
+
+    // ==================== 组织机构 CRUD ====================
+
+    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckLogin
+    @GetMapping("/organization/{id}")
+    public R<SysOrganization> getOrganization(@PathVariable String id) {
+        return R.ok(companyService.getOrganizationById(id));
+    }
+
+    @SaCheckPermission("thermal:property:company:add")
+    @SaCheckLogin
+    @Log(title = "组织机构", businessType = BusinessType.INSERT)
+    @PostMapping("/organization")
+    public R<Void> addOrganization(@Validated @RequestBody SysOrganization org) {
+        companyService.addOrganization(org);
+        return R.ok();
+    }
+
+    @SaCheckPermission("thermal:property:company:edit")
+    @SaCheckLogin
+    @Log(title = "组织机构", businessType = BusinessType.UPDATE)
+    @PutMapping("/organization")
+    public R<Void> updateOrganization(@Validated @RequestBody SysOrganization org) {
+        companyService.updateOrganization(org);
+        return R.ok();
+    }
+
+    @SaCheckPermission("thermal:property:company:remove")
+    @SaCheckLogin
+    @Log(title = "组织机构", businessType = BusinessType.DELETE)
+    @DeleteMapping("/organization/{id}")
+    public R<Void> deleteOrganization(@PathVariable String id) {
+        companyService.deleteOrganization(id);
+        return R.ok();
+    }
+
+    @SaCheckPermission("thermal:property:company:edit")
+    @SaCheckLogin
+    @Log(title = "用户组织权限", businessType = BusinessType.INSERT)
+    @PostMapping("/userOrg")
+    public R<Void> saveUserOrg(@Validated @RequestBody UserOrgBo bo) {
+        companyService.saveUserOrg(bo.getUserId(), bo.getCompanyId(), bo.getOrgIds());
+        return R.ok();
+    }
+
+    @SaCheckPermission("thermal:property:company:edit")
+    @SaCheckLogin
+    @Log(title = "用户组织权限", businessType = BusinessType.DELETE)
+    @DeleteMapping("/userOrg/{userId}")
+    public R<Void> clearUserOrg(@PathVariable Long userId) {
+        companyService.clearUserOrg(userId);
+        return R.ok();
     }
 }

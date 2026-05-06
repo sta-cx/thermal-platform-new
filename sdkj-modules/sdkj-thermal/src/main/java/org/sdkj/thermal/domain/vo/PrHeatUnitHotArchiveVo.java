@@ -16,8 +16,8 @@ public class PrHeatUnitHotArchiveVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
-    private String archiveId;
+    private Long id;
+    private Long archiveId;
     private String meterArcCode;
     private String meterArcName;
     private String meterNum;
@@ -31,7 +31,7 @@ public class PrHeatUnitHotArchiveVo implements Serializable {
     private Long closeValue;
     private String measurement;
     private String installSite;
-    private String standardId;
+    private Long standardId;
     private BigDecimal standardPrice;
     private Integer isSteps;
     private BigDecimal startReading;
@@ -62,7 +62,7 @@ public class PrHeatUnitHotArchiveVo implements Serializable {
     private Integer isNotify;
     private Integer isChanged;
     private Integer isStop;
-    private String unitId;
+    private Long unitId;
     private String companyId;
     private String orgId;
     private String imeiNum;

@@ -26,19 +26,17 @@
                a.code,
                a.company_id,
                a.level,
-               a.tele,
+               a.leader,
+               a.phone,
                a.address,
-               a.bank_name,
-               a.corpotate_account,
-               a.business_license,
+               a.org_id,
+               a.sort,
+               a.status,
                a.remark,
-               a.province,
-               a.city,
-               a.county,
-               a.street,
-               a.longitude,
-               a.latitude,
-               (SELECT name FROM sys_organization WHERE id = a.parent_id) AS parentName
+               a.create_by,
+               a.create_time,
+               a.update_by,
+               a.update_time
         FROM sys_organization a
         WHERE a.id = #{id}
     </select>
@@ -71,6 +69,27 @@
         )
           AND level = '1'
     </select>
+
+    <!-- ========== 新增/修改 ========== -->
+
+    <insert id="insertOrganization">
+        INSERT INTO sys_organization (id, name, company_id, parent_id, code, level, leader, phone, address, remark,
+                                      create_by, create_time)
+        VALUES (#{id}, #{name}, #{companyId}, #{parentId}, #{code}, #{level}, #{leader}, #{phone}, #{address}, #{remark},
+                #{createBy}, #{createTime})
+    </insert>
+
+    <update id="updateOrganization">
+        UPDATE sys_organization
+        SET name       = #{name},
+            leader     = #{leader},
+            phone      = #{phone},
+            address    = #{address},
+            remark     = #{remark},
+            update_by  = #{updateBy},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
 
     <!-- ========== 校验方法 ========== -->
 

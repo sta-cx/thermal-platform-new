@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -22,11 +21,11 @@ import java.util.Date;
 @AutoMapper(target = PrStandardPriceVo.class)
 public class PrStandardPrice extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 所属收费标准id */
-    private String standardId;
+    private Long standardId;
 
     /** 所属阶梯 1/2 */
     private Integer step12;

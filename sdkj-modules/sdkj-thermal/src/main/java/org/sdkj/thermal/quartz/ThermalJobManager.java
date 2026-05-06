@@ -19,7 +19,7 @@ public class ThermalJobManager {
     private static final String JOB_GROUP = "THERMAL_JOBS";
     private static final String TRIGGER_GROUP = "THERMAL_TRIGGERS";
 
-    public boolean addJob(Integer taskId) throws SchedulerException {
+    public boolean addJob(Long taskId) throws SchedulerException {
         HtTasks task = tasksMapper.selectById(taskId);
         if (task == null) {
             log.warn("任务不存在: {}", taskId);
@@ -65,7 +65,7 @@ public class ThermalJobManager {
         return true;
     }
 
-    public boolean resumeJob(Integer taskId) throws SchedulerException {
+    public boolean resumeJob(Long taskId) throws SchedulerException {
         JobKey jobKey = jobKey(TenantContextHolder.getTenantCode(), taskId);
         if (!scheduler.checkExists(jobKey)) {
             return addJob(taskId);
@@ -75,7 +75,7 @@ public class ThermalJobManager {
         return true;
     }
 
-    public boolean pauseJob(Integer taskId) throws SchedulerException {
+    public boolean pauseJob(Long taskId) throws SchedulerException {
         JobKey jobKey = jobKey(TenantContextHolder.getTenantCode(), taskId);
         if (scheduler.checkExists(jobKey)) {
             scheduler.pauseJob(jobKey);
@@ -84,7 +84,7 @@ public class ThermalJobManager {
         return true;
     }
 
-    public boolean deleteJob(Integer taskId) throws SchedulerException {
+    public boolean deleteJob(Long taskId) throws SchedulerException {
         JobKey jobKey = jobKey(TenantContextHolder.getTenantCode(), taskId);
         if (scheduler.checkExists(jobKey)) {
             scheduler.deleteJob(jobKey);
@@ -93,7 +93,7 @@ public class ThermalJobManager {
         return true;
     }
 
-    public boolean triggerJob(Integer taskId) throws SchedulerException {
+    public boolean triggerJob(Long taskId) throws SchedulerException {
         JobKey jobKey = jobKey(TenantContextHolder.getTenantCode(), taskId);
         if (scheduler.checkExists(jobKey)) {
             scheduler.triggerJob(jobKey);
@@ -103,11 +103,11 @@ public class ThermalJobManager {
         return addJob(taskId);
     }
 
-    private JobKey jobKey(String tenantCode, Integer taskId) {
+    private JobKey jobKey(String tenantCode, Long taskId) {
         return new JobKey("thermal_" + tenantKey(tenantCode) + "_" + taskId, JOB_GROUP);
     }
 
-    private TriggerKey triggerKey(String tenantCode, Integer taskId) {
+    private TriggerKey triggerKey(String tenantCode, Long taskId) {
         return new TriggerKey("trigger_" + tenantKey(tenantCode) + "_" + taskId, TRIGGER_GROUP);
     }
 

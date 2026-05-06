@@ -15,7 +15,7 @@ import org.sdkj.thermal.domain.HtStrategyPerform;
 public class HtStrategyPerformBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 任务ID */
     private Long tasksId;

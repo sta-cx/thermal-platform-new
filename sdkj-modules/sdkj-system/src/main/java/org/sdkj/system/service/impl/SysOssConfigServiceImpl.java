@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.common.core.constant.SystemConstants;
 import org.sdkj.common.core.constant.CacheNames;
 import org.sdkj.common.core.exception.ServiceException;
 import org.sdkj.common.core.utils.MapstructUtils;
@@ -53,7 +54,7 @@ public class SysOssConfigServiceImpl implements ISysOssConfigService {
         // 加载OSS初始化配置
         for (SysOssConfig config : list) {
             String configKey = config.getConfigKey();
-            if ("0".equals(config.getStatus())) {
+            if (SystemConstants.NORMAL.equals(config.getStatus())) {
                 RedisUtils.setCacheObject(OssConstant.DEFAULT_CONFIG_KEY, configKey);
             }
             CacheUtils.put(CacheNames.SYS_OSS_CONFIG, config.getConfigKey(), JsonUtils.toJsonString(config));
@@ -166,7 +167,7 @@ public class SysOssConfigServiceImpl implements ISysOssConfigService {
     public int updateOssConfigStatus(SysOssConfigBo bo) {
         SysOssConfig sysOssConfig = MapstructUtils.convert(bo, SysOssConfig.class);
         int row = baseMapper.update(null, new LambdaUpdateWrapper<SysOssConfig>()
-            .set(SysOssConfig::getStatus, "1"));
+            .set(SysOssConfig::getStatus, SystemConstants.DISABLE));
         row += baseMapper.updateById(sysOssConfig);
         if (row > 0) {
             RedisUtils.setCacheObject(OssConstant.DEFAULT_CONFIG_KEY, sysOssConfig.getConfigKey());

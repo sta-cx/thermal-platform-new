@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -17,11 +16,11 @@ import java.util.Date;
 @TableName("pr_reconciliation_diff")
 public class PrReconciliationDiff extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 关联账单ID */
-    private String billId;
+    private Long billId;
 
     /** 账单日期 */
     private String billDate;

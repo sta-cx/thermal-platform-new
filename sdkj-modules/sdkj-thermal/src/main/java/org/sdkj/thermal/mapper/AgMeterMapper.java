@@ -57,7 +57,8 @@ public interface AgMeterMapper {
      * 批量插入仪表分配记录
      */
     void insertMeterMatch(@Param("companyId") String companyId,
-                          @Param("archiveIds") List<String> archiveIds,
+                          @Param("archiveIds") List<Long> archiveIds,
+                          @Param("ids") List<Long> ids,
                           @Param("meterType") String meterType,
                           @Param("username") String username);
 

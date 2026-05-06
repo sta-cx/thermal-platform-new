@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -23,11 +22,11 @@ import java.util.Date;
 @AutoMapper(target = PrHouseExpenseVo.class)
 public class PrHouseExpense extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 账户/费项分组 */
     private String itemGroup;
@@ -36,7 +35,7 @@ public class PrHouseExpense extends BaseEntity {
     private String itemCode;
 
     /** 收费标准id */
-    private String standardId;
+    private Long standardId;
 
     /** 小区ID */
     private String orgId;
@@ -108,5 +107,5 @@ public class PrHouseExpense extends BaseEntity {
 
     /** 车位ID */
     @TableField(exist = false)
-    private String parkingSpaceId;
+    private Long parkingSpaceId;
 }

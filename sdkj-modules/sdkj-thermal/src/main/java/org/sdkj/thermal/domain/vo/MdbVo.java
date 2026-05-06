@@ -12,5 +12,5 @@ public class MdbVo {
     private String name;
     private String address;
     private String heatPayCode;
-    private String houseId;
+    private Long houseId;
 }

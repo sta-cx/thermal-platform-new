@@ -15,7 +15,7 @@ public class PrHeatDtuArchiveVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private Long id;
 
     private String dtuNum;
 

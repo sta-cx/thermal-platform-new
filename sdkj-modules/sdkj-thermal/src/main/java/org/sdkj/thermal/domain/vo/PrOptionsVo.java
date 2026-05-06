@@ -10,7 +10,7 @@ import org.sdkj.thermal.domain.PrOptions;
 @Data
 @AutoMapper(target = PrOptions.class)
 public class PrOptionsVo {
-    private String id;
+    private Long id;
     private String companyId;
     private String orgId;
     private String level;

@@ -19,7 +19,7 @@ public interface IMtFormulaFileService extends IService<MtFormulaFile> {
 
     int validateName(String name, String id);
 
-    boolean toggleEnabled(String id, String value);
+    boolean toggleEnabled(Long id, String value);
 
     List<Map<String, Object>> getFormulaType();
 

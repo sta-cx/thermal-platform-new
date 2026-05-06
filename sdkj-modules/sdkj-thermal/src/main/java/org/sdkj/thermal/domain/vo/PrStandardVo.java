@@ -22,7 +22,7 @@ public class PrStandardVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private Long id;
     private String name;
     private String itemCode;
     private String itemGroup;

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
+import org.sdkj.common.mybatis.utils.IdGeneratorUtil;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.PrImportBasicData;
@@ -47,7 +48,7 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
             item.setCreateBy(create);
             item.setCompanyId(companyId);
             if (item.getUserName() != null && !item.getUserName().isEmpty()) {
-                item.setUserId(UUID.randomUUID().toString().replace("-", ""));
+                item.setUserId(String.valueOf(IdGeneratorUtil.nextLongId()));
             }
             lists.add(item);
         }
@@ -227,20 +228,12 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
                 }
 
                 // 3. Handle user info (if userName and phone are both provided)
-                String userId = null;
+                Long userId = null;
                 if (row.getUserName() != null && !row.getUserName().isEmpty()
                     && row.getPhone() != null && !row.getPhone().isEmpty()) {
 
-                    // Try to find existing user by phone
-                    PrUser existingUser = null; // Use mapper to query
-                    // Since PrUserMapper isn't injected, use a simple approach
-                    // Check if there's a user linked to this house already
-                    // For simplicity, create a new user with UUID if not found
-                    userId = UUID.randomUUID().toString().replace("-", "");
-
                     // Insert user
                     PrUser newUser = new PrUser();
-                    newUser.setId(userId);
                     newUser.setName(row.getUserName().trim());
                     newUser.setPhone(row.getPhone().trim());
                     if (row.getIdNo() != null && !row.getIdNo().isEmpty()) {
@@ -250,8 +243,8 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
                     newUser.setOrgId(house.getOrgId());
                     newUser.setCompanyId(companyId);
                     newUser.setPassword("e10adc3949ba59abbe56e057f20f883e"); // default password
-                    // Use mapper's base mapper insert
                     mapper.insertUserDirect(newUser);
+                    userId = newUser.getId();
                 }
 
                 // 4. Link user to house

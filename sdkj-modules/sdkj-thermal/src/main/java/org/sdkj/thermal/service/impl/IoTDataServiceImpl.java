@@ -166,7 +166,7 @@ public class IoTDataServiceImpl implements IIoTDataService {
     /**
      * 反写温度数据到房屋表
      */
-    private void updateHouseTemperatures(String houseId, BigDecimal inTemperature,
+    private void updateHouseTemperatures(Long houseId, BigDecimal inTemperature,
                                          BigDecimal outTemperature, Integer actualOpen) {
         if (houseId == null) {
             return;

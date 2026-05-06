@@ -17,10 +17,10 @@ import java.util.Date;
 public class PrUseCardLogBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 仪表编号 */
     private String meterNum;

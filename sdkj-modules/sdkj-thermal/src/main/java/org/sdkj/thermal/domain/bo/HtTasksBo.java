@@ -18,7 +18,7 @@ import java.util.Date;
 public class HtTasksBo extends BaseEntity {
 
     /** 主键 */
-    private Integer id;
+    private Long id;
 
     /** 当前任务组ID */
     private String cuGroupId;
@@ -33,7 +33,7 @@ public class HtTasksBo extends BaseEntity {
     private String cronExpression;
 
     /** 策略ID */
-    private String strategyId;
+    private Long strategyId;
 
     /** 优先级 */
     private Integer priority;

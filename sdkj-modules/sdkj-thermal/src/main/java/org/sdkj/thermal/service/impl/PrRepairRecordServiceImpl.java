@@ -31,7 +31,7 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
     public boolean dispatch(String[] ids, String dispatchId, String isReject, String rejectReason, String dispatchMoney) {
         Arrays.stream(ids).forEach(id -> {
             PrRepairRecord record = new PrRepairRecord();
-            record.setId(id);
+            record.setId(Long.valueOf(id));
             record.setDispatchId(dispatchId);
             record.setRepairStatus(2);
             record.setDispatchTime(new Date());

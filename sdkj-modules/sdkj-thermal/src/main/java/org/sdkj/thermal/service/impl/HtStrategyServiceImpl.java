@@ -37,7 +37,7 @@ public class HtStrategyServiceImpl extends ServiceImpl<HtStrategyMapper, HtStrat
     }
 
     @Override
-    public HtStrategyVo selectDetailById(String id) {
+    public HtStrategyVo selectDetailById(Long id) {
         HtStrategyVo vo = baseMapper.selectVoById(id);
         if (vo != null) {
             List<HtStrategySubVo> subList = subMapper.selectByStrategyId(id);
@@ -81,7 +81,7 @@ public class HtStrategyServiceImpl extends ServiceImpl<HtStrategyMapper, HtStrat
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean removeById(Serializable id) {
-        subMapper.deleteByStrategyId((String) id);
+        subMapper.deleteByStrategyId((Long) id);
         return super.removeById(id);
     }
 

@@ -16,14 +16,14 @@ public interface MtElectricArchiveMapper extends BaseMapperPlus<MtElectricArchiv
      * @param archiveId 档案ID
      * @return 分配数量
      */
-    int countAllocatedToOtherCompany(@Param("archiveId") String archiveId);
+    int countAllocatedToOtherCompany(@Param("archiveId") Long archiveId);
 
     /**
      * 删除仪表匹配记录
      * @param archiveId 档案ID
      * @return 删除数量
      */
-    int deleteMeterMatch(@Param("archiveId") String archiveId);
+    int deleteMeterMatch(@Param("archiveId") Long archiveId);
 
     /**
      * 将仪表分配给代理商公司

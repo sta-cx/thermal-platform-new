@@ -48,8 +48,7 @@ public class PrRoleServiceImpl implements IPrRoleService {
     @Override
     public List<AgRole> getRoleByUserId(String userId) {
         return agRoleService.lambdaQuery()
-            .inSql(AgRole::getId,
-                "SELECT ur.role_id FROM sys_user_role ur WHERE ur.user_id = '" + userId + "'")
+            .apply("id IN (SELECT ur.role_id FROM sys_user_role ur WHERE ur.user_id = {0})", userId)
             .list();
     }
 

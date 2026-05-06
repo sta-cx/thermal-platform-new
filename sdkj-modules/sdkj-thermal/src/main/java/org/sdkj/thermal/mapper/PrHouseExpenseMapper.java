@@ -3,6 +3,7 @@ package org.sdkj.thermal.mapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.PrHouseExpense;
 import org.sdkj.thermal.domain.vo.PrHouseExpenseVo;
 import org.sdkj.thermal.domain.PrHouse;
@@ -16,6 +17,7 @@ import java.util.List;
  * 房屋费用项目绑定 Mapper
  * 迁移自旧系统 PrHouseExpenseMapper
  */
+@OrgPermission
 public interface PrHouseExpenseMapper extends BaseMapperPlus<PrHouseExpense, PrHouseExpenseVo> {
 
     /**

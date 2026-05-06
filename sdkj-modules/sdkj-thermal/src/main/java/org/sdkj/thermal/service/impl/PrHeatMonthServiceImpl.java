@@ -136,7 +136,6 @@ public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHea
 
         // 设置 UUID (ASSIGN_UUID 策略自动处理, 但显式设置更可靠)
         for (PrHeatMonth m : monthList) {
-            m.setId(UUID.randomUUID().toString().replace("-", ""));
         }
 
         super.saveBatch(monthList);

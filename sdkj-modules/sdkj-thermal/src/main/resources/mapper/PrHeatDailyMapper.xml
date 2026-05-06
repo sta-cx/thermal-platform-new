@@ -34,7 +34,7 @@
             voltage, read_time, daily_date, update_time
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             a.meter_num,
             a.meter_arc_code,
             IFNULL(a.total_heat, 0),

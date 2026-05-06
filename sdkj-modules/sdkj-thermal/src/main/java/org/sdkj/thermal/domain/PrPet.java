@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -12,10 +11,10 @@ import org.sdkj.common.mybatis.core.domain.BaseEntity;
 @TableName("pr_pet")
 public class PrPet extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
-    private String houseId;
+    private Long houseId;
     private String petName;
     private String petType;
     private String breed;

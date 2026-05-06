@@ -17,8 +17,10 @@ public interface IPrAccountService {
     List<PrAccountBalanceVo> pageList(String companyId, String orgId, String buildingId,
         String unitCode, String search, String itemGroup, String itemCode);
 
-    /** 开户 */
-    boolean insertData(List<String> houseIds, String itemGroup, String itemCode, String payment);
+    /**
+     * 账户开户
+     */
+    boolean insertData(List<Long> houseIds, String itemGroup, String itemCode, String payment);
 
     /** 查找没有开户的房屋 */
     List<PrAccountBalanceVo> noAccount(String companyId, String orgId, String buildingId,
@@ -35,11 +37,11 @@ public interface IPrAccountService {
     void refundData(RefundDataBo bo);
 
     /** 转存 */
-    boolean transfer(List<String> houseIds, String payment, String itemGroup, String itemCode,
+    boolean transfer(List<Long> houseIds, String payment, String itemGroup, String itemCode,
         String makeInvoice, String invoice);
 
     /** 查询个人账户余额 */
-    BigDecimal getPersonAccount(String companyId, String orgId, String userId);
+    BigDecimal getPersonAccount(String companyId, String orgId, Long userId);
 
     /** 查询账户对账单列表 */
     List<PrAccountBalanceVo> pageAccountStatementList(String companyId, String orgId, String buildingId,

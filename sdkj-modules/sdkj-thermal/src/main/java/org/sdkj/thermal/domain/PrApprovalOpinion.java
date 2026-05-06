@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -20,11 +19,11 @@ import java.util.Date;
 @TableName("pr_approval_opinion")
 public class PrApprovalOpinion extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 审批单ID */
-    private String approvalId;
+    private Long approvalId;
 
     /** 审批人 */
     private String approvalUser;

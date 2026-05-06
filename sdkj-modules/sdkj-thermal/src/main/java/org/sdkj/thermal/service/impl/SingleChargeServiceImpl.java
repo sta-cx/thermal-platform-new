@@ -109,7 +109,7 @@ public class SingleChargeServiceImpl implements ISingleChargeService {
     }
 
     @Override
-    public int getHasFinished(List<String> ids) {
+    public int getHasFinished(List<Long> ids) {
         if (ids == null || ids.isEmpty()) return 0;
         return Math.toIntExact(expenseMapper.selectCount(
             new LambdaQueryWrapper<PrExpense>()
@@ -151,7 +151,7 @@ public class SingleChargeServiceImpl implements ISingleChargeService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateHousePayStatus(String houseId, String orgId) {
+    public void updateHousePayStatus(Long houseId, String orgId) {
         LambdaQueryWrapper<PrExpense> lqw = new LambdaQueryWrapper<>();
         lqw.eq(PrExpense::getHouseId, houseId);
         long unpaid = expenseMapper.selectCount(lqw.eq(PrExpense::getIsCharged, 0));
@@ -169,14 +169,10 @@ public class SingleChargeServiceImpl implements ISingleChargeService {
         }
 
         // 2. 收集所有待收费的 expense ID（去重）
-        Set<String> allIds = new LinkedHashSet<>();
+        Set<Long> allIds = new LinkedHashSet<>();
         for (PrExpenseVo item : expenseVo.getLists()) {
-            if (item.getId() != null && !item.getId().isEmpty()) {
-                // id 可能是逗号分隔的多个 ID
-                String[] parts = item.getId().split(",");
-                for (String part : parts) {
-                    allIds.add(part.trim());
-                }
+            if (item.getId() != null) {
+                allIds.add(item.getId());
             }
         }
         if (allIds.isEmpty()) {
@@ -224,8 +220,8 @@ public class SingleChargeServiceImpl implements ISingleChargeService {
         transactionRecordMapper.insert(record);
 
         // 8. 创建交易记录子表 + 更新费用明细
-        List<String> idList = new ArrayList<>(allIds);
-        for (String expenseId : idList) {
+        List<Long> idList = new ArrayList<>(allIds);
+        for (Long expenseId : idList) {
             PrExpense expense = expenseMapper.selectById(expenseId);
             if (expense == null) {
                 continue;

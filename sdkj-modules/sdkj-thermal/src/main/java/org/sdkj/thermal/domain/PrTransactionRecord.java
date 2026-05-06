@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -23,8 +22,8 @@ import java.util.List;
 @AutoMapper(target = PrTransactionRecordVo.class)
 public class PrTransactionRecord extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 流水号 */
     private String serialNum;
@@ -45,10 +44,10 @@ public class PrTransactionRecord extends BaseEntity {
     private Integer status;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 用户ID */
-    private String userId;
+    private Long userId;
 
     /** 机构ID */
     private String orgId;
@@ -72,7 +71,7 @@ public class PrTransactionRecord extends BaseEntity {
     private String notes;
 
     /** 原记录ID（退费/冲销关联） */
-    private String originalRecordId;
+    private Long originalRecordId;
 
     /** 发票号 */
     private String invoiceNo;

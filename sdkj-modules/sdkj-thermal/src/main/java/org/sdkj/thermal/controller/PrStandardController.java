@@ -89,7 +89,7 @@ public class PrStandardController extends BaseController {
     @SaCheckLogin
     @Log(title = "收费标准", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
-    public R<Void> delete(@PathVariable String id) {
+    public R<Void> delete(@PathVariable Long id) {
         return toAjax(standardService.deleteData(id));
     }
 
@@ -101,7 +101,7 @@ public class PrStandardController extends BaseController {
     @SaCheckPermission("thermal:property:standard:query")
     @SaCheckLogin
     @GetMapping("/{id}")
-    public R<PrStandard> getById(@PathVariable String id) {
+    public R<PrStandard> getById(@PathVariable Long id) {
         return R.ok(standardService.selectDetailById(id));
     }
 

@@ -12,13 +12,13 @@ import org.sdkj.thermal.domain.HtStrategySub;
 @AutoMapper(target = HtStrategySub.class)
 public class HtStrategySubVo {
 
-    private String id;
+    private Long id;
 
     /** 策略ID */
-    private String strategyId;
+    private Long strategyId;
 
     /** 指令ID */
-    private String instructionId;
+    private Long instructionId;
 
     /** 排序 */
     private Integer sort;

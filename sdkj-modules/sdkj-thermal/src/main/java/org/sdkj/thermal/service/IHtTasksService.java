@@ -28,53 +28,53 @@ public interface IHtTasksService extends IService<HtTasks> {
     /**
      * 保存任务及关联范围
      */
-    boolean saveWithScope(HtTasks entity, List<String> scopeIds);
+    boolean saveWithScope(HtTasks entity, List<Long> scopeIds);
 
     /**
      * 更新任务及关联范围
      */
-    boolean updateWithScope(HtTasks entity, List<String> scopeIds);
+    boolean updateWithScope(HtTasks entity, List<Long> scopeIds);
 
     /** 启动/停止任务（Quartz调度） */
-    boolean changeStatus(Integer id, Integer status);
+    boolean changeStatus(Long id, Integer status);
 
     /** 立即运行任务（Quartz触发） */
-    boolean runTask(Integer id);
+    boolean runTask(Long id);
 
     /**
      * 添加调度任务
      */
-    boolean addToScheduler(Integer id);
+    boolean addToScheduler(Long id);
 
     /**
      * 移除调度任务
      */
-    boolean removeFromScheduler(Integer id);
+    boolean removeFromScheduler(Long id);
 
     /**
      * 标记特殊户
      */
-    boolean markSpecial(List<String> scopeIds, String val, String remark);
+    boolean markSpecial(List<Long> scopeIds, String val, String remark);
 
     /**
      * 标记特殊单元
      */
-    boolean markSpecialUnit(List<String> scopeIds, String val, String remark);
+    boolean markSpecialUnit(List<Long> scopeIds, String val, String remark);
 
     /**
      * 设置缴费状态
      */
-    boolean markPayStatus(List<String> scopeIds, String val);
+    boolean markPayStatus(List<Long> scopeIds, String val);
 
     /**
      * 刷新平衡率
      */
-    double refreshBalanceRate(String taskId);
+    double refreshBalanceRate(Long taskId);
 
     /**
      * 保存设定开度
      */
-    boolean saveValveAngle(String taskId, String scopeType);
+    boolean saveValveAngle(Long taskId, String scopeType);
 
     /**
      * 查询汇总统计

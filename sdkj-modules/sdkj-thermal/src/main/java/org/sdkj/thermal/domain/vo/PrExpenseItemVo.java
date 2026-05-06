@@ -19,7 +19,7 @@ public class PrExpenseItemVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private Long id;
     private String itemCode;
     private String itemName;
     private String itemGroup;

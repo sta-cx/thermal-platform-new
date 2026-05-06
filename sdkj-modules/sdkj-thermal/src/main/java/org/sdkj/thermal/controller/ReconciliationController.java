@@ -5,6 +5,7 @@ import cn.dev33.satoken.annotation.SaCheckPermission;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
+import org.sdkj.common.core.exception.ServiceException;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrReconciliationDiff;
 import org.sdkj.thermal.domain.PrWechatBill;
@@ -64,8 +65,8 @@ public class ReconciliationController extends BaseController {
     @SaCheckPermission("thermal:wechat:reconciliation:list")
     @SaCheckLogin
     @GetMapping("/diffs")
-    public R<List<PrReconciliationDiff>> queryDiffs(@RequestParam String billId) {
-        if (billId == null || billId.isEmpty()) return R.fail("账单ID不能为空");
+    public R<List<PrReconciliationDiff>> queryDiffs(@RequestParam Long billId) {
+        if (billId == null) return R.fail("账单ID不能为空");
         log.info("查询对账差异: billId={}", billId);
         return R.ok(reconciliationService.queryDiffs(billId));
     }
@@ -83,7 +84,7 @@ public class ReconciliationController extends BaseController {
         try {
             reconciliationService.handleDiff(diffId, handleRemark, handler);
             return R.ok();
-        } catch (RuntimeException e) {
+        } catch (ServiceException e) {
             return R.fail(e.getMessage());
         }
     }

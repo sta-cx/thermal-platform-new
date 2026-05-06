@@ -12,8 +12,8 @@ import java.util.Date;
 @Data
 @AutoMapper(target = PrUseCardLog.class)
 public class PrUseCardLogVo {
-    private String id;
-    private String meterId;
+    private Long id;
+    private Long meterId;
     private String meterNum;
     private String userId;
     private String cardNum;

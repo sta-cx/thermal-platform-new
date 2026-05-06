@@ -12,10 +12,10 @@ import org.sdkj.meter.domain.MtCentratorArchive;
 @AutoMapper(target = MtCentratorArchive.class)
 public class MtCentratorArchiveVo {
 
-    private String id;
+    private Long id;
 
     /** 分类ID */
-    private String sortId;
+    private Long sortId;
 
     /** 编号 */
     private String code;

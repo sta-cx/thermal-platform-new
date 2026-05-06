@@ -101,7 +101,7 @@ public class PrExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:expense:query")
     @SaCheckLogin
     @GetMapping("/heat/{houseId}")
-    public R<PrExpenseVo> queryHeatExpense(@PathVariable String houseId) {
+    public R<PrExpenseVo> queryHeatExpense(@PathVariable Long houseId) {
         return R.ok(expenseService.selectHeatExpenseByHouseId(houseId));
     }
 
@@ -326,7 +326,7 @@ public class PrExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:expense:edit")
     @SaCheckLogin
     @PutMapping("/calc-status")
-    public R<Void> setCalStatus(@RequestParam String houseId) {
+    public R<Void> setCalStatus(@RequestParam Long houseId) {
         return toAjax(expenseService.setCalStatus(houseId));
     }
 

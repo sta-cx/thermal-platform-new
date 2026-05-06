@@ -15,10 +15,10 @@ import org.sdkj.thermal.domain.PrHouseExpense;
 public class PrHouseExpenseBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 账户/费项分组 */
     private String itemGroup;
@@ -27,7 +27,7 @@ public class PrHouseExpenseBo extends BaseEntity {
     private String itemCode;
 
     /** 收费标准id */
-    private String standardId;
+    private Long standardId;
 
     /** 小区ID */
     private String orgId;

@@ -3,6 +3,7 @@ package org.sdkj.thermal.mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.HtRepair;
 import org.sdkj.thermal.domain.vo.HtRepairVo;
 
@@ -13,6 +14,7 @@ import java.util.Map;
  * 报修记录 Mapper
  * 迁移自旧系统 HtRepairMapper
  */
+@OrgPermission
 public interface HtRepairMapper extends BaseMapperPlus<HtRepair, HtRepairVo> {
 
     /**

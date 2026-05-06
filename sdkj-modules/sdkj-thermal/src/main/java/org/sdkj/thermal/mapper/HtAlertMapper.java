@@ -2,6 +2,7 @@ package org.sdkj.thermal.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.HtAlert;
 import org.sdkj.thermal.domain.vo.HtAlertVo;
 
@@ -12,6 +13,7 @@ import java.util.Map;
  * 报警记录 Mapper
  * 迁移自旧系统 HtAlertMapper
  */
+@OrgPermission
 public interface HtAlertMapper extends BaseMapperPlus<HtAlert, HtAlertVo> {
 
     /**

@@ -18,10 +18,10 @@ import java.util.Date;
 public class PrExpenseBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 账户/费项分组 */
     private String itemGroup;
@@ -33,7 +33,7 @@ public class PrExpenseBo extends BaseEntity {
     private String itemName;
 
     /** 收费标准id */
-    private String standardId;
+    private Long standardId;
 
     /** 起收日期 */
     private Date startDate;
@@ -108,7 +108,7 @@ public class PrExpenseBo extends BaseEntity {
     private Date chargedTime;
 
     /** 交易记录主表id */
-    private String recordId;
+    private Long recordId;
 
     /** 延期日期 */
     private Date delayDate;
@@ -135,5 +135,5 @@ public class PrExpenseBo extends BaseEntity {
     private String companyId;
 
     /** 车位ID */
-    private String parkingSpaceId;
+    private Long parkingSpaceId;
 }

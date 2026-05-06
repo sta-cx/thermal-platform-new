@@ -11,11 +11,11 @@ import org.sdkj.meter.domain.MtMeterSort;
 @AutoMapper(target = MtMeterSort.class)
 public class MtMeterSortVo {
 
-    private String id;
+    private Long id;
     private String code;
     private String name;
     private String model;
-    private String vendorId;
+    private Long vendorId;
     private Integer isOnecard;
     private String measureType;
     private String seq;

@@ -19,10 +19,10 @@ import java.util.Date;
 public class PrHeatTempArchiveBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 档案ID */
-    private String archiveId;
+    private Long archiveId;
 
     /** 表计档案编码 */
     @NotBlank(message = "表计档案编码不能为空")
@@ -93,7 +93,7 @@ public class PrHeatTempArchiveBo extends BaseEntity {
     private Integer isStop;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 小区ID */
     private String orgId;

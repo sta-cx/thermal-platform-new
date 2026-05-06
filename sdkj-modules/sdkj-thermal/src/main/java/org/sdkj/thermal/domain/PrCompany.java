@@ -1,11 +1,13 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.sdkj.common.mybatis.core.domain.BaseEntity;
+
+import java.util.List;
 
 /**
  * 物业公司实体
@@ -16,8 +18,8 @@ import org.sdkj.common.mybatis.core.domain.BaseEntity;
 @TableName("sys_company")
 public class PrCompany extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     private String name;
     private String code;
@@ -32,4 +34,7 @@ public class PrCompany extends BaseEntity {
     private String description;
     private Integer nature;
     private Integer isEnabled;
+
+    @TableField(exist = false)
+    private List<PrCompany> children;
 }

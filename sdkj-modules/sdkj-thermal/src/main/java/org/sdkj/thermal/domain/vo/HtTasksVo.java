@@ -10,12 +10,12 @@ import java.util.Date;
 @AutoMapper(target = HtTasks.class)
 public class HtTasksVo {
 
-    private Integer id;
+    private Long id;
     private String cuGroupId;
     private String name;
     private Integer type;
     private String cronExpression;
-    private String strategyId;
+    private Long strategyId;
     private Integer priority;
     private Integer status;
     private Integer number;

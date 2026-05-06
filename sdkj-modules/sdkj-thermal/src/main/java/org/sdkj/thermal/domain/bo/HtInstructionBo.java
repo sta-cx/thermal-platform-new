@@ -15,7 +15,7 @@ import org.sdkj.thermal.domain.HtInstruction;
 public class HtInstructionBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 指令名称 */
     private String name;

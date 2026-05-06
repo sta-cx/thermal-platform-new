@@ -16,7 +16,7 @@ import org.sdkj.meter.domain.MtFormulaFile;
 public class MtFormulaFileBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 公式名称 */
     @NotBlank(message = "公式名称不能为空")

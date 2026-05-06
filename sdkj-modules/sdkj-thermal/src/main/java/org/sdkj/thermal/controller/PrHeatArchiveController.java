@@ -144,7 +144,7 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "房屋热表配表-停表", businessType = BusinessType.UPDATE)
     @PostMapping("/stopMeter/{id}")
-    public R<Void> stopMeter(@PathVariable String id) {
+    public R<Void> stopMeter(@PathVariable Long id) {
         PrHeatArchive entity = new PrHeatArchive();
         entity.setId(id);
         entity.setIsStop(1);
@@ -160,7 +160,7 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "房屋热表配表-开表", businessType = BusinessType.UPDATE)
     @PostMapping("/startMeter/{id}")
-    public R<Void> startMeter(@PathVariable String id) {
+    public R<Void> startMeter(@PathVariable Long id) {
         PrHeatArchive entity = new PrHeatArchive();
         entity.setId(id);
         entity.setIsStop(0);

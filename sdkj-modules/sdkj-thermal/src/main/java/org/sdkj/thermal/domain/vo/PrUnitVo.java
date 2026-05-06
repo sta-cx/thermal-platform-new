@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @AutoMapper(target = PrUnit.class)
 public class PrUnitVo {
 
-    private String id;
+    private Long id;
 
     /** 单元编码 */
     private String code;
@@ -22,7 +22,7 @@ public class PrUnitVo {
     private String name;
 
     /** 楼宇ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 地上楼层 */
     private Integer onFloor;
@@ -43,7 +43,7 @@ public class PrUnitVo {
     private String seq;
 
     /** 热力站ID */
-    private String stationId;
+    private Long stationId;
 
     /** 小区ID */
     private String orgId;

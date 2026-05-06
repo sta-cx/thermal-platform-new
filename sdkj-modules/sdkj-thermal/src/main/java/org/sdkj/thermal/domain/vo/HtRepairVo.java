@@ -1,5 +1,7 @@
 package org.sdkj.thermal.domain.vo;
 
+import org.sdkj.common.sensitive.annotation.Sensitive;
+import org.sdkj.common.sensitive.core.SensitiveStrategy;
 import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
 import org.sdkj.thermal.domain.HtRepair;
@@ -15,10 +17,10 @@ import java.util.Date;
 @AutoMapper(target = HtRepair.class)
 public class HtRepairVo {
 
-    private String id;
+    private Long id;
 
     /** 楼宇ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 楼宇名称 */
     private String buildingName;
@@ -27,13 +29,13 @@ public class HtRepairVo {
     private String unitCode;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 房号 */
     private String roomNum;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 仪表号 */
     private String meterNum;
@@ -114,6 +116,7 @@ public class HtRepairVo {
     private String userName;
 
     /** 用户电话 */
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String userPhone;
 
     /** 预约时间 */

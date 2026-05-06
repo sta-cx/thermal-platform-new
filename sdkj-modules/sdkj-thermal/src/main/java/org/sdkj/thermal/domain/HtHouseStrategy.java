@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -19,17 +18,17 @@ import java.math.BigDecimal;
 @AutoMapper(target = HtHouseStrategyVo.class)
 public class HtHouseStrategy extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 房屋/单元ID */
-    private String tasksId;
+    private Long tasksId;
 
     /** 类型 1=房屋 2=单元 */
     private Integer type;
 
     /** 策略ID */
-    private String strategyId;
+    private Long strategyId;
 
     /** 策略名称 */
     private String name;

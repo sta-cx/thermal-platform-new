@@ -12,7 +12,7 @@ import org.sdkj.meter.domain.MtMeterVendor;
 @AutoMapper(target = MtMeterVendor.class)
 public class MtMeterVendorVo {
 
-    private String id;
+    private Long id;
 
     /** 厂商编码 */
     private String code;

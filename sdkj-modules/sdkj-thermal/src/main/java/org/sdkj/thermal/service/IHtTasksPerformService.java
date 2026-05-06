@@ -37,7 +37,7 @@ public interface IHtTasksPerformService extends IService<HtTasksPerform> {
      * @param performId 执行记录ID
      * @param status 新状态 (0=待发送 1=发送中 2=发送成功 3=发送失败)
      */
-    boolean updateInstructionStatus(String performId, Integer status);
+    boolean updateInstructionStatus(Long performId, Integer status);
 
     /**
      * 批量更新指令发送状态

@@ -43,7 +43,7 @@ public class MtMeterSortController extends BaseController {
         LambdaQueryWrapper<MtMeterSort> lqw = new LambdaQueryWrapper<>();
         lqw.like(sort.getName() != null && !sort.getName().isEmpty(), MtMeterSort::getName, sort.getName());
         lqw.eq(sort.getMeterType() != null && !sort.getMeterType().isEmpty(), MtMeterSort::getMeterType, sort.getMeterType());
-        lqw.eq(sort.getVendorId() != null && !sort.getVendorId().isEmpty(), MtMeterSort::getVendorId, sort.getVendorId());
+        lqw.eq(sort.getVendorId() != null, MtMeterSort::getVendorId, sort.getVendorId());
         lqw.orderByAsc(MtMeterSort::getSeq).orderByDesc(MtMeterSort::getCreateTime);
         return sortService.selectPageList(lqw, pageQuery);
     }

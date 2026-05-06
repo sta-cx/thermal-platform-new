@@ -308,7 +308,6 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
                                              int instructionType, int instruction) {
         return infos.stream().map(info -> {
             HtTasksPerform task = new HtTasksPerform();
-            task.setId(UUID.randomUUID().toString().replace("-", ""));
             task.setInstructionType(instructionType);
             task.setInstruction(instruction);
             task.setNumber(0);
@@ -335,7 +334,6 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
                                                   String interval, String unit, String valid) {
         return infos.stream().map(info -> {
             HtTasksPerform task = new HtTasksPerform();
-            task.setId(UUID.randomUUID().toString().replace("-", ""));
             task.setInstructionType(6);
             task.setInstruction(0);
             task.setNumber(0);
@@ -439,6 +437,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
                 try {
                     open = Integer.parseInt(hot.getValveStatus());
                 } catch (NumberFormatException ignored) {
+                                log.debug("数值解析失败, 使用默认值", ignored);
                     // keep 0
                 }
             }
@@ -550,7 +549,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
             return List.of();
         }
         // 2. 按房屋ID列表查卡阀
-        List<String> houseIds = houses.stream().map(PrHouse::getId).toList();
+        List<Long> houseIds = houses.stream().map(PrHouse::getId).toList();
         LambdaQueryWrapper<PrHeatValveArchive> valveLqw = new LambdaQueryWrapper<>();
         valveLqw.in(PrHeatValveArchive::getHouseId, houseIds);
         valveLqw.eq(PrHeatValveArchive::getIsChanged, 0);
@@ -662,7 +661,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String insertUserAndValveInfo(String companyId, String orgId, String orgName,
-                                          String buildingId, String buildingName, String unitCode,
+                                          Long buildingId, String buildingName, String unitCode,
                                           String roomNum, String floor, String otherCode, String payStatus,
                                           String userName, String phone,
                                           String gfloorArea, String nfloorArea, String heatingArea,
@@ -702,14 +701,14 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         archive.setIsOpen(0);
         save(archive);
 
-        return house.getId();
+        return String.valueOf(house.getId());
     }
 
     // ========== NB/MBus 数据接收实现 ==========
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateHouseTemperature(String houseId, BigDecimal inTemperature,
+    public void updateHouseTemperature(Long houseId, BigDecimal inTemperature,
                                        BigDecimal outTemperature, Integer actualOpen) {
         baseMapper.updateHouse(houseId, inTemperature, outTemperature, actualOpen);
         log.debug("温度反写完成, houseId={}, inTemp={}, outTemp={}, actualOpen={}",

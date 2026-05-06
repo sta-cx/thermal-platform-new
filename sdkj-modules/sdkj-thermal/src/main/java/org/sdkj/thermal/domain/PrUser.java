@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -23,8 +22,8 @@ import java.util.Date;
 @AutoMapper(target = PrUserVo.class)
 public class PrUser extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 手机号 */
     private String phone;
@@ -117,7 +116,7 @@ public class PrUser extends BaseEntity {
 
     /** 房屋ID（查询用） */
     @TableField(exist = false)
-    private String houseId;
+    private Long houseId;
 
     /** 房间号（查询用） */
     @TableField(exist = false)

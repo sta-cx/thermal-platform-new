@@ -1,5 +1,6 @@
 package org.sdkj.thermal.service.impl;
 
+import org.sdkj.common.core.exception.ServiceException;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -32,6 +33,7 @@ import java.io.BufferedReader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -56,7 +58,7 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
             log.info("微信支付 WXPay 实例初始化成功，appid={}, mchId={}", payConfig.getAppid(), payConfig.getMchId());
         } catch (Exception e) {
             log.error("微信支付 WXPay 实例初始化失败", e);
-            throw new RuntimeException("微信支付初始化失败: " + e.getMessage(), e);
+            throw new ServiceException("微信支付初始化失败: " + e.getMessage(), e);
         }
     }
 
@@ -67,7 +69,7 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
         try {
             // 1. 从 attach 中解析订单号和 houseId
             String outTradeNo = "WX" + System.currentTimeMillis();
-            String houseId = "";
+            Long houseId = null;
             if (attach != null && !attach.isEmpty()) {
                 try {
                     ObjectMapper objectMapper = new ObjectMapper();
@@ -76,7 +78,7 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
                         outTradeNo = (String) jsonMap.get("orderNo");
                     }
                     if (jsonMap.get("houseId") != null) {
-                        houseId = (String) jsonMap.get("houseId");
+                        houseId = Long.valueOf(jsonMap.get("houseId").toString());
                     }
                 } catch (Exception e) {
                     log.warn("解析 attach 参数失败，使用默认订单号: {}", e.getMessage());
@@ -102,15 +104,14 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
 
             // 4. 校验返回结果
             if (!WXPayConstants.SUCCESS.equals(wxResult.get("return_code"))) {
-                throw new RuntimeException("创建支付订单失败: " + wxResult.get("return_msg"));
+                throw new ServiceException("创建支付订单失败: " + wxResult.get("return_msg"));
             }
             if (!WXPayConstants.SUCCESS.equals(wxResult.get("result_code"))) {
-                throw new RuntimeException("创建支付订单失败: " + wxResult.get("err_code_des"));
+                throw new ServiceException("创建支付订单失败: " + wxResult.get("err_code_des"));
             }
 
             // 5. 保存订单到数据库
             PrWechatOrder order = new PrWechatOrder();
-            order.setId(UUID.randomUUID().toString().replace("-", ""));
             order.setOutTradeNo(outTradeNo);
             order.setOpenId(openId);
             order.setOtherCode(otherCode);
@@ -148,11 +149,11 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
             result.put("totalFee", totalFee);
             result.put("jsApiParam", jsApiParam);
             return result;
-        } catch (RuntimeException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             log.error("创建微信支付订单失败", e);
-            throw new RuntimeException("创建支付订单失败: " + e.getMessage(), e);
+            throw new ServiceException("创建支付订单失败: " + e.getMessage(), e);
         }
     }
 
@@ -226,9 +227,7 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
                 log.info("微信支付回调处理成功，订单: {}, 交易号: {}", outTradeNo, transactionId);
 
                 // 10. 插入交易流水记录 (PrTransactionRecord)
-                String recordId = UUID.randomUUID().toString().replace("-", "");
                 PrTransactionRecord record = new PrTransactionRecord();
-                record.setId(recordId);
                 record.setSerialNum(transactionId);
                 record.setTransactionType(1);      // 1=收费
                 record.setPaymentType(2);          // 2=微信
@@ -236,12 +235,12 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
                 record.setPaidAmount(notifyAmount);
                 record.setStatus(0);               // 0=正常
                 record.setHouseId(order.getHouseId());
-                record.setUserId(openId);
                 record.setTransactionTime(new Date());
                 record.setOperatorId(openId);
                 record.setNotes("微信支付自动入账，订单号: " + outTradeNo);
                 record.setCreateTime(new Date());
                 transactionRecordMapper.insert(record);
+                Long recordId = record.getId();
                 log.info("微信支付回调：交易流水已创建，recordId: {}", recordId);
 
                 // 11. 更新费用明细已缴金额 (PrExpense)
@@ -278,28 +277,28 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
             // 1. 查询原订单
             PrWechatOrder order = baseMapper.selectByOutTradeNo(outTradeNo);
             if (order == null) {
-                throw new RuntimeException("原订单不存在");
+                throw new ServiceException("原订单不存在");
             }
 
             // 2. 验证订单状态（1=支付成功）
             if (order.getOrderStatus() != 1) {
-                throw new RuntimeException("只有支付成功的订单才能申请退款");
+                throw new ServiceException("只有支付成功的订单才能申请退款");
             }
 
             // 3. 验证退款金额不超过订单总金额
             if (refundFee.compareTo(order.getTotalFee()) > 0) {
-                throw new RuntimeException("退款金额不能超过订单总金额");
+                throw new ServiceException("退款金额不能超过订单总金额");
             }
 
             // 4. 检查是否已有成功的退款记录
             PrWechatRefund existingRefund = wechatRefundMapper.selectByOutTradeNo(outTradeNo);
             if (existingRefund != null && existingRefund.getRefundStatus() == 1) {
-                throw new RuntimeException("该订单已完成退款");
+                throw new ServiceException("该订单已完成退款");
             }
 
             // 5. 生成退款单号
             String outRefundNo = "RF" + System.currentTimeMillis() +
-                    String.format("%06d", new Random().nextInt(1000000));
+                    String.format("%06d", ThreadLocalRandom.current().nextInt(1000000));
 
             // 6. 准备微信退款接口参数（金额单位为分）
             Map<String, String> params = new HashMap<>();
@@ -323,15 +322,14 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
 
             // 8. 校验返回结果
             if (!WXPayConstants.SUCCESS.equals(wxResult.get("return_code"))) {
-                throw new RuntimeException("申请退款失败: " + wxResult.get("return_msg"));
+                throw new ServiceException("申请退款失败: " + wxResult.get("return_msg"));
             }
             if (!WXPayConstants.SUCCESS.equals(wxResult.get("result_code"))) {
-                throw new RuntimeException("申请退款失败: " + wxResult.get("err_code_des"));
+                throw new ServiceException("申请退款失败: " + wxResult.get("err_code_des"));
             }
 
             // 9. 保存退款记录（状态=0 退款处理中）
             PrWechatRefund refund = new PrWechatRefund();
-            refund.setId(UUID.randomUUID().toString().replace("-", ""));
             refund.setOutTradeNo(outTradeNo);
             refund.setTransactionId(order.getTransactionId());
             refund.setOutRefundNo(outRefundNo);
@@ -360,11 +358,11 @@ public class PrWechatPayServiceImpl extends ServiceImpl<PrWechatOrderMapper, PrW
             result.put("refundFee", refundFee);
             result.put("refundStatus", 0);
             return result;
-        } catch (RuntimeException e) {
+        } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             log.error("申请微信退款失败", e);
-            throw new RuntimeException("申请退款失败: " + e.getMessage(), e);
+            throw new ServiceException("申请退款失败: " + e.getMessage(), e);
         }
     }
 

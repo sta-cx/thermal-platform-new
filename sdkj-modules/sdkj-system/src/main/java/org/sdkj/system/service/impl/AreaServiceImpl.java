@@ -3,6 +3,7 @@ package org.sdkj.system.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.sdkj.common.core.constant.SystemConstants;
 import org.sdkj.system.domain.Area;
 import org.sdkj.system.mapper.AreaMapper;
 import org.sdkj.system.service.IAreaService;
@@ -25,8 +26,8 @@ public class AreaServiceImpl extends ServiceImpl<AreaMapper, Area> implements IA
     @Override
     public List<Area> getProvinces() {
         return list(new LambdaQueryWrapper<Area>()
-            .eq(Area::getParentId, "1")
-            .eq(Area::getDelFlag, "0")
+            .eq(Area::getParentId, SystemConstants.ROOT_DEPT_ANCESTORS)
+            .eq(Area::getDelFlag, SystemConstants.NORMAL)
             .orderByAsc(Area::getSort));
     }
 
@@ -37,7 +38,7 @@ public class AreaServiceImpl extends ServiceImpl<AreaMapper, Area> implements IA
     public List<Area> getCities(String provinceId) {
         return list(new LambdaQueryWrapper<Area>()
             .eq(Area::getParentId, provinceId)
-            .eq(Area::getDelFlag, "0")
+            .eq(Area::getDelFlag, SystemConstants.NORMAL)
             .orderByAsc(Area::getSort));
     }
 
@@ -48,7 +49,7 @@ public class AreaServiceImpl extends ServiceImpl<AreaMapper, Area> implements IA
     public List<Area> getCounties(String cityId) {
         return list(new LambdaQueryWrapper<Area>()
             .eq(Area::getParentId, cityId)
-            .eq(Area::getDelFlag, "0")
+            .eq(Area::getDelFlag, SystemConstants.NORMAL)
             .orderByAsc(Area::getSort));
     }
 

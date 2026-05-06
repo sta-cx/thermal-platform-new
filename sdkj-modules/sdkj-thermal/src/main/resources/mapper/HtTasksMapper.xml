@@ -168,14 +168,14 @@
     <!-- 重新设定开度日志 - 插入子表（户阀） -->
     <insert id="insertSettingLogItemH">
         INSERT INTO ht_task_setting_log_item (id, main_id, scope_type, meter_num, meter_id, old_angle, new_angle)
-        SELECT REPLACE(UUID(), '-', ''), #{newMainId}, '1', a.meter_num, a.meter_id, a.old_angle, a.new_angle
+        SELECT CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{newMainId}, '1', a.meter_num, a.meter_id, a.old_angle, a.new_angle
         FROM ht_task_setting_log_item a WHERE a.main_id = #{oldMainId}
     </insert>
 
     <!-- 重新设定开度日志 - 插入子表（单元阀） -->
     <insert id="insertSettingLogItemD">
         INSERT INTO ht_task_setting_log_item (id, main_id, scope_type, meter_num, meter_id, old_angle, new_angle)
-        SELECT REPLACE(UUID(), '-', ''), #{newMainId}, '2', a.meter_num, a.meter_id, a.old_angle, a.new_angle
+        SELECT CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{newMainId}, '2', a.meter_num, a.meter_id, a.old_angle, a.new_angle
         FROM ht_task_setting_log_item a WHERE a.main_id = #{oldMainId}
     </insert>
 
@@ -220,7 +220,7 @@
             dtu_num, chan_num, status, instruction_status, create_time, create_by
         )
         SELECT
-            REPLACE(UUID(), '-', '') AS id,
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED) AS id,
             sd.tasks_id,
             (SELECT strategy_id FROM ht_tasks WHERE id = CAST(sd.tasks_id AS UNSIGNED)) AS strategy_id,
             sp.instruction_id AS instruction_id,
@@ -345,7 +345,7 @@
             dtu_num, chan_num
         FROM (
             SELECT
-                REPLACE(UUID(), '-', '') AS id,
+                CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED) AS id,
                 IFNULL(d.instruction_id, f.instruction_id) AS instruction_id,
                 IFNULL(d.orderr, '0') AS orderr,
                 IFNULL(d.instruction_type, f.type) AS instruction_type,
@@ -411,7 +411,7 @@
             tasks_id, alert_type, device_id, imei, dtu_num, chan_num
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             IFNULL(d.instruction_id, f.instruction_id),
             IFNULL(d.orderr, '0'),
             IFNULL(d.instruction_type, f.type),
@@ -916,7 +916,7 @@
             dtu_num, chan_num, out_temp_pj
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             a.instruction_id,
             IFNULL(a.instruction_type, 3) AS instruction_type,
             IFNULL(a.instruction, c.valve_max) AS instruction,
@@ -964,7 +964,7 @@
             dtu_num, chan_num
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             a.instruction_id,
             a.instruction_type,
             a.instruction,
@@ -1012,7 +1012,7 @@
             dtu_num, chan_num
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             a.instruction_id,
             a.instruction_type,
             a.instruction,
@@ -1052,7 +1052,7 @@
     <insert id="insertHtAlert">
         INSERT INTO ht_alert (id, meter_id, alert_type, alert_time, org_id, company_id, valve, in_temp, out_temp, room_temp)
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             a.meter_id,
             a.alert_type,
             NOW(),
@@ -1093,7 +1093,7 @@
             group_id, strategy_id, command_index
         )
         SELECT
-            REPLACE(UUID(), '-', ''),
+            CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             a.instruction_id,
             a.instruction_type,
             a.instruction,

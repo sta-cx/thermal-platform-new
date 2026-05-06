@@ -9,7 +9,7 @@ import java.util.List;
 @AutoMapper(target = HtTaskSettingLog.class)
 public class HtTaskSettingLogVo {
 
-    private String id;
+    private Long id;
     private String taskId;
     private String scopeType;
     private String createBy;

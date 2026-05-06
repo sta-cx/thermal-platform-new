@@ -30,17 +30,23 @@ public interface PrCompanyMapper extends BaseMapperPlus<PrCompany, PrCompanyVo> 
      * 获取用户数据权限范围内的组织机构（树形）
      */
     List<SysOrganization> getDataGrantOrg(@Param("companyId") String companyId,
-                                          @Param("userId") String userId);
+                                          @Param("userId") Long userId);
 
     /**
      * 获取用户可访问的小区列表
      */
-    List<SysOrganization> getUserOrgByUserId(@Param("userId") String userId);
+    List<SysOrganization> getUserOrgByUserId(@Param("userId") Long userId);
 
     /**
      * 获取用户可访问的分公司列表
      */
-    List<SysOrganization> getUserOrgBranchByUserId(@Param("userId") String userId);
+    List<SysOrganization> getUserOrgBranchByUserId(@Param("userId") Long userId);
+
+    // ========== 新增/修改 ==========
+
+    int insertOrganization(SysOrganization org);
+
+    int updateOrganization(SysOrganization org);
 
     // ========== 校验方法 ==========
 

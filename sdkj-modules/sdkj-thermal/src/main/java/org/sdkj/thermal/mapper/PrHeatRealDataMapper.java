@@ -1,6 +1,7 @@
 package org.sdkj.thermal.mapper;
 
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.PrHeatRealData;
 
 /**
@@ -8,5 +9,6 @@ import org.sdkj.thermal.domain.PrHeatRealData;
  *
  * @author sdkj
  */
+@OrgPermission
 public interface PrHeatRealDataMapper extends BaseMapperPlus<PrHeatRealData, PrHeatRealData> {
 }

@@ -57,14 +57,14 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     }
 
     @Override
-    public boolean validateRoomNum(String roomNum, String buildingId, String unitCode, String id) {
+    public boolean validateRoomNum(String roomNum, Long buildingId, String unitCode, Long id) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
         lqw.eq(PrHouse::getRoomNum, roomNum);
         lqw.eq(PrHouse::getBuildingId, buildingId);
         if (StringUtils.isNotBlank(unitCode)) {
             lqw.eq(PrHouse::getUnitCode, unitCode);
         }
-        if (StringUtils.isNotBlank(id)) {
+        if (id != null) {
             lqw.ne(PrHouse::getId, id);
         }
         return baseMapper.selectCount(lqw) > 0;
@@ -307,7 +307,7 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         }
 
         // 获取所有房屋ID
-        List<String> houseIds = allHouses.stream().map(PrHouse::getId).toList();
+        List<Long> houseIds = allHouses.stream().map(PrHouse::getId).toList();
 
         // TODO: 获取阀门状态，暂时跳过
         // 这里需要注入 PrHeatValveArchiveMapper 来查询
@@ -408,7 +408,7 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         int count = 0;
         for (PrHouse house : entities) {
             // 校验必填字段：房间号和楼宇ID
-            if (StringUtils.isBlank(house.getRoomNum()) || StringUtils.isBlank(house.getBuildingId())) {
+            if (StringUtils.isBlank(house.getRoomNum()) || house.getBuildingId() == null) {
                 log.warn("跳过无效房屋数据: roomNum={}, buildingId={}", house.getRoomNum(), house.getBuildingId());
                 continue;
             }

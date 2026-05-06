@@ -10,7 +10,7 @@ import org.sdkj.thermal.domain.PrOptionsHeat;
 @Data
 @AutoMapper(target = PrOptionsHeat.class)
 public class PrOptionsHeatVo {
-    private String id;
+    private Long id;
     private String heatStartDate;
     private String heatEndDate;
     private String chargeStandardType;

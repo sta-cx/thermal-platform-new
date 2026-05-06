@@ -43,7 +43,7 @@ public interface IPrHouseService extends IService<PrHouse> {
      * @param id 排除的ID（编辑时传入）
      * @return true=房间号已存在
      */
-    boolean validateRoomNum(String roomNum, String buildingId, String unitCode, String id);
+    boolean validateRoomNum(String roomNum, Long buildingId, String unitCode, Long id);
 
     /**
      * 根据楼宇+单元查询房屋列表

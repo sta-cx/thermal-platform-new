@@ -2,6 +2,7 @@ package org.sdkj.thermal.mapper;
 
 import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.PrAccountBalance;
 import org.sdkj.thermal.domain.vo.PrAccountBalanceVo;
 
@@ -12,6 +13,7 @@ import java.util.Map;
 /**
  * 个人账户余额 Mapper
  */
+@OrgPermission
 public interface PrAccountBalanceMapper extends BaseMapperPlus<PrAccountBalance, PrAccountBalanceVo> {
 
     /** 查询已开户的账户列表 */
@@ -38,12 +40,12 @@ public interface PrAccountBalanceMapper extends BaseMapperPlus<PrAccountBalance,
     BigDecimal selectBalanceByUser(
         @Param("companyId") String companyId,
         @Param("orgId") String orgId,
-        @Param("userId") String userId);
+        @Param("userId") Long userId);
 
     /** 更新账户余额 */
     int updateBalance(
-        @Param("userId") String userId,
-        @Param("houseId") String houseId,
+        @Param("userId") Long userId,
+        @Param("houseId") Long houseId,
         @Param("itemGroup") String itemGroup,
         @Param("itemCode") String itemCode,
         @Param("amount") BigDecimal amount);

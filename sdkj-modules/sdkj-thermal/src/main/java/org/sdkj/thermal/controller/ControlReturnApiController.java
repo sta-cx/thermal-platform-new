@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
+import org.sdkj.common.mybatis.utils.IdGeneratorUtil;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.PrOptionsHeat;
 import org.sdkj.thermal.mapper.HtTasksPerformMapper;
@@ -467,11 +468,11 @@ public class ControlReturnApiController {
 
         // 插入抄表记录
         if ("31D1".equals(dataFeild) || "1F90".equals(dataFeild) || "2190".equals(dataFeild)) {
-            htTasksPerformMapper.insertYTReading(meterNum, valveStatus, settingStatus, actualStatus, inTemp, outTemp,
+            htTasksPerformMapper.insertYTReading(IdGeneratorUtil.nextLongId(), meterNum, valveStatus, settingStatus, actualStatus, inTemp, outTemp,
                 voltage, valveTime, reportInterval, reportingUnit, csq, valveModel, userSetTemp, roomTemp, avgTemp,
                 workTime, totalOpenTime, coldFlg, wkqLock, tempLow, tempHigh, insFlow);
         } else {
-            htTasksPerformMapper.insertReading(meterNum, valveStatus, settingStatus, actualStatus, inTemp, outTemp,
+            htTasksPerformMapper.insertReading(IdGeneratorUtil.nextLongId(), meterNum, valveStatus, settingStatus, actualStatus, inTemp, outTemp,
                 voltage, valveTime, reportInterval, reportingUnit, validTime, totalDegree, csq, rouseNum, duration, insFlow);
         }
 
@@ -599,7 +600,7 @@ public class ControlReturnApiController {
         String valveStatus = json.containsKey("valveStatus") ? json.getStr("valveStatus") : null;
 
         // 插入抄表
-        htTasksPerformMapper.insertTempReading(meterNum, temperature, humi, voltage, readTime, reportingInterval,
+        htTasksPerformMapper.insertTempReading(IdGeneratorUtil.nextLongId(), meterNum, temperature, humi, voltage, readTime, reportingInterval,
             reportingUnit, validTime, csq, totalDegree, reportSuccNum, collectInterval, collectUnit, collectTime,
             collectDate, movPlace, valveStatus);
 
@@ -645,7 +646,7 @@ public class ControlReturnApiController {
         String status1 = json.containsKey("st") ? json.getStr("st") : null;
 
         // 插入抄表
-        htTasksPerformMapper.insertHotReading(meterNum, outTemp, inTemp, voltage, readTime, voltageStatus,
+        htTasksPerformMapper.insertHotReading(IdGeneratorUtil.nextLongId(), meterNum, outTemp, inTemp, voltage, readTime, voltageStatus,
             valveStatus, totalFlow, csq, totalHeat, flowRate, currentFlow, thermalPower, currentPower, status1);
 
         // 更新配表

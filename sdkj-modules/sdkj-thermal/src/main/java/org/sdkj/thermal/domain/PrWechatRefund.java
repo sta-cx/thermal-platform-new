@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -15,8 +14,8 @@ import java.util.Date;
 @TableName("pr_wechat_refund")
 public class PrWechatRefund extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     private String outTradeNo;
     private String transactionId;
@@ -29,7 +28,7 @@ public class PrWechatRefund extends BaseEntity {
     private String refundChannel;
     private Date refundTime;
     private String openId;
-    private String houseId;
+    private Long houseId;
     private String operator;
     private String remark;
 }

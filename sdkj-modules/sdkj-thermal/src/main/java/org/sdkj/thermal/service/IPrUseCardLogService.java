@@ -20,5 +20,5 @@ public interface IPrUseCardLogService extends IService<PrUseCardLog> {
     /**
      * 变更阀门状态
      */
-    boolean changeValveStatus(String meterId, Integer valveStatus);
+    boolean changeValveStatus(Long meterId, Integer valveStatus);
 }

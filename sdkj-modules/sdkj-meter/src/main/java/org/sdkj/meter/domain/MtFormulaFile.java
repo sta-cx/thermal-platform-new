@@ -1,6 +1,5 @@
 package org.sdkj.meter.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -18,8 +17,8 @@ import org.sdkj.meter.domain.vo.MtFormulaFileVo;
 @AutoMapper(target = MtFormulaFileVo.class)
 public class MtFormulaFile extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 公式名称 */
     private String name;

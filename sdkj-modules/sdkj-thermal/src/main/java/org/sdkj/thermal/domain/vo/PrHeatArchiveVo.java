@@ -16,14 +16,14 @@ public class PrHeatArchiveVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
+    private Long id;
     private String companyId;
     private String orgId;
     private String orgName;
     private String buildingName;
-    private String houseId;
+    private Long houseId;
     private String roomNum;
-    private String archiveId;
+    private Long archiveId;
     private String meterArcCode;
     private String meterArcName;
     private String meterNum;
@@ -37,7 +37,7 @@ public class PrHeatArchiveVo implements Serializable {
     private String model;
     private String concentratorCode;
     private String installSite;
-    private String standardId;
+    private Long standardId;
     private BigDecimal standardPrice;
     private BigDecimal inTemperature;
     private BigDecimal outTemperature;

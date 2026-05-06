@@ -16,8 +16,8 @@ public class PrHeatCommandValveArchiveVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
-    private String archiveId;
+    private Long id;
+    private Long archiveId;
     private String meterNum;
     private String cardNum;
     private String meterArcCode;
@@ -27,7 +27,7 @@ public class PrHeatCommandValveArchiveVo implements Serializable {
     private String productId;
     private String deviceId;
     private Integer meterSerial;
-    private String houseId;
+    private Long houseId;
     private String orgId;
     private String companyId;
     private String valveStatus;

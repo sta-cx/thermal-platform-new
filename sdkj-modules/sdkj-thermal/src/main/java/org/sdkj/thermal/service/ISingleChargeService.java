@@ -43,7 +43,7 @@ public interface ISingleChargeService {
     /**
      * 查询已完成的费用数量
      */
-    int getHasFinished(List<String> ids);
+    int getHasFinished(List<Long> ids);
 
     /**
      * 查询房屋缴费记录
@@ -53,7 +53,7 @@ public interface ISingleChargeService {
     /**
      * 更新房屋缴费状态
      */
-    void updateHousePayStatus(String houseId, String orgId);
+    void updateHousePayStatus(Long houseId, String orgId);
 
     /**
      * 执行单笔收费

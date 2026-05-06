@@ -15,9 +15,11 @@ import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.util.EntityUtils;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 交易保障
@@ -123,14 +125,23 @@ public class WXPayReport {
         this.config = config;
         reportMsgQueue = new LinkedBlockingQueue<String>(config.getReportQueueMaxSize());
 
-        // 添加处理线程
-        executorService = Executors.newFixedThreadPool(config.getReportWorkerNum(), new ThreadFactory() {
-            public Thread newThread(Runnable r) {
-                Thread t = Executors.defaultThreadFactory().newThread(r);
-                t.setDaemon(true);
-                return t;
+        int workerNum = config.getReportWorkerNum();
+        executorService = new ThreadPoolExecutor(
+            workerNum, workerNum, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(),
+            new ThreadFactory() {
+                private final AtomicInteger counter = new AtomicInteger(0);
+                public Thread newThread(Runnable r) {
+                    Thread t = new Thread(r, "wxpay-report-" + counter.incrementAndGet());
+                    t.setDaemon(true);
+                    return t;
+                }
             }
-        });
+        );
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            executorService.shutdownNow();
+        }));
 
         if (config.shouldAutoReport()) {
             WXPayUtil.getLogger().info("report worker num: {}", config.getReportWorkerNum());
@@ -212,16 +223,14 @@ public class WXPayReport {
 
     @Deprecated
     private void reportAsync(final String data) throws Exception {
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    httpRequest(data, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS);
-                }
-                catch (Exception ex) {
-                    WXPayUtil.getLogger().warn("report fail. reason: {}", ex.getMessage());
-                }
+        executorService.execute(() -> {
+            try {
+                httpRequest(data, DEFAULT_CONNECT_TIMEOUT_MS, DEFAULT_READ_TIMEOUT_MS);
             }
-        }).start();
+            catch (Exception ex) {
+                WXPayUtil.getLogger().warn("report fail. reason: {}", ex.getMessage());
+            }
+        });
     }
 
     /**

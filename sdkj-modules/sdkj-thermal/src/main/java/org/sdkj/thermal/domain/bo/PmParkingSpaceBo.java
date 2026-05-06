@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 public class PmParkingSpaceBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 车位编号 */
     private String parkingCode;
@@ -32,7 +32,7 @@ public class PmParkingSpaceBo extends BaseEntity {
     private String companyId;
 
     /** 收费标准ID */
-    private String standardId;
+    private Long standardId;
 
     /** 单价 */
     private BigDecimal standardPrice;

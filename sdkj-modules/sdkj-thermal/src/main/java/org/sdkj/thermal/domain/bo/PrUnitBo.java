@@ -2,6 +2,7 @@ package org.sdkj.thermal.domain.bo;
 
 import io.github.linpeilie.annotations.AutoMapper;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.sdkj.common.mybatis.core.domain.BaseEntity;
@@ -18,7 +19,7 @@ import java.math.BigDecimal;
 public class PrUnitBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 单元编码 */
     @NotBlank(message = "单元编码不能为空")
@@ -29,8 +30,8 @@ public class PrUnitBo extends BaseEntity {
     private String name;
 
     /** 楼宇ID */
-    @NotBlank(message = "楼宇ID不能为空")
-    private String buildingId;
+    @NotNull(message = "楼宇ID不能为空")
+    private Long buildingId;
 
     /** 地上楼层 */
     private Integer onFloor;
@@ -51,7 +52,7 @@ public class PrUnitBo extends BaseEntity {
     private String seq;
 
     /** 热力站ID */
-    private String stationId;
+    private Long stationId;
 
     /** 小区ID */
     private String orgId;

@@ -78,8 +78,8 @@ public interface PrImportBasicDataMapper extends BaseMapperPlus<PrImportBasicDat
     /**
      * 插入用户-房屋关联
      */
-    void insertUserHouseRelation(@Param("userId") String userId,
-                                  @Param("houseId") String houseId,
+    void insertUserHouseRelation(@Param("userId") Long userId,
+                                  @Param("houseId") Long houseId,
                                   @Param("companyId") String companyId,
                                   @Param("createBy") String createBy,
                                   @Param("createTime") java.util.Date createTime);
@@ -87,7 +87,7 @@ public interface PrImportBasicDataMapper extends BaseMapperPlus<PrImportBasicDat
     /**
      * 按标准名称插入房屋费用绑定
      */
-    void insertHouseExpenseByCode(@Param("houseId") String houseId,
+    void insertHouseExpenseByCode(@Param("houseId") Long houseId,
                                    @Param("standardName") String standardName,
                                    @Param("standardPrice") java.math.BigDecimal standardPrice,
                                    @Param("itemName") String itemName,
@@ -98,8 +98,8 @@ public interface PrImportBasicDataMapper extends BaseMapperPlus<PrImportBasicDat
     /**
      * 更新账户余额（按房屋/用户/费项）
      */
-    void updateAccountBalance(@Param("houseId") String houseId,
-                               @Param("userId") String userId,
+    void updateAccountBalance(@Param("houseId") Long houseId,
+                               @Param("userId") Long userId,
                                @Param("account") java.math.BigDecimal account,
                                @Param("itemName") String itemName,
                                @Param("companyId") String companyId,

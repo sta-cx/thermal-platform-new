@@ -18,14 +18,14 @@ public interface MtTcValveMapper extends BaseMapperPlus<MtTcValve, MtTcValveVo> 
      * @param archiveId 档案ID
      * @return 分配数量
      */
-    int countAllocatedToOtherCompany(@Param("archiveId") String archiveId);
+    int countAllocatedToOtherCompany(@Param("archiveId") Long archiveId);
 
     /**
      * 删除仪表匹配记录
      * @param archiveId 档案ID
      * @return 删除数量
      */
-    int deleteMeterMatch(@Param("archiveId") String archiveId);
+    int deleteMeterMatch(@Param("archiveId") Long archiveId);
 
     /**
      * 将阀门分配给代理商公司
@@ -47,7 +47,7 @@ public interface MtTcValveMapper extends BaseMapperPlus<MtTcValve, MtTcValveVo> 
      * @param name 新名称
      * @return 更新行数
      */
-    int syncNameToHeatValveArchive(@Param("archiveId") String archiveId, @Param("name") String name);
+    int syncNameToHeatValveArchive(@Param("archiveId") Long archiveId, @Param("name") String name);
 
     /**
      * 级联更新 pr_heat_unit_valve_archive 的 meter_arc_name
@@ -55,6 +55,6 @@ public interface MtTcValveMapper extends BaseMapperPlus<MtTcValve, MtTcValveVo> 
      * @param name 新名称
      * @return 更新行数
      */
-    int syncNameToHeatUnitValveArchive(@Param("archiveId") String archiveId, @Param("name") String name);
+    int syncNameToHeatUnitValveArchive(@Param("archiveId") Long archiveId, @Param("name") String name);
 
 }

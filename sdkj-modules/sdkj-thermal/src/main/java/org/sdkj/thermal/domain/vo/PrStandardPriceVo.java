@@ -20,8 +20,8 @@ public class PrStandardPriceVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
-    private String standardId;
+    private Long id;
+    private Long standardId;
     private Integer step12;
     private Integer grade;
     private Integer minimum;

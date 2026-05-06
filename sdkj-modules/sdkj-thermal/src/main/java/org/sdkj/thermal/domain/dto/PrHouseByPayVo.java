@@ -27,7 +27,7 @@ public class PrHouseByPayVo implements Serializable {
     private String companyId;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 楼宇名称 */
     private String buildingName;

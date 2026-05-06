@@ -3,6 +3,7 @@ package org.sdkj.thermal.wechat.wxPay;
 import org.sdkj.thermal.wechat.wxPay.WXPayConstants.SignType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -22,6 +23,7 @@ import java.security.SecureRandom;
 import java.util.*;
 
 
+@Slf4j
 public class WXPayUtil {
 
     private static final String SYMBOLS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -53,10 +55,12 @@ public class WXPayUtil {
             try {
                 stream.close();
             } catch (Exception ex) {
+            log.warn("WXPay数据处理异常", ex);
                 // do nothing
             }
             return data;
         } catch (Exception ex) {
+            log.warn("WXPay数据处理异常", ex);
             WXPayUtil.getLogger().warn("Invalid XML, can not convert to map. Error message: {}. XML content: {}", ex.getMessage(), strXML);
             throw ex;
         }
@@ -97,6 +101,7 @@ public class WXPayUtil {
             writer.close();
         }
         catch (Exception ex) {
+            log.warn("WXPay数据处理异常", ex);
         }
         return output;
     }

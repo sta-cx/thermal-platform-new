@@ -16,8 +16,8 @@ public class PrHeatTempArchiveVo implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String id;
-    private String archiveId;
+    private Long id;
+    private Long archiveId;
     private String meterArcCode;
     private String meterArcName;
     private String meterNum;
@@ -40,7 +40,7 @@ public class PrHeatTempArchiveVo implements Serializable {
     private Date reportTime;
     private Integer isChanged;
     private Integer isStop;
-    private String houseId;
+    private Long houseId;
     private String orgId;
     private String companyId;
     private String concentratorCode;

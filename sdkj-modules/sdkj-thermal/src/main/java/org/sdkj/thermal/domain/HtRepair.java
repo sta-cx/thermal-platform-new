@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -23,11 +22,11 @@ import java.util.Date;
 @AutoMapper(target = HtRepairVo.class)
 public class HtRepair extends BaseEntity {
 
-    @TableId(value = "id", type = IdType.ASSIGN_UUID)
-    private String id;
+    @TableId(value = "id")
+    private Long id;
 
     /** 楼宇ID */
-    private String buildingId;
+    private Long buildingId;
 
     /** 楼宇名称 */
     private String buildingName;
@@ -36,13 +35,13 @@ public class HtRepair extends BaseEntity {
     private String unitCode;
 
     /** 房屋ID */
-    private String houseId;
+    private Long houseId;
 
     /** 房号 */
     private String roomNum;
 
     /** 仪表ID */
-    private String meterId;
+    private Long meterId;
 
     /** 仪表号 */
     private String meterNum;

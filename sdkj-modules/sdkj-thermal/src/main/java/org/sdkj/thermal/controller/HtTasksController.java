@@ -93,7 +93,7 @@ public class HtTasksController extends BaseController {
     @SaCheckPermission("thermal:ht:tasks:query")
     @SaCheckLogin
     @GetMapping("/{id}")
-    public R<HtTasks> getById(@PathVariable Integer id) {
+    public R<HtTasks> getById(@PathVariable Long id) {
         return R.ok(tasksService.getById(id));
     }
 
@@ -105,7 +105,7 @@ public class HtTasksController extends BaseController {
     @Log(title = "调控任务", businessType = BusinessType.INSERT)
     @PostMapping
     public R<Void> save(@Validated @RequestBody HtTasksBo bo,
-                        @RequestParam(required = false) List<String> scopeIds) {
+                        @RequestParam(required = false) List<Long> scopeIds) {
         HtTasks task = MapstructUtils.convert(bo, HtTasks.class);
         task.setBeanClass("org.sdkj.thermal.quartz.ThermalJob");
         if (task.getNumber() == null) task.setNumber(0);
@@ -124,7 +124,7 @@ public class HtTasksController extends BaseController {
     @Log(title = "调控任务", businessType = BusinessType.UPDATE)
     @PutMapping
     public R<Void> update(@Validated @RequestBody HtTasksBo bo,
-                          @RequestParam(required = false) List<String> scopeIds) {
+                          @RequestParam(required = false) List<Long> scopeIds) {
         HtTasks task = MapstructUtils.convert(bo, HtTasks.class);
         HtTasks existing = tasksService.getById(task.getId());
         if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
@@ -140,7 +140,7 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "调控任务", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
-    public R<Void> remove(@PathVariable Integer id) {
+    public R<Void> remove(@PathVariable Long id) {
         HtTasks existing = tasksService.getById(id);
         if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
             return R.fail("运行中的任务不允许删除，请先停止任务！");
@@ -155,7 +155,7 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "调控任务", businessType = BusinessType.DELETE)
     @DeleteMapping("/batch")
-    public R<Void> removeBatch(@RequestParam List<Integer> ids) {
+    public R<Void> removeBatch(@RequestParam List<Long> ids) {
         List<HtTasks> tasks = tasksService.listByIds(ids);
         for (HtTasks t : tasks) {
             if (t.getStatus() != null && t.getStatus() == 1) {
@@ -199,7 +199,7 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "任务状态", businessType = BusinessType.UPDATE)
     @PutMapping("/status/{id}")
-    public R<Void> changeStatus(@PathVariable Integer id, @RequestParam Boolean status) {
+    public R<Void> changeStatus(@PathVariable Long id, @RequestParam Boolean status) {
         HtTasks existing = tasksService.getById(id);
         if (existing == null) return R.fail("任务不存在");
         return toAjax(tasksService.changeStatus(id, status ? 1 : 0));
@@ -212,7 +212,7 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "任务执行", businessType = BusinessType.UPDATE)
     @PostMapping("/run/{id}")
-    public R<Void> run(@PathVariable Integer id) {
+    public R<Void> run(@PathVariable Long id) {
         HtTasks existing = tasksService.getById(id);
         if (existing != null && existing.getStatus() != null && existing.getStatus() == 0) {
             return R.fail("请先启动任务！");
@@ -227,7 +227,7 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "特殊户标记", businessType = BusinessType.UPDATE)
     @PutMapping("/isSpecial")
-    public R<Void> isSpecial(@RequestBody List<String> scopeIds,
+    public R<Void> isSpecial(@RequestBody List<Long> scopeIds,
                              @RequestParam String val,
                              @RequestParam(required = false) String remark) {
         return toAjax(tasksService.markSpecial(scopeIds, val, remark));
@@ -240,7 +240,7 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "特殊单元标记", businessType = BusinessType.UPDATE)
     @PutMapping("/isSpecialUnit")
-    public R<Void> isSpecialUnit(@RequestBody List<String> scopeIds,
+    public R<Void> isSpecialUnit(@RequestBody List<Long> scopeIds,
                                  @RequestParam String val,
                                  @RequestParam(required = false) String remark) {
         return toAjax(tasksService.markSpecialUnit(scopeIds, val, remark));
@@ -253,7 +253,7 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "缴费状态", businessType = BusinessType.UPDATE)
     @PutMapping("/payStatus")
-    public R<Void> isPayStatus(@RequestBody List<String> scopeIds,
+    public R<Void> isPayStatus(@RequestBody List<Long> scopeIds,
                                @RequestParam String val) {
         return toAjax(tasksService.markPayStatus(scopeIds, val));
     }
@@ -264,7 +264,7 @@ public class HtTasksController extends BaseController {
     @SaCheckPermission("thermal:ht:tasks:query")
     @SaCheckLogin
     @GetMapping("/balanceRate/{taskId}")
-    public R<Double> refreshBalanceRate(@PathVariable String taskId) {
+    public R<Double> refreshBalanceRate(@PathVariable Long taskId) {
         return R.ok(tasksService.refreshBalanceRate(taskId));
     }
 
@@ -275,7 +275,7 @@ public class HtTasksController extends BaseController {
     @SaCheckLogin
     @Log(title = "设定开度", businessType = BusinessType.UPDATE)
     @PutMapping("/saveValveAngle")
-    public R<Void> saveValveAngle(@RequestParam String taskId,
+    public R<Void> saveValveAngle(@RequestParam Long taskId,
                                   @RequestParam String scopeType) {
         return toAjax(tasksService.saveValveAngle(taskId, scopeType));
     }

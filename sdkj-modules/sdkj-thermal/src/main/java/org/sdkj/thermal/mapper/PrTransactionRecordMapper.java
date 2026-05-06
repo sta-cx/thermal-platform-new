@@ -2,6 +2,7 @@ package org.sdkj.thermal.mapper;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrTransactionRecord;
 import org.sdkj.thermal.domain.vo.PrTransactionRecordVo;
@@ -13,6 +14,7 @@ import java.util.Map;
 /**
  * 交易记录 Mapper
  */
+@OrgPermission
 public interface PrTransactionRecordMapper extends BaseMapperPlus<PrTransactionRecord, PrTransactionRecordVo> {
 
     /**

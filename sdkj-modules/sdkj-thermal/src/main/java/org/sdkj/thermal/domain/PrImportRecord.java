@@ -3,7 +3,6 @@ package org.sdkj.thermal.domain;
 import cn.idev.excel.annotation.ExcelIgnore;
 import cn.idev.excel.annotation.ExcelProperty;
 import cn.idev.excel.annotation.write.style.ColumnWidth;
-import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -16,7 +15,7 @@ import java.util.Date;
 @TableName("pr_import_record")
 public class PrImportRecord {
 
-    @TableId(value = "id", type = IdType.AUTO)
+    @TableId(value = "id")
     @ExcelIgnore
     private Long id;
 
@@ -27,7 +26,7 @@ public class PrImportRecord {
     private String companyId;
 
     @ExcelIgnore
-    private String houseId;
+    private Long houseId;
 
     @ExcelProperty(value = {TITLE, "小区*"}, index = 0)
     private String orgName;
@@ -72,7 +71,7 @@ public class PrImportRecord {
     private String itemId;
 
     @ExcelIgnore
-    private String archiveId;
+    private Long archiveId;
 
     @ExcelIgnore
     private String userId;

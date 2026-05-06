@@ -15,7 +15,7 @@ import org.sdkj.thermal.domain.PrExpenseItem;
 public class PrExpenseItemBo extends BaseEntity {
 
     /** 主键 */
-    private String id;
+    private Long id;
 
     /** 项目编号 */
     private String itemCode;
