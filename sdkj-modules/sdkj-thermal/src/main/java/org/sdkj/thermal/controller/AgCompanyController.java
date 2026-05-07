@@ -10,13 +10,10 @@ import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.AgCompany;
 import org.sdkj.thermal.domain.bo.AgCompanyBo;
 import org.sdkj.thermal.service.IAgCompanyService;
-import org.sdkj.thermal.vo.TreeNode;
-import org.sdkj.thermal.vo.TreeUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 代理商公司管理
@@ -31,25 +28,13 @@ public class AgCompanyController extends BaseController {
     private final IAgCompanyService companyService;
 
     /**
-     * 查询公司树形列表
+     * 查询公司列表
      */
     @SaCheckPermission("thermal:agent:company:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<List<TreeNode>> list(@RequestParam(required = false) String companyId) {
-        List<AgCompany> companies = companyService.listCompanies();
-        List<TreeNode> trees = companies.stream()
-            .map(TreeNode::new)
-            .collect(Collectors.toList());
-
-        String parentId = "-1";
-        if (companyId != null && !companyId.isEmpty()) {
-            AgCompany company = companyService.getCompanyById(companyId);
-            if (company != null && company.getParentId() != null) {
-                parentId = company.getParentId();
-            }
-        }
-        return R.ok(TreeUtil.buildByLoop(trees, parentId));
+    public R<List<AgCompany>> list() {
+        return R.ok(companyService.listCompanies());
     }
 
     /**

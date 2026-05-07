@@ -2,15 +2,20 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.thermal.domain.AgCompany;
 import org.sdkj.thermal.domain.AgRole;
 import org.sdkj.thermal.domain.AgUser;
+import org.sdkj.thermal.domain.SysOrganization;
+import org.sdkj.thermal.domain.PrDataGrant;
 import org.sdkj.thermal.domain.bo.AgCompanyBo;
 import org.sdkj.thermal.mapper.AgCompanyMapper;
 import org.sdkj.thermal.mapper.AgRoleMapper;
 import org.sdkj.thermal.mapper.AgUserMapper;
+import org.sdkj.thermal.mapper.PrCompanyMapper;
+import org.sdkj.thermal.mapper.PrDataGrantMapper;
 import org.sdkj.thermal.service.IAgCompanyService;
 import org.springframework.beans.BeanUtils;
 import cn.hutool.crypto.digest.BCrypt;
@@ -28,13 +33,15 @@ public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany
 
     private final AgRoleMapper roleMapper;
     private final AgUserMapper userMapper;
+    private final PrCompanyMapper prCompanyMapper;
+    private final PrDataGrantMapper prDataGrantMapper;
 
 
     @Override
     public List<AgCompany> listCompanies() {
         return lambdaQuery()
             .eq(AgCompany::getIsAudited, 1)
-            .orderByAsc(AgCompany::getSeq)
+            .orderByDesc(AgCompany::getCreateTime)
             .list();
     }
 
@@ -46,6 +53,19 @@ public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteCompany(String id) {
+        // 级联删除数据权限
+        prDataGrantMapper.delete(
+            new LambdaQueryWrapper<PrDataGrant>().eq(PrDataGrant::getCompanyId, id)
+        );
+        // 级联删除组织机构
+        List<SysOrganization> orgs = prCompanyMapper.selectOrganizationsByCompanyId(id);
+        for (SysOrganization org : orgs) {
+            prCompanyMapper.deleteOrgById(org.getId());
+        }
+        SysOrganization root = prCompanyMapper.getCompany(id);
+        if (root != null) {
+            prCompanyMapper.deleteOrgById(root.getId());
+        }
         return removeById(id);
     }
 
@@ -102,6 +122,9 @@ public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany
 
         // 关联用户与角色
         userMapper.saveUserRole(adminUser.getId(), new String[]{role.getId()});
+
+        // 创建组织根节点
+        createOrgRoot(String.valueOf(company.getId()), company.getName(), company.getCode());
 
         return true;
     }
@@ -162,6 +185,9 @@ public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany
         adminUser.setIsEnabled(1);
         userMapper.insert(adminUser);
 
+        // 创建组织根节点
+        createOrgRoot(String.valueOf(company.getId()), company.getName(), company.getCode());
+
         return true;
     }
 
@@ -189,5 +215,16 @@ public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany
                .eq(AgUser::getIsSuper, 1)
                .set(AgUser::getIsEnabled, enabled ? 1 : 0);
         userMapper.update(null, wrapper);
+    }
+
+    private void createOrgRoot(String companyId, String name, String code) {
+        SysOrganization root = new SysOrganization();
+        root.setId(IdWorker.getIdStr(root));
+        root.setName(name);
+        root.setCode(code);
+        root.setCompanyId(companyId);
+        root.setParentId("-1");
+        root.setLevel("0");
+        prCompanyMapper.insertOrganization(root);
     }
 }

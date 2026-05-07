@@ -17,12 +17,6 @@ public class AgCompanyVo implements Serializable {
 
     private String code;
 
-    private String parentId;
-
-    private String parentName;
-
-    private String seq;
-
     private String province;
 
     private String city;

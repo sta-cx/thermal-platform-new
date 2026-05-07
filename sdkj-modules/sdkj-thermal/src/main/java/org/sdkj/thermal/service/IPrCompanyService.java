@@ -65,4 +65,8 @@ public interface IPrCompanyService extends IService<PrCompany> {
     void saveUserOrg(Long userId, String companyId, List<String> orgIds);
 
     void clearUserOrg(Long userId);
+
+    void createOrgRootNode(String companyId, String name, String code);
+
+    boolean deleteCompanyWithCascade(String id);
 }

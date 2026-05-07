@@ -7,7 +7,6 @@ public class PrCompanyVo {
     private Long id;
     private String name;
     private String code;
-    private String parentId;
     private String tele;
     private String principal;
     private Integer nature;

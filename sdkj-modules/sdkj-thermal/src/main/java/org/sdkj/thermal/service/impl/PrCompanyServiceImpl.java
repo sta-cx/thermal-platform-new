@@ -243,4 +243,31 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
         prCompanyMapper.deleteOrgById(id);
         prCompanyMapper.deleteGrantDataById(id, org.getCompanyId());
     }
+
+    @Override
+    public void createOrgRootNode(String companyId, String name, String code) {
+        SysOrganization root = new SysOrganization();
+        root.setId(IdWorker.getIdStr(root));
+        root.setName(name);
+        root.setCode(code);
+        root.setCompanyId(companyId);
+        root.setParentId("-1");
+        root.setLevel("0");
+        prCompanyMapper.insertOrganization(root);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteCompanyWithCascade(String id) {
+        // 级联删除数据权限
+        prDataGrantMapper.delete(
+            new LambdaQueryWrapper<PrDataGrant>().eq(PrDataGrant::getCompanyId, id)
+        );
+        // 级联删除组织机构（含根节点 level=0，因为查询条件是 level != '3'）
+        List<SysOrganization> orgs = prCompanyMapper.selectOrganizationsByCompanyId(id);
+        for (SysOrganization org : orgs) {
+            prCompanyMapper.deleteOrgById(org.getId());
+        }
+        return removeById(id);
+    }
 }

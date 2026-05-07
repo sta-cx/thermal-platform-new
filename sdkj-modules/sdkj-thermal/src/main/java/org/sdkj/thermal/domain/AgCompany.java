@@ -29,10 +29,6 @@ public class AgCompany extends BaseEntity {
 
     private String code;
 
-    private String parentId;
-
-    private String seq;
-
     private String province;
 
     private String city;
@@ -102,6 +98,4 @@ public class AgCompany extends BaseEntity {
     private String longitude;
 
     private String latitude;
-
-    private String parentName;
 }

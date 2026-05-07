@@ -14,7 +14,6 @@ import org.sdkj.thermal.domain.SysOrganization;
 import org.sdkj.thermal.domain.bo.UserOrgBo;
 import org.sdkj.thermal.service.IPrCompanyService;
 import org.sdkj.thermal.vo.TreeNode;
-import org.sdkj.thermal.vo.TreeUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,16 +37,7 @@ public class PrCompanyController extends BaseController {
     @SaCheckLogin
     @GetMapping("/list")
     public R<List<PrCompany>> list() {
-        List<PrCompany> companies = companyService.listCompanies();
-        return R.ok(buildCompanyTree(companies, null));
-    }
-
-    private List<PrCompany> buildCompanyTree(List<PrCompany> all, String parentId) {
-        return all.stream()
-                .filter(c -> (parentId == null && c.getParentId() == null)
-                        || (parentId != null && parentId.equals(c.getParentId())))
-                .peek(c -> c.setChildren(buildCompanyTree(all, String.valueOf(c.getId()))))
-                .collect(Collectors.toList());
+        return R.ok(companyService.listCompanies());
     }
 
     @SaCheckPermission("thermal:property:company:query")
@@ -62,7 +52,11 @@ public class PrCompanyController extends BaseController {
     @Log(title = "物业公司", businessType = BusinessType.INSERT)
     @PostMapping
     public R<Void> add(@Validated @RequestBody PrCompany company) {
-        return toAjax(companyService.save(company));
+        boolean saved = companyService.save(company);
+        if (saved) {
+            companyService.createOrgRootNode(String.valueOf(company.getId()), company.getName(), company.getCode());
+        }
+        return toAjax(saved);
     }
 
     @SaCheckPermission("thermal:property:company:edit")
@@ -78,7 +72,7 @@ public class PrCompanyController extends BaseController {
     @Log(title = "物业公司", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable String id) {
-        return toAjax(companyService.removeById(id));
+        return toAjax(companyService.deleteCompanyWithCascade(id));
     }
 
     @SaCheckPermission("thermal:property:company:query")
