@@ -149,7 +149,9 @@ public class SysTenantController extends BaseController {
     @SaCheckRole(TenantConstants.SUPER_ADMIN_ROLE_KEY)
     @SaCheckPermission("system:tenant:edit")
     @DeleteMapping("/unbindUser")
-    public R<Void> unbindUser(@RequestParam Long userId, @RequestParam String tenantId) {
+    public R<Void> unbindUser(@RequestBody Map<String, Object> params) {
+        Long userId = Long.valueOf(params.get("userId").toString());
+        String tenantId = params.get("tenantId").toString();
         return toAjax(tenantService.unbindUser(userId, tenantId));
     }
 }
