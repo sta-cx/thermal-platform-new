@@ -8,7 +8,6 @@
         SELECT *
         FROM sys_organization
         WHERE company_id = #{companyId}
-          AND level != '3'
         ORDER BY code
     </select>
 
