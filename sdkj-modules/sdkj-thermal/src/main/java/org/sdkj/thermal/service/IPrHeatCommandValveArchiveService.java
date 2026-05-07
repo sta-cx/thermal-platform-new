@@ -31,5 +31,6 @@ public interface IPrHeatCommandValveArchiveService extends IService<PrHeatComman
      */
     TableDataInfo<PrHeatCommandValveArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
                                                                String unit, String search, String parentId,
+                                                               String valveCategory,
                                                                PageQuery pageQuery);
 }

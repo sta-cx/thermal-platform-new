@@ -31,6 +31,7 @@ public class PrHeatCommandValveArchiveServiceImpl extends ServiceImpl<PrHeatComm
     @Override
     public TableDataInfo<PrHeatCommandValveArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
                                                                       String unit, String search, String parentId,
+                                                                      String valveCategory,
                                                                       PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatCommandValveArchive> lqw = new LambdaQueryWrapper<>();
         lqw.eq(StringUtils.isNotBlank(companyId), PrHeatCommandValveArchive::getCompanyId, companyId);
@@ -42,6 +43,11 @@ public class PrHeatCommandValveArchiveServiceImpl extends ServiceImpl<PrHeatComm
                 .or().like(PrHeatCommandValveArchive::getMeterArcName, search.trim()));
         }
         lqw.eq(PrHeatCommandValveArchive::getIsChanged, 0);
+        if ("card".equals(valveCategory)) {
+            lqw.inSql(PrHeatCommandValveArchive::getArchiveId, "SELECT id FROM mt_tc_valve WHERE type = '1'");
+        } else if ("switch".equals(valveCategory)) {
+            lqw.inSql(PrHeatCommandValveArchive::getArchiveId, "SELECT id FROM mt_tc_valve WHERE type != '1'");
+        }
         lqw.orderByDesc(PrHeatCommandValveArchive::getCreateTime);
         Page<PrHeatCommandValveArchiveVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);

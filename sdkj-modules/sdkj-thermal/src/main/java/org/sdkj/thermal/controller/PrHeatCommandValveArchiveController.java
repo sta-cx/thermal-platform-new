@@ -52,8 +52,9 @@ public class PrHeatCommandValveArchiveController extends BaseController {
             @RequestParam(required = false) String unit,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String parentId,
+            @RequestParam(required = false) String valveCategory,
             PageQuery pageQuery) {
-        return commandValveArchiveService.selectPageList(companyId, orgId, buildingId, unit, search, parentId, pageQuery);
+        return commandValveArchiveService.selectPageList(companyId, orgId, buildingId, unit, search, parentId, valveCategory, pageQuery);
     }
 
     /**
