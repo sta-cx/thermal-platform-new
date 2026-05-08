@@ -40,7 +40,7 @@ public class PrHeatTempArchiveController extends BaseController {
     /**
      * 分页查询温采器配表列表
      */
-    @SaCheckPermission("thermal:ht:temp-archive:list")
+    @SaCheckPermission("thermal:ht:tempArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatTempArchiveVo> list(
@@ -57,7 +57,7 @@ public class PrHeatTempArchiveController extends BaseController {
     /**
      * 查询温采器配表详情
      */
-    @SaCheckPermission("thermal:ht:temp-archive:query")
+    @SaCheckPermission("thermal:ht:tempArchive:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatTempArchiveVo> getById(@PathVariable String id) {
@@ -67,7 +67,7 @@ public class PrHeatTempArchiveController extends BaseController {
     /**
      * 新增温采器配表
      */
-    @SaCheckPermission("thermal:ht:temp-archive:add")
+    @SaCheckPermission("thermal:ht:tempArchive:add")
     @SaCheckLogin
     @Log(title = "温采器配表", businessType = BusinessType.INSERT)
     @PostMapping
@@ -87,7 +87,7 @@ public class PrHeatTempArchiveController extends BaseController {
     /**
      * 修改温采器配表
      */
-    @SaCheckPermission("thermal:ht:temp-archive:edit")
+    @SaCheckPermission("thermal:ht:tempArchive:edit")
     @SaCheckLogin
     @Log(title = "温采器配表", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -108,7 +108,7 @@ public class PrHeatTempArchiveController extends BaseController {
     /**
      * 删除温采器配表
      */
-    @SaCheckPermission("thermal:ht:temp-archive:remove")
+    @SaCheckPermission("thermal:ht:tempArchive:remove")
     @SaCheckLogin
     @Log(title = "温采器配表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -123,7 +123,7 @@ public class PrHeatTempArchiveController extends BaseController {
      * 旧端点: POST /property/prHeatTempArchive/valveInformationSynchronization
      * 新端点: POST /thermal/ht/temp-archive/sync
      */
-    @SaCheckPermission("thermal:ht:temp-archive:edit")
+    @SaCheckPermission("thermal:ht:tempArchive:edit")
     @SaCheckLogin
     @Log(title = "温采器配表-同步采集平台", businessType = BusinessType.UPDATE)
     @PostMapping("/sync")
@@ -139,7 +139,7 @@ public class PrHeatTempArchiveController extends BaseController {
      * 旧端点: POST /property/prHeatTempArchive/downloadInfoSync
      * 新端点: GET /thermal/ht/temp-archive/sync-download
      */
-    @SaCheckPermission("thermal:ht:temp-archive:list")
+    @SaCheckPermission("thermal:ht:tempArchive:list")
     @SaCheckLogin
     @Log(title = "温采器配表-同步信息下载", businessType = BusinessType.EXPORT)
     @GetMapping("/sync-download")
@@ -159,7 +159,7 @@ public class PrHeatTempArchiveController extends BaseController {
      * 旧端点: POST /property/prHeatTempArchive/exportAll
      * 新端点: GET /thermal/ht/temp-archive/export
      */
-    @SaCheckPermission("thermal:ht:temp-archive:list")
+    @SaCheckPermission("thermal:ht:tempArchive:list")
     @SaCheckLogin
     @Log(title = "温采器配表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
@@ -178,7 +178,7 @@ public class PrHeatTempArchiveController extends BaseController {
      * 导入温采器配表 Excel
      * POST /thermal/ht/temp-archive/import
      */
-    @SaCheckPermission("thermal:ht:temp-archive:add")
+    @SaCheckPermission("thermal:ht:tempArchive:add")
     @SaCheckLogin
     @Log(title = "温采器配表-导入", businessType = BusinessType.IMPORT)
     @PostMapping("/import")

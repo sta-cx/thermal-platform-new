@@ -40,7 +40,7 @@ public class PrHeatHotArchiveController extends BaseController {
     /**
      * 分页查询房屋热量表配表列表
      */
-    @SaCheckPermission("thermal:ht:hot-archive:list")
+    @SaCheckPermission("thermal:ht:hotArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatHotArchiveVo> list(
@@ -57,7 +57,7 @@ public class PrHeatHotArchiveController extends BaseController {
     /**
      * 查询房屋热量表配表详情
      */
-    @SaCheckPermission("thermal:ht:hot-archive:query")
+    @SaCheckPermission("thermal:ht:hotArchive:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatHotArchiveVo> getById(@PathVariable String id) {
@@ -67,7 +67,7 @@ public class PrHeatHotArchiveController extends BaseController {
     /**
      * 新增房屋热量表配表
      */
-    @SaCheckPermission("thermal:ht:hot-archive:add")
+    @SaCheckPermission("thermal:ht:hotArchive:add")
     @SaCheckLogin
     @Log(title = "房屋热量表配表", businessType = BusinessType.INSERT)
     @PostMapping
@@ -87,7 +87,7 @@ public class PrHeatHotArchiveController extends BaseController {
     /**
      * 修改房屋热量表配表
      */
-    @SaCheckPermission("thermal:ht:hot-archive:edit")
+    @SaCheckPermission("thermal:ht:hotArchive:edit")
     @SaCheckLogin
     @Log(title = "房屋热量表配表", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -108,7 +108,7 @@ public class PrHeatHotArchiveController extends BaseController {
     /**
      * 删除房屋热量表配表
      */
-    @SaCheckPermission("thermal:ht:hot-archive:remove")
+    @SaCheckPermission("thermal:ht:hotArchive:remove")
     @SaCheckLogin
     @Log(title = "房屋热量表配表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -120,7 +120,7 @@ public class PrHeatHotArchiveController extends BaseController {
      * 根据房屋ID新增热量表配表
      * 同时校验房屋是否已有热量表配表
      */
-    @SaCheckPermission("thermal:ht:hot-archive:add")
+    @SaCheckPermission("thermal:ht:hotArchive:add")
     @SaCheckLogin
     @Log(title = "房屋热量表配表", businessType = BusinessType.INSERT)
     @PostMapping("/insertByHouseId")
@@ -153,7 +153,7 @@ public class PrHeatHotArchiveController extends BaseController {
      * 旧端点: POST /property/prHeatHotArchive/valveInformationSynchronization
      * 新端点: POST /thermal/ht/hot-archive/sync
      */
-    @SaCheckPermission("thermal:ht:hot-archive:edit")
+    @SaCheckPermission("thermal:ht:hotArchive:edit")
     @SaCheckLogin
     @Log(title = "房屋热量表配表-同步采集平台", businessType = BusinessType.UPDATE)
     @PostMapping("/sync")
@@ -169,7 +169,7 @@ public class PrHeatHotArchiveController extends BaseController {
      * 旧端点: POST /property/prHeatHotArchive/downloadInfoSync
      * 新端点: GET /thermal/ht/hot-archive/sync-download
      */
-    @SaCheckPermission("thermal:ht:hot-archive:list")
+    @SaCheckPermission("thermal:ht:hotArchive:list")
     @SaCheckLogin
     @Log(title = "房屋热量表配表-同步信息下载", businessType = BusinessType.EXPORT)
     @GetMapping("/sync-download")
@@ -189,7 +189,7 @@ public class PrHeatHotArchiveController extends BaseController {
      * 旧端点: POST /property/prHeatHotArchive/exportAll
      * 新端点: GET /thermal/ht/hot-archive/export
      */
-    @SaCheckPermission("thermal:ht:hot-archive:list")
+    @SaCheckPermission("thermal:ht:hotArchive:list")
     @SaCheckLogin
     @Log(title = "房屋热量表配表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
@@ -208,7 +208,7 @@ public class PrHeatHotArchiveController extends BaseController {
      * 导入热量表配表 Excel
      * POST /thermal/ht/hot-archive/import
      */
-    @SaCheckPermission("thermal:ht:hot-archive:add")
+    @SaCheckPermission("thermal:ht:hotArchive:add")
     @SaCheckLogin
     @Log(title = "房屋热量表配表-导入", businessType = BusinessType.IMPORT)
     @PostMapping("/import")

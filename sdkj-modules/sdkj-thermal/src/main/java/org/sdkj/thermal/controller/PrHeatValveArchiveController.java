@@ -72,7 +72,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/pageList
      * 新端点: GET /thermal/ht/valve-archive/list
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatValveArchiveVo> list(
@@ -91,7 +91,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/getDataById/{id}
      * 新端点: GET /thermal/ht/valve-archive/{id}
      */
-    @SaCheckPermission("thermal:ht:valve-archive:query")
+    @SaCheckPermission("thermal:ht:valveArchive:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatValveArchiveVo> getById(@PathVariable String id) {
@@ -103,7 +103,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/insertData
      * 新端点: POST /thermal/ht/valve-archive
      */
-    @SaCheckPermission("thermal:ht:valve-archive:add")
+    @SaCheckPermission("thermal:ht:valveArchive:add")
     @SaCheckLogin
     @Log(title = "户间阀门配表", businessType = BusinessType.INSERT)
     @PostMapping
@@ -124,7 +124,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/updateData
      * 新端点: PUT /thermal/ht/valve-archive
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -146,7 +146,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/deleteData/{id}
      * 新端点: DELETE /thermal/ht/valve-archive/{id}
      */
-    @SaCheckPermission("thermal:ht:valve-archive:remove")
+    @SaCheckPermission("thermal:ht:valveArchive:remove")
     @SaCheckLogin
     @Log(title = "户间阀门配表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -159,7 +159,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/openValve
      * 新端点: POST /thermal/ht/valve-archive/openValve
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-开阀", businessType = BusinessType.UPDATE)
     @PostMapping("/openValve")
@@ -179,7 +179,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/closeValve
      * 新端点: POST /thermal/ht/valve-archive/closeValve
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-关阀", businessType = BusinessType.UPDATE)
     @PostMapping("/closeValve")
@@ -199,7 +199,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/exchangeMeter
      * 新端点: POST /thermal/ht/valve-archive/exchangeMeter/{oldId}
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-换表", businessType = BusinessType.UPDATE)
     @PostMapping("/exchangeMeter/{oldId}")
@@ -223,7 +223,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/insertByHouseId
      * 新端点: POST /thermal/ht/valve-archive/insertByHouseId
      */
-    @SaCheckPermission("thermal:ht:valve-archive:add")
+    @SaCheckPermission("thermal:ht:valveArchive:add")
     @SaCheckLogin
     @Log(title = "户间阀门配表-按房屋新增", businessType = BusinessType.INSERT)
     @PostMapping("/insertByHouseId")
@@ -257,7 +257,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * @param houseList   房屋列表（含 meterNum + meterArcCode）
      * @param valveStatus 阀门状态: "1"→开(100), "2"→关(0), "4"→查询, "5"→制动, "51"→特殊制动
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-批量开关", businessType = BusinessType.UPDATE)
     @PostMapping("/batch-status")
@@ -277,7 +277,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * @param houseList 房屋列表（含 meterNum + meterArcCode）
      * @param valveStatus 开度值 (0-100)
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-批量开度", businessType = BusinessType.UPDATE)
     @PostMapping("/batch-opening")
@@ -299,7 +299,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * @param unit      间隔单位
      * @param valid     有效时间
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-批量周期", businessType = BusinessType.UPDATE)
     @PostMapping("/batch-cycle")
@@ -318,7 +318,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/exportAll
      * 新端点: GET /thermal/ht/valve-archive/export
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @Log(title = "户间阀门配表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
@@ -338,7 +338,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/importValveArchive
      * 新端点: POST /thermal/ht/valve-archive/import
      */
-    @SaCheckPermission("thermal:ht:valve-archive:add")
+    @SaCheckPermission("thermal:ht:valveArchive:add")
     @SaCheckLogin
     @Log(title = "户间阀门配表-导入", businessType = BusinessType.IMPORT)
     @PostMapping("/import")
@@ -353,7 +353,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/heatCardPageList
      * 新端点: GET /thermal/ht/valve-archive/heat-card
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @GetMapping("/heat-card")
     public TableDataInfo<PrHeatValveArchiveVo> pageListHeatCard(
@@ -376,7 +376,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: PUT /ht/valveArchive/updateCardStatus/{id}
      * 新端点: PUT /thermal/ht/valve-archive/{id}/card-status
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-更新写卡状态", businessType = BusinessType.UPDATE)
     @PutMapping("/{id}/card-status")
@@ -391,7 +391,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/queryMeterByMeterNum
      * 新端点: GET /thermal/ht/valve-archive/query-by-meter
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @GetMapping("/query-by-meter")
     public R<List<PrHeatValveArchiveVo>> queryMeterByMeterNum(
@@ -406,7 +406,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/queryValveByMeterNum
      * 新端点: GET /thermal/ht/valve-archive/query-by-valve
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @GetMapping("/query-by-valve")
     public R<List<PrHeatValveArchiveVo>> queryValveByMeterNum(@RequestParam String meterNum) {
@@ -418,7 +418,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/queryHouseByMeterNum
      * 新端点: GET /thermal/ht/valve-archive/query-house
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @GetMapping("/query-house")
     public R<PrHouseVo> queryHouseByMeterNum(@RequestParam String meterNum) {
@@ -438,7 +438,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/queryCardMeterByHouseId
      * 新端点: GET /thermal/ht/valve-archive/query-card-by-house
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @GetMapping("/query-card-by-house")
     public R<List<PrHeatValveArchiveVo>> queryCardMeterByHouseId(@RequestParam String houseId) {
@@ -450,7 +450,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/queryCardMeterByRoomNum
      * 新端点: GET /thermal/ht/valve-archive/query-card-by-room
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @GetMapping("/query-card-by-room")
     public R<List<PrHeatValveArchiveVo>> queryCardMeterByRoomNum(
@@ -466,7 +466,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/getValveDataByHouseId/{houseId}
      * 新端点: GET /thermal/ht/valve-archive/valve-data/{houseId}
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @GetMapping("/valve-data/{houseId}")
     public R<PrHeatValveArchiveVo> getValveDataByHouseId(@PathVariable String houseId) {
@@ -480,7 +480,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/valveInformationSynchronization
      * 新端点: POST /thermal/ht/valve-archive/sync
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-同步采集平台", businessType = BusinessType.UPDATE)
     @PostMapping("/sync")
@@ -496,7 +496,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: GET /ht/valveArchive/downloadInfoSync
      * 新端点: GET /thermal/ht/valve-archive/sync-download
      */
-    @SaCheckPermission("thermal:ht:valve-archive:list")
+    @SaCheckPermission("thermal:ht:valveArchive:list")
     @SaCheckLogin
     @Log(title = "户间阀门配表-同步信息下载", businessType = BusinessType.EXPORT)
     @GetMapping("/sync-download")
@@ -518,7 +518,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/insertValveControlLogByBluetooth
      * 新端点: POST /thermal/ht/valve-archive/bluetooth-log
      */
-    @SaCheckPermission("thermal:ht:valve-archive:edit")
+    @SaCheckPermission("thermal:ht:valveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间阀门配表-蓝牙控制", businessType = BusinessType.UPDATE)
     @PostMapping("/bluetooth-log")
@@ -537,7 +537,7 @@ public class PrHeatValveArchiveController extends BaseController {
      * 旧端点: POST /ht/valveArchive/insertUserAndValveInfo
      * 新端点: POST /thermal/ht/valve-archive/user-valve
      */
-    @SaCheckPermission("thermal:ht:valve-archive:add")
+    @SaCheckPermission("thermal:ht:valveArchive:add")
     @SaCheckLogin
     @Log(title = "户间阀门配表-一键新增", businessType = BusinessType.INSERT)
     @PostMapping("/user-valve")

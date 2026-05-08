@@ -40,7 +40,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: GET /ht/heatArchive/pageList
      * 新端点: GET /thermal/ht/heat-archive/list
      */
-    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatArchiveVo> list(
@@ -59,7 +59,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: GET /ht/heatArchive/getDataById/{id}
      * 新端点: GET /thermal/ht/heat-archive/{id}
      */
-    @SaCheckPermission("thermal:ht:heat-archive:query")
+    @SaCheckPermission("thermal:ht:heatArchive:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatArchiveVo> getById(@PathVariable String id) {
@@ -71,7 +71,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/insertData
      * 新端点: POST /thermal/ht/heat-archive
      */
-    @SaCheckPermission("thermal:ht:heat-archive:add")
+    @SaCheckPermission("thermal:ht:heatArchive:add")
     @SaCheckLogin
     @Log(title = "房屋热表配表", businessType = BusinessType.INSERT)
     @PostMapping
@@ -92,7 +92,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/updateData
      * 新端点: PUT /thermal/ht/heat-archive
      */
-    @SaCheckPermission("thermal:ht:heat-archive:edit")
+    @SaCheckPermission("thermal:ht:heatArchive:edit")
     @SaCheckLogin
     @Log(title = "房屋热表配表", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -115,7 +115,7 @@ public class PrHeatArchiveController extends BaseController {
      * 新端点: DELETE /thermal/ht/heat-archive/{id}
      * 注意: PrHeatArchive 实体使用 @TableLogic 软删除
      */
-    @SaCheckPermission("thermal:ht:heat-archive:remove")
+    @SaCheckPermission("thermal:ht:heatArchive:remove")
     @SaCheckLogin
     @Log(title = "房屋热表配表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -128,7 +128,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: GET /ht/heatArchive/queryCompanyHeat
      * 新端点: GET /thermal/ht/heat-archive/queryCompanyHeat
      */
-    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @GetMapping("/queryCompanyHeat")
     public R<List<PrHeatArchiveVo>> queryCompanyHeat(@RequestParam String companyId) {
@@ -140,7 +140,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/stopMeter/{id}
      * 新端点: POST /thermal/ht/heat-archive/stopMeter/{id}
      */
-    @SaCheckPermission("thermal:ht:heat-archive:edit")
+    @SaCheckPermission("thermal:ht:heatArchive:edit")
     @SaCheckLogin
     @Log(title = "房屋热表配表-停表", businessType = BusinessType.UPDATE)
     @PostMapping("/stopMeter/{id}")
@@ -156,7 +156,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/startMeter/{id}
      * 新端点: POST /thermal/ht/heat-archive/startMeter/{id}
      */
-    @SaCheckPermission("thermal:ht:heat-archive:edit")
+    @SaCheckPermission("thermal:ht:heatArchive:edit")
     @SaCheckLogin
     @Log(title = "房屋热表配表-开表", businessType = BusinessType.UPDATE)
     @PostMapping("/startMeter/{id}")
@@ -172,7 +172,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: GET /ht/heatArchive/calculate/{id}
      * 新端点: GET /thermal/ht/heat-archive/calculate/{id}
      */
-    @SaCheckPermission("thermal:ht:heat-archive:query")
+    @SaCheckPermission("thermal:ht:heatArchive:query")
     @SaCheckLogin
     @GetMapping("/calculate/{id}")
     public R<BigDecimal> calculate(@PathVariable String id) {
@@ -184,7 +184,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/replaceHeatMeter
      * 新端点: POST /thermal/ht/heat-archive/replace
      */
-    @SaCheckPermission("thermal:ht:heat-archive:edit")
+    @SaCheckPermission("thermal:ht:heatArchive:edit")
     @SaCheckLogin
     @Log(title = "房屋热表配表-更换仪表", businessType = BusinessType.UPDATE)
     @PostMapping("/replace")
@@ -197,7 +197,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/recharge
      * 新端点: POST /thermal/ht/heat-archive/recharge
      */
-    @SaCheckPermission("thermal:ht:heat-archive:recharge")
+    @SaCheckPermission("thermal:ht:heatArchive:recharge")
     @SaCheckLogin
     @Log(title = "房屋热表配表-仪表充值", businessType = BusinessType.INSERT)
     @PostMapping("/recharge")
@@ -215,7 +215,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/manualControl
      * 新端点: POST /thermal/ht/heat-archive/manualControl
      */
-    @SaCheckPermission("thermal:ht:heat-archive:control")
+    @SaCheckPermission("thermal:ht:heatArchive:control")
     @SaCheckLogin
     @Log(title = "房屋热表配表-手动调控", businessType = BusinessType.UPDATE)
     @PostMapping("/manualControl")
@@ -238,7 +238,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/realTimeData
      * 新端点: POST /thermal/ht/heat-archive/realTimeData
      */
-    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @PostMapping("/realTimeData")
     public TableDataInfo<PrHeatArchiveVo> realTimeData(
@@ -256,7 +256,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/zonghe
      * 新端点: POST /thermal/ht/heat-archive/zonghe
      */
-    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @PostMapping("/zonghe")
     public TableDataInfo<PrHeatArchiveVo> zonghe(
@@ -276,7 +276,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/xunce
      * 新端点: POST /thermal/ht/heat-archive/xunce
      */
-    @SaCheckPermission("thermal:ht:heat-archive:control")
+    @SaCheckPermission("thermal:ht:heatArchive:control")
     @SaCheckLogin
     @Log(title = "房屋热表配表-巡测", businessType = BusinessType.UPDATE)
     @PostMapping("/xunce")
@@ -291,7 +291,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/setValveGroupParam
      * 新端点: POST /thermal/ht/heat-archive/setValveGroupParam
      */
-    @SaCheckPermission("thermal:ht:heat-archive:control")
+    @SaCheckPermission("thermal:ht:heatArchive:control")
     @SaCheckLogin
     @Log(title = "房屋热表配表-设置阀门组号", businessType = BusinessType.UPDATE)
     @PostMapping("/setValveGroupParam")
@@ -307,7 +307,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: GET /ht/heatArchive/findMeter
      * 新端点: GET /thermal/ht/heat-archive/findMeter
      */
-    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @GetMapping("/findMeter")
     public R<List<PrHeatArchiveVo>> findMeter(@RequestParam String search,
@@ -320,7 +320,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: GET /ht/heatArchive/exportAll
      * 新端点: GET /thermal/ht/heat-archive/export
      */
-    @SaCheckPermission("thermal:ht:heat-archive:export")
+    @SaCheckPermission("thermal:ht:heatArchive:export")
     @SaCheckLogin
     @Log(title = "房屋热表配表", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
@@ -334,7 +334,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/selectReport
      * 新端点: POST /thermal/ht/heat-archive/selectReport
      */
-    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @PostMapping("/selectReport")
     public R<List<PrHeatArchiveVo>> selectReport(
@@ -353,7 +353,7 @@ public class PrHeatArchiveController extends BaseController {
      * 旧端点: POST /ht/heatArchive/selectMeterReport
      * 新端点: POST /thermal/ht/heat-archive/selectMeterReport
      */
-    @SaCheckPermission("thermal:ht:heat-archive:list")
+    @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @PostMapping("/selectMeterReport")
     public R<List<PrHeatArchiveVo>> selectMeterReport(

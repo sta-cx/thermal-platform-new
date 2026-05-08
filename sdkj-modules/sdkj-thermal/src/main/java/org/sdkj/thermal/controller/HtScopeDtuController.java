@@ -32,7 +32,7 @@ public class HtScopeDtuController extends BaseController {
     /**
      * 查询DTU控制范围列表
      */
-    @SaCheckPermission("thermal:htScopeDtu:list")
+    @SaCheckPermission("thermal:ht:scopeDtu:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<HtScopeDtu> list(
@@ -52,7 +52,7 @@ public class HtScopeDtuController extends BaseController {
     /**
      * 获取DTU控制范围详细信息
      */
-    @SaCheckPermission("thermal:htScopeDtu:query")
+    @SaCheckPermission("thermal:ht:scopeDtu:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<HtScopeDtu> getInfo(@PathVariable String id) {
@@ -62,7 +62,7 @@ public class HtScopeDtuController extends BaseController {
     /**
      * 新增DTU控制范围
      */
-    @SaCheckPermission("thermal:htScopeDtu:add")
+    @SaCheckPermission("thermal:ht:scopeDtu:add")
     @SaCheckLogin
     @Log(title = "DTU控制范围", businessType = BusinessType.INSERT)
     @PostMapping
@@ -73,7 +73,7 @@ public class HtScopeDtuController extends BaseController {
     /**
      * 修改DTU控制范围
      */
-    @SaCheckPermission("thermal:htScopeDtu:edit")
+    @SaCheckPermission("thermal:ht:scopeDtu:edit")
     @SaCheckLogin
     @Log(title = "DTU控制范围", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -84,7 +84,7 @@ public class HtScopeDtuController extends BaseController {
     /**
      * 删除DTU控制范围
      */
-    @SaCheckPermission("thermal:htScopeDtu:remove")
+    @SaCheckPermission("thermal:ht:scopeDtu:remove")
     @SaCheckLogin
     @Log(title = "DTU控制范围", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")

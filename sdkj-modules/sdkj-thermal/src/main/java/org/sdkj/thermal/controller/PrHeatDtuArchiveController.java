@@ -39,7 +39,7 @@ public class PrHeatDtuArchiveController extends BaseController {
     /**
      * 分页查询DTU采集器配表列表
      */
-    @SaCheckPermission("thermal:ht:dtu-archive:list")
+    @SaCheckPermission("thermal:ht:dtuArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatDtuArchiveVo> list(
@@ -54,7 +54,7 @@ public class PrHeatDtuArchiveController extends BaseController {
     /**
      * 查询DTU采集器配表详情
      */
-    @SaCheckPermission("thermal:ht:dtu-archive:query")
+    @SaCheckPermission("thermal:ht:dtuArchive:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatDtuArchiveVo> getById(@PathVariable String id) {
@@ -64,7 +64,7 @@ public class PrHeatDtuArchiveController extends BaseController {
     /**
      * 新增DTU采集器配表
      */
-    @SaCheckPermission("thermal:ht:dtu-archive:add")
+    @SaCheckPermission("thermal:ht:dtuArchive:add")
     @SaCheckLogin
     @Log(title = "DTU采集器配表", businessType = BusinessType.INSERT)
     @PostMapping
@@ -76,7 +76,7 @@ public class PrHeatDtuArchiveController extends BaseController {
     /**
      * 修改DTU采集器配表
      */
-    @SaCheckPermission("thermal:ht:dtu-archive:edit")
+    @SaCheckPermission("thermal:ht:dtuArchive:edit")
     @SaCheckLogin
     @Log(title = "DTU采集器配表", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -88,7 +88,7 @@ public class PrHeatDtuArchiveController extends BaseController {
     /**
      * 删除DTU采集器配表
      */
-    @SaCheckPermission("thermal:ht:dtu-archive:remove")
+    @SaCheckPermission("thermal:ht:dtuArchive:remove")
     @SaCheckLogin
     @Log(title = "DTU采集器配表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -99,7 +99,7 @@ public class PrHeatDtuArchiveController extends BaseController {
     /**
      * 查询DTU下所有仪表信息并生成查询指令
      */
-    @SaCheckPermission("thermal:ht:dtu-archive:query")
+    @SaCheckPermission("thermal:ht:dtuArchive:query")
     @SaCheckLogin
     @Log(title = "查询DTU仪表", businessType = BusinessType.OTHER)
     @PostMapping("/query-meter")
@@ -114,7 +114,7 @@ public class PrHeatDtuArchiveController extends BaseController {
      * 旧端点: POST /property/prHeatDtuArchive/exportAll
      * 新端点: GET /thermal/ht/dtu-archive/export
      */
-    @SaCheckPermission("thermal:ht:dtu-archive:list")
+    @SaCheckPermission("thermal:ht:dtuArchive:list")
     @SaCheckLogin
     @Log(title = "DTU采集器配表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
@@ -133,7 +133,7 @@ public class PrHeatDtuArchiveController extends BaseController {
      * 导入DTU采集器配表 Excel
      * POST /thermal/ht/dtu-archive/import
      */
-    @SaCheckPermission("thermal:ht:dtu-archive:add")
+    @SaCheckPermission("thermal:ht:dtuArchive:add")
     @SaCheckLogin
     @Log(title = "DTU采集器配表-导入", businessType = BusinessType.IMPORT)
     @PostMapping("/import")

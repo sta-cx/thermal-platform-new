@@ -42,7 +42,7 @@ public class PrHeatCommandValveArchiveController extends BaseController {
      * 旧端点: GET /ht/commandValveArchive/pageList
      * 新端点: GET /thermal/ht/command-valve-archive/list
      */
-    @SaCheckPermission("thermal:ht:command-valve-archive:list")
+    @SaCheckPermission("thermal:ht:commandValveArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatCommandValveArchiveVo> list(
@@ -62,7 +62,7 @@ public class PrHeatCommandValveArchiveController extends BaseController {
      * 旧端点: GET /ht/commandValveArchive/getDataById/{id}
      * 新端点: GET /thermal/ht/command-valve-archive/{id}
      */
-    @SaCheckPermission("thermal:ht:command-valve-archive:query")
+    @SaCheckPermission("thermal:ht:commandValveArchive:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatCommandValveArchiveVo> getById(@PathVariable String id) {
@@ -74,7 +74,7 @@ public class PrHeatCommandValveArchiveController extends BaseController {
      * 旧端点: POST /ht/commandValveArchive/insertData
      * 新端点: POST /thermal/ht/command-valve-archive
      */
-    @SaCheckPermission("thermal:ht:command-valve-archive:add")
+    @SaCheckPermission("thermal:ht:commandValveArchive:add")
     @SaCheckLogin
     @Log(title = "户间控制阀门配表", businessType = BusinessType.INSERT)
     @PostMapping
@@ -95,7 +95,7 @@ public class PrHeatCommandValveArchiveController extends BaseController {
      * 旧端点: POST /ht/commandValveArchive/updateData
      * 新端点: PUT /thermal/ht/command-valve-archive
      */
-    @SaCheckPermission("thermal:ht:command-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:commandValveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间控制阀门配表", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -117,7 +117,7 @@ public class PrHeatCommandValveArchiveController extends BaseController {
      * 旧端点: POST /ht/commandValveArchive/deleteData/{id}
      * 新端点: DELETE /thermal/ht/command-valve-archive/{id}
      */
-    @SaCheckPermission("thermal:ht:command-valve-archive:remove")
+    @SaCheckPermission("thermal:ht:commandValveArchive:remove")
     @SaCheckLogin
     @Log(title = "户间控制阀门配表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -130,7 +130,7 @@ public class PrHeatCommandValveArchiveController extends BaseController {
      * 旧端点: POST /ht/commandValveArchive/openValve
      * 新端点: POST /thermal/ht/command-valve-archive/openValve
      */
-    @SaCheckPermission("thermal:ht:command-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:commandValveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间控制阀门配表-开阀", businessType = BusinessType.UPDATE)
     @PostMapping("/openValve")
@@ -150,7 +150,7 @@ public class PrHeatCommandValveArchiveController extends BaseController {
      * 旧端点: POST /ht/commandValveArchive/closeValve
      * 新端点: POST /thermal/ht/command-valve-archive/closeValve
      */
-    @SaCheckPermission("thermal:ht:command-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:commandValveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间控制阀门配表-关阀", businessType = BusinessType.UPDATE)
     @PostMapping("/closeValve")
@@ -170,7 +170,7 @@ public class PrHeatCommandValveArchiveController extends BaseController {
      * 旧端点: POST /ht/commandValveArchive/exchangeMeter
      * 新端点: POST /thermal/ht/command-valve-archive/exchangeMeter
      */
-    @SaCheckPermission("thermal:ht:command-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:commandValveArchive:edit")
     @SaCheckLogin
     @Log(title = "户间控制阀门配表-换表", businessType = BusinessType.UPDATE)
     @PostMapping("/exchangeMeter/{oldId}")

@@ -44,7 +44,7 @@ public class PrHeatUnitHotArchiveController extends BaseController {
      * 旧端点: GET /ht/unitHotArchive/pageList
      * 新端点: GET /thermal/ht/unit-hot-archive/list
      */
-    @SaCheckPermission("thermal:ht:unit-hot-archive:list")
+    @SaCheckPermission("thermal:ht:unitHotArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatUnitHotArchiveVo> list(
@@ -63,7 +63,7 @@ public class PrHeatUnitHotArchiveController extends BaseController {
      * 旧端点: GET /ht/unitHotArchive/getDataById/{id}
      * 新端点: GET /thermal/ht/unit-hot-archive/{id}
      */
-    @SaCheckPermission("thermal:ht:unit-hot-archive:query")
+    @SaCheckPermission("thermal:ht:unitHotArchive:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatUnitHotArchiveVo> getById(@PathVariable String id) {
@@ -75,7 +75,7 @@ public class PrHeatUnitHotArchiveController extends BaseController {
      * 旧端点: POST /ht/unitHotArchive/insertData
      * 新端点: POST /thermal/ht/unit-hot-archive
      */
-    @SaCheckPermission("thermal:ht:unit-hot-archive:add")
+    @SaCheckPermission("thermal:ht:unitHotArchive:add")
     @SaCheckLogin
     @Log(title = "单元热表配表", businessType = BusinessType.INSERT)
     @PostMapping
@@ -96,7 +96,7 @@ public class PrHeatUnitHotArchiveController extends BaseController {
      * 旧端点: POST /ht/unitHotArchive/updateData
      * 新端点: PUT /thermal/ht/unit-hot-archive
      */
-    @SaCheckPermission("thermal:ht:unit-hot-archive:edit")
+    @SaCheckPermission("thermal:ht:unitHotArchive:edit")
     @SaCheckLogin
     @Log(title = "单元热表配表", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -118,7 +118,7 @@ public class PrHeatUnitHotArchiveController extends BaseController {
      * 旧端点: POST /ht/unitHotArchive/deleteData/{id}
      * 新端点: DELETE /thermal/ht/unit-hot-archive/{id}
      */
-    @SaCheckPermission("thermal:ht:unit-hot-archive:remove")
+    @SaCheckPermission("thermal:ht:unitHotArchive:remove")
     @SaCheckLogin
     @Log(title = "单元热表配表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -132,7 +132,7 @@ public class PrHeatUnitHotArchiveController extends BaseController {
      * 同步单元热表信息到采集平台
      * POST /thermal/ht/unit-hot-archive/sync
      */
-    @SaCheckPermission("thermal:ht:unit-hot-archive:edit")
+    @SaCheckPermission("thermal:ht:unitHotArchive:edit")
     @SaCheckLogin
     @Log(title = "单元热表配表-同步采集平台", businessType = BusinessType.UPDATE)
     @PostMapping("/sync")
@@ -147,7 +147,7 @@ public class PrHeatUnitHotArchiveController extends BaseController {
      * 下载同步信息Excel
      * GET /thermal/ht/unit-hot-archive/sync-download
      */
-    @SaCheckPermission("thermal:ht:unit-hot-archive:list")
+    @SaCheckPermission("thermal:ht:unitHotArchive:list")
     @SaCheckLogin
     @Log(title = "单元热表配表-同步信息下载", businessType = BusinessType.EXPORT)
     @GetMapping("/sync-download")
@@ -166,7 +166,7 @@ public class PrHeatUnitHotArchiveController extends BaseController {
      * 导出单元热表配表 Excel
      * GET /thermal/ht/unit-hot-archive/export
      */
-    @SaCheckPermission("thermal:ht:unit-hot-archive:list")
+    @SaCheckPermission("thermal:ht:unitHotArchive:list")
     @SaCheckLogin
     @Log(title = "单元热表配表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
@@ -185,7 +185,7 @@ public class PrHeatUnitHotArchiveController extends BaseController {
      * 导入单元热表配表 Excel
      * POST /thermal/ht/unit-hot-archive/import
      */
-    @SaCheckPermission("thermal:ht:unit-hot-archive:add")
+    @SaCheckPermission("thermal:ht:unitHotArchive:add")
     @SaCheckLogin
     @Log(title = "单元热表配表-导入", businessType = BusinessType.IMPORT)
     @PostMapping("/import")

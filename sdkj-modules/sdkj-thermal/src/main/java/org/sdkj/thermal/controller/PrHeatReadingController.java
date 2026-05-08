@@ -38,7 +38,7 @@ public class PrHeatReadingController extends BaseController {
      * 旧端点: GET /ht/heatReading/pageList
      * 新端点: GET /thermal/ht/heat-reading/list
      */
-    @SaCheckPermission("thermal:ht:heat-reading:list")
+    @SaCheckPermission("thermal:ht:heatReading:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatReadingVo> list(
@@ -62,7 +62,7 @@ public class PrHeatReadingController extends BaseController {
      * 旧端点: GET /ht/heatReading/getDataById/{id}
      * 新端点: GET /thermal/ht/heat-reading/{id}
      */
-    @SaCheckPermission("thermal:ht:heat-reading:query")
+    @SaCheckPermission("thermal:ht:heatReading:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatReadingVo> getById(@PathVariable String id) {
@@ -74,7 +74,7 @@ public class PrHeatReadingController extends BaseController {
      * 旧端点: POST /ht/heatReading/pageListTrend
      * 新端点: POST /thermal/ht/heat-reading/trend
      */
-    @SaCheckPermission("thermal:ht:heat-reading:query")
+    @SaCheckPermission("thermal:ht:heatReading:query")
     @SaCheckLogin
     @Log(title = "热表抄表-阀门趋势", businessType = BusinessType.OTHER)
     @PostMapping("/trend")
@@ -93,7 +93,7 @@ public class PrHeatReadingController extends BaseController {
      * 旧端点: POST /ht/heatReading/pageListTrendS
      * 新端点: GET /thermal/ht/heat-reading/trend-home
      */
-    @SaCheckPermission("thermal:ht:heat-reading:query")
+    @SaCheckPermission("thermal:ht:heatReading:query")
     @SaCheckLogin
     @GetMapping("/trend-home")
     public R<List<PrHeatReadingVo>> trendHome(@RequestParam(required = false) String stationId,
@@ -107,7 +107,7 @@ public class PrHeatReadingController extends BaseController {
      * 旧端点: GET /ht/heatReading/exportAll
      * 新端点: GET /thermal/ht/heat-reading/exportAll
      */
-    @SaCheckPermission("thermal:ht:heat-reading:list")
+    @SaCheckPermission("thermal:ht:heatReading:list")
     @SaCheckLogin
     @Log(title = "热表抄表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/exportAll")

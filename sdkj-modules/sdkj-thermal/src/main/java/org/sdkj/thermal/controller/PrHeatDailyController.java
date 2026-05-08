@@ -37,7 +37,7 @@ public class PrHeatDailyController extends BaseController {
      * 旧端点: GET /ht/heatDaily/pageList
      * 新端点: GET /thermal/ht/heat-daily/list
      */
-    @SaCheckPermission("thermal:ht:heat-daily:list")
+    @SaCheckPermission("thermal:ht:heatDaily:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatDailyVo> list(
@@ -58,7 +58,7 @@ public class PrHeatDailyController extends BaseController {
      * 旧端点: GET /ht/heatDaily/getDataById/{id}
      * 新端点: GET /thermal/ht/heat-daily/{id}
      */
-    @SaCheckPermission("thermal:ht:heat-daily:query")
+    @SaCheckPermission("thermal:ht:heatDaily:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatDailyVo> getById(@PathVariable String id) {
@@ -71,7 +71,7 @@ public class PrHeatDailyController extends BaseController {
      * 新端点: POST /thermal/ht/heat-daily/setHeat
      * 5步流程：setIsValid -> setHeatDaily -> setSteps -> setQtyStepsN -> setCurrentReading
      */
-    @SaCheckPermission("thermal:ht:heat-daily:edit")
+    @SaCheckPermission("thermal:ht:heatDaily:edit")
     @SaCheckLogin
     @Log(title = "热表日表-生成", businessType = BusinessType.UPDATE)
     @PostMapping("/setHeat")
@@ -85,7 +85,7 @@ public class PrHeatDailyController extends BaseController {
      * 旧端点: GET /ht/heatDaily/exportAll
      * 新端点: GET /thermal/ht/heat-daily/exportAll
      */
-    @SaCheckPermission("thermal:ht:heat-daily:list")
+    @SaCheckPermission("thermal:ht:heatDaily:list")
     @SaCheckLogin
     @Log(title = "热表日表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/exportAll")

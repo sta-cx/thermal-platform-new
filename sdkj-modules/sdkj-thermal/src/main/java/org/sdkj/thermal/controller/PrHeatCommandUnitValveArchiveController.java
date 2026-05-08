@@ -38,7 +38,7 @@ public class PrHeatCommandUnitValveArchiveController extends BaseController {
     /**
      * 分页查询单元控制阀门配表列表
      */
-    @SaCheckPermission("thermal:ht:command-unit-valve-archive:list")
+    @SaCheckPermission("thermal:ht:commandUnitValveArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatCommandUnitValveArchiveVo> list(
@@ -55,7 +55,7 @@ public class PrHeatCommandUnitValveArchiveController extends BaseController {
     /**
      * 查询单元控制阀门配表详情
      */
-    @SaCheckPermission("thermal:ht:command-unit-valve-archive:query")
+    @SaCheckPermission("thermal:ht:commandUnitValveArchive:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatCommandUnitValveArchiveVo> getById(@PathVariable String id) {
@@ -65,7 +65,7 @@ public class PrHeatCommandUnitValveArchiveController extends BaseController {
     /**
      * 新增单元控制阀门配表
      */
-    @SaCheckPermission("thermal:ht:command-unit-valve-archive:add")
+    @SaCheckPermission("thermal:ht:commandUnitValveArchive:add")
     @SaCheckLogin
     @Log(title = "单元控制阀门配表", businessType = BusinessType.INSERT)
     @PostMapping
@@ -85,7 +85,7 @@ public class PrHeatCommandUnitValveArchiveController extends BaseController {
     /**
      * 修改单元控制阀门配表
      */
-    @SaCheckPermission("thermal:ht:command-unit-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:commandUnitValveArchive:edit")
     @SaCheckLogin
     @Log(title = "单元控制阀门配表", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -106,7 +106,7 @@ public class PrHeatCommandUnitValveArchiveController extends BaseController {
     /**
      * 删除单元控制阀门配表
      */
-    @SaCheckPermission("thermal:ht:command-unit-valve-archive:remove")
+    @SaCheckPermission("thermal:ht:commandUnitValveArchive:remove")
     @SaCheckLogin
     @Log(title = "单元控制阀门配表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -117,7 +117,7 @@ public class PrHeatCommandUnitValveArchiveController extends BaseController {
     /**
      * 开阀操作
      */
-    @SaCheckPermission("thermal:ht:command-unit-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:commandUnitValveArchive:edit")
     @SaCheckLogin
     @Log(title = "单元控制阀门配表-开阀", businessType = BusinessType.UPDATE)
     @PostMapping("/openValve")
@@ -133,7 +133,7 @@ public class PrHeatCommandUnitValveArchiveController extends BaseController {
     /**
      * 关阀操作
      */
-    @SaCheckPermission("thermal:ht:command-unit-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:commandUnitValveArchive:edit")
     @SaCheckLogin
     @Log(title = "单元控制阀门配表-关阀", businessType = BusinessType.UPDATE)
     @PostMapping("/closeValve")

@@ -32,7 +32,7 @@ public class AgPropertyMenuController {
     /**
      * 查询已分配的菜单列表
      */
-    @SaCheckPermission("thermal:agent:property:menu:list")
+    @SaCheckPermission("thermal:agent:propertyMenu:list")
     @SaCheckLogin
     @GetMapping("/list")
     public R<List<TreeNode>> list(@RequestParam(required = false) String companyId) {
@@ -46,7 +46,7 @@ public class AgPropertyMenuController {
     /**
      * 查询未分配的菜单列表
      */
-    @SaCheckPermission("thermal:agent:property:menu:list")
+    @SaCheckPermission("thermal:agent:propertyMenu:list")
     @SaCheckLogin
     @GetMapping("/unassigned")
     public R<List<TreeNode>> unassigned(@RequestParam(required = false) String companyId) {
@@ -60,7 +60,7 @@ public class AgPropertyMenuController {
     /**
      * 更新菜单权限
      */
-    @SaCheckPermission("thermal:agent:property:menu:edit")
+    @SaCheckPermission("thermal:agent:propertyMenu:edit")
     @SaCheckLogin
     @Log(title = "物业菜单权限", businessType = BusinessType.UPDATE)
     @PutMapping

@@ -35,7 +35,7 @@ public class AccessCodeController {
         this.jdbc = jdbc;
     }
 
-    @SaCheckPermission("thermal:agent:access-code:query")
+    @SaCheckPermission("thermal:agent:accessCode:query")
     @SaCheckLogin
     @GetMapping("/vendorCode")
     public R<String> accessMtVendorCode() {
@@ -45,7 +45,7 @@ public class AccessCodeController {
         return R.ok("操作成功", result);
     }
 
-    @SaCheckPermission("thermal:agent:access-code:query")
+    @SaCheckPermission("thermal:agent:accessCode:query")
     @SaCheckLogin
     @GetMapping("/sortCode")
     public R<String> accessMtSortCode(@RequestParam String vendorId,
@@ -59,7 +59,7 @@ public class AccessCodeController {
         return R.ok("操作成功", result);
     }
 
-    @SaCheckPermission("thermal:agent:access-code:query")
+    @SaCheckPermission("thermal:agent:accessCode:query")
     @SaCheckLogin
     @GetMapping("/meterCode")
     public R<String> accessMeterCode(@RequestParam String sortCode,

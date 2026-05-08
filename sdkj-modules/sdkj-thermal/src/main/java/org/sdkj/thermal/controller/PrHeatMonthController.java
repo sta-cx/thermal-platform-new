@@ -37,7 +37,7 @@ public class PrHeatMonthController extends BaseController {
      * 旧端点: GET /ht/heatMonth/pageList
      * 新端点: GET /thermal/ht/heat-month/list
      */
-    @SaCheckPermission("thermal:ht:heat-month:list")
+    @SaCheckPermission("thermal:ht:heatMonth:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatMonthVo> list(
@@ -58,7 +58,7 @@ public class PrHeatMonthController extends BaseController {
      * 旧端点: GET /ht/heatMonth/getDataById/{id}
      * 新端点: GET /thermal/ht/heat-month/{id}
      */
-    @SaCheckPermission("thermal:ht:heat-month:query")
+    @SaCheckPermission("thermal:ht:heatMonth:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatMonthVo> getById(@PathVariable String id) {
@@ -71,7 +71,7 @@ public class PrHeatMonthController extends BaseController {
      * 旧端点: POST /ht/heatMonth/setHeat
      * 新端点: POST /thermal/ht/heat-month/setHeat
      */
-    @SaCheckPermission("thermal:ht:heat-month:edit")
+    @SaCheckPermission("thermal:ht:heatMonth:edit")
     @SaCheckLogin
     @Log(title = "热表月表-生成", businessType = BusinessType.UPDATE)
     @PostMapping("/setHeat")
@@ -86,7 +86,7 @@ public class PrHeatMonthController extends BaseController {
      * 旧端点: GET /ht/heatMonth/exportAll
      * 新端点: GET /thermal/ht/heat-month/exportAll
      */
-    @SaCheckPermission("thermal:ht:heat-month:list")
+    @SaCheckPermission("thermal:ht:heatMonth:list")
     @SaCheckLogin
     @Log(title = "热表月表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/exportAll")

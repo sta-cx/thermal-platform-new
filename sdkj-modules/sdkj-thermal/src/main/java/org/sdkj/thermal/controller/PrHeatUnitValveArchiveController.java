@@ -44,7 +44,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     /**
      * 分页查询单元阀门配表列表
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:list")
+    @SaCheckPermission("thermal:ht:unitValveArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatUnitValveArchiveVo> list(
@@ -61,7 +61,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     /**
      * 查询单元阀门配表详情
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:query")
+    @SaCheckPermission("thermal:ht:unitValveArchive:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrHeatUnitValveArchiveVo> getById(@PathVariable String id) {
@@ -71,7 +71,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     /**
      * 新增单元阀门配表
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:add")
+    @SaCheckPermission("thermal:ht:unitValveArchive:add")
     @SaCheckLogin
     @Log(title = "单元阀门配表", businessType = BusinessType.INSERT)
     @PostMapping
@@ -91,7 +91,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     /**
      * 修改单元阀门配表
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:unitValveArchive:edit")
     @SaCheckLogin
     @Log(title = "单元阀门配表", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -112,7 +112,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     /**
      * 删除单元阀门配表
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:remove")
+    @SaCheckPermission("thermal:ht:unitValveArchive:remove")
     @SaCheckLogin
     @Log(title = "单元阀门配表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -123,7 +123,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     /**
      * 开阀操作
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:unitValveArchive:edit")
     @SaCheckLogin
     @Log(title = "单元阀门配表-开阀", businessType = BusinessType.UPDATE)
     @PostMapping("/openValve")
@@ -139,7 +139,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     /**
      * 关阀操作
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:unitValveArchive:edit")
     @SaCheckLogin
     @Log(title = "单元阀门配表-关阀", businessType = BusinessType.UPDATE)
     @PostMapping("/closeValve")
@@ -158,7 +158,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
      * 同步单元阀门信息到采集平台
      * POST /thermal/ht/unit-valve-archive/sync
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:edit")
+    @SaCheckPermission("thermal:ht:unitValveArchive:edit")
     @SaCheckLogin
     @Log(title = "单元阀门配表-同步采集平台", businessType = BusinessType.UPDATE)
     @PostMapping("/sync")
@@ -173,7 +173,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
      * 下载同步信息Excel
      * GET /thermal/ht/unit-valve-archive/sync-download
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:list")
+    @SaCheckPermission("thermal:ht:unitValveArchive:list")
     @SaCheckLogin
     @Log(title = "单元阀门配表-同步信息下载", businessType = BusinessType.EXPORT)
     @GetMapping("/sync-download")
@@ -192,7 +192,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
      * 导出单元阀门配表 Excel
      * GET /thermal/ht/unit-valve-archive/export
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:list")
+    @SaCheckPermission("thermal:ht:unitValveArchive:list")
     @SaCheckLogin
     @Log(title = "单元阀门配表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
@@ -211,7 +211,7 @@ public class PrHeatUnitValveArchiveController extends BaseController {
      * 导入单元阀门配表 Excel
      * POST /thermal/ht/unit-valve-archive/import
      */
-    @SaCheckPermission("thermal:ht:unit-valve-archive:add")
+    @SaCheckPermission("thermal:ht:unitValveArchive:add")
     @SaCheckLogin
     @Log(title = "单元阀门配表-导入", businessType = BusinessType.IMPORT)
     @PostMapping("/import")

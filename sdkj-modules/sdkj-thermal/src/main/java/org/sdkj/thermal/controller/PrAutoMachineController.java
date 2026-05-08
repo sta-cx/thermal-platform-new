@@ -46,7 +46,7 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/getSerialNum
      * 新端点: GET /thermal/property/auto-machine/serial-num
      */
-    @SaCheckPermission("thermal:property:auto-machine:query")
+    @SaCheckPermission("thermal:property:autoMachine:query")
     @SaCheckLogin
     @Log(title = "自助缴费机-生成流水号", businessType = BusinessType.OTHER)
     @GetMapping("/serial-num")
@@ -59,7 +59,7 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/getQrCode
      * 新端点: POST /thermal/property/auto-machine/qr-heat
      */
-    @SaCheckPermission("thermal:property:auto-machine:pay")
+    @SaCheckPermission("thermal:property:autoMachine:pay")
     @SaCheckLogin
     @Log(title = "自助缴费机-供暖二维码", businessType = BusinessType.OTHER)
     @PostMapping("/qr-heat")
@@ -78,7 +78,7 @@ public class PrAutoMachineController extends BaseController {
      * 水费与供暖在 QR 码生成层面使用同一套流程，
      * 费用类型由流水号前缀区分处理。
      */
-    @SaCheckPermission("thermal:property:auto-machine:pay")
+    @SaCheckPermission("thermal:property:autoMachine:pay")
     @SaCheckLogin
     @Log(title = "自助缴费机-水费二维码", businessType = BusinessType.OTHER)
     @PostMapping("/qr-water")
@@ -97,7 +97,7 @@ public class PrAutoMachineController extends BaseController {
      * 电费与供暖在 QR 码生成层面使用同一套流程，
      * 费用类型由流水号前缀区分处理。
      */
-    @SaCheckPermission("thermal:property:auto-machine:pay")
+    @SaCheckPermission("thermal:property:autoMachine:pay")
     @SaCheckLogin
     @Log(title = "自助缴费机-电费二维码", businessType = BusinessType.OTHER)
     @PostMapping("/qr-ele")
@@ -112,7 +112,7 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/queryPaymentSuccess
      * 新端点: GET /thermal/property/auto-machine/payment-status
      */
-    @SaCheckPermission("thermal:property:auto-machine:query")
+    @SaCheckPermission("thermal:property:autoMachine:query")
     @SaCheckLogin
     @GetMapping("/payment-status")
     public R<Boolean> queryPaymentSuccess(@RequestParam String serialNum) {
@@ -124,7 +124,7 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/getRecordBySerialNum
      * 新端点: GET /thermal/property/auto-machine/record
      */
-    @SaCheckPermission("thermal:property:auto-machine:query")
+    @SaCheckPermission("thermal:property:autoMachine:query")
     @SaCheckLogin
     @GetMapping("/record")
     public R<PrTransactionRecordVo> getRecordBySerialNum(@RequestParam String serialNum) {
@@ -136,7 +136,7 @@ public class PrAutoMachineController extends BaseController {
      * 旧端点: POST /property/autoMachine/getIsReadCard
      * 新端点: GET /thermal/property/auto-machine/read-card
      */
-    @SaCheckPermission("thermal:property:auto-machine:query")
+    @SaCheckPermission("thermal:property:autoMachine:query")
     @SaCheckLogin
     @GetMapping("/read-card")
     public R<Boolean> getIsReadCard(
