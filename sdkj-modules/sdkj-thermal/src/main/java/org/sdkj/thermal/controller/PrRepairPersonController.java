@@ -24,7 +24,7 @@ public class PrRepairPersonController extends BaseController {
 
     private final IPrRepairPersonService repairPersonService;
 
-    @SaCheckPermission("thermal:property:repair:list")
+    @SaCheckPermission("thermal:property:repairPerson:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrRepairPerson> list(
@@ -40,14 +40,14 @@ public class PrRepairPersonController extends BaseController {
         return TableDataInfo.build(page);
     }
 
-    @SaCheckPermission("thermal:property:repair:query")
+    @SaCheckPermission("thermal:property:repairPerson:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrRepairPerson> getById(@PathVariable String id) {
         return R.ok(repairPersonService.getById(id));
     }
 
-    @SaCheckPermission("thermal:property:repair:add")
+    @SaCheckPermission("thermal:property:repairPerson:add")
     @SaCheckLogin
     @Log(title = "维修人员", businessType = BusinessType.INSERT)
     @PostMapping
@@ -55,7 +55,7 @@ public class PrRepairPersonController extends BaseController {
         return toAjax(repairPersonService.save(person));
     }
 
-    @SaCheckPermission("thermal:property:repair:edit")
+    @SaCheckPermission("thermal:property:repairPerson:edit")
     @SaCheckLogin
     @Log(title = "维修人员", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -63,7 +63,7 @@ public class PrRepairPersonController extends BaseController {
         return toAjax(repairPersonService.updateById(person));
     }
 
-    @SaCheckPermission("thermal:property:repair:remove")
+    @SaCheckPermission("thermal:property:repairPerson:remove")
     @SaCheckLogin
     @Log(title = "维修人员", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")

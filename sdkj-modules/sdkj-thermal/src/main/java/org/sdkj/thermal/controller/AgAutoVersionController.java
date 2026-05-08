@@ -23,14 +23,14 @@ public class AgAutoVersionController {
 
     private final IAgAutoVersionService service;
 
-    @SaCheckPermission("thermal:agent:version:list")
+    @SaCheckPermission("thermal:agent:autoVersion:list")
     @SaCheckLogin
     @GetMapping("/list")
     public R<List<AgAutoVersion>> list() {
         return R.ok(service.list());
     }
 
-    @SaCheckPermission("thermal:agent:version:edit")
+    @SaCheckPermission("thermal:agent:autoVersion:edit")
     @SaCheckLogin
     @PutMapping
     public R<Void> update(@RequestBody AgAutoVersion version) {

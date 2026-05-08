@@ -296,3 +296,32 @@ INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component,
 (3421,'授权码查询',2408,1,'','',NULL,1,0,'F','0','0','thermal:agent:accessCode:query','#',103,1,NOW()),
 -- 微信管理
 (3500,'对账处理',2503,1,'','',NULL,1,0,'F','0','0','thermal:wechat:reconciliation:handle','#',103,1,NOW());
+
+-- ============================================================
+-- 补充修复：遗漏的 Controller 权限码 + 缺失 F 类条目
+-- ============================================================
+
+-- 补缺失的 F 类条目
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, query_param, is_frame, is_cache, menu_type, visible, status, perms, icon, create_dept, create_by, create_time) VALUES
+(3296,'维修人员查询',2320,1,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:query','#',103,1,NOW()),
+(3297,'维修人员新增',2320,2,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:add','#',103,1,NOW()),
+(3298,'维修人员修改',2320,3,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:edit','#',103,1,NOW()),
+(3299,'维修人员删除',2320,4,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:remove','#',103,1,NOW()),
+(3418,'代理商物业菜单查询',2404,1,'','',NULL,1,0,'F','0','0','thermal:agent:propertyMenu:list','#',103,1,NOW()),
+(3163,'月用量列表',2219,5,'','',NULL,1,0,'F','0','0','thermal:ht:heatMonth:list','#',103,1,NOW());
+
+-- ============================================================
+-- 补充修复 Round 2：修复遗漏 ID 冲突 + 新增缺失 F 类条目
+-- ============================================================
+
+-- 修复: 使用不冲突的 ID 重新插入
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, query_param, is_frame, is_cache, menu_type, visible, status, perms, icon, create_dept, create_by, create_time) VALUES
+(3501,'维修人员查询',2320,1,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:query','#',103,1,NOW()),
+(3502,'维修人员新增',2320,2,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:add','#',103,1,NOW()),
+(3503,'维修人员修改',2320,3,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:edit','#',103,1,NOW()),
+(3504,'维修人员删除',2320,4,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:remove','#',103,1,NOW()),
+(3505,'代理商物业菜单列表',2404,3,'','',NULL,1,0,'F','0','0','thermal:agent:propertyMenu:list','#',103,1,NOW()),
+(3506,'月用量列表',2219,5,'','',NULL,1,0,'F','0','0','thermal:ht:heatMonth:list','#',103,1,NOW()),
+(3507,'巡检列表',2323,5,'','',NULL,1,0,'F','0','0','thermal:property:inspection:list','#',103,1,NOW()),
+(3508,'报修派单',2320,5,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:dispatch','#',103,1,NOW()),
+(3509,'报修评价',2320,6,'','',NULL,1,0,'F','0','0','thermal:property:repairPerson:evaluate','#',103,1,NOW());

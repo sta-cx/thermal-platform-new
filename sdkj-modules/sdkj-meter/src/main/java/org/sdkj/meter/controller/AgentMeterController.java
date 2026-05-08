@@ -41,7 +41,7 @@ public class AgentMeterController extends BaseController {
     /**
      * 分页查询已分配的仪表列表
      */
-    @SaCheckPermission("thermal:meter:agent:list")
+    @SaCheckPermission("thermal:meter:agentMeter:list")
     @SaCheckLogin
     @GetMapping("/allocated")
     public TableDataInfo<?> allocated(
@@ -72,7 +72,7 @@ public class AgentMeterController extends BaseController {
     /**
      * 查询所有仪表（含未分配）
      */
-    @SaCheckPermission("thermal:meter:agent:list")
+    @SaCheckPermission("thermal:meter:agentMeter:list")
     @SaCheckLogin
     @GetMapping("/all")
     public R<List<?>> all(
@@ -90,7 +90,7 @@ public class AgentMeterController extends BaseController {
     /**
      * 批量分配仪表给公司（事务操作：先删后插）
      */
-    @SaCheckPermission("thermal:meter:agent:add")
+    @SaCheckPermission("thermal:meter:agentMeter:add")
     @SaCheckLogin
     @Log(title = "仪表分配", businessType = BusinessType.INSERT)
     @PostMapping("/allocate")

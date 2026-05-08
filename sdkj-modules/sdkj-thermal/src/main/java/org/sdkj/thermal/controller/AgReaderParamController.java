@@ -23,7 +23,7 @@ public class AgReaderParamController {
 
     private final IAgReaderParamService service;
 
-    @SaCheckPermission("thermal:agent:reader:query")
+    @SaCheckPermission("thermal:agent:readerParam:query")
     @SaCheckLogin
     @GetMapping
     public R<AgReaderParam> getByCode(@RequestParam String code) {

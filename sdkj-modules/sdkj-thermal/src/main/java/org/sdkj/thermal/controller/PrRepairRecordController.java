@@ -27,7 +27,7 @@ public class PrRepairRecordController extends BaseController {
 
     private final IPrRepairRecordService repairRecordService;
 
-    @SaCheckPermission("thermal:property:repair:list")
+    @SaCheckPermission("thermal:property:repairPerson:list")
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrRepairRecord> list(
@@ -46,14 +46,14 @@ public class PrRepairRecordController extends BaseController {
         return TableDataInfo.build(page);
     }
 
-    @SaCheckPermission("thermal:property:repair:query")
+    @SaCheckPermission("thermal:property:repairPerson:query")
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrRepairRecord> getById(@PathVariable String id) {
         return R.ok(repairRecordService.getById(id));
     }
 
-    @SaCheckPermission("thermal:property:repair:add")
+    @SaCheckPermission("thermal:property:repairPerson:add")
     @SaCheckLogin
     @Log(title = "报修记录", businessType = BusinessType.INSERT)
     @PostMapping
@@ -62,7 +62,7 @@ public class PrRepairRecordController extends BaseController {
         return toAjax(repairRecordService.save(record));
     }
 
-    @SaCheckPermission("thermal:property:repair:edit")
+    @SaCheckPermission("thermal:property:repairPerson:edit")
     @SaCheckLogin
     @Log(title = "报修记录-编辑", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -70,7 +70,7 @@ public class PrRepairRecordController extends BaseController {
         return toAjax(repairRecordService.updateById(record));
     }
 
-    @SaCheckPermission("thermal:property:repair:remove")
+    @SaCheckPermission("thermal:property:repairPerson:remove")
     @SaCheckLogin
     @Log(title = "报修记录", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
@@ -78,7 +78,7 @@ public class PrRepairRecordController extends BaseController {
         return toAjax(repairRecordService.removeById(id));
     }
 
-    @SaCheckPermission("thermal:property:repair:dispatch")
+    @SaCheckPermission("thermal:property:repairPerson:dispatch")
     @SaCheckLogin
     @Log(title = "报修派单", businessType = BusinessType.UPDATE)
     @PutMapping("/dispatch")
@@ -91,14 +91,14 @@ public class PrRepairRecordController extends BaseController {
             ids.split(","), dispatchId, isReject, rejectReason, dispatchMoney));
     }
 
-    @SaCheckPermission("thermal:property:repair:query")
+    @SaCheckPermission("thermal:property:repairPerson:query")
     @SaCheckLogin
     @GetMapping("/count/{companyId}")
     public R<Map<String, Object>> allTypeCount(@PathVariable String companyId) {
         return R.ok(repairRecordService.getAllTypeCount(companyId));
     }
 
-    @SaCheckPermission("thermal:property:repair:evaluate")
+    @SaCheckPermission("thermal:property:repairPerson:evaluate")
     @SaCheckLogin
     @Log(title = "报修评价", businessType = BusinessType.UPDATE)
     @PutMapping("/evaluate")
@@ -113,7 +113,7 @@ public class PrRepairRecordController extends BaseController {
      * 旧端点: POST /property/prRepairRecord/insertRepairItems
      * 新端点: POST /thermal/property/repair-record/items
      */
-    @SaCheckPermission("thermal:property:repair:edit")
+    @SaCheckPermission("thermal:property:repairPerson:edit")
     @SaCheckLogin
     @Log(title = "报修项目", businessType = BusinessType.INSERT)
     @PostMapping("/items")
@@ -126,7 +126,7 @@ public class PrRepairRecordController extends BaseController {
      * 旧端点: POST /property/prRepairRecord/getHouseIsOwe
      * 新端点: GET /thermal/property/repair-record/owe
      */
-    @SaCheckPermission("thermal:property:repair:query")
+    @SaCheckPermission("thermal:property:repairPerson:query")
     @SaCheckLogin
     @GetMapping("/owe")
     public R<Boolean> getHouseIsOwe(@RequestParam String houseId) {
@@ -138,7 +138,7 @@ public class PrRepairRecordController extends BaseController {
      * 旧端点: POST /property/prRepairRecord/updateDataService
      * 新端点: PUT /thermal/property/repair-record/service
      */
-    @SaCheckPermission("thermal:property:repair:edit")
+    @SaCheckPermission("thermal:property:repairPerson:edit")
     @SaCheckLogin
     @Log(title = "报修服务", businessType = BusinessType.UPDATE)
     @PutMapping("/service")
