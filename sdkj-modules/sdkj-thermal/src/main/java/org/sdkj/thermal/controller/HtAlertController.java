@@ -42,16 +42,13 @@ public class HtAlertController extends BaseController {
     @SaCheckPermission("thermal:ht:alert:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<HtAlertVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<HtAlertVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) Integer alertType,
             @RequestParam(required = false) String alertStatus,
             PageQuery pageQuery) {
         LambdaQueryWrapper<HtAlert> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(companyId != null && !companyId.isEmpty(), HtAlert::getCompanyId, companyId)
-           .eq(orgId != null && !orgId.isEmpty(), HtAlert::getOrgId, orgId)
+        lqw.eq(orgId != null && !orgId.isEmpty(), HtAlert::getOrgId, orgId)
            .eq(buildingId != null && !buildingId.isEmpty(), HtAlert::getBuildingId, buildingId)
            .eq(alertType != null, HtAlert::getAlertType, alertType)
            .eq(alertStatus != null && !alertStatus.isEmpty(), HtAlert::getAlertStatus, alertStatus);
@@ -118,8 +115,8 @@ public class HtAlertController extends BaseController {
     @SaCheckPermission("thermal:ht:alert:query")
     @SaCheckLogin
     @GetMapping("/typeCount")
-    public R<List<Map<String, Object>>> typeCount(@RequestParam String companyId) {
-        return R.ok(htAlertService.selectTypeCount(companyId));
+    public R<List<Map<String, Object>>> typeCount() {
+        return R.ok(htAlertService.selectTypeCount());
     }
 
     /**
@@ -142,8 +139,8 @@ public class HtAlertController extends BaseController {
     @SaCheckPermission("thermal:ht:alert:query")
     @SaCheckLogin
     @GetMapping("/typeCountDtu")
-    public R<List<Map<String, Object>>> typeCountDtu(@RequestParam String companyId) {
-        return R.ok(htAlertService.selectTypeCountDtu(companyId));
+    public R<List<Map<String, Object>>> typeCountDtu() {
+        return R.ok(htAlertService.selectTypeCountDtu());
     }
 
 }

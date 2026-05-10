@@ -9,23 +9,22 @@ import org.sdkj.thermal.domain.PrOptionsHeat;
 public interface IPrOptionsHeatService extends IService<PrOptionsHeat> {
 
     /**
-     * 根据 orgId 和 companyId 查询配置
+     * 根据 orgId 和 level 查询配置
      */
-    PrOptionsHeat getByOrgAndCompany(String orgId, String companyId, String level);
+    PrOptionsHeat getByOrgAndCompany(String orgId, String level);
 
     /**
      * 初始化默认配置
      */
-    boolean initData(String orgId, String companyId);
+    boolean initData(String orgId);
 
     /**
      * 根据ID查询配置（兼容旧系统方法）
      * @param orgId 小区ID
-     * @param companyId 公司ID
      * @param level 配置级别
      * @return 配置信息
      */
-    default PrOptionsHeat getDataById(String orgId, String companyId, String level) {
-        return getByOrgAndCompany(orgId, companyId, level);
+    default PrOptionsHeat getDataById(String orgId, String level) {
+        return getByOrgAndCompany(orgId, level);
     }
 }

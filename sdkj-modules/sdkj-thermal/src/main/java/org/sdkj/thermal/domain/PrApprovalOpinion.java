@@ -40,8 +40,6 @@ public class PrApprovalOpinion extends BaseEntity {
     /** 审批环节 */
     private Integer approvalLink;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 小区ID */
     private String orgId;

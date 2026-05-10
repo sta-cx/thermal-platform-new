@@ -24,5 +24,5 @@ public interface IPrImportValveService extends IService<PrImportValve> {
 
     Integer select();
 
-    List<PrImportValve> selectByCompanyIdOrgId(String companyId, String orgId);
+    List<PrImportValve> selectByOrgId(String orgId);
 }

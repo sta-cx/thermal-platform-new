@@ -34,5 +34,4 @@ public class PrAccountBalance extends BaseEntity {
 
     private String orgId;
 
-    private String companyId;
 }

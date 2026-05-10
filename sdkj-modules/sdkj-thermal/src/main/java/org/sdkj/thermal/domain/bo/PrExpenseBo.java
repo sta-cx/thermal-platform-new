@@ -131,8 +131,6 @@ public class PrExpenseBo extends BaseEntity {
     /** 小区id */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 车位ID */
     private Long parkingSpaceId;

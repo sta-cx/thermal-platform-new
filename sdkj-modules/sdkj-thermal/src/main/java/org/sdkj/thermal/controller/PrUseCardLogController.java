@@ -34,13 +34,10 @@ public class PrUseCardLogController extends BaseController {
     @SaCheckPermission("thermal:property:useCardLog:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<List<PrUseCardLog>> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrUseCardLog>> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String meterNum) {
         LambdaQueryWrapper<PrUseCardLog> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrUseCardLog::getCompanyId, companyId)
-                .eq(StringUtils.isNotBlank(orgId), PrUseCardLog::getOrgId, orgId)
+        lqw.eq(StringUtils.isNotBlank(orgId), PrUseCardLog::getOrgId, orgId)
                 .eq(StringUtils.isNotBlank(meterNum), PrUseCardLog::getMeterNum, meterNum)
                 .orderByDesc(PrUseCardLog::getOperationTime);
         return R.ok(useCardLogService.list(lqw));
@@ -58,12 +55,9 @@ public class PrUseCardLogController extends BaseController {
     @SaCheckPermission("thermal:property:useCardLog:list")
     @SaCheckLogin
     @GetMapping("/valve-status")
-    public R<List<PrUseCardLog>> pageListValveOCStatus(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId) {
+    public R<List<PrUseCardLog>> pageListValveOCStatus(@RequestParam(required = false) String orgId) {
         LambdaQueryWrapper<PrUseCardLog> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrUseCardLog::getCompanyId, companyId)
-                .eq(StringUtils.isNotBlank(orgId), PrUseCardLog::getOrgId, orgId)
+        lqw.eq(StringUtils.isNotBlank(orgId), PrUseCardLog::getOrgId, orgId)
                 .isNotNull(PrUseCardLog::getValveStatus)
                 .orderByDesc(PrUseCardLog::getOperationTime);
         return R.ok(useCardLogService.list(lqw));

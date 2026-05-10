@@ -18,7 +18,6 @@ public interface PrAccountBalanceMapper extends BaseMapperPlus<PrAccountBalance,
 
     /** 查询已开户的账户列表 */
     List<PrAccountBalanceVo> selectAccountList(
-        @Param("companyId") String companyId,
         @Param("orgId") String orgId,
         @Param("buildingId") String buildingId,
         @Param("unitCode") String unitCode,
@@ -28,7 +27,6 @@ public interface PrAccountBalanceMapper extends BaseMapperPlus<PrAccountBalance,
 
     /** 查询未开户的房屋列表 */
     List<PrAccountBalanceVo> selectNoAccountList(
-        @Param("companyId") String companyId,
         @Param("orgId") String orgId,
         @Param("buildingId") String buildingId,
         @Param("unitCode") String unitCode,
@@ -38,7 +36,6 @@ public interface PrAccountBalanceMapper extends BaseMapperPlus<PrAccountBalance,
 
     /** 查询用户账户余额 */
     BigDecimal selectBalanceByUser(
-        @Param("companyId") String companyId,
         @Param("orgId") String orgId,
         @Param("userId") Long userId);
 
@@ -52,7 +49,6 @@ public interface PrAccountBalanceMapper extends BaseMapperPlus<PrAccountBalance,
 
     /** 查询房屋押金信息 */
     Map<String, Object> selectHouseDeposit(
-        @Param("companyId") String companyId,
         @Param("orgId") String orgId,
         @Param("buildingId") String buildingId,
         @Param("unitCode") String unitCode,

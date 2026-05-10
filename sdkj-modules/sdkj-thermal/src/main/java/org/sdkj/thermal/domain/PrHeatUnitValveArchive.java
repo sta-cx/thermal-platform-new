@@ -61,8 +61,6 @@ public class PrHeatUnitValveArchive extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 阀门状态 */
     private String valveStatus;

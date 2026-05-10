@@ -32,11 +32,10 @@ public class PrHeatDailyServiceImpl extends ServiceImpl<PrHeatDailyMapper, PrHea
     }
 
     @Override
-    public TableDataInfo<PrHeatDailyVo> selectPageList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatDailyVo> selectPageList(String orgId, String buildingId,
                                                         String unitCode, String search, Integer isCharged,
                                                         String startTime, String endTime, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatDaily> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatDaily::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatDaily::getOrgId, orgId);
         if (StringUtils.isNotBlank(search)) {
             lqw.and(w -> w.like(PrHeatDaily::getMeterNum, search.trim())
@@ -52,18 +51,18 @@ public class PrHeatDailyServiceImpl extends ServiceImpl<PrHeatDailyMapper, PrHea
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean generateHeatDaily(String companyId, String orgId) {
+    public boolean generateHeatDaily(String orgId) {
         Calendar now = Calendar.getInstance();
         now.add(Calendar.DAY_OF_MONTH, -1);
         java.util.Date targetDate = now.getTime();
 
         boolean result = true;
-        result = result && baseMapper.setIsValid(targetDate, companyId, orgId);
-        result = result && baseMapper.deleteDaily(targetDate, companyId, orgId);
-        result = result && baseMapper.setHeatDaily(targetDate, companyId, orgId);
-        result = result && baseMapper.setSteps(targetDate, companyId, orgId);
-        result = result && baseMapper.setQtyStepsN(targetDate, companyId, orgId);
-        result = result && baseMapper.setCurrentReading(targetDate, companyId, orgId);
+        result = result && baseMapper.setIsValid(targetDate, orgId);
+        result = result && baseMapper.deleteDaily(targetDate, orgId);
+        result = result && baseMapper.setHeatDaily(targetDate, orgId);
+        result = result && baseMapper.setSteps(targetDate, orgId);
+        result = result && baseMapper.setQtyStepsN(targetDate, orgId);
+        result = result && baseMapper.setCurrentReading(targetDate, orgId);
         return result;
     }
 

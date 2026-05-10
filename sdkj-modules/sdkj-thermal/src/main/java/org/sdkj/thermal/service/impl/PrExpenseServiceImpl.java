@@ -48,20 +48,20 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     }
 
     @Override
-    public TableDataInfo<PrExpenseVo> selectPageList(String companyId, String orgId, String buildingId, String unitCode,
+    public TableDataInfo<PrExpenseVo> selectPageList(String orgId, String buildingId, String unitCode,
                                                      String itemGroup, String itemCode, String search, String isCharged,
                                                      String parkingId, String startTime, String endTime,
                                                      String startDate, String endDate, PageQuery pageQuery) {
         Page<PrExpenseVo> page = pageQuery.build();
-        baseMapper.selectPageList(page, companyId, orgId, buildingId, unitCode,
+        baseMapper.selectPageList(page, orgId, buildingId, unitCode,
             itemGroup, itemCode, search, isCharged, parkingId, startTime, endTime);
         return TableDataInfo.build(page);
     }
 
     @Override
-    public List<PrExpenseVo> selectHouseExpenseList(String companyId, String orgId, String buildingId, String unitCode,
+    public List<PrExpenseVo> selectHouseExpenseList(String orgId, String buildingId, String unitCode,
                                                     String itemGroup, String itemCode, String search) {
-        return baseMapper.selectHouseExpenseList(companyId, orgId, buildingId, unitCode, itemGroup, itemCode, search);
+        return baseMapper.selectHouseExpenseList(orgId, buildingId, unitCode, itemGroup, itemCode, search);
     }
 
     @Override
@@ -112,7 +112,6 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                 e.setIsClosed(0);
                 e.setIsCalc("0");
                 e.setOrgId(he.getOrgId());
-                e.setCompanyId(he.getCompanyId());
                 e.setRecordId(null);
                 e.setChargedTime(null);
                 e.setPaidIn(BigDecimal.ZERO);
@@ -220,7 +219,6 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                     e.setIsCharged(0);
                     e.setIsClosed(0);
                     e.setOrgId(he.getOrgId());
-                    e.setCompanyId(he.getCompanyId());
                     e.setPaidIn(BigDecimal.ZERO);
                     e.setPreferential(BigDecimal.ZERO);
                     e.setDeduction(BigDecimal.ZERO);
@@ -260,7 +258,6 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                 e.setIsCharged(0);
                 e.setIsClosed(0);
                 e.setOrgId(he.getOrgId());
-                e.setCompanyId(he.getCompanyId());
                 e.setPaidIn(BigDecimal.ZERO);
                 e.setPreferential(BigDecimal.ZERO);
                 e.setDeduction(BigDecimal.ZERO);
@@ -312,7 +309,6 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                     e.setIsCharged(0);
                     e.setIsClosed(0);
                     e.setOrgId(he.getOrgId());
-                    e.setCompanyId(he.getCompanyId());
                     e.setPaidIn(BigDecimal.ZERO);
                     e.setPreferential(BigDecimal.ZERO);
                     e.setDeduction(BigDecimal.ZERO);
@@ -359,7 +355,6 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                     e.setIsCharged(0);
                     e.setIsClosed(0);
                     e.setOrgId(he.getOrgId());
-                    e.setCompanyId(he.getCompanyId());
                     e.setPaidIn(BigDecimal.ZERO);
                     e.setPreferential(BigDecimal.ZERO);
                     e.setDeduction(BigDecimal.ZERO);
@@ -406,7 +401,6 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
                     e.setIsCharged(0);
                     e.setIsClosed(0);
                     e.setOrgId(he.getOrgId());
-                    e.setCompanyId(he.getCompanyId());
                     e.setPaidIn(BigDecimal.ZERO);
                     e.setPreferential(BigDecimal.ZERO);
                     e.setDeduction(BigDecimal.ZERO);
@@ -458,7 +452,6 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
             e.setIsClosed(0);
             e.setIsCalc("1");
             e.setOrgId(he.getOrgId());
-            e.setCompanyId(he.getCompanyId());
             e.setPaidIn(BigDecimal.ZERO);
             e.setPreferential(BigDecimal.ZERO);
             e.setDeduction(BigDecimal.ZERO);
@@ -498,7 +491,6 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
             e.setIsClosed(0);
             e.setIsCalc("1");
             e.setOrgId(space.getOrgId());
-            e.setCompanyId(space.getCompanyId());
             e.setPaidIn(BigDecimal.ZERO);
             e.setPreferential(BigDecimal.ZERO);
             e.setDeduction(BigDecimal.ZERO);
@@ -659,16 +651,16 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     }
 
     @Override
-    public boolean recalculate(String companyId, String orgId) {
-        boolean a = baseMapper.updateStepPrice(companyId, orgId) > 0;
-        a &= baseMapper.updateMoney(companyId, orgId) > 0;
-        a &= baseMapper.updateFormula(companyId, orgId) > 0;
+    public boolean recalculate(String orgId) {
+        boolean a = baseMapper.updateStepPrice(orgId) > 0;
+        a &= baseMapper.updateMoney(orgId) > 0;
+        a &= baseMapper.updateFormula(orgId) > 0;
         return a;
     }
 
     @Override
-    public boolean recalculateCw(String companyId, String orgId) {
-        return baseMapper.updateFormulaCw(companyId, orgId) > 0;
+    public boolean recalculateCw(String orgId) {
+        return baseMapper.updateFormulaCw(orgId) > 0;
     }
 
     @Override
@@ -678,7 +670,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     }
 
     @Override
-    public boolean updateStepPrice(String companyId, String orgId) {
+    public boolean updateStepPrice(String orgId) {
         // 查询所有收费标准
         List<org.sdkj.thermal.domain.vo.PrStandardVo> standardList = standardMapper.selectPageList(
             new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 1000), orgId, null);
@@ -700,7 +692,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
             // 没有阶梯（step_maxgrade = 1）
             if (standard.getStepMaxgrade() == null || standard.getStepMaxgrade() == 1) {
                 // 设置基本单价（已经在 updateStepPrice SQL 中处理）
-                result &= baseMapper.updateStepPrice(companyId, orgId) > 0;
+                result &= baseMapper.updateStepPrice(orgId) > 0;
             }
             // 建筑面积阶梯
             else if ("1".equals(standard.getStepType())) {
@@ -719,58 +711,58 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     }
 
     @Override
-    public boolean updatePrice(String companyId, String orgId) {
-        return baseMapper.updateMoney(companyId, orgId) > 0;
+    public boolean updatePrice(String orgId) {
+        return baseMapper.updateMoney(orgId) > 0;
     }
 
     @Override
-    public boolean updateFormula(String companyId, String orgId) {
-        return baseMapper.updateFormula(companyId, orgId) > 0;
+    public boolean updateFormula(String orgId) {
+        return baseMapper.updateFormula(orgId) > 0;
     }
 
     @Override
-    public boolean updateFormulaCw(String companyId, String orgId) {
-        return baseMapper.updateFormulaCw(companyId, orgId) > 0;
+    public boolean updateFormulaCw(String orgId) {
+        return baseMapper.updateFormulaCw(orgId) > 0;
     }
 
     @Override
-    public TableDataInfo<PrExpenseVo> parkingList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrExpenseVo> parkingList(String orgId, String buildingId,
             String unitCode, String itemGroup, String itemCode, String search, String isCharged,
             String parkingId, String startTime, String endTime, PageQuery pageQuery) {
         Page<PrExpenseVo> page = pageQuery.build();
-        baseMapper.selectParkingPageList(page, companyId, orgId, buildingId, unitCode,
+        baseMapper.selectParkingPageList(page, orgId, buildingId, unitCode,
             itemGroup, itemCode, search, isCharged, parkingId, startTime, endTime);
         return TableDataInfo.build(page);
     }
 
     @Override
-    public List<Map<String, Object>> parkingExpenseList(String companyId, String orgId, String buildingId,
+    public List<Map<String, Object>> parkingExpenseList(String orgId, String buildingId,
             String unitCode, String itemGroup, String itemCode, String parkingId, String search) {
-        return baseMapper.selectParkingSpaceExpenseList(companyId, orgId, buildingId, unitCode,
+        return baseMapper.selectParkingSpaceExpenseList(orgId, buildingId, unitCode,
             itemGroup, itemCode, parkingId, search);
     }
 
     @Override
-    public List<Map<String, Object>> houseExpenseAllList(String companyId, String orgId, String search) {
-        return baseMapper.selectHouseExpenseAllList(companyId, orgId, search);
+    public List<Map<String, Object>> houseExpenseAllList(String orgId, String search) {
+        return baseMapper.selectHouseExpenseAllList(orgId, search);
     }
 
     @Override
-    public TableDataInfo<Map<String, Object>> expenseLog(String companyId, String orgId, String buildingId,
+    public TableDataInfo<Map<String, Object>> expenseLog(String orgId, String buildingId,
             String unitCode, String parentId, String type, String startTime, String endTime, String search,
             PageQuery pageQuery) {
         Page<Map<String, Object>> page = pageQuery.build();
-        baseMapper.selectExpenseLog(page, companyId, orgId, buildingId,
+        baseMapper.selectExpenseLog(page, orgId, buildingId,
             unitCode, parentId, type, startTime, endTime, search);
         return TableDataInfo.build(page);
     }
 
     @Override
-    public TableDataInfo<Map<String, Object>> wechatOrderList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<Map<String, Object>> wechatOrderList(String orgId, String buildingId,
             String unitCode, String parentId, String type, String startTime, String endTime, String search,
             PageQuery pageQuery) {
         Page<Map<String, Object>> page = pageQuery.build();
-        baseMapper.selectWechatOrderList(page, companyId, orgId, buildingId,
+        baseMapper.selectWechatOrderList(page, orgId, buildingId,
             unitCode, parentId, type, startTime, endTime, search);
         return TableDataInfo.build(page);
     }
@@ -778,53 +770,53 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     // ========== 滞纳金计算方法实现 ==========
 
     @Override
-    public boolean updateLatefeeQs(String companyId, String orgId, String latefeeFormula, Long standardId) {
+    public boolean updateLatefeeQs(String orgId, String latefeeFormula, Long standardId) {
         validateFormula(latefeeFormula);
-        boolean result = baseMapper.updateLatefeeQs(companyId, orgId, latefeeFormula, standardId) > 0;
+        boolean result = baseMapper.updateLatefeeQs(orgId, latefeeFormula, standardId) > 0;
         // 计算滞纳金后更新最终金额
         if (result) {
-            baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId);
+            baseMapper.updateFinalMoneyAfterLateFee(orgId, standardId);
         }
         return result;
     }
 
     @Override
-    public boolean updateLatefeeJs(String companyId, String orgId, String latefeeFormula, Long standardId) {
+    public boolean updateLatefeeJs(String orgId, String latefeeFormula, Long standardId) {
         validateFormula(latefeeFormula);
-        boolean result = baseMapper.updateLatefeeJs(companyId, orgId, latefeeFormula, standardId) > 0;
+        boolean result = baseMapper.updateLatefeeJs(orgId, latefeeFormula, standardId) > 0;
         // 计算滞纳金后更新最终金额
         if (result) {
-            baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId);
+            baseMapper.updateFinalMoneyAfterLateFee(orgId, standardId);
         }
         return result;
     }
 
     @Override
-    public boolean updateLatefeeZd(String companyId, String orgId, String latefeeFormula, Long standardId,
+    public boolean updateLatefeeZd(String orgId, String latefeeFormula, Long standardId,
                                     java.util.Date latefeeStartdate) {
         validateFormula(latefeeFormula);
-        boolean result = baseMapper.updateLatefeeZd(companyId, orgId, latefeeFormula, standardId, latefeeStartdate) > 0;
+        boolean result = baseMapper.updateLatefeeZd(orgId, latefeeFormula, standardId, latefeeStartdate) > 0;
         // 计算滞纳金后更新最终金额
         if (result) {
-            baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId);
+            baseMapper.updateFinalMoneyAfterLateFee(orgId, standardId);
         }
         return result;
     }
 
     @Override
-    public boolean updateLatefeeSJHC(String companyId, String orgId, String latefeeFormula, Long standardId,
+    public boolean updateLatefeeSJHC(String orgId, String latefeeFormula, Long standardId,
                                       String year, String month) {
         validateFormula(latefeeFormula);
-        boolean result = baseMapper.updateLatefeeSJHC(companyId, orgId, latefeeFormula, standardId, year, month) > 0;
+        boolean result = baseMapper.updateLatefeeSJHC(orgId, latefeeFormula, standardId, year, month) > 0;
         // 计算滞纳金后更新最终金额
         if (result) {
-            baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId);
+            baseMapper.updateFinalMoneyAfterLateFee(orgId, standardId);
         }
         return result;
     }
 
     @Override
-    public boolean updateFinalMoneyAfterLateFee(String companyId, String orgId, Long standardId) {
-        return baseMapper.updateFinalMoneyAfterLateFee(companyId, orgId, standardId) > 0;
+    public boolean updateFinalMoneyAfterLateFee(String orgId, Long standardId) {
+        return baseMapper.updateFinalMoneyAfterLateFee(orgId, standardId) > 0;
     }
 }

@@ -24,7 +24,6 @@ public interface IPrHeatUnitValveArchiveService extends IService<PrHeatUnitValve
 
     /**
      * 分页查询单元阀门配表列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param unit 单元
@@ -33,7 +32,7 @@ public interface IPrHeatUnitValveArchiveService extends IService<PrHeatUnitValve
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<PrHeatUnitValveArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHeatUnitValveArchiveVo> selectPageList(String orgId, String buildingId,
                                                             String unit, String search, String parentId,
                                                             PageQuery pageQuery);
 
@@ -42,26 +41,23 @@ public interface IPrHeatUnitValveArchiveService extends IService<PrHeatUnitValve
     /**
      * 同步单元阀门信息到采集平台
      * @param orgId 小区ID
-     * @param companyId 公司ID
      * @return 是否同步成功
      */
-    boolean valveInformationSynchronization(String orgId, String companyId);
+    boolean valveInformationSynchronization(String orgId);
 
     /**
      * 获取同步数据列表（用于下载Excel）
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 单元阀门配表列表
      */
-    List<PrHeatUnitValveArchiveVo> listSyncData(String companyId, String orgId);
+    List<PrHeatUnitValveArchiveVo> listSyncData(String orgId);
 
     /**
      * 查询全部单元阀门信息（用于导出）
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 单元阀门配表列表
      */
-    List<PrHeatUnitValveArchiveVo> listAll(String companyId, String orgId);
+    List<PrHeatUnitValveArchiveVo> listAll(String orgId);
 
     /**
      * 导入单元阀门配表

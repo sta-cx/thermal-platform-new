@@ -29,7 +29,6 @@ public class PrHeatCommandUnitValveArchiveVo implements Serializable {
     private Integer meterSerial;
     private Long unitId;
     private String orgId;
-    private String companyId;
     private String valveStatus;
     private Integer settingStatus;
     private Integer actualStatus;

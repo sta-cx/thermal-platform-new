@@ -28,13 +28,11 @@ public class PrImportValveServiceImpl extends ServiceImpl<PrImportValveMapper, P
     @Transactional(rollbackFor = Exception.class)
     public Integer importData(List<PrImportValve> objects) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         Date date = new Date();
         List<PrImportValve> lists = new ArrayList<>();
         if (!objects.isEmpty()) {
             for (PrImportValve valve : objects) {
                 valve.setCreateBy(create);
-                valve.setCompanyId(companyId);
                 valve.setCreateTime(date);
                 valve.setType(0);
 
@@ -58,50 +56,47 @@ public class PrImportValveServiceImpl extends ServiceImpl<PrImportValveMapper, P
     @Transactional(rollbackFor = Exception.class)
     public void updateHouseId() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportValveMapper.updateHouseId(create, companyId);
+        prImportValveMapper.updateHouseId(create);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void check(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportValveMapper.updateMeter(create, companyId);
-        prImportValveMapper.updateCommandMeter(create, companyId);
+        prImportValveMapper.updateMeter(create);
+        prImportValveMapper.updateCommandMeter(create);
     }
 
     @Override
     public String getNull(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
 
-        List<PrImportValve> noHouseIds = prImportValveMapper.selectNoHouseId(create, companyId);
+        List<PrImportValve> noHouseIds = prImportValveMapper.selectNoHouseId(create);
         if (!noHouseIds.isEmpty()) {
             return "下列房屋信息无法匹配，请核对信息！";
         }
 
-        List<PrImportValve> noMeterNums = prImportValveMapper.selectNoMeterNum(create, companyId);
+        List<PrImportValve> noMeterNums = prImportValveMapper.selectNoMeterNum(create);
         if (!noMeterNums.isEmpty()) {
             return "下列房屋无表号，请核对信息！";
         }
 
-        List<PrImportValve> list = prImportValveMapper.getRepateMeter2(create, companyId);
+        List<PrImportValve> list = prImportValveMapper.getRepateMeter2(create);
         if (!list.isEmpty()) {
             return "下列表号重复，请核对信息！";
         }
 
-        List<PrImportValve> noArchiveId = prImportValveMapper.findNoArchiveId(create, companyId);
+        List<PrImportValve> noArchiveId = prImportValveMapper.findNoArchiveId(create);
         if (!noArchiveId.isEmpty()) {
             return "下列房屋无法匹配仪表名称，请核对信息！";
         }
 
-        List<PrImportValve> hasAllHouse = prImportValveMapper.selectHasAllHouse(create, companyId);
+        List<PrImportValve> hasAllHouse = prImportValveMapper.selectHasAllHouse(create);
         if (!hasAllHouse.isEmpty()) {
             return "下列房屋已绑定阀门，请核对信息！";
         }
 
-        List<PrImportValve> hasAllReadly = prImportValveMapper.selectHasAllReadly(create, companyId);
+        List<PrImportValve> hasAllReadly = prImportValveMapper.selectHasAllReadly(create);
         if (!hasAllReadly.isEmpty()) {
             return "下列表号系统中已存在，请核对信息！";
         }
@@ -113,8 +108,7 @@ public class PrImportValveServiceImpl extends ServiceImpl<PrImportValveMapper, P
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportValveMapper.deleteData(create, companyId);
+        prImportValveMapper.deleteData(create);
         return true;
     }
 
@@ -122,22 +116,20 @@ public class PrImportValveServiceImpl extends ServiceImpl<PrImportValveMapper, P
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportValveMapper.deleteHeatValveByNoHouseId(create, companyId);
-        prImportValveMapper.submitData(create, companyId);
-        prImportValveMapper.deleteImportValveData(create, companyId);
+        prImportValveMapper.deleteHeatValveByNoHouseId(create);
+        prImportValveMapper.submitData(create);
+        prImportValveMapper.deleteImportValveData(create);
         return true;
     }
 
     @Override
     public Integer select() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return prImportValveMapper.select(create, companyId);
+        return prImportValveMapper.select(create);
     }
 
     @Override
-    public List<PrImportValve> selectByCompanyIdOrgId(String companyId, String orgId) {
-        return prImportValveMapper.selectByCompanyIdOrgId(companyId, orgId);
+    public List<PrImportValve> selectByOrgId(String orgId) {
+        return prImportValveMapper.selectByOrgId(orgId);
     }
 }

@@ -24,11 +24,9 @@ public class PrImportRecordServiceImpl extends ServiceImpl<PrImportRecordMapper,
     @Transactional(rollbackFor = Exception.class)
     public Integer importData(List<PrImportRecord> objects) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         List<PrImportRecord> lists = new ArrayList<>();
         for (PrImportRecord item : objects) {
             item.setCreateBy(create);
-            item.setCompanyId(companyId);
             item.setCreateTime(new Date());
             item.setType(0);
             lists.add(item);
@@ -43,30 +41,28 @@ public class PrImportRecordServiceImpl extends ServiceImpl<PrImportRecordMapper,
     @Transactional(rollbackFor = Exception.class)
     public void updateIds() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.updateHouseId(companyId, create);
-        mapper.updateItemId(companyId, create);
-        mapper.updateMeterInfo(companyId, create);
+        mapper.updateHouseId(create);
+        mapper.updateItemId(create);
+        mapper.updateMeterInfo(create);
     }
 
     @Override
     public String check(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
 
-        List<PrImportRecord> noOrgIds = mapper.selectNoOrgId(companyId, create);
+        List<PrImportRecord> noOrgIds = mapper.selectNoOrgId(create);
         if (!noOrgIds.isEmpty()) return "下列小区信息无法匹配！";
 
-        List<PrImportRecord> noHouseIds = mapper.selectNoHouseId(companyId, create);
+        List<PrImportRecord> noHouseIds = mapper.selectNoHouseId(create);
         if (!noHouseIds.isEmpty()) return "下列房屋信息无法匹配！";
 
-        List<PrImportRecord> noItemIds = mapper.selectNoItemId(companyId, create);
+        List<PrImportRecord> noItemIds = mapper.selectNoItemId(create);
         if (!noItemIds.isEmpty()) return "下列费项信息无法匹配！";
 
-        List<PrImportRecord> noMeterNums = mapper.selectNoMeterNum(companyId, create);
+        List<PrImportRecord> noMeterNums = mapper.selectNoMeterNum(create);
         if (!noMeterNums.isEmpty()) return "下列记录无法匹配仪表信息！";
 
-        List<PrImportRecord> amountErrors = mapper.checkAmountError(companyId, create);
+        List<PrImportRecord> amountErrors = mapper.checkAmountError(create);
         if (!amountErrors.isEmpty()) return "下列金额核对不上！";
 
         return "成功导入" + r + "条记录！\n请提交数据！";
@@ -76,17 +72,15 @@ public class PrImportRecordServiceImpl extends ServiceImpl<PrImportRecordMapper,
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return mapper.deleteData(companyId, create);
+        return mapper.deleteData(create);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.submitData(companyId, create);
-        mapper.deleteImportRecordData(companyId, create);
+        mapper.submitData(create);
+        mapper.deleteImportRecordData(create);
         return true;
     }
 }

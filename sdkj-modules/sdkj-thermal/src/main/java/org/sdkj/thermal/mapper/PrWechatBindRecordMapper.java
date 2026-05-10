@@ -16,6 +16,5 @@ public interface PrWechatBindRecordMapper extends BaseMapperPlus<PrWechatBindRec
                    @Param("wxOpenId") String wxOpenId, @Param("orgId") String orgId,
                    @Param("orgName") String orgName, @Param("buildingId") String buildingId,
                    @Param("buildingName") String buildingName, @Param("unitCode") String unitCode,
-                   @Param("roomNum") String roomNum, @Param("companyId") String companyId,
-                   @Param("createBy") String createBy);
+                   @Param("roomNum") String roomNum, @Param("createBy") String createBy);
 }

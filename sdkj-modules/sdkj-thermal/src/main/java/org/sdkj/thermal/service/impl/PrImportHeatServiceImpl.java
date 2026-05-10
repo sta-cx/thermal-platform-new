@@ -26,13 +26,11 @@ public class PrImportHeatServiceImpl extends ServiceImpl<PrImportHeatMapper, PrI
     @Transactional(rollbackFor = Exception.class)
     public Integer importData(List<PrImportHeat> objects) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         Date date = new Date();
         List<PrImportHeat> lists = new ArrayList<>();
         if (!objects.isEmpty()) {
             for (PrImportHeat heat : objects) {
                 heat.setCreateBy(create);
-                heat.setCompanyId(companyId);
                 heat.setCreateTime(date);
                 heat.setType(0);
 
@@ -76,70 +74,67 @@ public class PrImportHeatServiceImpl extends ServiceImpl<PrImportHeatMapper, PrI
     @Transactional(rollbackFor = Exception.class)
     public void updateHouseId() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportHeatMapper.updateHouseId(create, companyId);
+        prImportHeatMapper.updateHouseId(create);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void check(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportHeatMapper.updateMeter(create, companyId);
-        prImportHeatMapper.updateStandard(create, companyId);
+        prImportHeatMapper.updateMeter(create);
+        prImportHeatMapper.updateStandard(create);
     }
 
     @Override
     public String getNull(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
 
-        List<PrImportHeat> noHouseIds = prImportHeatMapper.selectNoHouseId(create, companyId);
+        List<PrImportHeat> noHouseIds = prImportHeatMapper.selectNoHouseId(create);
         if (!noHouseIds.isEmpty()) {
             return "下列房屋信息无法匹配，请核对信息！";
         }
 
-        List<PrImportHeat> noMeterNums = prImportHeatMapper.selectNoMeterNum(create, companyId);
+        List<PrImportHeat> noMeterNums = prImportHeatMapper.selectNoMeterNum(create);
         if (!noMeterNums.isEmpty()) {
             return "下列房屋无表号，请核对信息！";
         }
 
-        List<PrImportHeat> repate = prImportHeatMapper.selectRepateMeterNum(create, companyId);
+        List<PrImportHeat> repate = prImportHeatMapper.selectRepateMeterNum(create);
         if (!repate.isEmpty()) {
             return "下列表号重复，请核对信息！";
         }
 
-        List<PrImportHeat> noArchiveId = prImportHeatMapper.findNoArchiveId(create, companyId);
+        List<PrImportHeat> noArchiveId = prImportHeatMapper.findNoArchiveId(create);
         if (!noArchiveId.isEmpty()) {
             return "下列房屋无法匹配仪表名称，请核对信息！";
         }
 
-        List<PrImportHeat> noStandardId = prImportHeatMapper.findNoStandardId(create, companyId);
+        List<PrImportHeat> noStandardId = prImportHeatMapper.findNoStandardId(create);
         if (!noStandardId.isEmpty()) {
             return "下列房屋无法匹配单价，请核对信息！";
         }
 
-        List<PrImportHeat> errorMoney = prImportHeatMapper.findErrorMoney(create, companyId);
+        List<PrImportHeat> errorMoney = prImportHeatMapper.findErrorMoney(create);
         if (!errorMoney.isEmpty()) {
             return "下列金额核对不上，请核对信息！";
         }
 
-        List<PrImportHeat> meterSerialErrors = prImportHeatMapper.selectMeterSerial(create, companyId);
+        List<PrImportHeat> meterSerialErrors = prImportHeatMapper.selectMeterSerial(create);
         if (!meterSerialErrors.isEmpty()) {
             return "下列子表号设置错误，请核对信息！";
         }
 
-        List<PrImportHeat> numericalErrors = prImportHeatMapper.selectNumericalErrors(create, companyId);
+        List<PrImportHeat> numericalErrors = prImportHeatMapper.selectNumericalErrors(create);
         if (!numericalErrors.isEmpty()) {
             return "下列当前读数小于起始读数，请核对信息！";
         }
 
-        List<PrImportHeat> hasAllHouse = prImportHeatMapper.hasAllHouse(create, companyId);
+        List<PrImportHeat> hasAllHouse = prImportHeatMapper.hasAllHouse(create);
         if (!hasAllHouse.isEmpty()) {
             return "下列房屋已绑定热表，请核对信息！";
         }
 
-        List<PrImportHeat> hasAllReadly = prImportHeatMapper.hasAllReadly(create, companyId);
+        List<PrImportHeat> hasAllReadly = prImportHeatMapper.hasAllReadly(create);
         if (!hasAllReadly.isEmpty()) {
             return "下列表号系统中已存在，请核对信息！";
         }
@@ -151,8 +146,7 @@ public class PrImportHeatServiceImpl extends ServiceImpl<PrImportHeatMapper, PrI
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportHeatMapper.deleteData(create, companyId);
+        prImportHeatMapper.deleteData(create);
         return true;
     }
 
@@ -160,22 +154,20 @@ public class PrImportHeatServiceImpl extends ServiceImpl<PrImportHeatMapper, PrI
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportHeatMapper.deleteHeatByNoHouseId(create, companyId);
-        prImportHeatMapper.submitData(create, companyId);
-        prImportHeatMapper.deleteImportHeatData(create, companyId);
+        prImportHeatMapper.deleteHeatByNoHouseId(create);
+        prImportHeatMapper.submitData(create);
+        prImportHeatMapper.deleteImportHeatData(create);
         return true;
     }
 
     @Override
     public Integer select() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return prImportHeatMapper.select(create, companyId);
+        return prImportHeatMapper.select(create);
     }
 
     @Override
-    public List<PrImportHeat> selectByCompanyIdOrgId(String companyId, String orgId) {
-        return prImportHeatMapper.selectByCompanyIdOrgId(companyId, orgId);
+    public List<PrImportHeat> selectByOrgId(String orgId) {
+        return prImportHeatMapper.selectByOrgId(orgId);
     }
 }

@@ -27,23 +27,22 @@ public class PrOptionsHeatServiceImpl extends ServiceImpl<PrOptionsHeatMapper, P
     private final PrOptionsHeatMapper baseMapper;
 
     @Override
-    public PrOptionsHeat getByOrgAndCompany(String orgId, String companyId, String level) {
+    public PrOptionsHeat getByOrgAndCompany(String orgId, String level) {
         // 确定级别：如果 orgId 为空或为 "0"，则为公司级别（0），否则为小区级别（1）
         String actualLevel = (StringUtils.isBlank(orgId) || "0".equals(orgId)) ? "0" : "1";
 
         if ("0".equals(actualLevel)) {
             // 公司级别配置
-            return baseMapper.selectByCompanyId(companyId);
+            return baseMapper.selectByCompanyId();
         } else {
             // 小区级别配置
-            PrOptionsHeat options = baseMapper.selectByOrgAndCompany(orgId, companyId);
+            PrOptionsHeat options = baseMapper.selectByOrgAndCompany(orgId);
             if (options == null) {
                 // 如果小区没有配置，尝试从公司级别获取默认配置
-                PrOptionsHeat companyOptions = baseMapper.selectByCompanyId(companyId);
+                PrOptionsHeat companyOptions = baseMapper.selectByCompanyId();
                 if (companyOptions != null) {
                     // 复制公司配置作为小区配置的默认值
                     options = new PrOptionsHeat();
-                    options.setCompanyId(companyId);
                     options.setOrgId(orgId);
                     options.setLevel("1");
 
@@ -61,7 +60,7 @@ public class PrOptionsHeatServiceImpl extends ServiceImpl<PrOptionsHeatMapper, P
 
                     // 保存小区配置
                     save(options);
-                    options = baseMapper.selectByOrgAndCompany(orgId, companyId);
+                    options = baseMapper.selectByOrgAndCompany(orgId);
                 }
             }
             return options;
@@ -70,17 +69,16 @@ public class PrOptionsHeatServiceImpl extends ServiceImpl<PrOptionsHeatMapper, P
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean initData(String orgId, String companyId) {
+    public boolean initData(String orgId) {
         // 检查是否已存在配置
-        PrOptionsHeat existing = baseMapper.selectByOrgAndCompany(orgId, companyId);
+        PrOptionsHeat existing = baseMapper.selectByOrgAndCompany(orgId);
         if (existing != null) {
             // 如果存在，删除后重新初始化
-            baseMapper.deleteByOrgAndCompany(orgId, companyId);
+            baseMapper.deleteByOrgAndCompany(orgId);
         }
 
         // 创建新配置
         PrOptionsHeat options = new PrOptionsHeat();
-        options.setCompanyId(companyId);
         options.setOrgId(orgId);
         options.setLevel(StringUtils.isBlank(orgId) ? "0" : "1");
 

@@ -12,5 +12,5 @@ public interface IPrWechatBindRecordService extends IService<PrWechatBindRecord>
 
     int insertData(String houseId, String heatPayCode, String wxOpenId, String orgId,
                    String orgName, String buildingId, String buildingName, String unitCode,
-                   String roomNum, String companyId, String createBy);
+                   String roomNum, String createBy);
 }

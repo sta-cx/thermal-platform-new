@@ -16,7 +16,6 @@ public class HtScopeVo {
     private String orgId;
     private Long buildingId;
     private Long unitId;
-    private String companyId;
     private Long houseId;
     private String meterNum;
     private Long meterId;

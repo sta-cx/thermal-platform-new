@@ -20,7 +20,6 @@ public interface IPrHeatMonthService extends IService<PrHeatMonth> {
 
     /**
      * 分页查询热表月记录列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param unitCode 单元编码
@@ -31,7 +30,7 @@ public interface IPrHeatMonthService extends IService<PrHeatMonth> {
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<PrHeatMonthVo> selectPageList(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHeatMonthVo> selectPageList(String orgId, String buildingId,
                                                  String unitCode, String search, String isCharged,
                                                  String startTime, String endTime, PageQuery pageQuery);
 
@@ -42,19 +41,17 @@ public interface IPrHeatMonthService extends IService<PrHeatMonth> {
      * 3. updateQty - 更新用量
      * 4. setFee - 计算费用
      * 5. updateArrearage - 更新欠费状态
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 是否成功
      */
-    boolean generateHeatMonth(String companyId, String orgId);
+    boolean generateHeatMonth(String orgId);
 
     /**
      * 从日表聚合生成月表数据
      * 默认生成上月数据，force=true时重算当月
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param force 是否强制重算当月
      * @return 结果消息
      */
-    String setHeat(String companyId, String orgId, Boolean force);
+    String setHeat(String orgId, Boolean force);
 }

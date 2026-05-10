@@ -48,9 +48,8 @@ public class PrImportValveController extends BaseController {
     @SaCheckLogin
     @GetMapping("/template")
     public void downloadTemplate(HttpServletResponse response,
-                                  @RequestParam String companyId,
                                   @RequestParam String orgId) throws IOException {
-        List<PrImportValve> lists = prImportValveService.selectByCompanyIdOrgId(companyId, orgId);
+        List<PrImportValve> lists = prImportValveService.selectByOrgId(orgId);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");

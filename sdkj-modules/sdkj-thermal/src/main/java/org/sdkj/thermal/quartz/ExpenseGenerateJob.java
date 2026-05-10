@@ -20,10 +20,9 @@ public class ExpenseGenerateJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap data = context.getJobDetail().getJobDataMap();
         String jobName = data.getString("jobName");
-        String companyId = data.getString("companyId");
         String orgId = data.getString("orgId");
 
-        log.info("费用生成 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgId);
+        log.info("费用生成 Job 启动: {} (小区: {})", jobName, orgId);
 
         boolean tenantPushed = TenantQuartzContext.push(context);
         try {
@@ -31,10 +30,10 @@ public class ExpenseGenerateJob implements Job {
                 .getContext().get("applicationContext");
             IPrExpenseService expenseService = ctx.getBean(IPrExpenseService.class);
 
-            expenseService.recalculate(companyId, orgId);
-            log.info("费用生成 Job 完成: {} (公司: {}, 小区: {})", jobName, companyId, orgId);
+            expenseService.recalculate(orgId);
+            log.info("费用生成 Job 完成: {} (小区: {})", jobName, orgId);
         } catch (Exception e) {
-            log.error("费用生成 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgId, e);
+            log.error("费用生成 Job 失败: {} (小区: {})", jobName, orgId, e);
         } finally {
             TenantQuartzContext.clear(tenantPushed);
         }

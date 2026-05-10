@@ -43,8 +43,6 @@ public class PrUseCardLog extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 操作员ID */
     private String operatorId;

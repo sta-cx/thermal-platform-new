@@ -32,11 +32,10 @@ public class HtHouseStrategyServiceImpl extends ServiceImpl<HtHouseStrategyMappe
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean insertBatch(List<HtHouseStrategy> list, String orgId, String companyId) {
+    public boolean insertBatch(List<HtHouseStrategy> list, String orgId) {
         if (list == null || list.isEmpty()) return false;
         for (HtHouseStrategy item : list) {
             item.setOrgId(orgId);
-            item.setCompanyId(companyId);
             baseMapper.insert(item);
         }
         return true;

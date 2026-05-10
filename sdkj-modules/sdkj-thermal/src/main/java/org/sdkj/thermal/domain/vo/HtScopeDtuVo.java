@@ -19,7 +19,6 @@ public class HtScopeDtuVo implements Serializable {
 
     private String orgId;
 
-    private String companyId;
 
     private String meterArcCode;
 

@@ -85,8 +85,6 @@ public class HtRepair extends BaseEntity {
     /** 小区名称 */
     private String orgName;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 是否删除 (0=正常 1=删除) */
     @TableLogic(value = "0", delval = "1")

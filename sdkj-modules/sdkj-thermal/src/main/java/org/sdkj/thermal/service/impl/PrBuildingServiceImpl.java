@@ -9,8 +9,10 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrBuilding;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.PrUnit;
+import org.sdkj.thermal.domain.SysOrganization;
 import org.sdkj.thermal.domain.vo.PrBuildingVo;
 import org.sdkj.thermal.mapper.PrBuildingMapper;
+import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.mapper.PrUnitMapper;
 import org.sdkj.thermal.service.IPrBuildingService;
@@ -18,6 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +36,7 @@ public class PrBuildingServiceImpl extends ServiceImpl<PrBuildingMapper, PrBuild
     private final PrBuildingMapper baseMapper;
     private final PrUnitMapper unitMapper;
     private final PrHouseMapper houseMapper;
+    private final PrCompanyMapper prCompanyMapper;
 
     @Override
     public PrBuildingVo selectById(java.io.Serializable id) {
@@ -52,6 +58,7 @@ public class PrBuildingServiceImpl extends ServiceImpl<PrBuildingMapper, PrBuild
         }
         lqw.orderByAsc(PrBuilding::getSeq).orderByDesc(PrBuilding::getCreateTime);
         Page<PrBuildingVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        fillOrgName(result.getRecords());
         return TableDataInfo.build(result);
     }
 
@@ -66,11 +73,8 @@ public class PrBuildingServiceImpl extends ServiceImpl<PrBuildingMapper, PrBuild
     }
 
     @Override
-    public List<PrBuildingVo> selectByOrgId(String companyId, String orgId) {
+    public List<PrBuildingVo> selectByOrgId(String orgId) {
         LambdaQueryWrapper<PrBuilding> lqw = new LambdaQueryWrapper<>();
-        if (companyId != null && !companyId.trim().isEmpty()) {
-            lqw.eq(PrBuilding::getCompanyId, companyId);
-        }
         if (orgId != null && !orgId.trim().isEmpty()) {
             lqw.eq(PrBuilding::getOrgId, orgId);
         }
@@ -118,6 +122,18 @@ public class PrBuildingServiceImpl extends ServiceImpl<PrBuildingMapper, PrBuild
     @Transactional(rollbackFor = Exception.class)
     public boolean removeById(java.io.Serializable id) {
         return super.removeById(id);
+    }
+
+    private void fillOrgName(List<PrBuildingVo> list) {
+        if (list == null || list.isEmpty()) return;
+        Set<String> orgIds = list.stream()
+            .map(PrBuildingVo::getOrgId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        if (orgIds.isEmpty()) return;
+        Map<String, String> orgNameMap = prCompanyMapper.selectOrgByIds(orgIds).stream()
+            .collect(Collectors.toMap(SysOrganization::getId, SysOrganization::getName, (a, b) -> a));
+        list.forEach(vo -> vo.setOrgName(orgNameMap.getOrDefault(vo.getOrgId(), "")));
     }
 
 }

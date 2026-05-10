@@ -127,10 +127,8 @@ public class PrStandardController extends BaseController {
     @SaCheckPermission("thermal:property:standard:list")
     @SaCheckLogin
     @GetMapping("/ele")
-    public R<List<PrStandardVo>> findEle(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId) {
-        return R.ok(standardService.findEleStandard(companyId, orgId));
+    public R<List<PrStandardVo>> findEle(@RequestParam(required = false) String orgId) {
+        return R.ok(standardService.findEleStandard(orgId));
     }
 
     /**
@@ -141,10 +139,8 @@ public class PrStandardController extends BaseController {
     @SaCheckPermission("thermal:property:standard:list")
     @SaCheckLogin
     @GetMapping("/water")
-    public R<List<PrStandardVo>> findWater(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId) {
-        return R.ok(standardService.findWaterStandard(companyId, orgId));
+    public R<List<PrStandardVo>> findWater(@RequestParam(required = false) String orgId) {
+        return R.ok(standardService.findWaterStandard(orgId));
     }
 
     /**
@@ -155,10 +151,8 @@ public class PrStandardController extends BaseController {
     @SaCheckPermission("thermal:property:standard:list")
     @SaCheckLogin
     @GetMapping("/heat")
-    public R<List<PrStandardVo>> findHeat(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId) {
-        return R.ok(standardService.findHeatStandard(companyId, orgId));
+    public R<List<PrStandardVo>> findHeat(@RequestParam(required = false) String orgId) {
+        return R.ok(standardService.findHeatStandard(orgId));
     }
 
     /**
@@ -169,13 +163,11 @@ public class PrStandardController extends BaseController {
     @SaCheckPermission("thermal:property:standard:query")
     @SaCheckLogin
     @GetMapping("/check-name")
-    public R<Boolean> checkName(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Boolean> checkName(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String itemGroup,
             @RequestParam String name,
             @RequestParam(required = false) String id) {
-        return R.ok(standardService.isName(companyId, orgId, itemGroup, name, id));
+        return R.ok(standardService.isName(orgId, itemGroup, name, id));
     }
 
     /**
@@ -189,10 +181,9 @@ public class PrStandardController extends BaseController {
     public R<Boolean> purchase(
             @RequestParam String meterId,
             @RequestParam String standardId,
-            @RequestParam String companyId,
             @RequestParam String orgId,
             @RequestParam BigDecimal num) {
-        IPrStandardService.PurchaseCheckResult result = standardService.checkPurchase(meterId, standardId, companyId, orgId, num);
+        IPrStandardService.PurchaseCheckResult result = standardService.checkPurchase(meterId, standardId, orgId, num);
         if (result.exceeded()) {
             return R.fail(result.message());
         }
@@ -207,11 +198,9 @@ public class PrStandardController extends BaseController {
     @SaCheckPermission("thermal:property:standard:query")
     @SaCheckLogin
     @GetMapping("/expense-item")
-    public R<PrExpenseItem> getExpenseItem(
-            @RequestParam String companyId,
-            @RequestParam String orgId,
+    public R<PrExpenseItem> getExpenseItem(@RequestParam String orgId,
             @RequestParam String standardId) {
-        return R.ok(standardService.getExpenseItemByStandardId(companyId, orgId, standardId));
+        return R.ok(standardService.getExpenseItemByStandardId(orgId, standardId));
     }
 
     /**

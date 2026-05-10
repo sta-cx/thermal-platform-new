@@ -18,5 +18,4 @@ public class PrWechatBillVo {
     private Integer totalCount;
     private Integer successCount;
     private Integer diffCount;
-    private String companyId;
 }

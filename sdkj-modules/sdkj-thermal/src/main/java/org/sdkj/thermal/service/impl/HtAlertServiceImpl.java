@@ -38,8 +38,8 @@ public class HtAlertServiceImpl extends ServiceImpl<HtAlertMapper, HtAlert> impl
     }
 
     @Override
-    public List<Map<String, Object>> selectTypeCount(String companyId) {
-        return baseMapper.selectTypeCount(companyId);
+    public List<Map<String, Object>> selectTypeCount() {
+        return baseMapper.selectTypeCount();
     }
 
     @Override
@@ -52,8 +52,8 @@ public class HtAlertServiceImpl extends ServiceImpl<HtAlertMapper, HtAlert> impl
     }
 
     @Override
-    public List<Map<String, Object>> selectTypeCountDtu(String companyId) {
-        return baseMapper.selectTypeCountDtu(companyId);
+    public List<Map<String, Object>> selectTypeCountDtu() {
+        return baseMapper.selectTypeCountDtu();
     }
 
 }

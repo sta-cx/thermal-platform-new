@@ -35,10 +35,9 @@ public class ValvePaymentControlJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap data = context.getJobDetail().getJobDataMap();
         String jobName = data.getString("jobName");
-        String companyId = data.getString("companyId");
         String orgIdStr = data.getString("orgId");
 
-        log.info("缴费自动开关阀 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr);
+        log.info("缴费自动开关阀 Job 启动: {} (小区: {})", jobName, orgIdStr);
 
         boolean tenantPushed = TenantQuartzContext.push(context);
         try {
@@ -59,14 +58,14 @@ public class ValvePaymentControlJob implements Job {
                 log.info("执行缴费自动开关阀: 小区ID={}", orgId);
                 try {
                     processValveControl(ctx, valveArchiveService, performService,
-                        optionsHeatService, companyId, orgId);
+                        optionsHeatService, orgId);
                 } catch (Exception e) {
                     log.error("缴费自动开关阀失败: 小区ID={}", orgId, e);
                 }
             }
-            log.info("缴费自动开关阀 Job 完成: {} (公司: {})", jobName, companyId);
+            log.info("缴费自动开关阀 Job 完成: {}", jobName);
         } catch (Exception e) {
-            log.error("缴费自动开关阀 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr, e);
+            log.error("缴费自动开关阀 Job 失败: {} (小区: {})", jobName, orgIdStr, e);
         } finally {
             TenantQuartzContext.clear(tenantPushed);
         }
@@ -76,12 +75,12 @@ public class ValvePaymentControlJob implements Job {
                                       IPrHeatValveArchiveService valveArchiveService,
                                       IHtTasksPerformService performService,
                                       IPrOptionsHeatService optionsHeatService,
-                                      String companyId, String orgId) {
+                                      String orgId) {
         // 查询已缴费但未开阀的阀门
-        List<PrHeatValveArchive> paidClosedList = valveArchiveService.queryPaidClosedValves(companyId, orgId);
+        List<PrHeatValveArchive> paidClosedList = valveArchiveService.queryPaidClosedValves(orgId);
 
         // 获取调控参数
-        PrOptionsHeat optionsHeat = optionsHeatService.getDataById(orgId, companyId, "2");
+        PrOptionsHeat optionsHeat = optionsHeatService.getDataById(orgId, "2");
         if (optionsHeat == null) {
             log.warn("未找到小区 {} 的调控配置，跳过", orgId);
             return;
@@ -91,7 +90,7 @@ public class ValvePaymentControlJob implements Job {
 
         // 生成开阀指令（已缴费 -> 开阀）
         if (CollUtil.isNotEmpty(paidClosedList)) {
-            List<HtTasksPerform> tasks = buildOpenValveTasks(paidClosedList, companyId, orgId,
+            List<HtTasksPerform> tasks = buildOpenValveTasks(paidClosedList, orgId,
                 max, optionsHeat);
             if (CollUtil.isNotEmpty(tasks)) {
                 try {
@@ -111,7 +110,7 @@ public class ValvePaymentControlJob implements Job {
     }
 
     private List<HtTasksPerform> buildOpenValveTasks(List<PrHeatValveArchive> archives,
-                                                      String companyId, String orgId,
+                                                      String orgId,
                                                       int instruction, PrOptionsHeat optionsHeat) {
         List<HtTasksPerform> tasks = new ArrayList<>();
         Date now = new Date();
@@ -122,7 +121,6 @@ public class ValvePaymentControlJob implements Job {
             task.setInstruction(instruction);
             task.setNumber(0);
             task.setOrgId(orgId);
-            task.setCompanyId(companyId);
             task.setDeviceId(archive.getDeviceId());
             task.setMeterArcCode(archive.getMeterArcCode());
             task.setMeterId(archive.getId());

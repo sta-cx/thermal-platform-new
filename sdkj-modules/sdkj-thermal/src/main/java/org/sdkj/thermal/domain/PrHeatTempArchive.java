@@ -99,8 +99,6 @@ public class PrHeatTempArchive extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 集中器编码 */
     private String concentratorCode;

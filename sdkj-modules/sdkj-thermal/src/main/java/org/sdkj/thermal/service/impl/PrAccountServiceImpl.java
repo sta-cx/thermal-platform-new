@@ -33,10 +33,10 @@ public class PrAccountServiceImpl implements IPrAccountService {
     private final PrTransactionRecordMapper transactionMapper;
 
     @Override
-    public List<PrAccountBalanceVo> pageList(String companyId, String orgId, String buildingId,
+    public List<PrAccountBalanceVo> pageList(String orgId, String buildingId,
             String unitCode, String search, String itemGroup, String itemCode) {
         return balanceMapper.selectAccountList(
-            companyId, orgId, buildingId, unitCode, search, itemGroup, itemCode);
+            orgId, buildingId, unitCode, search, itemGroup, itemCode);
     }
 
     @Override
@@ -75,17 +75,17 @@ public class PrAccountServiceImpl implements IPrAccountService {
     }
 
     @Override
-    public List<PrAccountBalanceVo> noAccount(String companyId, String orgId, String buildingId,
+    public List<PrAccountBalanceVo> noAccount(String orgId, String buildingId,
             String unitCode, String search, String itemGroup, String itemCode) {
         return balanceMapper.selectNoAccountList(
-            companyId, orgId, buildingId, unitCode, search, itemGroup, itemCode);
+            orgId, buildingId, unitCode, search, itemGroup, itemCode);
     }
 
     @Override
-    public List<PrAccountBalanceVo> getAccount(String companyId, String orgId, String buildingId,
+    public List<PrAccountBalanceVo> getAccount(String orgId, String buildingId,
             String unitCode, String search, String itemGroup, String itemCode, String userId) {
         return balanceMapper.selectAccountList(
-            companyId, orgId, buildingId, unitCode, search, itemGroup, itemCode)
+            orgId, buildingId, unitCode, search, itemGroup, itemCode)
             .stream()
             .filter(vo -> userId == null || userId.equals(vo.getUserId()))
             .toList();
@@ -231,7 +231,6 @@ public class PrAccountServiceImpl implements IPrAccountService {
                     newBalance.setItemCode(itemCode);
                     newBalance.setBalance(balance);
                     newBalance.setOrgId(source.getOrgId());
-                    newBalance.setCompanyId(source.getCompanyId());
                     newBalance.setCreateBy(userId);
                     newBalance.setCreateTime(now);
                     balanceMapper.insert(newBalance);
@@ -260,21 +259,21 @@ public class PrAccountServiceImpl implements IPrAccountService {
     }
 
     @Override
-    public BigDecimal getPersonAccount(String companyId, String orgId, Long userId) {
-        return balanceMapper.selectBalanceByUser(companyId, orgId, userId);
+    public BigDecimal getPersonAccount(String orgId, Long userId) {
+        return balanceMapper.selectBalanceByUser(orgId, userId);
     }
 
     @Override
-    public List<PrAccountBalanceVo> pageAccountStatementList(String companyId, String orgId, String buildingId,
+    public List<PrAccountBalanceVo> pageAccountStatementList(String orgId, String buildingId,
             String unitCode, String itemGroup, String itemCode, String searchPhone) {
         return balanceMapper.selectAccountList(
-            companyId, orgId, buildingId, unitCode, searchPhone, itemGroup, itemCode);
+            orgId, buildingId, unitCode, searchPhone, itemGroup, itemCode);
     }
 
     @Override
-    public Map<String, Object> getHouseDeposit(String companyId, String orgId, String buildingId,
+    public Map<String, Object> getHouseDeposit(String orgId, String buildingId,
             String unitCode, String search) {
-        return balanceMapper.selectHouseDeposit(companyId, orgId, buildingId, unitCode, search);
+        return balanceMapper.selectHouseDeposit(orgId, buildingId, unitCode, search);
     }
 
     @Override
@@ -290,7 +289,6 @@ public class PrAccountServiceImpl implements IPrAccountService {
         String itemCode = (String) depositVo.get("itemCode");
         String paymentStr = (String) depositVo.get("payment");
         String orgId = (String) depositVo.get("orgId");
-        String companyId = (String) depositVo.get("companyId");
 
         if (houseId == null) {
             throw new ServiceException("房屋ID不能为空");
@@ -325,7 +323,6 @@ public class PrAccountServiceImpl implements IPrAccountService {
         record.setHouseId(houseId);
         record.setUserId(userId);
         record.setOrgId(orgId);
-        record.setCompanyId(companyId);
         record.setItemGroup(itemGroup);
         record.setItemCode(itemCode);
         record.setTransactionTime(now);
@@ -352,7 +349,6 @@ public class PrAccountServiceImpl implements IPrAccountService {
             balance.setHouseId(houseId);
             balance.setUserId(userId);
             balance.setOrgId(orgId);
-            balance.setCompanyId(companyId);
             balance.setItemGroup(itemGroup);
             balance.setItemCode(itemCode);
             balance.setBalance(amount);
@@ -371,9 +367,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
 
     @Override
     public Map<String, Object> pageListImportData(int pageNum, int pageSize) {
-        String companyId = LoginHelper.getTenantId();
         LambdaQueryWrapper<PrAccountBalance> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(PrAccountBalance::getCompanyId, companyId);
         lqw.orderByDesc(PrAccountBalance::getCreateTime);
         var page = new com.baomidou.mybatisplus.extension.plugins.pagination.Page<PrAccountBalance>(pageNum, pageSize);
         var result = balanceMapper.selectPage(page, lqw);
@@ -395,7 +389,6 @@ public class PrAccountServiceImpl implements IPrAccountService {
             if (objects.isEmpty()) {
                 return Map.of("msg", "文件中无数据");
             }
-            String companyId = LoginHelper.getTenantId();
             Long userId = LoginHelper.getUserId();
             Date now = new Date();
             int count = 0;
@@ -411,7 +404,6 @@ public class PrAccountServiceImpl implements IPrAccountService {
                     balance.setItemGroup(String.valueOf(row.getOrDefault("itemGroup", "")));
                     balance.setItemCode(String.valueOf(row.getOrDefault("itemCode", "")));
                     balance.setBalance(java.math.BigDecimal.ZERO);
-                    balance.setCompanyId(companyId);
                     balance.setCreateBy(userId);
                     balance.setCreateTime(now);
                     balanceMapper.insert(balance);

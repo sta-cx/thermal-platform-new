@@ -22,7 +22,7 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
      * 分页查询费用明细列表
      */
     List<PrExpenseVo> selectPageList(Page<PrExpenseVo> page,
-                                     @Param("companyId") String companyId, @Param("orgId") String orgId,
+                                     @Param("orgId") String orgId,
                                      @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
                                      @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode,
                                      @Param("search") String search, @Param("isCharged") String isCharged,
@@ -32,7 +32,7 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
     /**
      * 查询房屋费用明细列表
      */
-    List<PrExpenseVo> selectHouseExpenseList(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    List<PrExpenseVo> selectHouseExpenseList(@Param("orgId") String orgId,
                                              @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
                                              @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode,
                                              @Param("search") String search);
@@ -50,22 +50,22 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
     /**
      * 批量更新单价
      */
-    int updateStepPrice(@Param("companyId") String companyId, @Param("orgId") String orgId);
+    int updateStepPrice(@Param("orgId") String orgId);
 
     /**
      * 批量更新金额
      */
-    int updateMoney(@Param("companyId") String companyId, @Param("orgId") String orgId);
+    int updateMoney(@Param("orgId") String orgId);
 
     /**
      * 批量计算公式
      */
-    int updateFormula(@Param("companyId") String companyId, @Param("orgId") String orgId);
+    int updateFormula(@Param("orgId") String orgId);
 
     /**
      * 批量计算公式（车位）
      */
-    int updateFormulaCw(@Param("companyId") String companyId, @Param("orgId") String orgId);
+    int updateFormulaCw(@Param("orgId") String orgId);
 
     /**
      * 设置房屋缴费状态
@@ -85,7 +85,7 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
     /** 车位费用分页查询 */
     List<PrExpenseVo> selectParkingPageList(
         Page<PrExpenseVo> page,
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
         @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode,
         @Param("search") String search, @Param("isCharged") String isCharged,
@@ -94,20 +94,20 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
 
     /** 车位空间费用查询 */
     List<Map<String, Object>> selectParkingSpaceExpenseList(
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
         @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode,
         @Param("parkingId") String parkingId, @Param("search") String search);
 
     /** 全部房屋费用查询 */
     List<Map<String, Object>> selectHouseExpenseAllList(
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("search") String search);
 
     /** 费用操作日志 */
     List<Map<String, Object>> selectExpenseLog(
         Page<Map<String, Object>> page,
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
         @Param("parentId") String parentId, @Param("type") String type,
         @Param("startTime") String startTime, @Param("endTime") String endTime,
@@ -116,7 +116,7 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
     /** 微信费用订单 */
     List<Map<String, Object>> selectWechatOrderList(
         Page<Map<String, Object>> page,
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
         @Param("parentId") String parentId, @Param("type") String type,
         @Param("startTime") String startTime, @Param("endTime") String endTime,
@@ -154,32 +154,32 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
     /**
      * 滞纳金计算 - 起收日期
      */
-    int updateLatefeeQs(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    int updateLatefeeQs(@Param("orgId") String orgId,
                         @Param("latefeeFormula") String latefeeFormula, @Param("standardId") Long standardId);
 
     /**
      * 滞纳金计算 - 到期日期
      */
-    int updateLatefeeJs(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    int updateLatefeeJs(@Param("orgId") String orgId,
                         @Param("latefeeFormula") String latefeeFormula, @Param("standardId") Long standardId);
 
     /**
      * 滞纳金计算 - 指定日期
      */
-    int updateLatefeeZd(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    int updateLatefeeZd(@Param("orgId") String orgId,
                         @Param("latefeeFormula") String latefeeFormula, @Param("standardId") Long standardId,
                         @Param("latefeeStartdate") java.util.Date latefeeStartdate);
 
     /**
      * 滞纳金计算 - 数据核查
      */
-    int updateLatefeeSJHC(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    int updateLatefeeSJHC(@Param("orgId") String orgId,
                           @Param("latefeeFormula") String latefeeFormula, @Param("standardId") Long standardId,
                           @Param("year") String year, @Param("month") String month);
 
     /**
      * 滞纳金计算后更新最终金额
      */
-    int updateFinalMoneyAfterLateFee(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    int updateFinalMoneyAfterLateFee(@Param("orgId") String orgId,
                                       @Param("standardId") Long standardId);
 }

@@ -16,7 +16,7 @@ public interface IPrUserService extends IService<PrUser> {
     /**
      * 分页查询客户列表
      */
-    TableDataInfo<PrUserVo> selectPageList(String companyId, PageQuery pageQuery);
+    TableDataInfo<PrUserVo> selectPageList(PageQuery pageQuery);
 
     /**
      * 查询客户详情

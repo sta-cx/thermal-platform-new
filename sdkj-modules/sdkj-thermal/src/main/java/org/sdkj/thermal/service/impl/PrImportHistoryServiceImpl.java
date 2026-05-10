@@ -24,11 +24,9 @@ public class PrImportHistoryServiceImpl extends ServiceImpl<PrImportHistoryMappe
     @Transactional(rollbackFor = Exception.class)
     public Integer importData(List<PrImportHistory> objects) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         List<PrImportHistory> lists = new ArrayList<>();
         for (PrImportHistory item : objects) {
             item.setCreateBy(create);
-            item.setCompanyId(companyId);
             item.setCreateTime(new Date());
             item.setType(0);
             lists.add(item);
@@ -43,19 +41,17 @@ public class PrImportHistoryServiceImpl extends ServiceImpl<PrImportHistoryMappe
     @Transactional(rollbackFor = Exception.class)
     public void updateIds() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.updateHouseId(create, companyId);
-        mapper.updateStandardId(create, companyId);
+        mapper.updateHouseId(create);
+        mapper.updateStandardId(create);
     }
 
     @Override
     public String check(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
 
-        if (!mapper.selectNoHouseId(create, companyId).isEmpty())
+        if (!mapper.selectNoHouseId(create).isEmpty())
             return "下列房屋信息无法匹配！";
-        if (!mapper.selectNoStandardId(create, companyId).isEmpty())
+        if (!mapper.selectNoStandardId(create).isEmpty())
             return "下列标准名称无法匹配！";
 
         return "成功导入" + r + "条记录！\n请提交数据！";
@@ -65,24 +61,21 @@ public class PrImportHistoryServiceImpl extends ServiceImpl<PrImportHistoryMappe
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return mapper.deleteData(create, companyId);
+        return mapper.deleteData(create);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.submitData(create, companyId);
-        mapper.deleteImportHistoryData(create, companyId);
+        mapper.submitData(create);
+        mapper.deleteImportHistoryData(create);
         return true;
     }
 
     @Override
     public Integer select() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return mapper.select(create, companyId);
+        return mapper.select(create);
     }
 }

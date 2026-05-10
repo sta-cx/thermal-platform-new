@@ -58,7 +58,6 @@ public class PrExpenseVo implements Serializable {
     private String year;
     private String month;
     private String orgId;
-    private String companyId;
     private Long parkingSpaceId;
     private String roomNum;
     private String orgName;

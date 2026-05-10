@@ -18,5 +18,4 @@ public class PrStrategy extends BaseEntity {
     private String type;
     private String content;
     private String orgId;
-    private String companyId;
 }

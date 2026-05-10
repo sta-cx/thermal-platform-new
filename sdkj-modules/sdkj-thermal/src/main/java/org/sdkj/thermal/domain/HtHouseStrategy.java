@@ -99,8 +99,6 @@ public class HtHouseStrategy extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 预设角度 */
     private Integer presetAngle;

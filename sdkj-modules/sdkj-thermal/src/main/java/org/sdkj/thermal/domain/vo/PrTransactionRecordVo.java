@@ -25,7 +25,6 @@ public class PrTransactionRecordVo {
     private Long houseId;
     private String userId;
     private String orgId;
-    private String companyId;
     private String itemGroup;
     private String itemCode;
     private Date transactionTime;

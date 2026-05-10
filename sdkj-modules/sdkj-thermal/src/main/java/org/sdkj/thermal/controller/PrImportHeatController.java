@@ -45,9 +45,8 @@ public class PrImportHeatController extends BaseController {
     @SaCheckLogin
     @GetMapping("/template")
     public void downloadTemplate(HttpServletResponse response,
-                                  @RequestParam String companyId,
                                   @RequestParam String orgId) throws IOException {
-        List<PrImportHeat> lists = prImportHeatService.selectByCompanyIdOrgId(companyId, orgId);
+        List<PrImportHeat> lists = prImportHeatService.selectByOrgId(orgId);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");

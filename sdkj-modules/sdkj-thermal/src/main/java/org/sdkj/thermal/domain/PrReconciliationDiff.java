@@ -59,5 +59,4 @@ public class PrReconciliationDiff extends BaseEntity {
     private Date handleTime;
 
     /** 所属公司 */
-    private String companyId;
 }

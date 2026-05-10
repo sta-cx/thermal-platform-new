@@ -23,8 +23,6 @@ public class HtStrategyVo {
     /** 策略类型 */
     private Integer type;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 备注 */
     private String remark;

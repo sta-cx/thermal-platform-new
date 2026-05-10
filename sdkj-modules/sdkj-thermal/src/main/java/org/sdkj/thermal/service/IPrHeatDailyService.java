@@ -20,7 +20,6 @@ public interface IPrHeatDailyService extends IService<PrHeatDaily> {
 
     /**
      * 分页查询热表日记录列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param unitCode 单元编码
@@ -31,7 +30,7 @@ public interface IPrHeatDailyService extends IService<PrHeatDaily> {
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<PrHeatDailyVo> selectPageList(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHeatDailyVo> selectPageList(String orgId, String buildingId,
                                                  String unitCode, String search, Integer isCharged,
                                                  String startTime, String endTime, PageQuery pageQuery);
 
@@ -42,9 +41,8 @@ public interface IPrHeatDailyService extends IService<PrHeatDaily> {
      * 3. setSteps - 更新日表单价及金额
      * 4. setQtyStepsN - 计算日表用量和金额
      * 5. setCurrentReading - 更新配表档案的当前读数
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 是否成功
      */
-    boolean generateHeatDaily(String companyId, String orgId);
+    boolean generateHeatDaily(String orgId);
 }

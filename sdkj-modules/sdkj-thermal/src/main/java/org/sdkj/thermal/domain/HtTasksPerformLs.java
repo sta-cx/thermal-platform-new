@@ -52,8 +52,6 @@ public class HtTasksPerformLs extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 集中器编号 */
     private String concentratorCode;

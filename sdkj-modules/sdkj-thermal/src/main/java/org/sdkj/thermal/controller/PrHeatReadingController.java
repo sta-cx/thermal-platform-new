@@ -41,9 +41,7 @@ public class PrHeatReadingController extends BaseController {
     @SaCheckPermission("thermal:ht:heatReading:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrHeatReadingVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHeatReadingVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String meterArcCode,
@@ -54,7 +52,7 @@ public class PrHeatReadingController extends BaseController {
             @RequestParam(required = false) String valveType,
             @RequestParam(required = false) String parentId,
             PageQuery pageQuery) {
-        return heatReadingService.selectPageList(companyId, orgId, buildingId, unitCode, meterArcCode, search, startTime, endTime, type, valveType, parentId, pageQuery);
+        return heatReadingService.selectPageList(orgId, buildingId, unitCode, meterArcCode, search, startTime, endTime, type, valveType, parentId, pageQuery);
     }
 
     /**
@@ -81,11 +79,10 @@ public class PrHeatReadingController extends BaseController {
     public R<List<PrHeatReadingVo>> trend(@RequestBody List<String> meterNums,
                                           @RequestParam(required = false) String startTime,
                                           @RequestParam(required = false) String endTime,
-                                          @RequestParam(required = false) String companyId,
                                           @RequestParam(required = false) String status,
                                           @RequestParam(required = false) String orgId,
                                           @RequestParam(required = false) String parentId) {
-        return R.ok(heatReadingService.selectTrendList(meterNums, startTime, endTime, companyId, status, orgId, parentId));
+        return R.ok(heatReadingService.selectTrendList(meterNums, startTime, endTime, status, orgId, parentId));
     }
 
     /**
@@ -97,9 +94,8 @@ public class PrHeatReadingController extends BaseController {
     @SaCheckLogin
     @GetMapping("/trend-home")
     public R<List<PrHeatReadingVo>> trendHome(@RequestParam(required = false) String stationId,
-                                              @RequestParam(required = false) String stationPartitionId,
-                                              @RequestParam(required = false) String companyId) {
-        return R.ok(heatReadingService.selectHomeTrendList(stationId, stationPartitionId, companyId));
+                                              @RequestParam(required = false) String stationPartitionId) {
+        return R.ok(heatReadingService.selectHomeTrendList(stationId, stationPartitionId));
     }
 
     /**
@@ -112,7 +108,6 @@ public class PrHeatReadingController extends BaseController {
     @Log(title = "热表抄表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/exportAll")
     public void exportAll(HttpServletResponse response,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
@@ -123,7 +118,7 @@ public class PrHeatReadingController extends BaseController {
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String valveType,
             @RequestParam(required = false) String parentId) throws IOException {
-        var list = heatReadingService.selectPageList(companyId, orgId, buildingId, unitCode, meterArcCode, search, startTime, endTime, type, valveType, parentId, null).getRows();
+        var list = heatReadingService.selectPageList(orgId, buildingId, unitCode, meterArcCode, search, startTime, endTime, type, valveType, parentId, null).getRows();
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("热表抄表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");

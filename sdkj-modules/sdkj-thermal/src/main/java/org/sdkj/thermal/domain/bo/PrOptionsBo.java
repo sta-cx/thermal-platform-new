@@ -17,8 +17,6 @@ public class PrOptionsBo extends BaseEntity {
     /** 主键 */
     private Long id;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 组织/小区ID */
     private String orgId;

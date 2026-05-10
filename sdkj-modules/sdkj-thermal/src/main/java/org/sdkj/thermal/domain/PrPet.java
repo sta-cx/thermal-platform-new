@@ -21,5 +21,4 @@ public class PrPet extends BaseEntity {
     private String color;
     private String vaccineStatus;
     private String orgId;
-    private String companyId;
 }

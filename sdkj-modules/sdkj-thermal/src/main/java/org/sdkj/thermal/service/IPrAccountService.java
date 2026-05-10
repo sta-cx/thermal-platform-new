@@ -14,7 +14,7 @@ import java.util.Map;
 public interface IPrAccountService {
 
     /** 分页查询个人账户列表 */
-    List<PrAccountBalanceVo> pageList(String companyId, String orgId, String buildingId,
+    List<PrAccountBalanceVo> pageList(String orgId, String buildingId,
         String unitCode, String search, String itemGroup, String itemCode);
 
     /**
@@ -23,11 +23,11 @@ public interface IPrAccountService {
     boolean insertData(List<Long> houseIds, String itemGroup, String itemCode, String payment);
 
     /** 查找没有开户的房屋 */
-    List<PrAccountBalanceVo> noAccount(String companyId, String orgId, String buildingId,
+    List<PrAccountBalanceVo> noAccount(String orgId, String buildingId,
         String unitCode, String search, String itemGroup, String itemCode);
 
     /** 充值查询 */
-    List<PrAccountBalanceVo> getAccount(String companyId, String orgId, String buildingId,
+    List<PrAccountBalanceVo> getAccount(String orgId, String buildingId,
         String unitCode, String search, String itemGroup, String itemCode, String userId);
 
     /** 充值操作 */
@@ -41,14 +41,14 @@ public interface IPrAccountService {
         String makeInvoice, String invoice);
 
     /** 查询个人账户余额 */
-    BigDecimal getPersonAccount(String companyId, String orgId, Long userId);
+    BigDecimal getPersonAccount(String orgId, Long userId);
 
     /** 查询账户对账单列表 */
-    List<PrAccountBalanceVo> pageAccountStatementList(String companyId, String orgId, String buildingId,
+    List<PrAccountBalanceVo> pageAccountStatementList(String orgId, String buildingId,
         String unitCode, String itemGroup, String itemCode, String searchPhone);
 
     /** 查询房屋押金信息 */
-    Map<String, Object> getHouseDeposit(String companyId, String orgId, String buildingId,
+    Map<String, Object> getHouseDeposit(String orgId, String buildingId,
         String unitCode, String search);
 
     /** 保存押金缴费 */

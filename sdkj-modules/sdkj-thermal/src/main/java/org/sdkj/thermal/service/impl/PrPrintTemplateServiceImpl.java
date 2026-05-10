@@ -23,20 +23,18 @@ public class PrPrintTemplateServiceImpl extends ServiceImpl<PrPrintTemplateMappe
     private final PrPrintTemplateMapper baseMapper;
 
     @Override
-    public List<PrPrintTemplate> listByOrgAndCompany(String companyId, String orgId, String name) {
+    public List<PrPrintTemplate> listByOrgAndCompany(String orgId, String name) {
         LambdaQueryWrapper<PrPrintTemplate> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrPrintTemplate::getCompanyId, companyId)
-                .eq(StringUtils.isNotBlank(orgId), PrPrintTemplate::getOrgId, orgId)
+        lqw.eq(StringUtils.isNotBlank(orgId), PrPrintTemplate::getOrgId, orgId)
                 .like(StringUtils.isNotBlank(name), PrPrintTemplate::getName, name);
         return baseMapper.selectList(lqw);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean saveOrUpdateTemplate(String companyId, String orgId, String name, String templateContent) {
+    public boolean saveOrUpdateTemplate(String orgId, String name, String templateContent) {
         LambdaQueryWrapper<PrPrintTemplate> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(PrPrintTemplate::getCompanyId, companyId)
-                .eq(PrPrintTemplate::getOrgId, orgId)
+        lqw.eq(PrPrintTemplate::getOrgId, orgId)
                 .eq(PrPrintTemplate::getName, name);
         PrPrintTemplate existing = baseMapper.selectOne(lqw);
         if (existing != null) {
@@ -44,7 +42,6 @@ public class PrPrintTemplateServiceImpl extends ServiceImpl<PrPrintTemplateMappe
             return updateById(existing);
         }
         PrPrintTemplate template = new PrPrintTemplate();
-        template.setCompanyId(companyId);
         template.setOrgId(orgId);
         template.setName(name);
         template.setTemplateContent(templateContent);

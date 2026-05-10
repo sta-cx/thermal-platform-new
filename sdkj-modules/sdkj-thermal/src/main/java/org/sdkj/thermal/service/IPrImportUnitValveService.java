@@ -49,5 +49,5 @@ public interface IPrImportUnitValveService extends IService<PrImportUnitValve> {
     /**
      * 按公司和小区查询单元列表
      */
-    List<PrImportUnitValve> selectByCompanyIdOrgId(String companyId, String orgId);
+    List<PrImportUnitValve> selectByOrgId(String orgId);
 }

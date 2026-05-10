@@ -137,14 +137,13 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean batchCreateValveControlTasks(List<ValveArchiveInfo> archives, String orgId, String companyId, int instruction) {
+    public boolean batchCreateValveControlTasks(List<ValveArchiveInfo> archives, String orgId, int instruction) {
         List<HtTasksPerform> tasks = archives.stream().map(info -> {
             HtTasksPerform task = new HtTasksPerform();
             task.setInstructionType(3);
             task.setInstruction(instruction);
             task.setNumber(0);
             task.setOrgId(orgId);
-            task.setCompanyId(companyId);
             task.setDeviceId(info.deviceId());
             task.setMeterArcCode(info.meterArcCode());
             task.setMeterId(info.meterId());
@@ -294,12 +293,12 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
     }
 
     @Override
-    public void executePendingCommands(String companyId, String orgId) {
+    public void executePendingCommands(String orgId) {
         // TODO: Implement pending command execution (from old system getNonExecutionNew)
         // 1. Query all pending (status=1, instructionStatus=0) HtTasksPerform records
         // 2. Group by concentrator/device
         // 3. Send via DTU/NB/MBus depending on device type
         // 4. Update instructionStatus after send
-        log.warn("executePendingCommands not yet implemented for companyId={}, orgId={}", companyId, orgId);
+        log.warn("executePendingCommands not yet implemented for orgId={}", orgId);
     }
 }

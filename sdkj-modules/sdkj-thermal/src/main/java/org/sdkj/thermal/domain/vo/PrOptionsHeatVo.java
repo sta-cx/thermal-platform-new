@@ -17,7 +17,6 @@ public class PrOptionsHeatVo {
     private String penaltyRate;
     private String invoiceNotes;
     private String paymentReminder;
-    private String companyId;
     private String orgId;
     private String level;
 }

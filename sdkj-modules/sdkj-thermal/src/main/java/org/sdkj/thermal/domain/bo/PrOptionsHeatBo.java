@@ -35,8 +35,6 @@ public class PrOptionsHeatBo extends BaseEntity {
     /** 缴费提示 */
     private String paymentReminder;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 小区ID */
     private String orgId;

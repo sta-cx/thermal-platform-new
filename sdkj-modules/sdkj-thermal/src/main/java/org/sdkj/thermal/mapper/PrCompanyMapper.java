@@ -7,6 +7,7 @@ import org.sdkj.thermal.domain.PrCompany;
 import org.sdkj.thermal.domain.SysOrganization;
 import org.sdkj.thermal.domain.vo.PrCompanyVo;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface PrCompanyMapper extends BaseMapperPlus<PrCompany, PrCompanyVo> {
@@ -15,6 +16,8 @@ public interface PrCompanyMapper extends BaseMapperPlus<PrCompany, PrCompanyVo> 
      * 查询公司下所有组织机构（不含部门）
      */
     List<SysOrganization> selectOrganizationsByCompanyId(@Param("companyId") String companyId);
+
+    List<SysOrganization> selectAllOrganizations();
 
     /**
      * 获取公司根节点（parent_id = '-1'）
@@ -25,6 +28,11 @@ public interface PrCompanyMapper extends BaseMapperPlus<PrCompany, PrCompanyVo> 
      * 根据ID查询组织机构
      */
     SysOrganization selectOrgById(@Param("id") String id);
+
+    /**
+     * 批量查询组织机构名称
+     */
+    List<SysOrganization> selectOrgByIds(@Param("ids") Collection<String> ids);
 
     /**
      * 获取用户数据权限范围内的组织机构（树形）

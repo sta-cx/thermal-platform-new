@@ -49,11 +49,10 @@ public class PrHeatUnitValveArchiveServiceImpl extends ServiceImpl<PrHeatUnitVal
     }
 
     @Override
-    public TableDataInfo<PrHeatUnitValveArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatUnitValveArchiveVo> selectPageList(String orgId, String buildingId,
                                                                    String unit, String search, String parentId,
                                                                    PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatUnitValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatUnitValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatUnitValveArchive::getOrgId, orgId);
         // parentId maps to unitId for this entity (uses unitId, not houseId)
         lqw.eq(StringUtils.isNotBlank(parentId), PrHeatUnitValveArchive::getUnitId, parentId);
@@ -89,15 +88,14 @@ public class PrHeatUnitValveArchiveServiceImpl extends ServiceImpl<PrHeatUnitVal
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean valveInformationSynchronization(String orgId, String companyId) {
+    public boolean valveInformationSynchronization(String orgId) {
         // 1. 查询该小区下所有有效单元阀门档案
         LambdaQueryWrapper<PrHeatUnitValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatUnitValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatUnitValveArchive::getOrgId, orgId);
         lqw.eq(PrHeatUnitValveArchive::getIsChanged, 0);
         List<PrHeatUnitValveArchive> archives = list(lqw);
         if (archives.isEmpty()) {
-            log.info("同步-未找到单元阀门档案数据, orgId={}, companyId={}", orgId, companyId);
+            log.info("同步-未找到单元阀门档案数据, orgId={}", orgId);
             return false;
         }
 
@@ -114,7 +112,6 @@ public class PrHeatUnitValveArchiveServiceImpl extends ServiceImpl<PrHeatUnitVal
             item.set("dtuNum", archive.getDtuNum());
             item.set("chanNum", archive.getChanNum());
             item.set("orgId", archive.getOrgId());
-            item.set("companyId", archive.getCompanyId());
             dataArray.add(item);
         }
 
@@ -135,15 +132,14 @@ public class PrHeatUnitValveArchiveServiceImpl extends ServiceImpl<PrHeatUnitVal
             }
         }
 
-        log.info("同步单元阀门信息到采集平台, orgId={}, companyId={}, count={}, result={}",
-            orgId, companyId, archives.size(), result);
+        log.info("同步单元阀门信息到采集平台, orgId={}, count={}, result={}",
+            orgId, archives.size(), result);
         return result;
     }
 
     @Override
-    public List<PrHeatUnitValveArchiveVo> listSyncData(String companyId, String orgId) {
+    public List<PrHeatUnitValveArchiveVo> listSyncData(String orgId) {
         LambdaQueryWrapper<PrHeatUnitValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatUnitValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatUnitValveArchive::getOrgId, orgId);
         lqw.eq(PrHeatUnitValveArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatUnitValveArchive::getCreateTime);
@@ -151,9 +147,8 @@ public class PrHeatUnitValveArchiveServiceImpl extends ServiceImpl<PrHeatUnitVal
     }
 
     @Override
-    public List<PrHeatUnitValveArchiveVo> listAll(String companyId, String orgId) {
+    public List<PrHeatUnitValveArchiveVo> listAll(String orgId) {
         LambdaQueryWrapper<PrHeatUnitValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatUnitValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatUnitValveArchive::getOrgId, orgId);
         lqw.eq(PrHeatUnitValveArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatUnitValveArchive::getCreateTime);
@@ -210,7 +205,6 @@ public class PrHeatUnitValveArchiveServiceImpl extends ServiceImpl<PrHeatUnitVal
             entity.setChanNum(dto.getChanNum());
             entity.setUnitId(dto.getUnitId());
             entity.setOrgId(dto.getOrgId());
-            entity.setCompanyId(dto.getCompanyId());
             entity.setIsChanged(0);
             entity.setIsStop(0);
             entity.setMeterSerial(dto.getMeterSerial());

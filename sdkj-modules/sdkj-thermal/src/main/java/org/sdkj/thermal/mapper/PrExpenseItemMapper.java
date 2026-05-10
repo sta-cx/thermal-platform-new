@@ -32,29 +32,29 @@ public interface PrExpenseItemMapper extends BaseMapperPlus<PrExpenseItem, PrExp
     /**
      * 按条件查询费用项目
      */
-    List<PrExpenseItemVo> selectByItemCode(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    List<PrExpenseItemVo> selectByItemCode(@Param("orgId") String orgId,
                                            @Param("itemGroup") String itemGroup, @Param("itemCode") String itemCode);
 
     /**
      * 按费项分组查询列表
      */
-    List<PrExpenseItemVo> selectByItemGroup(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    List<PrExpenseItemVo> selectByItemGroup(@Param("orgId") String orgId,
                                             @Param("itemGroup") String itemGroup);
 
     /**
      * 按公司/小区查询费用项目
      */
-    List<PrExpenseItemVo> selectByCompanyAndOrg(@Param("companyId") String companyId, @Param("orgId") String orgId);
+    List<PrExpenseItemVo> selectByCompanyAndOrg(@Param("orgId") String orgId);
 
     /**
      * 按用户查询费用项目（关联账户表）
      */
-    List<PrExpenseItemVo> selectByItemGroupAndUserId(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    List<PrExpenseItemVo> selectByItemGroupAndUserId(@Param("orgId") String orgId,
                                                      @Param("itemGroup") String itemGroup, @Param("userId") String userId);
 
     /**
      * 检查项目名称是否重复
      */
-    List<PrExpenseItemVo> checkItemName(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    List<PrExpenseItemVo> checkItemName(@Param("orgId") String orgId,
                                         @Param("itemName") String itemName, @Param("id") String id);
 }

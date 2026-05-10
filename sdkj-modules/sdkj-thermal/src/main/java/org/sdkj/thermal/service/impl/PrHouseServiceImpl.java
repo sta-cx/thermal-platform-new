@@ -41,7 +41,7 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
 
     @Override
     public TableDataInfo<PrHouseVo> selectPageList(String search, String buildingId, String orgId,
-                                                   String status, String companyId, PageQuery pageQuery) {
+                                                   String status, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(search)) {
             lqw.and(w -> w.like(PrHouse::getRoomNum, search.trim())
@@ -50,7 +50,6 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
         lqw.eq(StringUtils.isNotBlank(status), PrHouse::getStatus, status);
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
         lqw.orderByAsc(PrHouse::getSeq).orderByDesc(PrHouse::getCreateTime);
         Page<PrHouseVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -82,9 +81,8 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     }
 
     @Override
-    public List<PrHouseVo> selectByOrg(String companyId, String orgId) {
+    public List<PrHouseVo> selectByOrg(String orgId) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
         lqw.orderByAsc(PrHouse::getSeq, PrHouse::getRoomNum);
         return baseMapper.selectVoList(lqw);
@@ -127,10 +125,9 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     // ========== 类型筛选功能实现 ==========
 
     @Override
-    public List<PrHouseVo> selectByType(String companyId, String orgId, String buildingId,
+    public List<PrHouseVo> selectByType(String orgId, String buildingId,
                                         String unitCode, String stationId, List<String> types) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
         lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
         lqw.eq(StringUtils.isNotBlank(unitCode), PrHouse::getUnitCode, unitCode);
@@ -173,12 +170,11 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     }
 
     @Override
-    public List<PrHouseVo> selectByValveAndHotType(String companyId, String orgId, String buildingId,
+    public List<PrHouseVo> selectByValveAndHotType(String orgId, String buildingId,
                                                    String unitCode, String stationId, List<String> types) {
         // 按阀门和供热类型筛选
         // valveOpen > 0 表示阀门已开启, stationType 表示供热区域属性
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
         lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
         lqw.eq(StringUtils.isNotBlank(unitCode), PrHouse::getUnitCode, unitCode);
@@ -217,10 +213,9 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     }
 
     @Override
-    public List<PrHouseVo> selectAllForExport(String companyId, String orgId, String buildingId,
+    public List<PrHouseVo> selectAllForExport(String orgId, String buildingId,
                                               String status, String search) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
         lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
         lqw.eq(StringUtils.isNotBlank(status), PrHouse::getStatus, status);
@@ -239,11 +234,10 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     }
 
     @Override
-    public TableDataInfo<PrHouseVo> selectByPayStatus(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHouseVo> selectByPayStatus(String orgId, String buildingId,
                                                       String status, String payStatus, String search,
                                                       PageQuery pageQuery) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
         lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
         lqw.eq(StringUtils.isNotBlank(status), PrHouse::getStatus, status);
@@ -266,10 +260,9 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     }
 
     @Override
-    public TableDataInfo<PrHouseVo> selectByMultiSearch(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHouseVo> selectByMultiSearch(String orgId, String buildingId,
                                                         String type, String search, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
         lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
         lqw.eq(StringUtils.isNotBlank(type), PrHouse::getType, type);
@@ -297,9 +290,9 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     // ========== 孤岛户功能实现 ==========
 
     @Override
-    public List<PrHouseVo> queryIsolatedHouses(String companyId, String orgId, String buildingId) {
+    public List<PrHouseVo> queryIsolatedHouses(String orgId, String buildingId) {
         // 获取楼宇下所有房屋
-        List<PrHouse> allHouses = baseMapper.queryIsolatedHouses(companyId, orgId, buildingId);
+        List<PrHouse> allHouses = baseMapper.queryIsolatedHouses(orgId, buildingId);
         List<PrHouse> isolatedHouses = new ArrayList<>();
 
         if (allHouses.isEmpty()) {
@@ -379,9 +372,9 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean setIsolatedHouses(List<PrHouse> houseList, String companyId, String orgId, String buildingId) {
+    public boolean setIsolatedHouses(List<PrHouse> houseList, String orgId, String buildingId) {
         // 1. 重置楼宇下所有房屋的位置属性
-        baseMapper.resetSiteTypeByBuilding(companyId, orgId, buildingId);
+        baseMapper.resetSiteTypeByBuilding(orgId, buildingId);
 
         // 2. 批量更新孤岛户的位置属性
         if (houseList != null && !houseList.isEmpty()) {
@@ -393,8 +386,8 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
             baseMapper.updateSiteTypeBatch(houseList);
         }
 
-        log.info("设置孤岛户完成, companyId={}, orgId={}, buildingId={}, count={}",
-            companyId, orgId, buildingId, houseList != null ? houseList.size() : 0);
+        log.info("设置孤岛户完成, orgId={}, buildingId={}, count={}",
+            orgId, buildingId, houseList != null ? houseList.size() : 0);
         return true;
     }
 
@@ -426,9 +419,8 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     }
 
     @Override
-    public List<PrHouseVo> selectForStrategyBinding(String companyId, String orgId, String buildingId, String search) {
+    public List<PrHouseVo> selectForStrategyBinding(String orgId, String buildingId, String search) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
         lqw.eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId);
         if (StringUtils.isNotBlank(search)) {

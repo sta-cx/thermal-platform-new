@@ -6,8 +6,10 @@ import org.sdkj.thermal.domain.PrExpense;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.PrTransactionRecord;
 import org.sdkj.thermal.domain.PrTransactionRecordSub;
+import org.sdkj.thermal.domain.SysOrganization;
 import org.sdkj.thermal.domain.vo.PrExpenseVo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
+import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrExpenseMapper;
 import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.mapper.PrTransactionRecordMapper;
@@ -40,11 +42,11 @@ public class SingleChargeServiceImpl implements ISingleChargeService {
     private final PrHouseMapper houseMapper;
     private final PrTransactionRecordMapper transactionRecordMapper;
     private final PrTransactionRecordSubMapper transactionRecordSubMapper;
+    private final PrCompanyMapper prCompanyMapper;
 
     @Override
-    public List<PrHouseVo> getHouse(String search, String companyId, String orgId, String buildingId) {
+    public List<PrHouseVo> getHouse(String search, String orgId, String buildingId) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(PrHouse::getCompanyId, companyId);
         lqw.eq(PrHouse::getOrgId, orgId);
         if (buildingId != null && !buildingId.isEmpty()) {
             lqw.eq(PrHouse::getBuildingId, buildingId);
@@ -56,10 +58,8 @@ public class SingleChargeServiceImpl implements ISingleChargeService {
     }
 
     @Override
-    public List<PrHouseVo> getHouseRoomId(String search, String companyId, String orgId,
-                                          String buildingId, String unitCode, String roomNum) {
+    public List<PrHouseVo> getHouseRoomId(String search, String orgId, String buildingId, String unitCode, String roomNum) {
         LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(PrHouse::getCompanyId, companyId);
         lqw.eq(PrHouse::getOrgId, orgId);
         if (buildingId != null && !buildingId.isEmpty()) lqw.eq(PrHouse::getBuildingId, buildingId);
         if (unitCode != null && !unitCode.isEmpty()) lqw.eq(PrHouse::getUnitCode, unitCode);
@@ -70,7 +70,7 @@ public class SingleChargeServiceImpl implements ISingleChargeService {
 
     @Override
     public List<PrExpenseVo> pageList(String houseId) {
-        return expenseMapper.selectHouseExpenseList(null, null, null, null, null, null, null)
+        return expenseMapper.selectHouseExpenseList(null, null, null, null, null, null)
             .stream()
             .filter(vo -> houseId == null || houseId.equals(vo.getHouseId()))
             .toList();
@@ -196,7 +196,7 @@ public class SingleChargeServiceImpl implements ISingleChargeService {
         // 5. 生成流水号
         String serialNum = generateSerialNum();
 
-        // 6. 查询房屋信息获取 companyId/orgId
+        // 6. 查询房屋信息获取 orgId
         PrHouse house = houseMapper.selectById(expenseVo.getHouseId());
         if (house == null) {
             return Map.of("success", false, "msg", "房屋信息不存在");
@@ -213,7 +213,6 @@ public class SingleChargeServiceImpl implements ISingleChargeService {
         record.setHouseId(expenseVo.getHouseId());
         record.setUserId(expenseVo.getUserId());
         record.setOrgId(house.getOrgId());
-        record.setCompanyId(house.getCompanyId());
         record.setTransactionTime(transactionTime);
         record.setNotes("单笔收费");
 

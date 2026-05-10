@@ -49,7 +49,6 @@ public class PrStandardVo implements Serializable {
     private String moneyFormula;
     private BigDecimal maxMoney;
     private String orgId;
-    private String companyId;
     private String priceFormula;
     private String itemName;
     private Date createTime;

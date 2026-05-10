@@ -36,10 +36,9 @@ public class DashboardController {
     /** 统计概览 — 基础统计 + 缴费统计 */
     @SaCheckLogin
     @GetMapping("/analytics/overview")
-    public R<Map<String, Object>> analyticsOverview(
-            @RequestParam(required = false) String companyId) {
+    public R<Map<String, Object>> analyticsOverview() {
         Long userId = LoginHelper.getUserId();
-        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, companyId, null, null);
+        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, null, null);
         Map<String, Object> result = new LinkedHashMap<>();
         // Block 1: 基础统计
         result.put("orgNum", full.get("orgNum"));
@@ -68,10 +67,9 @@ public class DashboardController {
     /** 聚合统计 — 返回全部 6 个 Block 数据 */
     @SaCheckLogin
     @GetMapping("/analytics/summary")
-    public R<Map<String, Object>> analyticsSummary(
-            @RequestParam(required = false) String companyId) {
+    public R<Map<String, Object>> analyticsSummary() {
         Long userId = LoginHelper.getUserId();
-        return R.ok(sysHomeService.aggregateHomeData(userId, companyId, null, null));
+        return R.ok(sysHomeService.aggregateHomeData(userId, null, null));
     }
 
     // ==================== 热量平衡 ====================
@@ -79,11 +77,9 @@ public class DashboardController {
     /** 热量平衡总览 — Block 4 (温度/热量) + Block 6 (换热站) */
     @SaCheckLogin
     @GetMapping("/balance/overview")
-    public R<Map<String, Object>> heatBalanceOverview(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String stationId) {
+    public R<Map<String, Object>> heatBalanceOverview(@RequestParam(required = false) String stationId) {
         Long userId = LoginHelper.getUserId();
-        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, companyId, stationId, null);
+        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, stationId, null);
         Map<String, Object> result = new LinkedHashMap<>();
         // Block 4: 温度/热量
         result.put("valveArchiveOut", full.get("valveArchiveOut"));
@@ -106,10 +102,9 @@ public class DashboardController {
     @SaCheckLogin
     @GetMapping("/balance/station/{stationId}")
     public R<Map<String, Object>> stationHeatBalance(
-            @PathVariable String stationId,
-            @RequestParam(required = false) String companyId) {
+            @PathVariable String stationId) {
         Long userId = LoginHelper.getUserId();
-        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, companyId, stationId, null);
+        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, stationId, null);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("stationData", full.get("stationData"));
         result.put("valveArchiveOut", full.get("valveArchiveOut"));
@@ -125,13 +120,11 @@ public class DashboardController {
     /** 能耗分析 — Block 4 热量数据 */
     @SaCheckLogin
     @GetMapping("/energy/analysis")
-    public R<Map<String, Object>> energyAnalysis(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String buildingId,
+    public R<Map<String, Object>> energyAnalysis(@RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String beginDate,
             @RequestParam(required = false) String endDate) {
         Long userId = LoginHelper.getUserId();
-        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, companyId, null, null);
+        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, null, null);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("hotArchiveTotal", full.get("hotArchiveTotal"));
         result.put("hotArchiveTotalAll", full.get("hotArchiveTotalAll"));
@@ -147,12 +140,10 @@ public class DashboardController {
     /** 楼栋能耗 — Block 1 楼栋数据 */
     @SaCheckLogin
     @GetMapping("/energy/buildings")
-    public R<Map<String, Object>> buildingEnergyList(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String beginDate,
+    public R<Map<String, Object>> buildingEnergyList(@RequestParam(required = false) String beginDate,
             @RequestParam(required = false) String endDate) {
         Long userId = LoginHelper.getUserId();
-        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, companyId, null, null);
+        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, null, null);
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("buildingNum", full.get("buildingNum"));
         result.put("buildingAllNum", full.get("buildingAllNum"));
@@ -166,11 +157,9 @@ public class DashboardController {
     /** 实时设备数据 — Block 2 (阀门/户表) + Block 3 (单元表/温采器/DTU) */
     @SaCheckLogin
     @GetMapping("/realtime/devices")
-    public R<Map<String, Object>> realtimeDevices(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String stationId) {
+    public R<Map<String, Object>> realtimeDevices(@RequestParam(required = false) String stationId) {
         Long userId = LoginHelper.getUserId();
-        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, companyId, stationId, null);
+        Map<String, Object> full = sysHomeService.aggregateHomeData(userId, stationId, null);
         Map<String, Object> result = new LinkedHashMap<>();
         // Block 2: 阀门/户表
         result.put("valveNum", full.get("valveNum"));
@@ -201,14 +190,10 @@ public class DashboardController {
     /** 实时告警 — 从 HtAlert 表查询最近告警 */
     @SaCheckLogin
     @GetMapping("/realtime/alerts")
-    public R<List<Map<String, Object>>> realtimeAlerts(
-            @RequestParam(required = false) String companyId) {
+    public R<List<Map<String, Object>>> realtimeAlerts() {
         LambdaQueryWrapper<HtAlert> wrapper = new LambdaQueryWrapper<HtAlert>()
             .orderByDesc(HtAlert::getCreateTime)
             .last("LIMIT 50");
-        if (companyId != null && !companyId.isEmpty()) {
-            wrapper.eq(HtAlert::getCompanyId, companyId);
-        }
         List<HtAlert> alerts = htAlertService.list(wrapper);
         List<Map<String, Object>> result = alerts.stream().map(a -> {
             Map<String, Object> m = new LinkedHashMap<>();

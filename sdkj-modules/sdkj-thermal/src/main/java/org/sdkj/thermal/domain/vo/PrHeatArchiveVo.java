@@ -17,7 +17,6 @@ public class PrHeatArchiveVo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Long id;
-    private String companyId;
     private String orgId;
     private String orgName;
     private String buildingName;

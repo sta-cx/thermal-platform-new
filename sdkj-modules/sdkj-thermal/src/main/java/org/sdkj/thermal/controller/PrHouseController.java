@@ -53,9 +53,8 @@ public class PrHouseController extends BaseController {
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) String companyId,
             PageQuery pageQuery) {
-        return houseService.selectPageList(search, buildingId, orgId, status, companyId, pageQuery);
+        return houseService.selectPageList(search, buildingId, orgId, status, pageQuery);
     }
 
     /**
@@ -162,10 +161,8 @@ public class PrHouseController extends BaseController {
     @SaCheckPermission("thermal:property:house:list")
     @SaCheckLogin
     @GetMapping("/byOrg")
-    public R<List<PrHouseVo>> listByOrg(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId) {
-        return R.ok(houseService.selectByOrg(companyId, orgId));
+    public R<List<PrHouseVo>> listByOrg(@RequestParam(required = false) String orgId) {
+        return R.ok(houseService.selectByOrg(orgId));
     }
 
     /**
@@ -176,14 +173,12 @@ public class PrHouseController extends BaseController {
     @SaCheckPermission("thermal:property:house:list")
     @SaCheckLogin
     @GetMapping("/byType")
-    public R<List<PrHouseVo>> listByType(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrHouseVo>> listByType(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String stationId,
             @RequestParam(required = false) List<String> types) {
-        return R.ok(houseService.selectByType(companyId, orgId, buildingId, unitCode, stationId, types));
+        return R.ok(houseService.selectByType(orgId, buildingId, unitCode, stationId, types));
     }
 
     /**
@@ -194,14 +189,12 @@ public class PrHouseController extends BaseController {
     @SaCheckPermission("thermal:property:house:list")
     @SaCheckLogin
     @GetMapping("/valveAndHot")
-    public R<List<PrHouseVo>> listByValveAndHot(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrHouseVo>> listByValveAndHot(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String stationId,
             @RequestParam(required = false) List<String> types) {
-        return R.ok(houseService.selectByValveAndHotType(companyId, orgId, buildingId, unitCode, stationId, types));
+        return R.ok(houseService.selectByValveAndHotType(orgId, buildingId, unitCode, stationId, types));
     }
 
     /**
@@ -214,12 +207,11 @@ public class PrHouseController extends BaseController {
     @Log(title = "房屋信息-导出", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response,
-                       @RequestParam(required = false) String companyId,
                        @RequestParam(required = false) String orgId,
                        @RequestParam(required = false) String buildingId,
                        @RequestParam(required = false) String status,
                        @RequestParam(required = false) String search) throws IOException {
-        List<PrHouseVo> list = houseService.selectAllForExport(companyId, orgId, buildingId, status, search);
+        List<PrHouseVo> list = houseService.selectAllForExport(orgId, buildingId, status, search);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("房屋基础数据", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
@@ -304,15 +296,13 @@ public class PrHouseController extends BaseController {
     @SaCheckPermission("thermal:property:house:list")
     @SaCheckLogin
     @GetMapping("/payStatus")
-    public TableDataInfo<PrHouseVo> listByPayStatus(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHouseVo> listByPayStatus(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String payStatus,
             @RequestParam(required = false) String search,
             PageQuery pageQuery) {
-        return houseService.selectByPayStatus(companyId, orgId, buildingId, status, payStatus, search, pageQuery);
+        return houseService.selectByPayStatus(orgId, buildingId, status, payStatus, search, pageQuery);
     }
 
     /**
@@ -323,14 +313,12 @@ public class PrHouseController extends BaseController {
     @SaCheckPermission("thermal:property:house:list")
     @SaCheckLogin
     @GetMapping("/multiSearch")
-    public TableDataInfo<PrHouseVo> multiSearch(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHouseVo> multiSearch(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String search,
             PageQuery pageQuery) {
-        return houseService.selectByMultiSearch(companyId, orgId, buildingId, type, search, pageQuery);
+        return houseService.selectByMultiSearch(orgId, buildingId, type, search, pageQuery);
     }
 
     /**
@@ -367,11 +355,9 @@ public class PrHouseController extends BaseController {
     @SaCheckPermission("thermal:property:house:list")
     @SaCheckLogin
     @GetMapping("/isolated")
-    public R<List<PrHouseVo>> queryIsolatedHouses(
-            @RequestParam String companyId,
-            @RequestParam String orgId,
+    public R<List<PrHouseVo>> queryIsolatedHouses(@RequestParam String orgId,
             @RequestParam(required = false) String buildingId) {
-        return R.ok(houseService.queryIsolatedHouses(companyId, orgId, buildingId));
+        return R.ok(houseService.queryIsolatedHouses(orgId, buildingId));
     }
 
     /**
@@ -385,9 +371,8 @@ public class PrHouseController extends BaseController {
     @PutMapping("/isolated")
     public R<Void> setIsolatedHouses(
             @RequestBody List<PrHouse> houseList,
-            @RequestParam String companyId,
             @RequestParam String orgId,
             @RequestParam(required = false) String buildingId) {
-        return toAjax(houseService.setIsolatedHouses(houseList, companyId, orgId, buildingId));
+        return toAjax(houseService.setIsolatedHouses(houseList, orgId, buildingId));
     }
 }

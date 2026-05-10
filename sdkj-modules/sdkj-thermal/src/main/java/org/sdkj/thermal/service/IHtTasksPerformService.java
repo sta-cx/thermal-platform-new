@@ -63,10 +63,9 @@ public interface IHtTasksPerformService extends IService<HtTasksPerform> {
      * 批量创建阀门控制任务并保存
      * @param archives 阀门配表信息列表
      * @param orgId 组织ID
-     * @param companyId 公司ID
      * @param instruction 指令值 (100=开阀, 0=关阀)
      */
-    boolean batchCreateValveControlTasks(List<ValveArchiveInfo> archives, String orgId, String companyId, int instruction);
+    boolean batchCreateValveControlTasks(List<ValveArchiveInfo> archives, String orgId, int instruction);
 
     /**
      * 批量保存任务执行记录
@@ -111,8 +110,7 @@ public interface IHtTasksPerformService extends IService<HtTasksPerform> {
     /**
      * 查询并执行所有待发送的指令（全局）
      * 从旧系统 getNonExecutionNew 移植
-     * @param companyId 公司ID
      * @param orgId 小区ID（可逗号分隔多个）
      */
-    void executePendingCommands(String companyId, String orgId);
+    void executePendingCommands(String orgId);
 }

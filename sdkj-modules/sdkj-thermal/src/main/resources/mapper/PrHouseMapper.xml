@@ -22,8 +22,7 @@
     <!-- 查询孤岛户列表 -->
     <select id="queryIsolatedHouses" resultType="org.sdkj.thermal.domain.PrHouse">
         SELECT h.* FROM pr_house h
-        WHERE h.company_id = #{companyId}
-          AND h.org_id = #{orgId}
+        WHERE h.org_id = #{orgId}
           AND h.building_id = #{buildingId}
           AND h.del_flag = 0
           AND h.room_num REGEXP '^[0-9]+-[0-9]+-[0-9]+$'
@@ -47,8 +46,7 @@
         SET site_type = NULL,
             site_type_old = site_type,
             update_time = NOW()
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
           AND building_id = #{buildingId}
           AND del_flag = 0
     </update>

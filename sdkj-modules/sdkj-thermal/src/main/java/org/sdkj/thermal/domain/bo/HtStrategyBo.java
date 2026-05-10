@@ -31,8 +31,6 @@ public class HtStrategyBo extends BaseEntity {
     /** 策略类型(前端 UI 已下线,值域待业务方确认) */
     private Integer type;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 备注 */
     private String remark;

@@ -161,8 +161,6 @@ public class PrHeatHotArchiveBo extends BaseEntity {
     /** 房屋ID */
     private Long houseId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 小区ID */
     private String orgId;

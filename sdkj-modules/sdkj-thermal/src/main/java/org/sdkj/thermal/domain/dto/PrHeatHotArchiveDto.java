@@ -26,7 +26,6 @@ public class PrHeatHotArchiveDto implements Serializable {
     private Integer meterSerial;
     private Long houseId;
     private String orgId;
-    private String companyId;
     private String valveStatus;
     private Integer settingStatus;
     private Integer actualStatus;

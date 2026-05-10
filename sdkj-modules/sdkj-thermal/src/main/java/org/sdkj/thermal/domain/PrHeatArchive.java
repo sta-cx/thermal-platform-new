@@ -25,8 +25,6 @@ public class PrHeatArchive extends BaseEntity {
     @TableId(value = "id")
     private Long id;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 小区ID */
     private String orgId;

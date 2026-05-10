@@ -26,9 +26,9 @@ public class PrUserServiceImpl extends ServiceImpl<PrUserMapper, PrUser> impleme
     private final PrUserMapper baseMapper;
 
     @Override
-    public TableDataInfo<PrUserVo> selectPageList(String companyId, PageQuery pageQuery) {
+    public TableDataInfo<PrUserVo> selectPageList(PageQuery pageQuery) {
         Page<PrUserVo> page = pageQuery.build();
-        baseMapper.selectPageList(page, companyId);
+        baseMapper.selectPageList(page);
         return TableDataInfo.build(page);
     }
 

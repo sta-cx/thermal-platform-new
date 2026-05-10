@@ -47,7 +47,6 @@ public class PrUserVo implements Serializable {
     @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String emerPhone;
     private String orgId;
-    private String companyId;
     private String seq;
     private String headPhoto;
     private String frontPhoto;

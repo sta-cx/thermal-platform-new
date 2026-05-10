@@ -19,5 +19,4 @@ public class PrWechatBindRecord extends BaseEntity {
     private Long houseId;
     private String heatPayCode;
     private String wxOpenId;
-    private String companyId;
 }

@@ -40,10 +40,9 @@ public class PrHeatDtuArchiveServiceImpl extends ServiceImpl<PrHeatDtuArchiveMap
     }
 
     @Override
-    public TableDataInfo<PrHeatDtuArchiveVo> selectPageList(String companyId, String orgId, String search,
+    public TableDataInfo<PrHeatDtuArchiveVo> selectPageList(String orgId, String search,
                                                              String status, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatDtuArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatDtuArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatDtuArchive::getOrgId, orgId);
         if (StringUtils.isNotBlank(search)) {
             lqw.like(PrHeatDtuArchive::getDtuNum, search.trim());
@@ -59,23 +58,22 @@ public class PrHeatDtuArchiveServiceImpl extends ServiceImpl<PrHeatDtuArchiveMap
     @Transactional(rollbackFor = Exception.class)
     public Boolean queryMeter(PrHeatDtuArchiveBo bo) {
         String createBy = StpUtil.getLoginIdAsString();
-        String companyId = bo.getCompanyId();
         String orgId = bo.getOrgId();
         String dtuNum = bo.getDtuNum();
 
         boolean result = true;
 
         // 生成户阀查询指令
-        result = baseMapper.setTasksPerformValve(companyId, orgId, dtuNum, createBy) && result;
+        result = baseMapper.setTasksPerformValve(orgId, dtuNum, createBy) && result;
 
         // 生成单元阀查询指令
-        result = baseMapper.setTasksPerformUnitValve(companyId, orgId, dtuNum, createBy) && result;
+        result = baseMapper.setTasksPerformUnitValve(orgId, dtuNum, createBy) && result;
 
         // 生成热表查询指令
-        result = baseMapper.setTasksPerformHot(companyId, orgId, dtuNum, createBy) && result;
+        result = baseMapper.setTasksPerformHot(orgId, dtuNum, createBy) && result;
 
         // 生成单元热表查询指令
-        result = baseMapper.setTasksPerformUnitHot(companyId, orgId, dtuNum, createBy) && result;
+        result = baseMapper.setTasksPerformUnitHot(orgId, dtuNum, createBy) && result;
 
         return result;
     }
@@ -101,9 +99,8 @@ public class PrHeatDtuArchiveServiceImpl extends ServiceImpl<PrHeatDtuArchiveMap
     // ========== 批量操作实现 ==========
 
     @Override
-    public List<PrHeatDtuArchiveVo> listAll(String companyId, String orgId) {
+    public List<PrHeatDtuArchiveVo> listAll(String orgId) {
         LambdaQueryWrapper<PrHeatDtuArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatDtuArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatDtuArchive::getOrgId, orgId);
         lqw.orderByDesc(PrHeatDtuArchive::getCreateTime);
         return baseMapper.selectVoList(lqw);
@@ -156,7 +153,6 @@ public class PrHeatDtuArchiveServiceImpl extends ServiceImpl<PrHeatDtuArchiveMap
             entity.setLatestTime(dto.getLatestTime());
             entity.setLastTime(dto.getLastTime());
             entity.setOrgId(dto.getOrgId());
-            entity.setCompanyId(dto.getCompanyId());
             save(entity);
             successCount++;
         }

@@ -146,9 +146,6 @@ public class PrImportUnitValve {
     /**
      * 所属物业公司id
      */
-    @ExcelIgnore
-    private String companyId;
-
     /**
      * 创建者
      */

@@ -26,10 +26,9 @@ public interface IHtRepairService extends IService<HtRepair> {
 
     /**
      * 按报修类型统计数量
-     * @param companyId 公司ID
      * @return 类型统计列表 [{repairType, count}]
      */
-    List<Map<String, Object>> selectTypeCount(String companyId);
+    List<Map<String, Object>> selectTypeCount();
 
     /**
      * 根据房间ID查询报修记录
@@ -41,10 +40,9 @@ public interface IHtRepairService extends IService<HtRepair> {
     /**
      * 逻辑删除报修记录
      * @param repairNo 报修编号
-     * @param companyId 公司ID
      * @return 影响行数
      */
-    int markAsDeleted(String repairNo, String companyId);
+    int markAsDeleted(String repairNo);
 
     /**
      * 生成报修编号

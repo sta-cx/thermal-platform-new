@@ -42,9 +42,8 @@ public class PrImportHeatTempController extends BaseController {
     @SaCheckLogin
     @GetMapping("/template")
     public void downloadTemplate(HttpServletResponse response,
-                                  @RequestParam String companyId,
                                   @RequestParam String orgId) throws IOException {
-        List<PrImportHeatTemp> lists = service.selectByCompanyIdOrgId(companyId, orgId);
+        List<PrImportHeatTemp> lists = service.selectByOrgId(orgId);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("温度采集器导入", StandardCharsets.UTF_8).replaceAll("\\+", "%20");

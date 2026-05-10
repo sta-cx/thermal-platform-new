@@ -37,7 +37,6 @@ public class PrHeatDtuArchiveVo implements Serializable {
 
     private String orgId;
 
-    private String companyId;
 
     /** 控制范围（非数据库字段） */
     private String controlRange;

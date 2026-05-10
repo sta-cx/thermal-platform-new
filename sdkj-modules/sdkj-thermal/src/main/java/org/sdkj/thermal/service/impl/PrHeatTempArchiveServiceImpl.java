@@ -49,11 +49,10 @@ public class PrHeatTempArchiveServiceImpl extends ServiceImpl<PrHeatTempArchiveM
     }
 
     @Override
-    public TableDataInfo<PrHeatTempArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatTempArchiveVo> selectPageList(String orgId, String buildingId,
                                                               String unit, String search, String parentId,
                                                               PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatTempArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatTempArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatTempArchive::getOrgId, orgId);
         // parentId maps to houseId for this entity
         lqw.eq(StringUtils.isNotBlank(parentId), PrHeatTempArchive::getHouseId, parentId);
@@ -89,15 +88,14 @@ public class PrHeatTempArchiveServiceImpl extends ServiceImpl<PrHeatTempArchiveM
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean valveInformationSynchronization(String orgId, String companyId) {
+    public boolean valveInformationSynchronization(String orgId) {
         // 1. 查询该小区下所有有效温采器档案
         LambdaQueryWrapper<PrHeatTempArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatTempArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatTempArchive::getOrgId, orgId);
         lqw.eq(PrHeatTempArchive::getIsChanged, 0);
         List<PrHeatTempArchive> archives = list(lqw);
         if (archives.isEmpty()) {
-            log.info("同步-未找到温采器档案数据, orgId={}, companyId={}", orgId, companyId);
+            log.info("同步-未找到温采器档案数据, orgId={}", orgId);
             return false;
         }
 
@@ -113,7 +111,6 @@ public class PrHeatTempArchiveServiceImpl extends ServiceImpl<PrHeatTempArchiveM
             item.set("imeiNum", archive.getImeiNum());
             item.set("deviceId", archive.getDeviceId());
             item.set("orgId", archive.getOrgId());
-            item.set("companyId", archive.getCompanyId());
             dataArray.add(item);
         }
 
@@ -134,15 +131,14 @@ public class PrHeatTempArchiveServiceImpl extends ServiceImpl<PrHeatTempArchiveM
             }
         }
 
-        log.info("同步户温采器信息到采集平台, orgId={}, companyId={}, count={}, result={}",
-            orgId, companyId, archives.size(), result);
+        log.info("同步户温采器信息到采集平台, orgId={}, count={}, result={}",
+            orgId, archives.size(), result);
         return result;
     }
 
     @Override
-    public List<PrHeatTempArchiveVo> listSyncData(String companyId, String orgId) {
+    public List<PrHeatTempArchiveVo> listSyncData(String orgId) {
         LambdaQueryWrapper<PrHeatTempArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatTempArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatTempArchive::getOrgId, orgId);
         lqw.eq(PrHeatTempArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatTempArchive::getCreateTime);
@@ -150,9 +146,8 @@ public class PrHeatTempArchiveServiceImpl extends ServiceImpl<PrHeatTempArchiveM
     }
 
     @Override
-    public List<PrHeatTempArchiveVo> listAll(String companyId, String orgId) {
+    public List<PrHeatTempArchiveVo> listAll(String orgId) {
         LambdaQueryWrapper<PrHeatTempArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatTempArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatTempArchive::getOrgId, orgId);
         lqw.eq(PrHeatTempArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatTempArchive::getCreateTime);
@@ -207,7 +202,6 @@ public class PrHeatTempArchiveServiceImpl extends ServiceImpl<PrHeatTempArchiveM
             entity.setDeviceId(dto.getDeviceId());
             entity.setHouseId(dto.getHouseId());
             entity.setOrgId(dto.getOrgId());
-            entity.setCompanyId(dto.getCompanyId());
             entity.setIsChanged(0);
             entity.setIsStop(0);
             entity.setValveStatus(dto.getValveStatus());

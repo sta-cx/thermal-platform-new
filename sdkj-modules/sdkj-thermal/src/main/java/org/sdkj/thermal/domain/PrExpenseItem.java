@@ -63,8 +63,6 @@ public class PrExpenseItem extends BaseEntity {
     /** 小区id */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 收费标准数量（非数据库字段） */
     private Integer num;

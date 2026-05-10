@@ -7,7 +7,7 @@
         meter_serial, meter_num, card_num, concentrator_code, install_site,
         standard_id, standard_name, standard_price, start_reading, current_reading,
         total_used, trade_times, total_money, total_recharge, current_balance,
-        company_id, create_by, type, create_time, imei, device_id, install_type,
+        create_by, type, create_time, imei, device_id, install_type,
         dtu_num, dtu_type, chan_num, archive_id, meter_arc_code
     </sql>
 
@@ -16,7 +16,7 @@
         (org_name, building_name, room_num, meter_name, meter_serial, meter_num,
          card_num, dtu_num, dtu_type, chan_num, concentrator_code, install_site,
          start_reading, current_reading, total_used, trade_times, total_money,
-         total_recharge, current_balance, company_id, create_by, type, create_time,
+         total_recharge, current_balance, create_by, type, create_time,
          imei, install_type, device_id)
         values
         <foreach collection="list" item="item" separator=",">
@@ -26,7 +26,7 @@
              trim(#{item.chanNum}), trim(#{item.concentratorCode}), trim(#{item.installSite}),
              trim(#{item.startReading}), trim(#{item.currentReading}), trim(#{item.totalUsed}),
              trim(#{item.tradeTimes}), trim(#{item.totalMoney}), trim(#{item.totalRecharge}),
-             trim(#{item.currentBalance}), trim(#{item.companyId}), trim(#{item.createBy}),
+             trim(#{item.currentBalance}), trim(#{item.createBy}),
              trim(#{item.type}), trim(#{item.createTime}), trim(#{item.imei}),
              trim(#{item.installType}), trim(#{item.deviceId}))
         </foreach>
@@ -37,10 +37,8 @@
             left join pr_house b on a.room_num = b.room_num
         set a.house_id = b.id,
             a.org_id = b.org_id
-        where a.company_id = #{companyId}
-          and a.type = '0'
+        where a.type = '0'
           and a.create_by = #{create}
-          and b.company_id = #{companyId}
           and b.del_flag = '0'
           and a.room_num = b.room_num
           and a.building_name = b.building_name
@@ -49,12 +47,11 @@
 
     <update id="updateMeter">
         update pr_import_heat a
-            left join mt_meter_match b on a.company_id = b.company_id
+            left join mt_meter_match b on 1=1
             left join mt_heat_archive mha on b.archive_id = mha.id
         set a.meter_arc_code = mha.code,
             a.archive_id = mha.id
-        where a.company_id = #{companyId}
-          and a.create_by = #{create}
+        where a.create_by = #{create}
           and a.type = '0'
           and b.meter_type = '03'
           and a.meter_name = mha.name
@@ -64,13 +61,10 @@
         update pr_import_heat a
             left join pr_standard b on a.standard_name = b.name
                 and a.standard_price = b.standard_price
-                and a.company_id = b.company_id
                 and a.org_id = b.org_id
         set a.standard_id = b.id
-        where a.company_id = #{companyId}
-          and a.type = '0'
+        where a.type = '0'
           and a.create_by = #{create}
-          and b.company_id = #{companyId}
           and a.org_id = b.org_id
           and a.standard_price = b.standard_price
           and length(a.standard_name) &gt; 0
@@ -79,8 +73,7 @@
     <select id="selectNoHouseId" resultType="org.sdkj.thermal.domain.PrImportHeat">
         select <include refid="Base_Column_List"/>
         from pr_import_heat
-        where company_id = #{companyId}
-          and type = '0'
+        where type = '0'
           and create_by = #{create}
           and (house_id is null or org_id is null)
         limit 500
@@ -89,8 +82,7 @@
     <select id="selectNoMeterNum" resultType="org.sdkj.thermal.domain.PrImportHeat">
         select *
         from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
           and (meter_num is null or meter_num = '')
         limit 500
@@ -99,15 +91,13 @@
     <select id="selectRepateMeterNum" resultType="org.sdkj.thermal.domain.PrImportHeat">
         select <include refid="Base_Column_List"/>
         from pr_import_heat
-        where company_id = #{companyId}
-          and type = '0'
+        where type = '0'
           and create_by = #{create}
           and meter_num in (
             select meter_num from (
                 select meter_num, count(1) as cc
                 from pr_import_heat
-                where company_id = #{companyId}
-                  and type = '0'
+                where type = '0'
                   and create_by = #{create}
                 group by meter_num
                 having cc > 1
@@ -118,8 +108,7 @@
     <select id="findNoArchiveId" resultType="org.sdkj.thermal.domain.PrImportHeat">
         select <include refid="Base_Column_List"/>
         from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
           and archive_id is null
         limit 500
@@ -128,8 +117,7 @@
     <select id="findNoStandardId" resultType="org.sdkj.thermal.domain.PrImportHeat">
         select <include refid="Base_Column_List"/>
         from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
           and standard_id is null
           and length(standard_name) &gt; 0
@@ -138,8 +126,7 @@
     <select id="findErrorMoney" resultType="org.sdkj.thermal.domain.PrImportHeat">
         select <include refid="Base_Column_List"/>
         from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
           and (total_recharge != '0' or total_money != '0' or current_balance != '0')
           and (total_money + current_balance) &lt;&gt; total_recharge
@@ -148,8 +135,7 @@
     <select id="selectMeterSerial" resultType="org.sdkj.thermal.domain.PrImportHeat">
         select *, count(1) as cc
         from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
         group by house_id, meter_serial
         having (cc mod 2) &lt;&gt; 0
@@ -160,8 +146,7 @@
     <select id="selectNumericalErrors" resultType="org.sdkj.thermal.domain.PrImportHeat">
         select *
         from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
           and current_reading &lt; start_reading
         limit 500
@@ -171,8 +156,7 @@
         select a.*
         from pr_import_heat a
             left join pr_heat_hot_archive b on a.house_id = b.house_id
-        where a.company_id = #{companyId}
-          and a.create_by = #{create}
+        where a.create_by = #{create}
           and a.type = '0'
           and a.house_id = b.house_id
           and b.is_changed = '0'
@@ -184,8 +168,7 @@
         from pr_import_heat a
             left join pr_heat_hot_archive b on a.archive_id = b.archive_id
                 and a.meter_num = b.meter_num
-        where a.company_id = #{companyId}
-          and a.create_by = #{create}
+        where a.create_by = #{create}
           and a.type = '0'
           and a.archive_id = b.archive_id
           and a.meter_num = b.meter_num
@@ -196,37 +179,34 @@
     <select id="select" resultType="int">
         select count(1)
         from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
     </select>
 
-    <select id="selectByCompanyIdOrgId" resultType="org.sdkj.thermal.domain.PrImportHeat">
+    <select id="selectByOrgId" resultType="org.sdkj.thermal.domain.PrImportHeat">
         select org_name, building_name, room_num
         from pr_house
-        where company_id = #{companyId}
-          and org_id = #{orgId}
+        where org_id = #{orgId}
           and del_flag = '0'
         order by org_name, building_name, room_num
     </select>
 
     <delete id="deleteData">
         delete from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
     </delete>
 
     <insert id="submitData">
         insert into pr_heat_hot_archive
-        (id, company_id, org_id, house_id, archive_id, meter_arc_code, meter_arc_name,
+        (id, org_id, house_id, archive_id, meter_arc_code, meter_arc_name,
          meter_num, card_num, imei_num, dtu_num, dtu_type, chan_num, device_id,
          meter_serial, concentrator_code, install_site, standard_id, standard_price,
          opened_time, create_by, create_time, start_reading, current_reading,
          total_used, trade_times, total_money, total_recharge, current_balance,
          install_type, is_steps)
         select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
-               company_id, org_id, house_id, archive_id, meter_arc_code, meter_name,
+               org_id, house_id, archive_id, meter_arc_code, meter_name,
                meter_num, card_num, imei, dtu_num, dtu_type, chan_num, device_id,
                meter_serial, concentrator_code, install_site, standard_id, standard_price,
                opened_time, create_by, create_time, start_reading, current_reading,
@@ -234,8 +214,7 @@
                ifnull(total_recharge, 0), ifnull(current_balance, 0),
                install_type, '0'
         from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
           and house_id is not null
           and archive_id is not null
@@ -243,28 +222,23 @@
 
     <delete id="deleteImportHeatData">
         delete from pr_import_heat
-        where company_id = #{companyId}
-          and create_by = #{create}
+        where create_by = #{create}
     </delete>
 
     <delete id="deleteHeatByNoHouseId">
         delete a
         from pr_heat_hot_archive a
             left join pr_house b on b.id = a.house_id
-                and b.company_id = #{companyId}
                 and b.org_id in (
                     select distinct org_id
                     from pr_import_heat
-                    where company_id = #{companyId}
-                      and create_by = #{create}
+                    where create_by = #{create}
                       and type = '0'
                 )
-        where a.company_id = #{companyId}
-          and a.org_id in (
+        where a.org_id in (
               select distinct org_id
               from pr_import_heat
-              where company_id = #{companyId}
-                and create_by = #{create}
+              where create_by = #{create}
                 and type = '0'
           )
           and a.house_id is not null

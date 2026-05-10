@@ -59,8 +59,6 @@ public class HtAlertBo extends BaseEntity {
     /** 组织ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 是否在维修中 */
     private Integer inMaintenance;

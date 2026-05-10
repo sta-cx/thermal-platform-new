@@ -6,14 +6,22 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.thermal.domain.PrBuilding;
 import org.sdkj.thermal.domain.PrUnit;
+import org.sdkj.thermal.domain.SysOrganization;
 import org.sdkj.thermal.domain.vo.PrUnitVo;
+import org.sdkj.thermal.mapper.PrBuildingMapper;
+import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrUnitMapper;
 import org.sdkj.thermal.service.IPrUnitService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 单元信息 Service 实现
@@ -24,6 +32,8 @@ import java.util.List;
 public class PrUnitServiceImpl extends ServiceImpl<PrUnitMapper, PrUnit> implements IPrUnitService {
 
     private final PrUnitMapper baseMapper;
+    private final PrBuildingMapper buildingMapper;
+    private final PrCompanyMapper prCompanyMapper;
 
     @Override
     public PrUnitVo selectById(java.io.Serializable id) {
@@ -45,6 +55,7 @@ public class PrUnitServiceImpl extends ServiceImpl<PrUnitMapper, PrUnit> impleme
         }
         lqw.orderByAsc(PrUnit::getSeq).orderByDesc(PrUnit::getCreateTime);
         Page<PrUnitVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        fillAssociatedNames(result.getRecords());
         return TableDataInfo.build(result);
     }
 
@@ -76,6 +87,31 @@ public class PrUnitServiceImpl extends ServiceImpl<PrUnitMapper, PrUnit> impleme
     @Transactional(rollbackFor = Exception.class)
     public boolean removeById(java.io.Serializable id) {
         return super.removeById(id);
+    }
+
+    private void fillAssociatedNames(List<PrUnitVo> list) {
+        if (list == null || list.isEmpty()) return;
+
+        Set<Long> buildingIds = list.stream()
+            .map(PrUnitVo::getBuildingId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        if (!buildingIds.isEmpty()) {
+            Map<Long, String> buildingNameMap = buildingMapper.selectBatchIds(buildingIds).stream()
+                .collect(Collectors.toMap(PrBuilding::getId,
+                    b -> b.getName() != null ? b.getName() : "", (a, b) -> a));
+            list.forEach(vo -> vo.setBuildingName(buildingNameMap.getOrDefault(vo.getBuildingId(), "")));
+        }
+
+        Set<String> orgIds = list.stream()
+            .map(PrUnitVo::getOrgId)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        if (!orgIds.isEmpty()) {
+            Map<String, String> orgNameMap = prCompanyMapper.selectOrgByIds(orgIds).stream()
+                .collect(Collectors.toMap(SysOrganization::getId, SysOrganization::getName, (a, b) -> a));
+            list.forEach(vo -> vo.setOrgName(orgNameMap.getOrDefault(vo.getOrgId(), "")));
+        }
     }
 
 }

@@ -21,5 +21,5 @@ public interface IPrImportUnitHeatService extends IService<PrImportUnitHeat> {
 
     Integer select();
 
-    List<PrImportUnitHeat> selectByCompanyIdOrgId(String companyId, String orgId);
+    List<PrImportUnitHeat> selectByOrgId(String orgId);
 }

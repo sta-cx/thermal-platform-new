@@ -4,7 +4,7 @@
 
     <select id="selectPageList" resultType="org.sdkj.thermal.domain.vo.PrTransactionRecordVo">
         SELECT r.id, r.serial_num, r.transaction_type, r.payment_type, r.amount,
-               r.paid_amount, r.status, r.house_id, r.user_id, r.org_id, r.company_id,
+               r.paid_amount, r.status, r.house_id, r.user_id, r.org_id,
                r.item_group, r.item_code, r.transaction_time, r.operator_id, r.notes,
                r.original_record_id, r.invoice_no,
                b.room_num, u.user_name
@@ -12,9 +12,6 @@
         LEFT JOIN pr_house b ON r.house_id = b.id
         LEFT JOIN pr_user u ON r.user_id = u.id
         WHERE 1=1
-        <if test="companyId != null and companyId != ''">
-            AND r.company_id = #{companyId}
-        </if>
         <if test="orgId != null and orgId != ''">
             AND r.org_id = #{orgId}
         </if>
@@ -71,7 +68,7 @@
             SUM(CASE WHEN status = 1 THEN 1 ELSE 0 END) AS revokedCount,
             SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) AS invalidCount
         FROM pr_transaction_record
-        WHERE company_id = #{companyId} AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
         <if test="startTime != null and startTime != ''">
             AND transaction_time &gt;= #{startTime}
         </if>
@@ -89,7 +86,7 @@
             SUM(CASE WHEN payment_type = 3 THEN paid_amount ELSE 0 END) AS alipayAmount,
             SUM(CASE WHEN payment_type = 4 THEN paid_amount ELSE 0 END) AS cardAmount
         FROM pr_transaction_record
-        WHERE company_id = #{companyId} AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
           AND transaction_type = 1 AND status = 0
         <if test="startTime != null and startTime != ''">
             AND transaction_time &gt;= #{startTime}
@@ -105,7 +102,7 @@
             COUNT(*) AS arrearsCount,
             SUM(e.receivable - e.paid_in) AS totalArrears
         FROM pr_expense e
-        WHERE e.company_id = #{companyId} AND e.org_id = #{orgId}
+        WHERE e.org_id = #{orgId}
           AND e.is_charged = 0 AND e.receivable > 0
     </select>
 
@@ -116,7 +113,7 @@
         FROM pr_transaction_record r
         LEFT JOIN pr_house b ON r.house_id = b.id
         LEFT JOIN pr_user u ON r.user_id = u.id
-        WHERE r.company_id = #{companyId} AND r.org_id = #{orgId}
+        WHERE r.org_id = #{orgId}
           AND DATE(r.transaction_time) = #{date}
           AND status = 0
         ORDER BY r.transaction_time ASC
@@ -135,8 +132,7 @@
         LEFT JOIN pr_user_house uh ON h.id = uh.house_id AND uh.del_flag = '0'
         LEFT JOIN pr_user u ON uh.user_id = u.id
         LEFT JOIN pr_expense_item ei ON ptd.item_code = ei.item_code
-        WHERE r.company_id = #{companyId}
-          AND r.del_flag = '0' AND r.status = 0
+        WHERE r.del_flag = '0' AND r.status = 0
           AND r.transaction_type = 2
         <if test="orgId != null and orgId != ''">AND r.org_id = #{orgId}</if>
         <if test="buildingId != null and buildingId != ''">AND h.building_id = #{buildingId}</if>
@@ -161,7 +157,6 @@
         WHERE ptd.item_group = '5' AND ptd.item_code = '02'
           AND r.transaction_type = 1 AND r.status = 0
           AND r.del_flag = '0'
-          AND r.company_id = #{companyId}
         <if test="orgId != null and orgId != ''">AND r.org_id = #{orgId}</if>
         <if test="buildingId != null and buildingId != ''">AND h.building_id = #{buildingId}</if>
         <if test="startTime != null and startTime != ''">AND r.transaction_time &gt;= #{startTime}</if>
@@ -185,7 +180,6 @@
         WHERE ptd.item_group = '5' AND ptd.item_code = '01'
           AND r.transaction_type = 1 AND r.status = 0
           AND r.del_flag = '0'
-          AND r.company_id = #{companyId}
         <if test="orgId != null and orgId != ''">AND r.org_id = #{orgId}</if>
         <if test="buildingId != null and buildingId != ''">AND h.building_id = #{buildingId}</if>
         <if test="startTime != null and startTime != ''">AND r.transaction_time &gt;= #{startTime}</if>
@@ -205,7 +199,7 @@
         LEFT JOIN pr_house h ON h.id = v.house_id
         LEFT JOIN pr_building d ON d.id = h.building_id
         LEFT JOIN sys_organization o ON a.org_id = o.id
-        WHERE a.company_id = #{companyId}
+        WHERE 1=1
         <if test="orgId != null and orgId != ''">AND a.org_id = #{orgId}</if>
         <if test="buildingId != null and buildingId != ''">AND h.building_id = #{buildingId}</if>
         <if test="type != null and type != ''">AND a.type = #{type}</if>
@@ -220,7 +214,7 @@
         SELECT s.id, s.user_name
         FROM pr_operate_card_log a
         LEFT JOIN sys_user s ON a.create_by = s.id
-        WHERE a.company_id = #{companyId}
+        WHERE 1=1
         <if test="orgId != null and orgId != ''">AND a.org_id = #{orgId}</if>
         GROUP BY a.create_by
     </select>
@@ -233,8 +227,7 @@
                SUM(e.deduction) AS deduction, SUM(e.qty) AS qty
         FROM pr_expense e
         LEFT JOIN pr_house h ON e.house_id = h.id
-        WHERE e.company_id = #{companyId}
-          AND e.is_charged = 0 AND e.del_flag = '0'
+        WHERE e.is_charged = 0 AND e.del_flag = '0'
         <if test="orgId != null and orgId != ''">AND e.org_id = #{orgId}</if>
         <if test="buildingId != null and buildingId != ''">AND h.building_id = #{buildingId}</if>
         <if test="search != null and search != ''">AND (h.room_num LIKE CONCAT('%',#{search},'%'))</if>
@@ -245,8 +238,7 @@
     <select id="selectThisMonthTotal" resultType="java.util.LinkedHashMap">
         SELECT ROUND(SUM(r.paid_amount), 2) AS paidIn
         FROM pr_transaction_record r
-        WHERE r.company_id = #{companyId}
-          AND r.del_flag = '0' AND r.transaction_type = 1 AND r.status = 0
+        WHERE r.del_flag = '0' AND r.transaction_type = 1 AND r.status = 0
           AND DATE_FORMAT(r.transaction_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
     </select>
 
@@ -254,8 +246,7 @@
         SELECT ptd.item_name AS itemName, SUM(ptd.amount) AS paidIn
         FROM pr_transaction_record_sub ptd
         LEFT JOIN pr_transaction_record r ON ptd.main_id = r.id
-        WHERE r.company_id = #{companyId}
-          AND r.del_flag = '0' AND r.transaction_type = 1 AND r.status = 0
+        WHERE r.del_flag = '0' AND r.transaction_type = 1 AND r.status = 0
           AND DATE_FORMAT(r.transaction_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
         GROUP BY ptd.item_name
     </select>
@@ -264,8 +255,7 @@
         SELECT r.item_group AS itemGroup, SUM(ptd.amount) AS paidIn, COUNT(1) AS qty
         FROM pr_transaction_record_sub ptd
         LEFT JOIN pr_transaction_record r ON ptd.main_id = r.id
-        WHERE r.company_id = #{companyId}
-          AND r.del_flag = '0' AND r.transaction_type = 1 AND r.status = 0
+        WHERE r.del_flag = '0' AND r.transaction_type = 1 AND r.status = 0
           AND DATE_FORMAT(r.transaction_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
         GROUP BY r.item_group
     </select>

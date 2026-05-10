@@ -28,12 +28,11 @@ public interface IPrHouseService extends IService<PrHouse> {
      * @param buildingId 楼宇ID
      * @param orgId 小区ID
      * @param status 房屋状态
-     * @param companyId 公司ID
      * @param pageQuery 分页参数
      * @return 分页结果
      */
     TableDataInfo<PrHouseVo> selectPageList(String search, String buildingId, String orgId,
-                                            String status, String companyId, PageQuery pageQuery);
+                                            String status, PageQuery pageQuery);
 
     /**
      * 校验房间号是否唯一
@@ -55,11 +54,10 @@ public interface IPrHouseService extends IService<PrHouse> {
 
     /**
      * 根据小区查询房屋列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 房屋列表
      */
-    List<PrHouseVo> selectByOrg(String companyId, String orgId);
+    List<PrHouseVo> selectByOrg(String orgId);
 
     /**
      * 查询用户关联的房屋数量
@@ -79,7 +77,6 @@ public interface IPrHouseService extends IService<PrHouse> {
 
     /**
      * 按类型筛选房屋列表（特殊户、收费状态等）
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param unitCode 单元编码
@@ -87,12 +84,11 @@ public interface IPrHouseService extends IService<PrHouse> {
      * @param types 类型列表（1=特殊户, 2=非特殊户, 3=已收费, 4=未收费）
      * @return 房屋列表
      */
-    List<PrHouseVo> selectByType(String companyId, String orgId, String buildingId,
+    List<PrHouseVo> selectByType(String orgId, String buildingId,
                                  String unitCode, String stationId, List<String> types);
 
     /**
      * 按阀门和供热类型筛选房屋列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param unitCode 单元编码
@@ -100,19 +96,18 @@ public interface IPrHouseService extends IService<PrHouse> {
      * @param types 类型列表
      * @return 房屋列表
      */
-    List<PrHouseVo> selectByValveAndHotType(String companyId, String orgId, String buildingId,
+    List<PrHouseVo> selectByValveAndHotType(String orgId, String buildingId,
                                             String unitCode, String stationId, List<String> types);
 
     /**
      * 查询所有房屋（用于导出）
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param status 状态
      * @param search 搜索关键字
      * @return 房屋列表
      */
-    List<PrHouseVo> selectAllForExport(String companyId, String orgId, String buildingId,
+    List<PrHouseVo> selectAllForExport(String orgId, String buildingId,
                                        String status, String search);
 
     /**
@@ -124,7 +119,6 @@ public interface IPrHouseService extends IService<PrHouse> {
 
     /**
      * 通过缴费状态查询房屋
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param status 房屋状态
@@ -133,12 +127,11 @@ public interface IPrHouseService extends IService<PrHouse> {
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<PrHouseVo> selectByPayStatus(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHouseVo> selectByPayStatus(String orgId, String buildingId,
                                                String status, String payStatus, String search, PageQuery pageQuery);
 
     /**
      * 多条件综合搜索房屋
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param type 类型
@@ -146,7 +139,7 @@ public interface IPrHouseService extends IService<PrHouse> {
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<PrHouseVo> selectByMultiSearch(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHouseVo> selectByMultiSearch(String orgId, String buildingId,
                                                  String type, String search, PageQuery pageQuery);
 
     /**
@@ -169,23 +162,21 @@ public interface IPrHouseService extends IService<PrHouse> {
     /**
      * 查询孤岛户列表
      * 通过分析相邻房号的阀门状态来判断孤岛户
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @return 孤岛户列表
      */
-    List<PrHouseVo> queryIsolatedHouses(String companyId, String orgId, String buildingId);
+    List<PrHouseVo> queryIsolatedHouses(String orgId, String buildingId);
 
     /**
      * 设置孤岛户标记
      * 先重置楼宇下所有房屋的位置属性，再更新传入的孤岛户列表
      * @param houseList 房屋列表（包含 siteType 和 siteTypeOld）
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @return 是否成功
      */
-    boolean setIsolatedHouses(List<PrHouse> houseList, String companyId, String orgId, String buildingId);
+    boolean setIsolatedHouses(List<PrHouse> houseList, String orgId, String buildingId);
 
     /**
      * 批量导入房屋数据
@@ -196,11 +187,10 @@ public interface IPrHouseService extends IService<PrHouse> {
 
     /**
      * 查询可用于策略绑定的房屋列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param search 搜索关键字（房间号）
      * @return 房屋列表
      */
-    List<PrHouseVo> selectForStrategyBinding(String companyId, String orgId, String buildingId, String search);
+    List<PrHouseVo> selectForStrategyBinding(String orgId, String buildingId, String search);
 }

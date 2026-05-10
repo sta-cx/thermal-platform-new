@@ -29,7 +29,6 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
 
     /**
      * 分页查询户间阀门配表列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param unit 单元
@@ -38,7 +37,7 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<PrHeatValveArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHeatValveArchiveVo> selectPageList(String orgId, String buildingId,
                                                         String unit, String search, String parentId,
                                                         PageQuery pageQuery);
 
@@ -70,11 +69,10 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
 
     /**
      * 查询全部阀门信息（用于导出）
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 阀门配表列表
      */
-    List<PrHeatValveArchiveVo> listAll(String companyId, String orgId);
+    List<PrHeatValveArchiveVo> listAll(String orgId);
 
     /**
      * 导入阀门配表
@@ -112,7 +110,7 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
     /**
      * 卡表分页查询
      */
-    TableDataInfo<PrHeatValveArchiveVo> pageListHeatCard(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHeatValveArchiveVo> pageListHeatCard(String orgId, String buildingId,
                                                           String unit, String meterArcCode, String payStatus,
                                                           String search, String parentId, String writeCardStatus,
                                                           PageQuery pageQuery);
@@ -152,32 +150,30 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
     /**
      * 查询已缴费但未开阀的阀门列表（用于自动开阀）
      * 从旧系统 queryValveStatusGetByPayK 移植
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 需要开阀的阀门列表
      */
-    List<PrHeatValveArchive> queryPaidClosedValves(String companyId, String orgId);
+    List<PrHeatValveArchive> queryPaidClosedValves(String orgId);
 
     /**
      * 查询未缴费但已开阀的阀门列表（用于自动关阀）
      * 从旧系统 queryValveStatusGetByPayG 移植
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 需要关阀的阀门列表
      */
-    List<PrHeatValveArchive> queryUnpaidOpenValves(String companyId, String orgId);
+    List<PrHeatValveArchive> queryUnpaidOpenValves(String orgId);
 
     // ========== 信息同步 ==========
 
     /**
      * 同步户阀信息到采集平台
      */
-    boolean valveInformationSynchronization(String orgId, String companyId);
+    boolean valveInformationSynchronization(String orgId);
 
     /**
      * 获取同步数据列表（用于导出Excel）
      */
-    List<PrHeatValveArchiveVo> listSyncData(String companyId, String orgId);
+    List<PrHeatValveArchiveVo> listSyncData(String orgId);
 
     // ========== 蓝牙控制日志 ==========
 
@@ -191,7 +187,7 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
     /**
      * 新增用户和阀门信息（事务性：PrHouse + PrFamily + PrHeatValveArchive）
      */
-    String insertUserAndValveInfo(String companyId, String orgId, String orgName,
+    String insertUserAndValveInfo(String orgId, String orgName,
                                   Long buildingId, String buildingName, String unitCode,
                                   String roomNum, String floor, String otherCode, String payStatus,
                                   String userName, String phone,

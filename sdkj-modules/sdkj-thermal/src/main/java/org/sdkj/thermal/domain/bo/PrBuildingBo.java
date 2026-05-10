@@ -55,7 +55,4 @@ public class PrBuildingBo extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
-
 }

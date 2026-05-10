@@ -35,7 +35,6 @@ public class HtTasksPerform extends BaseEntity {
     private Integer unit;
     private Integer duration;
     private String orgId;
-    private String companyId;
     private String concentratorCode;
     private String deviceId;
     private String meterNum;

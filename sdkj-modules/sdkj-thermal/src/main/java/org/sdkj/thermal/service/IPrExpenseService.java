@@ -21,7 +21,7 @@ public interface IPrExpenseService extends IService<PrExpense> {
     /**
      * 分页查询费用明细列表
      */
-    TableDataInfo<PrExpenseVo> selectPageList(String companyId, String orgId, String buildingId, String unitCode,
+    TableDataInfo<PrExpenseVo> selectPageList(String orgId, String buildingId, String unitCode,
                                               String itemGroup, String itemCode, String search, String isCharged,
                                               String parkingId, String startTime, String endTime,
                                               String startDate, String endDate, PageQuery pageQuery);
@@ -29,7 +29,7 @@ public interface IPrExpenseService extends IService<PrExpense> {
     /**
      * 查询房屋费用明细列表
      */
-    List<PrExpenseVo> selectHouseExpenseList(String companyId, String orgId, String buildingId, String unitCode,
+    List<PrExpenseVo> selectHouseExpenseList(String orgId, String buildingId, String unitCode,
                                              String itemGroup, String itemCode, String search);
 
     /**
@@ -100,12 +100,12 @@ public interface IPrExpenseService extends IService<PrExpense> {
     /**
      * 重新计算费用明细
      */
-    boolean recalculate(String companyId, String orgId);
+    boolean recalculate(String orgId);
 
     /**
      * 重新计算车位费用明细
      */
-    boolean recalculateCw(String companyId, String orgId);
+    boolean recalculateCw(String orgId);
 
     /**
      * 设置计算状态
@@ -115,42 +115,42 @@ public interface IPrExpenseService extends IService<PrExpense> {
     /**
      * 批量更新阶梯单价
      */
-    boolean updateStepPrice(String companyId, String orgId);
+    boolean updateStepPrice(String orgId);
 
     /**
      * 批量更新单价
      */
-    boolean updatePrice(String companyId, String orgId);
+    boolean updatePrice(String orgId);
 
     /**
      * 批量计算公式
      */
-    boolean updateFormula(String companyId, String orgId);
+    boolean updateFormula(String orgId);
 
     /**
      * 批量计算公式（车位）
      */
-    boolean updateFormulaCw(String companyId, String orgId);
+    boolean updateFormulaCw(String orgId);
 
     /** 车位费用列表查询 */
-    TableDataInfo<PrExpenseVo> parkingList(String companyId, String orgId, String buildingId, String unitCode,
+    TableDataInfo<PrExpenseVo> parkingList(String orgId, String buildingId, String unitCode,
         String itemGroup, String itemCode, String search, String isCharged,
         String parkingId, String startTime, String endTime, PageQuery pageQuery);
 
     /** 车位空间费用查询 */
-    List<Map<String, Object>> parkingExpenseList(String companyId, String orgId, String buildingId,
+    List<Map<String, Object>> parkingExpenseList(String orgId, String buildingId,
         String unitCode, String itemGroup, String itemCode, String parkingId, String search);
 
     /** 全部房屋费用查询 */
-    List<Map<String, Object>> houseExpenseAllList(String companyId, String orgId, String search);
+    List<Map<String, Object>> houseExpenseAllList(String orgId, String search);
 
     /** 费用操作日志 */
-    TableDataInfo<Map<String, Object>> expenseLog(String companyId, String orgId, String buildingId,
+    TableDataInfo<Map<String, Object>> expenseLog(String orgId, String buildingId,
         String unitCode, String parentId, String type, String startTime, String endTime, String search,
         PageQuery pageQuery);
 
     /** 微信费用订单 */
-    TableDataInfo<Map<String, Object>> wechatOrderList(String companyId, String orgId, String buildingId,
+    TableDataInfo<Map<String, Object>> wechatOrderList(String orgId, String buildingId,
         String unitCode, String parentId, String type, String startTime, String endTime, String search,
         PageQuery pageQuery);
 
@@ -159,27 +159,27 @@ public interface IPrExpenseService extends IService<PrExpense> {
     /**
      * 滞纳金计算 - 起收日期
      */
-    boolean updateLatefeeQs(String companyId, String orgId, String latefeeFormula, Long standardId);
+    boolean updateLatefeeQs(String orgId, String latefeeFormula, Long standardId);
 
     /**
      * 滞纳金计算 - 到期日期
      */
-    boolean updateLatefeeJs(String companyId, String orgId, String latefeeFormula, Long standardId);
+    boolean updateLatefeeJs(String orgId, String latefeeFormula, Long standardId);
 
     /**
      * 滞纳金计算 - 指定日期
      */
-    boolean updateLatefeeZd(String companyId, String orgId, String latefeeFormula, Long standardId,
+    boolean updateLatefeeZd(String orgId, String latefeeFormula, Long standardId,
                              java.util.Date latefeeStartdate);
 
     /**
      * 滞纳金计算 - 数据核查
      */
-    boolean updateLatefeeSJHC(String companyId, String orgId, String latefeeFormula, Long standardId,
+    boolean updateLatefeeSJHC(String orgId, String latefeeFormula, Long standardId,
                               String year, String month);
 
     /**
      * 滞纳金计算后更新最终金额
      */
-    boolean updateFinalMoneyAfterLateFee(String companyId, String orgId, Long standardId);
+    boolean updateFinalMoneyAfterLateFee(String orgId, Long standardId);
 }

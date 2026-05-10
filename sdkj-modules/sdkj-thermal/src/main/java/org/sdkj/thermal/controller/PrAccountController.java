@@ -39,15 +39,13 @@ public class PrAccountController extends BaseController {
     @SaCheckPermission("thermal:property:account:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<List<PrAccountBalanceVo>> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrAccountBalanceVo>> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String itemGroup,
             @RequestParam(required = false) String itemCode) {
-        return R.ok(accountService.pageList(companyId, orgId, buildingId, unitCode, search, itemGroup, itemCode));
+        return R.ok(accountService.pageList(orgId, buildingId, unitCode, search, itemGroup, itemCode));
     }
 
     /**
@@ -74,15 +72,13 @@ public class PrAccountController extends BaseController {
     @SaCheckPermission("thermal:property:account:list")
     @SaCheckLogin
     @GetMapping("/no-account")
-    public R<List<PrAccountBalanceVo>> noAccount(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrAccountBalanceVo>> noAccount(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String itemGroup,
             @RequestParam(required = false) String itemCode) {
-        return R.ok(accountService.noAccount(companyId, orgId, buildingId, unitCode, search, itemGroup, itemCode));
+        return R.ok(accountService.noAccount(orgId, buildingId, unitCode, search, itemGroup, itemCode));
     }
 
     /**
@@ -93,16 +89,14 @@ public class PrAccountController extends BaseController {
     @SaCheckPermission("thermal:property:account:query")
     @SaCheckLogin
     @GetMapping("/recharge-query")
-    public R<List<PrAccountBalanceVo>> getAccount(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrAccountBalanceVo>> getAccount(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String itemGroup,
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) String userId) {
-        return R.ok(accountService.getAccount(companyId, orgId, buildingId, unitCode, search, itemGroup, itemCode, userId));
+        return R.ok(accountService.getAccount(orgId, buildingId, unitCode, search, itemGroup, itemCode, userId));
     }
 
     /**
@@ -161,11 +155,9 @@ public class PrAccountController extends BaseController {
     @SaCheckPermission("thermal:property:account:query")
     @SaCheckLogin
     @GetMapping("/balance")
-    public R<BigDecimal> getPersonAccount(
-            @RequestParam String companyId,
-            @RequestParam String orgId,
+    public R<BigDecimal> getPersonAccount(@RequestParam String orgId,
             @RequestParam Long userId) {
-        return R.ok(accountService.getPersonAccount(companyId, orgId, userId));
+        return R.ok(accountService.getPersonAccount(orgId, userId));
     }
 
     /**
@@ -176,15 +168,13 @@ public class PrAccountController extends BaseController {
     @SaCheckPermission("thermal:property:account:list")
     @SaCheckLogin
     @GetMapping("/statement")
-    public R<List<PrAccountBalanceVo>> statementList(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrAccountBalanceVo>> statementList(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String itemGroup,
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) String searchPhone) {
-        return R.ok(accountService.pageAccountStatementList(companyId, orgId, buildingId, unitCode, itemGroup, itemCode, searchPhone));
+        return R.ok(accountService.pageAccountStatementList(orgId, buildingId, unitCode, itemGroup, itemCode, searchPhone));
     }
 
     /**
@@ -195,13 +185,11 @@ public class PrAccountController extends BaseController {
     @SaCheckPermission("thermal:property:account:query")
     @SaCheckLogin
     @GetMapping("/deposit")
-    public R<Map<String, Object>> getHouseDeposit(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Map<String, Object>> getHouseDeposit(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search) {
-        return R.ok(accountService.getHouseDeposit(companyId, orgId, buildingId, unitCode, search));
+        return R.ok(accountService.getHouseDeposit(orgId, buildingId, unitCode, search));
     }
 
     /**

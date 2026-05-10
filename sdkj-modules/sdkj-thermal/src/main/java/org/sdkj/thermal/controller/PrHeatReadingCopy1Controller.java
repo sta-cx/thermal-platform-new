@@ -62,7 +62,6 @@ public class PrHeatReadingCopy1Controller extends BaseController {
      * 旧端点: GET /property/prHeatReadingCopy1/pageHeatReadingList
      * 新端点: GET /thermal/ht/heat-reading-copy1/pageHeatReadingList
      *
-     * @param companyId   公司ID
      * @param orgId       小区ID
      * @param buildingId  楼栋ID
      * @param unitCode    单元编码
@@ -74,9 +73,7 @@ public class PrHeatReadingCopy1Controller extends BaseController {
     @SaCheckPermission("thermal:ht:reading:query")
     @SaCheckLogin
     @GetMapping("/pageHeatReadingList")
-    public TableDataInfo<PrHeatReadingCopy1Vo> pageHeatReadingList(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHeatReadingCopy1Vo> pageHeatReadingList(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String meterArcCode,
@@ -84,6 +81,6 @@ public class PrHeatReadingCopy1Controller extends BaseController {
             PageQuery pageQuery) {
         Page<?> page = pageQuery.build();
         return TableDataInfo.build(copy1Service.pageHeatReadingList(
-            companyId, orgId, buildingId, unitCode, meterArcCode, search, page));
+            orgId, buildingId, unitCode, meterArcCode, search, page));
     }
 }

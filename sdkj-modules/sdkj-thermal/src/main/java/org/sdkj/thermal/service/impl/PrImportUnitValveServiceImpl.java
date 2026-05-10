@@ -29,13 +29,11 @@ public class PrImportUnitValveServiceImpl extends ServiceImpl<PrImportUnitValveM
     @Transactional(rollbackFor = Exception.class)
     public Integer importData(List<PrImportUnitValve> objects) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         Date date = new Date();
         List<PrImportUnitValve> lists = new ArrayList<>();
         if (!objects.isEmpty()) {
             for (PrImportUnitValve prImportUnitValve : objects) {
                 prImportUnitValve.setCreateBy(create);
-                prImportUnitValve.setCompanyId(companyId);
                 prImportUnitValve.setCreateTime(date);
                 prImportUnitValve.setType(0);
 
@@ -59,70 +57,67 @@ public class PrImportUnitValveServiceImpl extends ServiceImpl<PrImportUnitValveM
     @Transactional(rollbackFor = Exception.class)
     public void updateHouseId() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         // 更新单元ID及小区ID
-        prImportUnitValveMapper.updateOrgId(create, companyId);
-        prImportUnitValveMapper.updateBuildingId(create, companyId);
-        prImportUnitValveMapper.updateUnitId(create, companyId);
+        prImportUnitValveMapper.updateOrgId(create);
+        prImportUnitValveMapper.updateBuildingId(create);
+        prImportUnitValveMapper.updateUnitId(create);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void check(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         // 匹配阀门档案信息
-        prImportUnitValveMapper.updateMeter(create, companyId);
+        prImportUnitValveMapper.updateMeter(create);
         // 匹配有阀门控制档案信息
-        prImportUnitValveMapper.updateCommandMeter(create, companyId);
+        prImportUnitValveMapper.updateCommandMeter(create);
     }
 
     @Override
     public String getNull(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
 
         // 小区ID匹配不到的记录
-        List<PrImportUnitValve> noOrgIds = prImportUnitValveMapper.selectNoOrgIds(create, companyId);
+        List<PrImportUnitValve> noOrgIds = prImportUnitValveMapper.selectNoOrgIds(create);
         if (!noOrgIds.isEmpty()) {
             return "下列小区信息无法匹配，请核对信息！";
         }
 
-        List<PrImportUnitValve> noBuildingIds = prImportUnitValveMapper.selectNoBuildingIds(create, companyId);
+        List<PrImportUnitValve> noBuildingIds = prImportUnitValveMapper.selectNoBuildingIds(create);
         if (!noBuildingIds.isEmpty()) {
             return "下列楼宇信息无法匹配，请核对信息！";
         }
 
         // 单元ID匹配不到的记录
-        List<PrImportUnitValve> lists = prImportUnitValveMapper.selectNoUnitId(create, companyId);
+        List<PrImportUnitValve> lists = prImportUnitValveMapper.selectNoUnitId(create);
         if (!lists.isEmpty()) {
             return "下列单元信息无法匹配，请核对信息！";
         }
 
         // 没有表号的记录
-        List<PrImportUnitValve> noMeterNums = prImportUnitValveMapper.selectNoMeterNum(create, companyId);
+        List<PrImportUnitValve> noMeterNums = prImportUnitValveMapper.selectNoMeterNum(create);
         if (!noMeterNums.isEmpty()) {
             return "下列单元无表号，请核对信息！";
         }
 
         // 表号重复的记录
-        List<PrImportUnitValve> list = prImportUnitValveMapper.getRepateUnitMeter2(create, companyId);
+        List<PrImportUnitValve> list = prImportUnitValveMapper.getRepateUnitMeter2(create);
         if (!list.isEmpty()) {
             return "下列单元表号重复，请核对信息！";
         }
 
         // 查询出没有仪表ID的记录
-        List<PrImportUnitValve> noArchiveId = prImportUnitValveMapper.findNoArchiveId(create, companyId);
+        List<PrImportUnitValve> noArchiveId = prImportUnitValveMapper.findNoArchiveId(create);
         if (!noArchiveId.isEmpty()) {
             return "下列单元无法匹配仪表名称，请核对信息！";
         }
 
-        List<PrImportUnitValve> hasAllUnit = prImportUnitValveMapper.selectHasAllByUnit(create, companyId);
+        List<PrImportUnitValve> hasAllUnit = prImportUnitValveMapper.selectHasAllByUnit(create);
         if (!hasAllUnit.isEmpty()) {
             return "下列单元已绑定阀门，请核对信息！";
         }
 
-        List<PrImportUnitValve> hasAllReadly = prImportUnitValveMapper.selectHasAllReadly(create, companyId);
+        List<PrImportUnitValve> hasAllReadly = prImportUnitValveMapper.selectHasAllReadly(create);
         if (!hasAllReadly.isEmpty()) {
             return "下列表号系统中已存在，请核对信息！";
         }
@@ -134,8 +129,7 @@ public class PrImportUnitValveServiceImpl extends ServiceImpl<PrImportUnitValveM
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportUnitValveMapper.deleteData(create, companyId);
+        prImportUnitValveMapper.deleteData(create);
         return true;
     }
 
@@ -143,21 +137,19 @@ public class PrImportUnitValveServiceImpl extends ServiceImpl<PrImportUnitValveM
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        prImportUnitValveMapper.submitData(create, companyId);
-        prImportUnitValveMapper.deleteImportUnitValveData(create, companyId);
+        prImportUnitValveMapper.submitData(create);
+        prImportUnitValveMapper.deleteImportUnitValveData(create);
         return true;
     }
 
     @Override
     public Integer select() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return prImportUnitValveMapper.select(create, companyId);
+        return prImportUnitValveMapper.select(create);
     }
 
     @Override
-    public List<PrImportUnitValve> selectByCompanyIdOrgId(String companyId, String orgId) {
-        return prImportUnitValveMapper.selectByCompanyIdOrgId(companyId, orgId);
+    public List<PrImportUnitValve> selectByOrgId(String orgId) {
+        return prImportUnitValveMapper.selectByOrgId(orgId);
     }
 }

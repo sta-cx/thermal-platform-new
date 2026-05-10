@@ -24,12 +24,11 @@ public class SysHomeController {
 
     @SaCheckLogin
     @PostMapping("/dashboard")
-    public R<Map<String, Object>> dashboard(@RequestParam(required = false) String companyId,
-                                             @RequestParam(required = false) String stationId,
+    public R<Map<String, Object>> dashboard(@RequestParam(required = false) String stationId,
                                              @RequestParam(required = false) String stationPartitionId) {
         try {
             Long userId = LoginHelper.getUserId();
-            Map<String, Object> result = sysHomeService.aggregateHomeData(userId, companyId, stationId, stationPartitionId);
+            Map<String, Object> result = sysHomeService.aggregateHomeData(userId, stationId, stationPartitionId);
             return R.ok(result);
         } catch (Exception e) {
             log.error("查询首页数据失败", e);

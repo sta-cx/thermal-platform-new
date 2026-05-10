@@ -22,7 +22,6 @@ public interface PrHeatReadingMapper extends BaseMapperPlus<PrHeatReading, PrHea
      * @param meterNums 表号列表
      * @param startTime 开始时间
      * @param endTime 结束时间
-     * @param companyId 公司ID
      * @param status 状态（阀门/热表/温控器）
      * @param orgId 小区ID
      * @param parentId 父ID
@@ -31,7 +30,6 @@ public interface PrHeatReadingMapper extends BaseMapperPlus<PrHeatReading, PrHea
     List<PrHeatReadingVo> selectTrendList(@Param("meterNums") List<String> meterNums,
                                           @Param("startTime") String startTime,
                                           @Param("endTime") String endTime,
-                                          @Param("companyId") String companyId,
                                           @Param("status") String status,
                                           @Param("orgId") String orgId,
                                           @Param("parentId") String parentId);
@@ -40,12 +38,10 @@ public interface PrHeatReadingMapper extends BaseMapperPlus<PrHeatReading, PrHea
      * 查询首页户间阀门趋势图
      * @param stationId 站点ID
      * @param stationPartitionId 站点分区ID
-     * @param companyId 公司ID
      * @return 趋势数据列表
      */
     List<PrHeatReadingVo> selectHomeTrendList(@Param("stationId") String stationId,
-                                              @Param("stationPartitionId") String stationPartitionId,
-                                              @Param("companyId") String companyId);
+                                              @Param("stationPartitionId") String stationPartitionId);
 
     // ========== PrHeatReadingCopy1 远传抄表副本查询 ==========
 
@@ -63,7 +59,6 @@ public interface PrHeatReadingMapper extends BaseMapperPlus<PrHeatReading, PrHea
     /**
      * 分页查询热表配表读数情况
      * @param page        分页参数
-     * @param companyId   公司ID
      * @param orgId       小区ID
      * @param buildingId  楼栋ID
      * @param unitCode    单元编码
@@ -72,7 +67,6 @@ public interface PrHeatReadingMapper extends BaseMapperPlus<PrHeatReading, PrHea
      * @return 分页结果
      */
     Page<PrHeatReadingCopy1Vo> selectPageHeatReadingList(Page<?> page,
-                                                         @Param("companyId") String companyId,
                                                          @Param("orgId") String orgId,
                                                          @Param("buildingId") String buildingId,
                                                          @Param("unitCode") String unitCode,

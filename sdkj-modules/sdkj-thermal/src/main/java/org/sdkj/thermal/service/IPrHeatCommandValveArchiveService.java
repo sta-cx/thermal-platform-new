@@ -20,7 +20,6 @@ public interface IPrHeatCommandValveArchiveService extends IService<PrHeatComman
 
     /**
      * 分页查询户间控制阀门配表列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param unit 单元
@@ -29,7 +28,7 @@ public interface IPrHeatCommandValveArchiveService extends IService<PrHeatComman
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<PrHeatCommandValveArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHeatCommandValveArchiveVo> selectPageList(String orgId, String buildingId,
                                                                String unit, String search, String parentId,
                                                                String valveCategory,
                                                                PageQuery pageQuery);

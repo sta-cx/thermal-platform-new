@@ -42,7 +42,6 @@ public class PrHeatTempArchiveVo implements Serializable {
     private Integer isStop;
     private Long houseId;
     private String orgId;
-    private String companyId;
     private String concentratorCode;
     private String imeiNum;
     private String productId;

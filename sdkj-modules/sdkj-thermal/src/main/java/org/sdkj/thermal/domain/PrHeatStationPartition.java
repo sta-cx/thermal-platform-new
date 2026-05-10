@@ -20,5 +20,4 @@ public class PrHeatStationPartition extends BaseEntity {
     private String principal;
     private String address;
     private String seq;
-    private String companyId;
 }

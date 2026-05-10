@@ -57,9 +57,6 @@ public class PrUnit extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
-
     // ========== 非数据库字段 ==========
 
     /** 楼宇名称（查询用） */

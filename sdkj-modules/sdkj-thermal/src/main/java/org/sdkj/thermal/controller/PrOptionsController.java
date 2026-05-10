@@ -37,7 +37,6 @@ public class PrOptionsController extends BaseController {
     @GetMapping
     public R<?> getDataById(
             @RequestParam String orgId,
-            @RequestParam String companyId,
             @RequestParam(required = false) String level) {
         return R.ok(optionsService.selectByOrgId(orgId));
     }
@@ -78,7 +77,7 @@ public class PrOptionsController extends BaseController {
     @SaCheckPermission("thermal:property:options:add")
     @SaCheckLogin
     @PostMapping("/init")
-    public R<Void> initData(@RequestParam String orgId, @RequestParam String companyId) {
+    public R<Void> initData(@RequestParam String orgId) {
         return toAjax(optionsService.initOptions(orgId));
     }
 
@@ -92,7 +91,6 @@ public class PrOptionsController extends BaseController {
     @GetMapping("/forbidden")
     public R<?> forbiddenToBuy(
             @RequestParam String meterId,
-            @RequestParam String companyId,
             @RequestParam String orgId,
             @RequestParam(required = false) String type) {
         return R.ok(optionsService.forbiddenToBuyCheck(meterId));

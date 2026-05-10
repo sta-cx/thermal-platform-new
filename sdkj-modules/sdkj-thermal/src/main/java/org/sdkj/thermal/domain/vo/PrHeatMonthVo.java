@@ -90,6 +90,4 @@ public class PrHeatMonthVo implements Serializable {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 }

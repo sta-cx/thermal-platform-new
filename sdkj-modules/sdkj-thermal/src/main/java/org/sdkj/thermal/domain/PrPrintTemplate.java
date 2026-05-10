@@ -29,8 +29,6 @@ public class PrPrintTemplate extends BaseEntity {
     /** 序列号 */
     private String serialNum;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 小区ID */
     private String orgId;

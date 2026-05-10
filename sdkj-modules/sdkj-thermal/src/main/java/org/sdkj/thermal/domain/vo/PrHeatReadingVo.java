@@ -90,8 +90,6 @@ public class PrHeatReadingVo implements Serializable {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 信号 */
     private String csq;

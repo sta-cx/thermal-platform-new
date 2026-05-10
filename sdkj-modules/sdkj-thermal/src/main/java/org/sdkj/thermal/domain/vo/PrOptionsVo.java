@@ -11,7 +11,6 @@ import org.sdkj.thermal.domain.PrOptions;
 @AutoMapper(target = PrOptions.class)
 public class PrOptionsVo {
     private Long id;
-    private String companyId;
     private String orgId;
     private String level;
     private Boolean forbiddenBuyElectric;

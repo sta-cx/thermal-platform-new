@@ -27,10 +27,9 @@ public class HeatDailyGenerateJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap data = context.getJobDetail().getJobDataMap();
         String jobName = data.getString("jobName");
-        String companyId = data.getString("companyId");
         String orgIdStr = data.getString("orgId");
 
-        log.info("热表日表生成 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr);
+        log.info("热表日表生成 Job 启动: {} (小区: {})", jobName, orgIdStr);
 
         boolean tenantPushed = TenantQuartzContext.push(context);
         try {
@@ -41,15 +40,15 @@ public class HeatDailyGenerateJob implements Job {
             String[] orgIds = orgIdStr.split(",");
             for (String orgId : orgIds) {
                 try {
-                    boolean result = heatDailyService.generateHeatDaily(companyId, orgId.trim());
+                    boolean result = heatDailyService.generateHeatDaily(orgId.trim());
                     log.info("热表日表生成完成: 小区={}, 结果={}", orgId.trim(), result);
                 } catch (Exception e) {
                     log.error("热表日表生成失败: 小区={}", orgId.trim(), e);
                 }
             }
-            log.info("热表日表生成 Job 完成: {} (公司: {})", jobName, companyId);
+            log.info("热表日表生成 Job 完成: {}", jobName);
         } catch (Exception e) {
-            log.error("热表日表生成 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr, e);
+            log.error("热表日表生成 Job 失败: {} (小区: {})", jobName, orgIdStr, e);
         } finally {
             TenantQuartzContext.clear(tenantPushed);
         }

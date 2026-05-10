@@ -11,10 +11,9 @@ public interface IPrAutoMachineService {
      * 生成缴费流水号
      * 格式: PrOptionsHeat.serialPrefix + 日期(yyyyMMdd) + 自增序号
      *
-     * @param companyId 公司ID
      * @return 生成的流水号
      */
-    String generateSerialNum(String companyId);
+    String generateSerialNum();
 
     /**
      * 生成支付二维码URL

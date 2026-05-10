@@ -13,7 +13,6 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
-import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.domain.PrHeatUnitValveArchive;
 import org.sdkj.thermal.domain.bo.PrHeatUnitValveArchiveBo;
 import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
@@ -48,14 +47,13 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatUnitValveArchiveVo> list(
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unit,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String parentId,
             PageQuery pageQuery) {
-        return unitValveArchiveService.selectPageList(companyId, orgId, buildingId, unit, search, parentId, pageQuery);
+        return unitValveArchiveService.selectPageList(orgId, buildingId, unit, search, parentId, pageQuery);
     }
 
     /**
@@ -127,13 +125,13 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "单元阀门配表-开阀", businessType = BusinessType.UPDATE)
     @PostMapping("/openValve")
-    public R<Void> openValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
+    public R<Void> openValve(@RequestParam String orgId, @RequestBody List<String> ids) {
         List<PrHeatUnitValveArchive> archives = unitValveArchiveService.listByIds(ids);
         if (archives.isEmpty()) { return R.fail("未找到配表记录"); }
         var infos = archives.stream()
             .map(a -> new ValveArchiveInfo(a.getId(), a.getMeterArcCode(), a.getMeterNum(), a.getDeviceId(), a.getConcentratorCode(), a.getImeiNum(), null, null))
             .toList();
-        return toAjax(tasksPerformService.batchCreateValveControlTasks(infos, orgId, companyId, 100));
+        return toAjax(tasksPerformService.batchCreateValveControlTasks(infos, orgId, 100));
     }
 
     /**
@@ -143,13 +141,13 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "单元阀门配表-关阀", businessType = BusinessType.UPDATE)
     @PostMapping("/closeValve")
-    public R<Void> closeValve(@RequestParam String orgId, @RequestParam String companyId, @RequestBody List<String> ids) {
+    public R<Void> closeValve(@RequestParam String orgId, @RequestBody List<String> ids) {
         List<PrHeatUnitValveArchive> archives = unitValveArchiveService.listByIds(ids);
         if (archives.isEmpty()) { return R.fail("未找到配表记录"); }
         var infos = archives.stream()
             .map(a -> new ValveArchiveInfo(a.getId(), a.getMeterArcCode(), a.getMeterNum(), a.getDeviceId(), a.getConcentratorCode(), a.getImeiNum(), null, null))
             .toList();
-        return toAjax(tasksPerformService.batchCreateValveControlTasks(infos, orgId, companyId, 0));
+        return toAjax(tasksPerformService.batchCreateValveControlTasks(infos, orgId, 0));
     }
 
     // ========== 批量操作端点 ==========
@@ -163,9 +161,8 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     @Log(title = "单元阀门配表-同步采集平台", businessType = BusinessType.UPDATE)
     @PostMapping("/sync")
     public R<Boolean> valveInformationSynchronization(
-            @RequestParam String orgId,
-            @RequestParam String companyId) {
-        boolean result = unitValveArchiveService.valveInformationSynchronization(orgId, companyId);
+            @RequestParam String orgId) {
+        boolean result = unitValveArchiveService.valveInformationSynchronization(orgId);
         return result ? R.ok(true) : R.fail("同步失败，请检查采集平台配置");
     }
 
@@ -178,9 +175,8 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     @Log(title = "单元阀门配表-同步信息下载", businessType = BusinessType.EXPORT)
     @GetMapping("/sync-download")
     public void downloadInfoSync(HttpServletResponse response,
-                                  @RequestParam String companyId,
                                   @RequestParam String orgId) throws IOException {
-        List<PrHeatUnitValveArchiveVo> list = unitValveArchiveService.listSyncData(companyId, orgId);
+        List<PrHeatUnitValveArchiveVo> list = unitValveArchiveService.listSyncData(orgId);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("单元阀门同步信息", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
@@ -197,9 +193,8 @@ public class PrHeatUnitValveArchiveController extends BaseController {
     @Log(title = "单元阀门配表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public void exportAll(HttpServletResponse response,
-                           @RequestParam(required = false) String companyId,
                            @RequestParam(required = false) String orgId) throws IOException {
-        List<PrHeatUnitValveArchiveVo> list = unitValveArchiveService.listAll(companyId, orgId);
+        List<PrHeatUnitValveArchiveVo> list = unitValveArchiveService.listAll(orgId);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("单元阀门配表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");

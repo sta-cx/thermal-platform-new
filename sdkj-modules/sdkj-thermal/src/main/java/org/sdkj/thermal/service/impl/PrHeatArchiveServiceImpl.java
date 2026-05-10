@@ -49,11 +49,10 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     @Override
-    public TableDataInfo<PrHeatArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatArchiveVo> selectPageList(String orgId, String buildingId,
                                                           String unitCode, String search, String archiveId,
                                                           PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatArchive::getOrgId, orgId);
         // buildingId and unitCode are not direct fields on PrHeatArchive;
         // they are used for frontend filtering and may be resolved through house/building relations
@@ -70,9 +69,8 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     @Override
-    public List<PrHeatArchiveVo> queryCompanyHeat(String companyId) {
+    public List<PrHeatArchiveVo> queryCompanyHeat() {
         LambdaQueryWrapper<PrHeatArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(PrHeatArchive::getCompanyId, companyId);
         // isDeleted handled by @TableLogic
         lqw.eq(PrHeatArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatArchive::getCreateTime);
@@ -156,7 +154,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
             record.setStatus(0);
             record.setHouseId(oldHeatArchive.getHouseId());
             record.setOrgId(oldHeatArchive.getOrgId());
-            record.setCompanyId(newHeatArchive.getCompanyId());
             record.setOperatorId(String.valueOf(creater));
             record.setTransactionTime(date);
             record.setNotes("换表余额转移");
@@ -182,7 +179,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     @Transactional(rollbackFor = Exception.class)
     public Object recharge(PrHeatArchive heatArchive, String paymentMethod) {
         Long userId = LoginHelper.getUserId();
-        String companyId = LoginHelper.getTenantId();
         Date now = new Date();
 
         PrHeatArchive archive = getById(heatArchive.getId());
@@ -213,7 +209,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         record.setStatus(0);
         record.setHouseId(archive.getHouseId());
         record.setOrgId(archive.getOrgId());
-        record.setCompanyId(companyId);
         record.setOperatorId(String.valueOf(userId));
         record.setTransactionTime(now);
         record.setCreateBy(userId);
@@ -237,8 +232,8 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean manualControl(List<PrHeatVo> prHeatVoList, boolean switch1, Integer scale, String adjust,
-                                  String orgId, String companyId, String intervall, String unit, String duration) {
-        PrOptionsHeat prOptionsHeat = prOptionsHeatService.getDataById(orgId, companyId, "2");
+                                  String orgId, String intervall, String unit, String duration) {
+        PrOptionsHeat prOptionsHeat = prOptionsHeatService.getDataById(orgId, "2");
         if (prOptionsHeat == null) {
             throw new ServiceException("未找到调控配置");
         }
@@ -281,70 +276,70 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         // adjust=1: 开度调节（加档/减档）
         if ("1".equals(adjust)) {
             if (switch1) { // 调大
-                processValveControl(valveArchives, commandValveArchives, orgId, companyId, min, max, create, now,
+                processValveControl(valveArchives, commandValveArchives, orgId, min, max, create, now,
                     prOptionsHeat, htTasksPerformList, true, scale);
             } else { // 调小
-                processValveControl(valveArchives, commandValveArchives, orgId, companyId, min, max, create, now,
+                processValveControl(valveArchives, commandValveArchives, orgId, min, max, create, now,
                     prOptionsHeat, htTasksPerformList, false, scale);
             }
         }
         // adjust=2: 开关控制
         else if ("2".equals(adjust)) {
             if (switch1) { // 开阀
-                processSwitchControl(valveArchives, commandValveArchives, orgId, companyId, create, now,
+                processSwitchControl(valveArchives, commandValveArchives, orgId, create, now,
                     prOptionsHeat, htTasksPerformList, true);
             } else { // 关阀
-                processSwitchControl(valveArchives, commandValveArchives, orgId, companyId, create, now,
+                processSwitchControl(valveArchives, commandValveArchives, orgId, create, now,
                     prOptionsHeat, htTasksPerformList, false);
             }
         }
         // adjust=3: 开度设定
         else if ("3".equals(adjust)) {
-            processSetOpening(valveArchives, commandValveArchives, orgId, companyId, create, now,
+            processSetOpening(valveArchives, commandValveArchives, orgId, create, now,
                 prOptionsHeat, htTasksPerformList, scale);
         }
         // adjust=4: 状态查询
         else if ("4".equals(adjust)) {
-            processStatusQuery(valveArchives, commandValveArchives, orgId, companyId, create, now,
+            processStatusQuery(valveArchives, commandValveArchives, orgId, create, now,
                 prOptionsHeat, htTasksPerformList);
         }
         // adjust=5: 制动
         else if ("5".equals(adjust)) {
-            processBrake(valveArchives, commandValveArchives, orgId, companyId, create, now,
+            processBrake(valveArchives, commandValveArchives, orgId, create, now,
                 prOptionsHeat, htTasksPerformList);
         }
         // adjust=6: 上报周期调整
         else if ("6".equals(adjust)) {
-            processReportCycle(valveArchives, commandValveArchives, orgId, companyId, create, now,
+            processReportCycle(valveArchives, commandValveArchives, orgId, create, now,
                 prOptionsHeat, htTasksPerformList, intervall, unit, duration);
         }
         // adjust=7: 热表巡测
         else if ("7".equals(adjust)) {
-            processHeatMeterQuery(hotArchives, orgId, companyId, create, now, prOptionsHeat, htTasksPerformList);
+            processHeatMeterQuery(hotArchives, orgId, create, now, prOptionsHeat, htTasksPerformList);
         }
         // adjust=28-1: 修改设备信道（阀门）
         else if ("28-1".equals(adjust)) {
-            processModifyChannel(valveArchives, orgId, companyId, create, now, prOptionsHeat, htTasksPerformList, scale);
+            processModifyChannel(valveArchives, orgId, create, now, prOptionsHeat, htTasksPerformList, scale);
         }
         // adjust=28-2: 修改设备信道（DTU）
         else if ("28-2".equals(adjust)) {
-            processModifyDtuChannel(dtuArchives, orgId, companyId, create, now, prOptionsHeat, htTasksPerformList, scale);
+            processModifyDtuChannel(dtuArchives, orgId, create, now, prOptionsHeat, htTasksPerformList, scale);
         }
         // adjust=27: 读取信道
         else if ("27".equals(adjust)) {
-            processReadChannel(dtuArchives, orgId, companyId, create, now, prOptionsHeat, htTasksPerformList, scale);
+            processReadChannel(dtuArchives, orgId, create, now, prOptionsHeat, htTasksPerformList, scale);
         }
         // adjust=29: 打开网关
         else if ("29".equals(adjust)) {
-            processOpenGateway(dtuArchives, orgId, companyId, create, now, prOptionsHeat, htTasksPerformList, scale);
+            processOpenGateway(dtuArchives, orgId, create, now, prOptionsHeat, htTasksPerformList, scale);
         }
         // adjust=30: 关闭网关
         else if ("30".equals(adjust)) {
-            processCloseGateway(dtuArchives, orgId, companyId, create, now, prOptionsHeat, htTasksPerformList, scale);
+            processCloseGateway(dtuArchives, orgId, create, now, prOptionsHeat, htTasksPerformList, scale);
         }
         // adjust=51: 特殊制动
         else if ("51".equals(adjust)) {
-            processSpecialBrake(valveArchives, orgId, companyId, create, now, prOptionsHeat, htTasksPerformList);
+            processSpecialBrake(valveArchives, orgId, create, now, prOptionsHeat, htTasksPerformList);
         }
 
         if (!htTasksPerformList.isEmpty()) {
@@ -372,11 +367,11 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
 
     private void processValveControl(List<org.sdkj.thermal.domain.PrHeatValveArchive> valveArchives,
                                      List<org.sdkj.thermal.domain.PrHeatCommandValveArchive> commandValveArchives,
-                                     String orgId, String companyId, Integer min, Integer max, Long create, Date now,
+                                     String orgId, Integer min, Integer max, Long create, Date now,
                                      PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList,
                                      boolean increase, Integer scale) {
         for (org.sdkj.thermal.domain.PrHeatValveArchive archive : valveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(3);
             int actualStatus = archive.getActualStatus() != null ? archive.getActualStatus() : 0;
             if (increase) {
@@ -388,7 +383,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
             htTasksPerformList.add(task);
         }
         for (org.sdkj.thermal.domain.PrHeatCommandValveArchive archive : commandValveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(3);
             int actualStatus = archive.getActualStatus() != null ? archive.getActualStatus() : 0;
             if (increase) {
@@ -403,18 +398,18 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
 
     private void processSwitchControl(List<org.sdkj.thermal.domain.PrHeatValveArchive> valveArchives,
                                       List<org.sdkj.thermal.domain.PrHeatCommandValveArchive> commandValveArchives,
-                                      String orgId, String companyId, Long create, Date now,
+                                      String orgId, Long create, Date now,
                                       PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList,
                                       boolean open) {
         for (org.sdkj.thermal.domain.PrHeatValveArchive archive : valveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(open ? 1 : 2);
             task.setInstruction(open ? 100 : 0);
             setValveTaskFields(task, archive);
             htTasksPerformList.add(task);
         }
         for (org.sdkj.thermal.domain.PrHeatCommandValveArchive archive : commandValveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(open ? 1 : 2);
             task.setInstruction(open ? 100 : 0);
             setCommandValveTaskFields(task, archive);
@@ -424,18 +419,18 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
 
     private void processSetOpening(List<org.sdkj.thermal.domain.PrHeatValveArchive> valveArchives,
                                    List<org.sdkj.thermal.domain.PrHeatCommandValveArchive> commandValveArchives,
-                                   String orgId, String companyId, Long create, Date now,
+                                   String orgId, Long create, Date now,
                                    PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList,
                                    Integer scale) {
         for (org.sdkj.thermal.domain.PrHeatValveArchive archive : valveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(3);
             task.setInstruction(scale);
             setValveTaskFields(task, archive);
             htTasksPerformList.add(task);
         }
         for (org.sdkj.thermal.domain.PrHeatCommandValveArchive archive : commandValveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(3);
             task.setInstruction(scale);
             setCommandValveTaskFields(task, archive);
@@ -445,13 +440,13 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
 
     private void processStatusQuery(List<org.sdkj.thermal.domain.PrHeatValveArchive> valveArchives,
                                     List<org.sdkj.thermal.domain.PrHeatCommandValveArchive> commandValveArchives,
-                                    String orgId, String companyId, Long create, Date now,
+                                    String orgId, Long create, Date now,
                                     PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList) {
         String[] supportedCodes = {"04310401", "04310402", "04310502", "04310501", "04310503",
             "04310403", "04310601", "04310404", "04310801", "04310802", "04310803"};
         for (org.sdkj.thermal.domain.PrHeatValveArchive archive : valveArchives) {
             if (archive.getMeterArcCode() != null && Arrays.asList(supportedCodes).contains(archive.getMeterArcCode())) {
-                HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+                HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
                 task.setInstructionType(4);
                 task.setInstruction(0);
                 setValveTaskFields(task, archive);
@@ -460,7 +455,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         }
         for (org.sdkj.thermal.domain.PrHeatCommandValveArchive archive : commandValveArchives) {
             if (archive.getMeterArcCode() != null && Arrays.asList(supportedCodes).contains(archive.getMeterArcCode())) {
-                HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+                HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
                 task.setInstructionType(4);
                 task.setInstruction(0);
                 setCommandValveTaskFields(task, archive);
@@ -471,17 +466,17 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
 
     private void processBrake(List<org.sdkj.thermal.domain.PrHeatValveArchive> valveArchives,
                              List<org.sdkj.thermal.domain.PrHeatCommandValveArchive> commandValveArchives,
-                             String orgId, String companyId, Long create, Date now,
+                             String orgId, Long create, Date now,
                              PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList) {
         for (org.sdkj.thermal.domain.PrHeatValveArchive archive : valveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(5);
             task.setInstruction(0);
             setValveTaskFields(task, archive);
             htTasksPerformList.add(task);
         }
         for (org.sdkj.thermal.domain.PrHeatCommandValveArchive archive : commandValveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(5);
             task.setInstruction(0);
             setCommandValveTaskFields(task, archive);
@@ -491,11 +486,11 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
 
     private void processReportCycle(List<org.sdkj.thermal.domain.PrHeatValveArchive> valveArchives,
                                     List<org.sdkj.thermal.domain.PrHeatCommandValveArchive> commandValveArchives,
-                                    String orgId, String companyId, Long create, Date now,
+                                    String orgId, Long create, Date now,
                                     PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList,
                                     String intervall, String unit, String duration) {
         for (org.sdkj.thermal.domain.PrHeatValveArchive archive : valveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(6);
             task.setInstruction(0);
             if (intervall != null) task.setIntervall(Integer.parseInt(intervall));
@@ -505,7 +500,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
             htTasksPerformList.add(task);
         }
         for (org.sdkj.thermal.domain.PrHeatCommandValveArchive archive : commandValveArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(6);
             task.setInstruction(0);
             if (intervall != null) task.setIntervall(Integer.parseInt(intervall));
@@ -517,12 +512,12 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     private void processHeatMeterQuery(List<org.sdkj.thermal.domain.PrHeatHotArchive> hotArchives,
-                                       String orgId, String companyId, Long create, Date now,
+                                       String orgId, Long create, Date now,
                                        PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList) {
         String[] supportedCodes = {"040303", "04030301", "04030302", "04030303", "04030304", "090301", "09030101"};
         for (org.sdkj.thermal.domain.PrHeatHotArchive archive : hotArchives) {
             if (archive.getMeterArcCode() != null && Arrays.asList(supportedCodes).contains(archive.getMeterArcCode())) {
-                HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+                HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
                 task.setInstructionType(4);
                 task.setInstruction(0);
                 setHotArchiveTaskFields(task, archive);
@@ -532,13 +527,13 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     private void processModifyChannel(List<org.sdkj.thermal.domain.PrHeatValveArchive> valveArchives,
-                                      String orgId, String companyId, Long create, Date now,
+                                      String orgId, Long create, Date now,
                                       PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList,
                                       Integer scale) {
         String[] supportedCodes = {"04310401", "04310402", "04310502", "04310501", "04310503", "04310403", "04310404"};
         for (org.sdkj.thermal.domain.PrHeatValveArchive archive : valveArchives) {
             if (archive.getMeterArcCode() != null && Arrays.asList(supportedCodes).contains(archive.getMeterArcCode())) {
-                HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+                HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
                 task.setInstructionType(28);
                 task.setInstruction(scale);
                 setValveTaskFields(task, archive);
@@ -548,11 +543,11 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     private void processModifyDtuChannel(List<org.sdkj.thermal.domain.PrHeatDtuArchive> dtuArchives,
-                                         String orgId, String companyId, Long create, Date now,
+                                         String orgId, Long create, Date now,
                                          PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList,
                                          Integer scale) {
         for (org.sdkj.thermal.domain.PrHeatDtuArchive archive : dtuArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(28);
             task.setInstruction(scale);
             task.setDtuNum(archive.getDtuNum());
@@ -561,11 +556,11 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     private void processReadChannel(List<org.sdkj.thermal.domain.PrHeatDtuArchive> dtuArchives,
-                                    String orgId, String companyId, Long create, Date now,
+                                    String orgId, Long create, Date now,
                                     PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList,
                                     Integer scale) {
         for (org.sdkj.thermal.domain.PrHeatDtuArchive archive : dtuArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(27);
             task.setInstruction(scale);
             task.setDtuNum(archive.getDtuNum());
@@ -574,11 +569,11 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     private void processOpenGateway(List<org.sdkj.thermal.domain.PrHeatDtuArchive> dtuArchives,
-                                    String orgId, String companyId, Long create, Date now,
+                                    String orgId, Long create, Date now,
                                     PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList,
                                     Integer scale) {
         for (org.sdkj.thermal.domain.PrHeatDtuArchive archive : dtuArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(29);
             task.setInstruction(scale);
             task.setDtuNum(archive.getDtuNum());
@@ -587,11 +582,11 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     private void processCloseGateway(List<org.sdkj.thermal.domain.PrHeatDtuArchive> dtuArchives,
-                                     String orgId, String companyId, Long create, Date now,
+                                     String orgId, Long create, Date now,
                                      PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList,
                                      Integer scale) {
         for (org.sdkj.thermal.domain.PrHeatDtuArchive archive : dtuArchives) {
-            HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+            HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
             task.setInstructionType(30);
             task.setInstruction(scale);
             task.setDtuNum(archive.getDtuNum());
@@ -600,12 +595,12 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     private void processSpecialBrake(List<org.sdkj.thermal.domain.PrHeatValveArchive> valveArchives,
-                                     String orgId, String companyId, Long create, Date now,
+                                     String orgId, Long create, Date now,
                                      PrOptionsHeat prOptionsHeat, List<HtTasksPerform> htTasksPerformList) {
         String[] supportedCodes = {"04310801", "04310802", "04310803"};
         for (org.sdkj.thermal.domain.PrHeatValveArchive archive : valveArchives) {
             if (archive.getMeterArcCode() != null && Arrays.asList(supportedCodes).contains(archive.getMeterArcCode())) {
-                HtTasksPerform task = createBaseTask(orgId, companyId, create, now, prOptionsHeat);
+                HtTasksPerform task = createBaseTask(orgId, create, now, prOptionsHeat);
                 task.setInstructionType(51);
                 task.setInstruction(0);
                 setValveTaskFields(task, archive);
@@ -614,11 +609,10 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         }
     }
 
-    private HtTasksPerform createBaseTask(String orgId, String companyId, Long create, Date now,
+    private HtTasksPerform createBaseTask(String orgId, Long create, Date now,
                                            PrOptionsHeat prOptionsHeat) {
         HtTasksPerform task = new HtTasksPerform();
         task.setOrgId(orgId);
-        task.setCompanyId(companyId);
         task.setCreateBy(create);
         task.setCreateTime(now);
         task.setNumber(0);
@@ -661,10 +655,9 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     @Override
-    public TableDataInfo<PrHeatArchiveVo> realTimeData(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatArchiveVo> realTimeData(String orgId, String buildingId,
                                                         String unitCode, String search, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatArchive::getOrgId, orgId);
         if (StringUtils.isNotBlank(search)) {
             lqw.and(w -> w.like(PrHeatArchive::getMeterNum, search.trim())
@@ -677,11 +670,10 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     @Override
-    public TableDataInfo<PrHeatArchiveVo> zonghe(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatArchiveVo> zonghe(String orgId, String buildingId,
                                                   String unitCode, String search, String moneyType,
                                                   String valveStatus, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatArchive::getOrgId, orgId);
         if (StringUtils.isNotBlank(search)) {
             lqw.and(w -> w.like(PrHeatArchive::getMeterNum, search.trim())
@@ -695,7 +687,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean xunce(List<PrHeatVo> prHeatVoList, String orgId, String companyId) {
+    public boolean xunce(List<PrHeatVo> prHeatVoList, String orgId) {
         if (prHeatVoList.isEmpty()) {
             return true;
         }
@@ -705,7 +697,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         for (PrHeatVo vo : prHeatVoList) {
             HtTasksPerform task = new HtTasksPerform();
             task.setOrgId(orgId);
-            task.setCompanyId(companyId);
             task.setCreateBy(create);
             task.setCreateTime(now);
             if (vo.getPrHeatValveArchive() != null) {
@@ -728,7 +719,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean setValveGroupParam(List<PrHeatVo> prHeatVoList, String commandParam, String orgId, String companyId) {
+    public boolean setValveGroupParam(List<PrHeatVo> prHeatVoList, String commandParam, String orgId) {
         if (prHeatVoList.isEmpty()) {
             return true;
         }
@@ -738,7 +729,6 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         for (PrHeatVo vo : prHeatVoList) {
             HtTasksPerform task = new HtTasksPerform();
             task.setOrgId(orgId);
-            task.setCompanyId(companyId);
             task.setCreateBy(create);
             task.setCreateTime(now);
             if (vo.getPrHeatValveArchive() != null) {
@@ -761,9 +751,8 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     @Override
-    public List<PrHeatArchiveVo> findMeter(String search, String companyId) {
+    public List<PrHeatArchiveVo> findMeter(String search) {
         LambdaQueryWrapper<PrHeatArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatArchive::getCompanyId, companyId);
         if (StringUtils.isNotBlank(search)) {
             lqw.and(w -> w.like(PrHeatArchive::getMeterNum, search.trim())
                 .or().like(PrHeatArchive::getMeterArcName, search.trim()));
@@ -788,9 +777,8 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     @Override
-    public List<PrHeatArchiveVo> exportAll(String companyId, String orgId) {
+    public List<PrHeatArchiveVo> exportAll(String orgId) {
         LambdaQueryWrapper<PrHeatArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatArchive::getOrgId, orgId);
         lqw.eq(PrHeatArchive::getIsChanged, 0);
         return baseMapper.selectVoList(lqw);
@@ -799,18 +787,16 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean importData(String uuid) {
-        String companyId = LoginHelper.getTenantId();
         String create = LoginHelper.getUserIdStr();
-        log.info("导入配表数据，批次号：{}，公司：{}，用户：{}", uuid, companyId, create);
-        baseMapper.importData(companyId, create);
+        log.info("导入配表数据，批次号：{}，用户：{}", uuid, create);
+        baseMapper.importData(create);
         return true;
     }
 
     @Override
-    public List<PrHeatArchiveVo> selectReport(String companyId, String orgId, String buildingId,
+    public List<PrHeatArchiveVo> selectReport(String orgId, String buildingId,
                                               String unitCode, String startTime, String endTime, String search) {
         LambdaQueryWrapper<PrHeatArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatArchive::getOrgId, orgId);
         lqw.eq(PrHeatArchive::getIsChanged, 0);
         if (StringUtils.isNotBlank(search)) {
@@ -822,10 +808,9 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     }
 
     @Override
-    public List<PrHeatArchiveVo> selectMeterReport(String companyId, String orgId, String buildingId,
+    public List<PrHeatArchiveVo> selectMeterReport(String orgId, String buildingId,
                                                    String unitCode, String startTime, String endTime, String search) {
         LambdaQueryWrapper<PrHeatArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatArchive::getOrgId, orgId);
         lqw.eq(PrHeatArchive::getIsChanged, 0);
         if (StringUtils.isNotBlank(search)) {

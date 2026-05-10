@@ -12,7 +12,6 @@ public class PrWechatBindRecordVo {
     private Long houseId;
     private String heatPayCode;
     private String wxOpenId;
-    private String companyId;
     private String createBy;
     private Date createTime;
 }

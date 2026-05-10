@@ -40,11 +40,10 @@ public interface IPrBuildingService extends IService<PrBuilding> {
 
     /**
      * 根据小区ID查询楼宇列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 楼宇列表
      */
-    List<PrBuildingVo> selectByOrgId(String companyId, String orgId);
+    List<PrBuildingVo> selectByOrgId(String orgId);
 
     /**
      * 根据楼宇ID查询单元编码列表

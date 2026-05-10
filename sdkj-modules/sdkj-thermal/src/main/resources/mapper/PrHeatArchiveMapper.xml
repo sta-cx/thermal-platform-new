@@ -4,7 +4,7 @@
 
     <insert id="importData">
         INSERT INTO pr_heat_archive (
-            id, company_id, org_id, house_id, meter_num, meter_arc_code, meter_arc_name,
+            id, org_id, house_id, meter_num, meter_arc_code, meter_arc_name,
             meter_serial, specification, model, concentrator_code, dtu_num, dtu_type,
             start_reading, current_reading, total_used, trade_times, total_money,
             total_recharge, current_balance, standard_id, standard_name, standard_price,
@@ -12,7 +12,7 @@
             create_by, create_time
         )
         SELECT
-            id, company_id, org_id, house_id, meter_num, meter_arc_code, meter_arc_name,
+            id, org_id, house_id, meter_num, meter_arc_code, meter_arc_name,
             meter_serial, specification, model, concentrator_code, dtu_num, dtu_type,
             COALESCE(start_reading, 0), COALESCE(current_reading, 0),
             COALESCE(total_used, 0), COALESCE(trade_times, 0), COALESCE(total_money, 0),
@@ -21,8 +21,7 @@
             card_num, imei, device_id, chan_num, install_site, install_type, 0,
             #{createBy}, NOW()
         FROM pr_import_heat
-        WHERE company_id = #{companyId}
-        AND create_by = #{createBy}
+        WHERE create_by = #{createBy}
         AND type = 0
     </insert>
 

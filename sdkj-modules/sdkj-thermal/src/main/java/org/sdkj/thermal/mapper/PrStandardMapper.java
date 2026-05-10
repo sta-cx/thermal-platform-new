@@ -42,17 +42,17 @@ public interface PrStandardMapper extends BaseMapperPlus<PrStandard, PrStandardV
     /**
      * 查询电表收费标准
      */
-    List<PrStandardVo> selectEleStandard(@Param("companyId") String companyId, @Param("orgId") String orgId);
+    List<PrStandardVo> selectEleStandard(@Param("orgId") String orgId);
 
     /**
      * 查询水表收费标准
      */
-    List<PrStandardVo> selectWaterStandard(@Param("companyId") String companyId, @Param("orgId") String orgId);
+    List<PrStandardVo> selectWaterStandard(@Param("orgId") String orgId);
 
     /**
      * 查询热力收费标准
      */
-    List<PrStandardVo> selectHeatStandard(@Param("companyId") String companyId, @Param("orgId") String orgId);
+    List<PrStandardVo> selectHeatStandard(@Param("orgId") String orgId);
 
     /**
      * 查询标准单价列表（grade=1）
@@ -67,43 +67,43 @@ public interface PrStandardMapper extends BaseMapperPlus<PrStandard, PrStandardV
     /**
      * 检查标准名称是否重复
      */
-    List<PrStandardVo> checkName(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    List<PrStandardVo> checkName(@Param("orgId") String orgId,
                                  @Param("itemGroup") String itemGroup, @Param("name") String name, @Param("id") String id);
 
     /**
      * 按月购买次数
      */
-    int getPurchaseNumMonth(@Param("meterId") String meterId, @Param("companyId") String companyId, @Param("orgId") String orgId);
+    int getPurchaseNumMonth(@Param("meterId") String meterId, @Param("orgId") String orgId);
 
     /**
      * 按月已用金额
      */
-    BigDecimal getPurchaseAmountMonth(@Param("meterId") String meterId, @Param("companyId") String companyId, @Param("orgId") String orgId);
+    BigDecimal getPurchaseAmountMonth(@Param("meterId") String meterId, @Param("orgId") String orgId);
 
     /**
      * 按季度购买次数
      */
-    int getPurchaseNumQuarter(@Param("meterId") String meterId, @Param("companyId") String companyId, @Param("orgId") String orgId);
+    int getPurchaseNumQuarter(@Param("meterId") String meterId, @Param("orgId") String orgId);
 
     /**
      * 按季度已用金额
      */
-    BigDecimal getPurchaseAmountQuarter(@Param("meterId") String meterId, @Param("companyId") String companyId, @Param("orgId") String orgId);
+    BigDecimal getPurchaseAmountQuarter(@Param("meterId") String meterId, @Param("orgId") String orgId);
 
     /**
      * 按年购买次数
      */
-    int getPurchaseNumYear(@Param("meterId") String meterId, @Param("companyId") String companyId, @Param("orgId") String orgId);
+    int getPurchaseNumYear(@Param("meterId") String meterId, @Param("orgId") String orgId);
 
     /**
      * 按年已用金额
      */
-    BigDecimal getPurchaseAmountYear(@Param("meterId") String meterId, @Param("companyId") String companyId, @Param("orgId") String orgId);
+    BigDecimal getPurchaseAmountYear(@Param("meterId") String meterId, @Param("orgId") String orgId);
 
     /**
      * 根据标准 ID 查询关联的费用项目
      */
-    PrExpenseItem selectExpenseItemByStandardId(@Param("companyId") String companyId, @Param("orgId") String orgId, @Param("standardId") String standardId);
+    PrExpenseItem selectExpenseItemByStandardId(@Param("orgId") String orgId, @Param("standardId") String standardId);
 
     /**
      * 按项目名称查询收费标准列表

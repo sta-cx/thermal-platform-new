@@ -80,8 +80,6 @@ public class HtRepairBo extends BaseEntity {
     /** 小区名称 */
     private String orgName;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 创建人姓名 */
     private String createName;

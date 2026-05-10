@@ -63,7 +63,6 @@ public class PrHeatUnitHotArchiveVo implements Serializable {
     private Integer isChanged;
     private Integer isStop;
     private Long unitId;
-    private String companyId;
     private String orgId;
     private String imeiNum;
     private String dtuNum;

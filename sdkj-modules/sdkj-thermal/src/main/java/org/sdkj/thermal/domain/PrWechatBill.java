@@ -28,7 +28,6 @@ public class PrWechatBill extends BaseEntity {
     private Integer totalCount;
     private Integer successCount;
     private Integer diffCount;
-    private String companyId;
     private String operator;
     private String remark;
     private String delFlag;

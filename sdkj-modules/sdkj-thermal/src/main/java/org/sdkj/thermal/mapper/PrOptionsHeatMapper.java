@@ -14,24 +14,21 @@ public interface PrOptionsHeatMapper extends BaseMapperPlus<PrOptionsHeat, PrOpt
 
     /**
      * 根据公司ID查询公司级别的配置
-     * @param companyId 公司ID
      * @return 配置信息
      */
-    PrOptionsHeat selectByCompanyId(@Param("companyId") String companyId);
+    PrOptionsHeat selectByCompanyId();
 
     /**
      * 根据小区ID和公司ID查询配置
      * @param orgId 小区ID
-     * @param companyId 公司ID
      * @return 配置信息
      */
-    PrOptionsHeat selectByOrgAndCompany(@Param("orgId") String orgId, @Param("companyId") String companyId);
+    PrOptionsHeat selectByOrgAndCompany(@Param("orgId") String orgId);
 
     /**
      * 删除指定小区和公司的配置
      * @param orgId 小区ID
-     * @param companyId 公司ID
      * @return 删除结果
      */
-    int deleteByOrgAndCompany(@Param("orgId") String orgId, @Param("companyId") String companyId);
+    int deleteByOrgAndCompany(@Param("orgId") String orgId);
 }

@@ -75,6 +75,4 @@ public class PrStandardPrice extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 }

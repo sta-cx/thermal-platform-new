@@ -31,15 +31,10 @@ public class PrAutoMachineServiceImpl implements IPrAutoMachineService {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     @Override
-    public String generateSerialNum(String companyId) {
-        if (StrUtil.isBlank(companyId)) {
-            throw new ServiceException("公司ID不能为空");
-        }
-
+    public String generateSerialNum() {
         // 查询公司级别的供热配置，获取流水号前缀
         PrOptionsHeat options = optionsHeatMapper.selectOne(
             new LambdaQueryWrapper<PrOptionsHeat>()
-                .eq(PrOptionsHeat::getCompanyId, companyId)
                 .eq(PrOptionsHeat::getLevel, "company")
                 .last("LIMIT 1")
         );

@@ -26,7 +26,6 @@ public class PrHouseExpenseVo implements Serializable {
     private String itemCode;
     private Long standardId;
     private String orgId;
-    private String companyId;
     private String itemName;
     private BigDecimal standardPrice;
     private String moneyFormula;

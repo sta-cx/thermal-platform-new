@@ -26,10 +26,9 @@ public class HeatExpenseGenerateJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap data = context.getJobDetail().getJobDataMap();
         String jobName = data.getString("jobName");
-        String companyId = data.getString("companyId");
         String orgId = data.getString("orgId");
 
-        log.info("采暖费生成 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgId);
+        log.info("采暖费生成 Job 启动: {} (小区: {})", jobName, orgId);
 
         boolean tenantPushed = TenantQuartzContext.push(context);
         try {
@@ -42,29 +41,28 @@ public class HeatExpenseGenerateJob implements Job {
             String[] orgIds = orgId.split(",");
             for (String realOrgId : orgIds) {
                 List<PrExpenseItemVo> items = expenseItemService.selectByItemGroup(
-                    companyId, realOrgId, "6", null);
+                    realOrgId, "6", null);
                 if (items == null || items.isEmpty()) {
-                    log.debug("无采暖费项目: 公司={}, 小区={}", companyId, realOrgId);
+                    log.debug("无采暖费项目: 小区={}", realOrgId);
                     continue;
                 }
                 for (PrExpenseItemVo item : items) {
                     List<PrHouseExpense> houseExpenses = houseExpenseService.lambdaQuery()
-                        .eq(PrHouseExpense::getCompanyId, companyId)
                         .eq(PrHouseExpense::getOrgId, realOrgId)
                         .eq(PrHouseExpense::getItemGroup, item.getItemGroup())
                         .eq(PrHouseExpense::getItemCode, item.getItemCode())
                         .list();
                     if (houseExpenses != null && !houseExpenses.isEmpty()) {
                         expenseService.insertData(houseExpenses);
-                        expenseService.updateFormula(companyId, realOrgId);
-                        log.info("采暖费生成: 公司={}, 小区={}, 项目={}, 房屋数={}",
-                            companyId, realOrgId, item.getItemCode(), houseExpenses.size());
+                        expenseService.updateFormula(realOrgId);
+                        log.info("采暖费生成: 小区={}, 项目={}, 房屋数={}",
+                            realOrgId, item.getItemCode(), houseExpenses.size());
                     }
                 }
             }
             log.info("采暖费生成 Job 完成: {}", jobName);
         } catch (Exception e) {
-            log.error("采暖费生成 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgId, e);
+            log.error("采暖费生成 Job 失败: {} (小区: {})", jobName, orgId, e);
         } finally {
             TenantQuartzContext.clear(tenantPushed);
         }

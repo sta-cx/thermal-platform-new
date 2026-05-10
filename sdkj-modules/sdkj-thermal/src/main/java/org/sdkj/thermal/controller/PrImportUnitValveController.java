@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
-import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrImportUnitValve;
 import org.sdkj.thermal.excel.ExcelStyleUtils;
@@ -50,9 +49,8 @@ public class PrImportUnitValveController extends BaseController {
     @SaCheckLogin
     @GetMapping("/template")
     public void downloadTemplate(HttpServletResponse response,
-                                  @RequestParam String companyId,
                                   @RequestParam String orgId) throws IOException {
-        List<PrImportUnitValve> lists = prImportUnitValveService.selectByCompanyIdOrgId(companyId, orgId);
+        List<PrImportUnitValve> lists = prImportUnitValveService.selectByOrgId(orgId);
 
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");

@@ -24,7 +24,6 @@ public class SysUserExt extends BaseEntity {
     private String id;
 
     private Long userId;
-    private String companyId;
     private String wxOpenid;
     private String wxNumber;
     private String qqNumber;

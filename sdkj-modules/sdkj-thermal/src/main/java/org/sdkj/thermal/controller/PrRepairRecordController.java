@@ -33,12 +33,10 @@ public class PrRepairRecordController extends BaseController {
     public TableDataInfo<PrRepairRecord> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String orgId,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) Integer status,
             PageQuery pageQuery) {
         Page<PrRepairRecord> page = pageQuery.build();
         LambdaQueryWrapper<PrRepairRecord> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(companyId != null && !companyId.isEmpty(), PrRepairRecord::getCompanyId, companyId);
         lqw.eq(orgId != null && !orgId.isEmpty(), PrRepairRecord::getOrgId, orgId);
         lqw.eq(status != null, PrRepairRecord::getRepairStatus, status);
         lqw.orderByDesc(PrRepairRecord::getCreateTime);
@@ -93,9 +91,9 @@ public class PrRepairRecordController extends BaseController {
 
     @SaCheckPermission("thermal:property:repairRecord:query")
     @SaCheckLogin
-    @GetMapping("/count/{companyId}")
-    public R<Map<String, Object>> allTypeCount(@PathVariable String companyId) {
-        return R.ok(repairRecordService.getAllTypeCount(companyId));
+    @GetMapping("/count")
+    public R<Map<String, Object>> allTypeCount() {
+        return R.ok(repairRecordService.getAllTypeCount());
     }
 
     @SaCheckPermission("thermal:property:repairRecord:evaluate")

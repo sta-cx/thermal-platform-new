@@ -9,7 +9,6 @@ import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
-import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtTasks;
@@ -54,7 +53,6 @@ public class HtTasksController extends BaseController {
     public TableDataInfo<HtTasksVo> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String orgId,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) Integer type,
             @RequestParam(required = false) Integer scopeType,
@@ -66,7 +64,6 @@ public class HtTasksController extends BaseController {
         LambdaQueryWrapper<HtTasks> lqw = new LambdaQueryWrapper<>();
         lqw.like(keyword != null && !keyword.isEmpty(), HtTasks::getName, keyword);
         lqw.eq(orgId != null && !orgId.isEmpty(), HtTasks::getOrgId, orgId);
-        lqw.eq(companyId != null && !companyId.isEmpty(), HtTasks::getCompanyId, companyId);
         lqw.eq(status != null, HtTasks::getStatus, status);
         lqw.eq(type != null, HtTasks::getType, type);
         lqw.eq(scopeType != null, HtTasks::getScopeType, scopeType);
@@ -327,10 +324,9 @@ public class HtTasksController extends BaseController {
     @GetMapping("/deviceList")
     public TableDataInfo<HtTasksVo> deviceList(
             @RequestParam(required = false) String orgId,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String deviceType,
             PageQuery pageQuery) {
-        return tasksService.selectDeviceList(orgId, companyId, deviceType, pageQuery);
+        return tasksService.selectDeviceList(orgId, deviceType, pageQuery);
     }
 
     /**

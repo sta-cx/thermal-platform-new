@@ -9,7 +9,7 @@
                a.max_money, a.money_formula, a.is_free, a.reason, a.preferential, a.deduction,
                a.latefee, a.receivable, a.paid_in, a.final_money, a.overdue_day,
                a.is_charged, a.charged_time, a.record_id, a.delay_date, a.heat_usage,
-               a.is_calc, a.is_closed, a.year, a.month, a.org_id, a.company_id,
+               a.is_calc, a.is_closed, a.year, a.month, a.org_id,
                a.parking_space_id,
                b.room_num,
                c.user_name,
@@ -22,10 +22,7 @@
         LEFT JOIN pr_building d ON b.building_id = d.id
         LEFT JOIN pm_parking_space e ON a.parking_space_id = e.id
         WHERE a.del_flag = '0'
-        <if test="companyId != null and companyId != ''">
-            AND a.company_id = #{companyId}
-        </if>
-        <if test="orgId != null and orgId != ''">
+                <if test="orgId != null and orgId != ''">
             AND a.org_id = #{orgId}
         </if>
         <if test="buildingId != null and buildingId != ''">
@@ -60,7 +57,6 @@
         LEFT JOIN pr_house b ON a.house_id = b.id
         LEFT JOIN pr_user_house c ON c.house_id = b.id AND c.del_flag = '0'
         WHERE a.del_flag = '0'
-          AND a.company_id = #{companyId}
           AND a.org_id = #{orgId}
         <if test="buildingId != null and buildingId != ''">
             AND b.building_id = #{buildingId}
@@ -101,8 +97,7 @@
         SET a.standard_price = b.standard_price,
             a.price_formula = b.price_formula,
             a.max_price = b.max_price
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.is_calc = '0'
           AND b.grade = '1'
           AND a.del_flag = '0'
@@ -157,15 +152,13 @@
         LEFT JOIN pr_standard_price d ON d.standard_id = a.standard_id
         LEFT JOIN pr_expense_item e ON e.item_code = c.item_code
             AND e.item_group = c.item_group
-            AND e.company_id = c.company_id
             AND e.org_id = c.org_id
         SET a.standard_price = IF(a.max_price = 0,
             ROUND(${a.price_formula}, e.price_precision),
             IF(ROUND(${a.price_formula}, e.price_precision) >= a.max_price,
                 a.max_price,
                 ROUND(${a.price_formula}, e.price_precision)))
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.is_calc = '0'
           AND a.del_flag = '0'
     </update>
@@ -177,7 +170,6 @@
         LEFT JOIN pr_standard_price d ON d.standard_id = a.standard_id
         LEFT JOIN pr_expense_item e ON e.item_group = c.item_group
             AND e.item_code = c.item_code
-            AND e.company_id = c.company_id
             AND e.org_id = c.org_id
         SET a.is_calc = '1',
             a.receivable = IF(a.max_money > '0' AND ROUND(${a.money_formula}, e.money_precision) >= a.max_money,
@@ -189,8 +181,7 @@
                     ROUND(${a.money_formula}, e.money_precision))
                 - a.preferential - a.deduction + a.latefee,
                 e.money_precision)
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.is_calc = '0'
           AND a.del_flag = '0'
     </update>
@@ -208,8 +199,7 @@
                     a.max_money,
                     ROUND(${a.money_formula}, '2'))
                 - a.preferential - a.deduction + a.latefee, '2')
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.is_calc = '0'
           AND a.del_flag = '0'
     </update>
@@ -233,7 +223,7 @@
                is_latefee, latefee_startdate, latefee_type, latefee_startdays, latefee_formula,
                is_limited, limited_type, limited_cond, limited_times, limited_money,
                limited_single_money, standard_price, money_formula, max_money,
-               org_id, company_id
+               org_id
         FROM pr_standard
         WHERE id = #{standardId}
     </select>
@@ -252,7 +242,7 @@
         LEFT JOIN pr_building d ON b.building_id = d.id
         LEFT JOIN pm_parking_space e ON a.parking_space_id = e.id
         WHERE a.del_flag = '0'
-          AND a.org_id = #{orgId} AND a.company_id = #{companyId}
+          AND a.org_id = #{orgId}
         <if test="buildingId != null and buildingId != ''">AND b.building_id = #{buildingId}</if>
         <if test="unitCode != null and unitCode != ''">AND b.unit_code = #{unitCode}</if>
         <if test="itemGroup != null and itemGroup != ''">AND a.item_group = #{itemGroup}</if>
@@ -266,7 +256,7 @@
     <select id="selectParkingSpaceExpenseList" resultType="java.util.LinkedHashMap">
         SELECT a.id, a.code AS parkingCode, a.house_id,
                e.user_name AS userName, '7' AS itemGroup, '701' AS itemCode,
-               a.standard_id, a.org_id, a.company_id,
+               a.standard_id, a.org_id,
                b.room_num AS roomNum,
                IFNULL(g.expire_date, a.establish_time) AS openTime,
                c.name AS standardName, c.standard_price AS standardPrice
@@ -279,7 +269,7 @@
             SELECT parking_space_id, MAX(expire_date) AS expire_date
             FROM pr_expense WHERE del_flag = '0' GROUP BY parking_space_id
         ) g ON g.parking_space_id = a.id
-        WHERE a.company_id = #{companyId} AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
         <if test="buildingId != null and buildingId != ''">AND b.building_id = #{buildingId}</if>
         <if test="unitCode != null and unitCode != ''">AND b.unit_code = #{unitCode}</if>
         <if test="itemGroup != null and itemGroup != ''">AND '7' = #{itemGroup}</if>
@@ -292,7 +282,7 @@
                b.building_id AS buildingId, b.unit_code AS unitCode
         FROM pr_house_expense a
         LEFT JOIN pr_house b ON b.id = a.house_id
-        WHERE a.company_id = #{companyId} AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
         <if test="search != null and search != ''">AND b.room_num = TRIM(#{search})</if>
     </select>
 
@@ -305,7 +295,7 @@
         LEFT JOIN pr_user c ON uh.user_id = c.id
         LEFT JOIN sys_user d ON d.id = a.create_by
         LEFT JOIN sys_organization e ON e.id = b.org_id
-        WHERE a.company_id = #{companyId}
+        WHERE 1=1
         <if test="orgId != null and orgId != ''">AND b.org_id = #{orgId}</if>
         <if test="buildingId != null and buildingId != ''">AND b.building_id = #{buildingId}</if>
         <if test="unitCode != null and unitCode != ''">AND b.unit_code = #{unitCode}</if>
@@ -325,7 +315,7 @@
         LEFT JOIN pr_user_house uh ON uh.house_id = b.id AND uh.del_flag = '0'
         LEFT JOIN pr_user c ON uh.user_id = c.id
         LEFT JOIN sys_organization e ON e.id = b.org_id
-        WHERE b.company_id = #{companyId}
+        WHERE 1=1
         <if test="orgId != null and orgId != ''">AND b.org_id = #{orgId}</if>
         <if test="buildingId != null and buildingId != ''">AND b.building_id = #{buildingId}</if>
         <if test="unitCode != null and unitCode != ''">AND b.unit_code = #{unitCode}</if>
@@ -351,8 +341,7 @@
             a.overdue_day = IF(DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)) &lt;= 0,
                 0,
                 DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)))
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND b.id = #{standardId}
           AND a.is_charged = '0'
           AND a.is_calc = '1'
@@ -374,8 +363,7 @@
             a.overdue_day = IF(DATEDIFF(CURRENT_DATE, DATE_ADD(a.expire_date, INTERVAL b.latefee_startdays DAY)) &lt;= 0,
                 0,
                 DATEDIFF(CURRENT_DATE, DATE_ADD(a.expire_date, INTERVAL b.latefee_startdays DAY)))
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND b.id = #{standardId}
           AND a.is_charged = '0'
           AND a.is_calc = '1'
@@ -397,8 +385,7 @@
             a.overdue_day = IF(DATEDIFF(CURRENT_DATE, DATE_ADD(b.latefee_startdate, INTERVAL b.latefee_startdays DAY)) &lt;= 0,
                 0,
                 DATEDIFF(CURRENT_DATE, DATE_ADD(b.latefee_startdate, INTERVAL b.latefee_startdays DAY)))
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND b.id = #{standardId}
           AND a.is_charged = '0'
           AND a.is_calc = '1'
@@ -420,8 +407,7 @@
             a.overdue_day = IF((DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)) - '30') &lt;= 0,
                 0,
                 (DATEDIFF(CURRENT_DATE, DATE_ADD(a.start_date, INTERVAL b.latefee_startdays DAY)) - '30'))
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND b.id = #{standardId}
           AND a.is_charged = '0'
           AND a.is_calc = '1'
@@ -436,11 +422,9 @@
         LEFT JOIN pr_standard b ON b.id = a.standard_id
         LEFT JOIN pr_expense_item c ON c.item_group = a.item_group
             AND c.item_code = a.item_code
-            AND c.company_id = a.company_id
             AND c.org_id = a.org_id
         SET a.final_money = ROUND(a.receivable - a.preferential - a.deduction + a.latefee, c.money_precision)
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.is_charged = '0'
           AND a.is_calc = '1'
           AND b.id = #{standardId}

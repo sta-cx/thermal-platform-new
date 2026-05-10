@@ -163,8 +163,6 @@ public class PrHeatUnitHotArchive extends BaseEntity {
     /** 单元ID */
     private Long unitId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 小区ID */
     private String orgId;

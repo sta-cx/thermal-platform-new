@@ -22,7 +22,6 @@ public class HtTasksVo {
     private Date lastTime;
     private Integer total;
     private String orgId;
-    private String companyId;
     private Integer adjustBasis;
     private Integer scopeType;
     private String description;

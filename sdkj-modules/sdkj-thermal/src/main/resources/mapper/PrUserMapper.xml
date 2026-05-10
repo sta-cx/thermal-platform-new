@@ -7,10 +7,10 @@
                a.nation, a.birthday, a.id_startdate, a.id_enddate, a.id_department,
                a.address, a.employer, a.open_id, a.wx_number, a.qq_number,
                a.occupation, a.education, a.hobby, a.email, a.emer_contact, a.emer_phone,
-               a.org_id, a.company_id, a.seq, a.head_photo, a.front_photo, a.back_photo,
+               a.org_id, a.seq, a.head_photo, a.front_photo, a.back_photo,
                a.create_time
         FROM pr_user a
-        WHERE a.company_id = #{companyId} AND a.del_flag = '0'
+        WHERE a.del_flag = '0'
         ORDER BY a.create_time DESC
     </select>
 
@@ -19,7 +19,7 @@
                a.nation, a.birthday, a.id_startdate, a.id_enddate, a.id_department,
                a.address, a.employer, a.open_id, a.wx_number, a.qq_number,
                a.occupation, a.education, a.hobby, a.email, a.emer_contact, a.emer_phone,
-               a.org_id, a.company_id, a.seq, a.head_photo, a.front_photo, a.back_photo,
+               a.org_id, a.seq, a.head_photo, a.front_photo, a.back_photo,
                a.create_time,
                b.room_num,
                c.org_name
@@ -40,7 +40,7 @@
                nation, birthday, id_startdate, id_enddate, id_department,
                address, employer, open_id, wx_number, qq_number,
                occupation, education, hobby, email, emer_contact, emer_phone,
-               org_id, company_id, seq, head_photo, front_photo, back_photo,
+               org_id, seq, head_photo, front_photo, back_photo,
                create_time
         FROM pr_user
         WHERE phone = #{phone} AND del_flag = '0'

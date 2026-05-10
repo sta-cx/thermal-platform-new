@@ -27,13 +27,10 @@ public class PrRepairPersonController extends BaseController {
     @SaCheckPermission("thermal:property:repairPerson:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrRepairPerson> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String search,
+    public TableDataInfo<PrRepairPerson> list(@RequestParam(required = false) String search,
             PageQuery pageQuery) {
         Page<PrRepairPerson> page = pageQuery.build();
         LambdaQueryWrapper<PrRepairPerson> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(companyId != null && !companyId.isEmpty(), PrRepairPerson::getCompanyId, companyId);
         lqw.like(search != null && !search.isEmpty(), PrRepairPerson::getName, search);
         lqw.orderByDesc(PrRepairPerson::getCreateTime);
         repairPersonService.page(page, lqw);

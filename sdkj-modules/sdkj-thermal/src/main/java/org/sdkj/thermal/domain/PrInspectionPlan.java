@@ -21,5 +21,4 @@ public class PrInspectionPlan extends BaseEntity {
     private Date endTime;
     private Long equipmentId;
     private String orgId;
-    private String companyId;
 }

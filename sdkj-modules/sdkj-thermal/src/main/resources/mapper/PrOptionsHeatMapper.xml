@@ -5,24 +5,21 @@
     <!-- 根据公司ID查询公司级别的配置 -->
     <select id="selectByCompanyId" resultType="org.sdkj.thermal.domain.PrOptionsHeat">
         SELECT * FROM pr_options_heat
-        WHERE company_id = #{companyId}
-          AND (org_id IS NULL OR org_id = '')
+        WHERE (org_id IS NULL OR org_id = '')
         LIMIT 1
     </select>
 
     <!-- 根据小区ID和公司ID查询配置 -->
     <select id="selectByOrgAndCompany" resultType="org.sdkj.thermal.domain.PrOptionsHeat">
         SELECT * FROM pr_options_heat
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
         LIMIT 1
     </select>
 
     <!-- 删除指定小区和公司的配置 -->
     <delete id="deleteByOrgAndCompany">
         DELETE FROM pr_options_heat
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
     </delete>
 
 </mapper>

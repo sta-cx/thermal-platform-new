@@ -53,5 +53,4 @@ public class PrRepairRecord extends BaseEntity {
     private String whyFailure;
     private String alertStatus;
     private String orgId;
-    private String companyId;
 }

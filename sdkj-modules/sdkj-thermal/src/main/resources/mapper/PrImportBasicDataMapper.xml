@@ -8,13 +8,13 @@
         unit_site, floor, nfloor_area, gfloor_area, heating_area, establish_time, nature,
         site_type, user_id, exist_user_id, user_name, phone, id_no, account, item_name,
         standard_id, standard_name, standard_price, pay_status, other_code,
-        company_id, create_by, create_time, type
+        create_by, create_time, type
     </sql>
 
     <insert id="insertList">
         insert into pr_import_basic_data
         (org_name, building_name, room_num, unit_code, floor, nfloor_area, gfloor_area,
-         establish_time, user_id, user_name, phone, id_no, account, company_id, create_by,
+         establish_time, user_id, user_name, phone, id_no, account, create_by,
          create_time, building_code, room_code, station_name, substation_name, heating_area,
          site_type, station_type, unit_site, nature, item_name, standard_name, standard_price,
          pay_status, other_code)
@@ -24,7 +24,7 @@
              trim(#{item.unitCode}), trim(#{item.floor}), trim(#{item.nfloorArea}),
              trim(#{item.gfloorArea}), trim(#{item.establishTime}), #{item.userId},
              trim(#{item.userName}), trim(#{item.phone}), trim(#{item.idNo}), #{item.account},
-             trim(#{item.companyId}), #{item.createBy}, #{item.createTime},
+             #{item.createBy}, #{item.createTime},
              trim(#{item.buildingCode}), trim(#{item.roomCode}), trim(#{item.stationName}),
              trim(#{item.substationName}), trim(#{item.heatingArea}), trim(#{item.siteType}),
              trim(#{item.stationType}), trim(#{item.unitSite}), trim(#{item.nature}),
@@ -35,27 +35,27 @@
 
     <update id="updateOrgId">
         update pr_import_basic_data a
-            left join sys_organization b on a.company_id = b.company_id and a.org_name = b.name
+            left join sys_organization b on a.org_name = b.name
         set a.org_id = b.id
-        where a.company_id = #{companyId} and a.create_by = #{create}
-          and a.type = '0' and b.company_id = #{companyId} and a.org_name = b.name
+        where a.create_by = #{create}
+          and a.type = '0' and a.org_name = b.name
     </update>
 
     <update id="updateBuildId">
         update pr_import_basic_data a
             left join pr_building b on a.org_id = b.org_id and a.building_name = b.name
         set a.building_id = b.id
-        where a.company_id = #{companyId} and a.create_by = #{create}
-          and a.type = '0' and b.company_id = #{companyId}
+        where a.create_by = #{create}
+          and a.type = '0'
           and a.org_id = b.org_id and a.building_name = b.name
     </update>
 
     <update id="updateUnitId">
         update pr_import_basic_data a
-            left join pr_unit b on a.company_id = b.company_id and a.org_id = b.org_id
+            left join pr_unit b on a.org_id = b.org_id
                 and a.building_id = b.building_id
         set a.unit_id = b.id
-        where a.company_id = #{companyId} and a.create_by = #{create}
+        where a.create_by = #{create}
           and a.type = '0' and b.del_flag = '0'
           and a.org_id = b.org_id and a.building_id = b.building_id
           and a.unit_code = b.name
@@ -65,8 +65,8 @@
         update pr_import_basic_data a
             left join pr_heat_station b on a.org_id = b.org_id and a.station_name = b.name
         set a.station_id = b.id
-        where a.company_id = #{companyId} and a.create_by = #{create}
-          and a.type = '0' and b.company_id = #{companyId}
+        where a.create_by = #{create}
+          and a.type = '0'
     </update>
 
     <update id="updateSubstationId">
@@ -74,7 +74,7 @@
             left join pr_heat_station_partition b on a.station_id = b.station_id
                 and a.substation_name = b.name
         set a.substation_id = b.id
-        where a.company_id = #{companyId} and a.create_by = #{create}
+        where a.create_by = #{create}
           and a.type = '0'
     </update>
 
@@ -82,24 +82,24 @@
         update pr_import_basic_data a
             left join pr_house b on a.org_id = b.org_id and a.room_num = b.room_num
         set a.house_id = b.id
-        where a.company_id = #{companyId} and a.create_by = #{create}
-          and a.type = '0' and b.company_id = #{companyId}
+        where a.create_by = #{create}
+          and a.type = '0'
     </update>
 
     <update id="updateStandardId">
         update pr_import_basic_data a
             left join pr_standard b on a.standard_name = b.name
-                and a.standard_price = b.standard_price and a.company_id = b.company_id
+                and a.standard_price = b.standard_price
         set a.standard_id = b.id
-        where a.company_id = #{companyId} and a.create_by = #{create}
-          and a.type = '0' and b.company_id = #{companyId}
+        where a.create_by = #{create}
+          and a.type = '0'
           and length(a.standard_name) &gt; 0
     </update>
 
     <select id="selectNoOrgIds" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select <include refid="Base_Column_List"/>
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and (org_id is null or org_id = '')
         limit 500
     </select>
@@ -107,7 +107,7 @@
     <select id="selectNoRoomNum" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select <include refid="Base_Column_List"/>
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and (room_num is null or room_num = '')
         limit 500
     </select>
@@ -115,13 +115,13 @@
     <select id="selectRepeatHouse" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select <include refid="Base_Column_List"/>
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0'
           and room_num in (
             select room_num from (
                 select room_num, count(1) as cc
                 from pr_import_basic_data
-                where company_id = #{companyId} and type = '0' and create_by = #{create}
+                where type = '0' and create_by = #{create}
                 group by room_num having cc > 1
             ) aa
           )
@@ -130,7 +130,7 @@
     <select id="selectError1" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select *
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and establish_time is null
         limit 500
     </select>
@@ -139,7 +139,7 @@
         select a.*
         from pr_import_basic_data a
             left join pr_house b on a.org_id = b.org_id and a.room_num = b.room_num
-        where a.company_id = #{companyId} and a.create_by = #{create}
+        where a.create_by = #{create}
           and a.type = '0' and a.org_id = b.org_id and a.room_num = b.room_num
           and b.del_flag = '0'
         limit 500
@@ -148,119 +148,119 @@
     <select id="selectNoBuildId" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select <include refid="Base_Column_List"/>
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and (building_id is null or building_id = '')
     </select>
 
     <select id="selectNoUnitId" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select <include refid="Base_Column_List"/>
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and (unit_id is null or unit_id = '')
     </select>
 
     <select id="selectStationId" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select <include refid="Base_Column_List"/>
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and (station_id is null or station_id = '')
     </select>
 
     <select id="selectNoSubstationId" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select <include refid="Base_Column_List"/>
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and (substation_id is null or substation_id = '')
     </select>
 
     <select id="selectNoStandardId" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select <include refid="Base_Column_List"/>
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and standard_id is null and length(standard_name) &gt; 0
     </select>
 
     <delete id="deleteData">
         delete from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create} and type = '0'
+        where create_by = #{create} and type = '0'
     </delete>
 
     <insert id="submitData">
         insert into pr_house
-        (id, room_num, building_id, building_name, org_id, org_name, company_id,
+        (id, room_num, building_id, building_name, org_id, org_name,
          create_by, establish_time, unit_code, floor, nfloor_area, gfloor_area,
          heating_area, site_type, station_type, nature, other_code, status)
         select house_id, room_num, building_id, building_name, org_id, org_name,
-               company_id, create_by, establish_time, unit_code, floor, nfloor_area,
+               create_by, establish_time, unit_code, floor, nfloor_area,
                gfloor_area, heating_area, site_type, substation_id, nature, other_code,
                case when phone is not null and phone != '' then '8' else '7' end
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create} and type = '0'
+        where create_by = #{create} and type = '0'
     </insert>
 
     <delete id="deleteImportBasicData">
         delete from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
     </delete>
 
     <select id="groupOrgId" resultType="string">
         select distinct org_id
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create} and type = '0'
+        where create_by = #{create} and type = '0'
     </select>
 
     <select id="selectBuildings" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select distinct building_id, building_name, building_code, station_id
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and org_id = #{orgId}
     </select>
 
     <select id="selectUnits" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select distinct unit_id, unit_code, unit_site, building_id, substation_id
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and org_id = #{orgId}
     </select>
 
     <select id="selectHouses" resultType="org.sdkj.thermal.domain.PrImportBasicData">
         select *
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and org_id = #{orgId}
     </select>
 
     <insert id="insertUsers">
-        insert into pr_user (id, name, phone, id_type, id_no, password, org_id, company_id, create_by, create_time)
-        select user_id, user_name, phone, '1', id_no, #{password}, org_id, #{companyId}, #{create}, now()
+        insert into pr_user (id, name, phone, id_type, id_no, password, org_id, create_by, create_time)
+        select user_id, user_name, phone, '1', id_no, #{password}, org_id, #{create}, now()
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create} and type = '0'
+        where create_by = #{create} and type = '0'
           and user_id is not null
           and user_id not in (select id from pr_user)
         group by user_id
     </insert>
 
     <insert id="insertUserHouse">
-        insert into pr_user_house (id, user_id, house_id, company_id)
-        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), user_id, house_id, company_id
+        insert into pr_user_house (id, user_id, house_id)
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), user_id, house_id
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and user_id is not null and house_id is not null
     </insert>
 
     <insert id="insertHouseChange">
-        insert into pr_house_change (id, house_id, org_id, user_id, change_type, create_time, company_id)
-        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), house_id, org_id, user_id, '0', now(), company_id
+        insert into pr_house_change (id, house_id, org_id, user_id, change_type, create_time)
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), house_id, org_id, user_id, '0', now()
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and user_id is not null
     </insert>
 
     <insert id="insertHouseExpense">
-        insert into pr_house_expense (id, house_id, standard_id, company_id, create_by, create_time)
-        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), house_id, standard_id, company_id, create_by, now()
+        insert into pr_house_expense (id, house_id, standard_id, create_by, create_time)
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), house_id, standard_id, create_by, now()
         from pr_import_basic_data
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
           and type = '0' and standard_id is not null
     </insert>
 
@@ -268,37 +268,34 @@
         delete a
         from pr_user_house a
             left join pr_house b on b.id = a.house_id
-                and b.company_id = #{companyId}
                 and b.org_id in
                 <foreach collection="orgIds" item="orgId" open="(" separator="," close=")">
                     #{orgId}
                 </foreach>
-        where a.company_id = #{companyId}
-          and a.house_id is not null and b.id is null
+        where a.house_id is not null and b.id is null
     </delete>
 
     <!-- ========== 按房屋编码导入相关方法 ========== -->
 
     <insert id="insertUserDirect">
-        insert into pr_user (id, name, phone, id_type, id_no, password, org_id, company_id, create_by, create_time)
+        insert into pr_user (id, name, phone, id_type, id_no, password, org_id, create_by, create_time)
         values (#{user.id}, #{user.name}, #{user.phone}, #{user.idType}, #{user.idNo}, #{user.password},
-                #{user.orgId}, #{user.companyId}, #{user.createBy}, #{user.createTime})
+                #{user.orgId}, #{user.createBy}, #{user.createTime})
     </insert>
 
     <insert id="insertUserHouseRelation">
-        insert into pr_user_house (id, user_id, house_id, company_id, create_by, create_time)
-        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{userId}, #{houseId}, #{companyId}, #{createBy}, #{createTime}
+        insert into pr_user_house (id, user_id, house_id, create_by, create_time)
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{userId}, #{houseId}, #{createBy}, #{createTime}
         where not exists (
             select 1 from pr_user_house where user_id = #{userId} and house_id = #{houseId}
         )
     </insert>
 
     <insert id="insertHouseExpenseByCode">
-        insert into pr_house_expense (id, house_id, standard_id, item_group, item_code, company_id, create_by, create_time)
-        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{houseId}, s.id, s.item_group, s.item_code, #{companyId}, #{createBy}, #{createTime}
+        insert into pr_house_expense (id, house_id, standard_id, item_group, item_code, create_by, create_time)
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{houseId}, s.id, s.item_group, s.item_code, #{createBy}, #{createTime}
         from pr_standard s
         where s.name = #{standardName}
-          and s.company_id = #{companyId}
           and s.del_flag = '0'
           and not exists (
               select 1 from pr_house_expense where house_id = #{houseId} and standard_id = s.id
@@ -307,8 +304,8 @@
     </insert>
 
     <insert id="updateAccountBalance">
-        insert into pr_account_balance (id, user_id, house_id, item_group, item_code, balance, company_id, create_by, create_time)
-        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{userId}, #{houseId}, e.item_group, e.item_code, #{account}, #{companyId}, #{createBy}, #{createTime}
+        insert into pr_account_balance (id, user_id, house_id, item_group, item_code, balance, create_by, create_time)
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), #{userId}, #{houseId}, e.item_group, e.item_code, #{account}, #{createBy}, #{createTime}
         from pr_house_expense he
         left join pr_standard e on he.standard_id = e.id
         where he.house_id = #{houseId}

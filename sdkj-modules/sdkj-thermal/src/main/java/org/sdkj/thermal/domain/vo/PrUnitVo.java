@@ -48,9 +48,6 @@ public class PrUnitVo {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
-
     /** 楼宇名称（查询用） */
     private String buildingName;
 

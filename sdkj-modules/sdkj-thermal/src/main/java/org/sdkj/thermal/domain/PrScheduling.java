@@ -21,5 +21,4 @@ public class PrScheduling extends BaseEntity {
     private Date workDate;
     private String shift;
     private String orgId;
-    private String companyId;
 }

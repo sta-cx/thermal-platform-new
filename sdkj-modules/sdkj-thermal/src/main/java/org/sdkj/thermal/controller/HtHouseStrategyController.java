@@ -42,15 +42,12 @@ public class HtHouseStrategyController extends BaseController {
     @SaCheckPermission("thermal:ht:houseStrategy:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<HtHouseStrategyVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<HtHouseStrategyVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) String search,
             PageQuery pageQuery) {
         LambdaQueryWrapper<HtHouseStrategy> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(companyId != null && !companyId.isEmpty(), HtHouseStrategy::getCompanyId, companyId);
         lqw.eq(orgId != null && !orgId.isEmpty(), HtHouseStrategy::getOrgId, orgId);
         lqw.eq(buildingId != null && !buildingId.isEmpty(), HtHouseStrategy::getTasksId, buildingId);
         String keyword = search != null ? search.trim() : null;
@@ -66,12 +63,10 @@ public class HtHouseStrategyController extends BaseController {
     @SaCheckPermission("thermal:ht:houseStrategy:list")
     @SaCheckLogin
     @GetMapping("/houses")
-    public R<List<PrHouseVo>> queryPrHouse(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrHouseVo>> queryPrHouse(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String search) {
-        List<PrHouseVo> list = houseService.selectForStrategyBinding(companyId, orgId, buildingId, search);
+        List<PrHouseVo> list = houseService.selectForStrategyBinding(orgId, buildingId, search);
         return R.ok(list);
     }
 
@@ -83,10 +78,9 @@ public class HtHouseStrategyController extends BaseController {
     @Log(title = "房屋策略绑定", businessType = BusinessType.INSERT)
     @PostMapping("/batch")
     public R<Void> insertBatch(@RequestBody List<HtHouseStrategyBo> boList,
-                               @RequestParam String orgId,
-                               @RequestParam String companyId) {
+                               @RequestParam String orgId) {
         List<HtHouseStrategy> list = MapstructUtils.convert(boList, HtHouseStrategy.class);
-        return toAjax(houseStrategyService.insertBatch(list, orgId, companyId));
+        return toAjax(houseStrategyService.insertBatch(list, orgId));
     }
 
     /**

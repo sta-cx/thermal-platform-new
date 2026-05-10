@@ -12,7 +12,7 @@ import java.util.Map;
 
 public interface IPrTransactionRecordService extends IService<PrTransactionRecord> {
 
-    TableDataInfo<PrTransactionRecordVo> pageList(String search, String companyId, String orgId,
+    TableDataInfo<PrTransactionRecordVo> pageList(String search, String orgId,
         String buildingId, String unitCode, String startTime, String endTime, String status,
         PageQuery pageQuery);
 
@@ -22,40 +22,40 @@ public interface IPrTransactionRecordService extends IService<PrTransactionRecor
 
     boolean invalid(String recordId);
 
-    Map<String, Object> comprehensive(String companyId, String orgId, String startTime, String endTime);
+    Map<String, Object> comprehensive(String orgId, String startTime, String endTime);
 
-    Map<String, Object> received(String companyId, String orgId, String startTime, String endTime);
+    Map<String, Object> received(String orgId, String startTime, String endTime);
 
-    Map<String, Object> arrears(String companyId, String orgId);
+    Map<String, Object> arrears(String orgId);
 
-    List<PrTransactionRecordVo> daily(String companyId, String orgId, String date);
+    List<PrTransactionRecordVo> daily(String orgId, String date);
 
     /** 退费记录查询 */
-    Map<String, Object> refund(String companyId, String orgId, String buildingId,
+    Map<String, Object> refund(String orgId, String buildingId,
         String startTime, String endTime, String search);
 
     /** 水费交易查询 */
-    Map<String, Object> getWater(String companyId, String orgId, String buildingId,
+    Map<String, Object> getWater(String orgId, String buildingId,
         String startTime, String endTime, String search);
 
     /** 电费交易查询 */
-    Map<String, Object> getEle(String companyId, String orgId, String buildingId,
+    Map<String, Object> getEle(String orgId, String buildingId,
         String startTime, String endTime, String search);
 
     /** 写卡日志查询 */
-    Map<String, Object> cardLog(String companyId, String orgId, String buildingId,
+    Map<String, Object> cardLog(String orgId, String buildingId,
         String startTime, String endTime, String search, String type, String createBy);
 
     /** 写卡操作人列表 */
-    List<Map<String, Object>> cardLogCreateByName(String companyId, String orgId);
+    List<Map<String, Object>> cardLogCreateByName(String orgId);
 
     /** 未收款查询 */
-    Map<String, Object> uncoll(String companyId, String orgId, String buildingId,
+    Map<String, Object> uncoll(String orgId, String buildingId,
         String startTime, String endTime, String search);
 
     /** 本月统计 */
-    Map<String, Object> getThisMonth(String companyId, String userId);
+    Map<String, Object> getThisMonth(String userId);
 
     /** 本月分类统计 */
-    Map<String, Object> getThisMonthVarious(String companyId, String userId);
+    Map<String, Object> getThisMonthVarious(String userId);
 }

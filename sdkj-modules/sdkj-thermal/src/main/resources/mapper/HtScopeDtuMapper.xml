@@ -14,10 +14,10 @@
 
     <!-- 批量插入DTU控制范围 -->
     <insert id="insertList">
-        INSERT INTO ht_scope_dtu (id, tasks_id, org_id, company_id, meter_arc_code, dtu_num, chan_nums, concentrator_code, status, create_time, create_by)
+        INSERT INTO ht_scope_dtu (id, tasks_id, org_id, meter_arc_code, dtu_num, chan_nums, concentrator_code, status, create_time, create_by)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.id}, #{item.tasksId}, #{item.orgId}, #{item.companyId}, #{item.meterArcCode}, #{item.dtuNum}, #{item.chanNums}, #{item.concentratorCode}, #{item.status}, #{item.createTime}, #{item.createBy})
+            (#{item.id}, #{item.tasksId}, #{item.orgId}, #{item.meterArcCode}, #{item.dtuNum}, #{item.chanNums}, #{item.concentratorCode}, #{item.status}, #{item.createTime}, #{item.createBy})
         </foreach>
     </insert>
 

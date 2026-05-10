@@ -23,27 +23,23 @@ public class PrRegionalController extends BaseController {
     @SaCheckPermission("thermal:property:regional:list")
     @SaCheckLogin
     @GetMapping("/stats")
-    public R<Map<String, Object>> regionalStats(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Map<String, Object>> regionalStats(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) {
         Map<String, Object> result = new HashMap<>();
-        result.put("arrears", transactionService.arrears(companyId, orgId));
-        result.put("received", transactionService.received(companyId, orgId, startTime, endTime));
-        result.put("comprehensive", transactionService.comprehensive(companyId, orgId, startTime, endTime));
+        result.put("arrears", transactionService.arrears(orgId));
+        result.put("received", transactionService.received(orgId, startTime, endTime));
+        result.put("comprehensive", transactionService.comprehensive(orgId, startTime, endTime));
         return R.ok(result);
     }
 
     @SaCheckPermission("thermal:property:regional:list")
     @SaCheckLogin
     @GetMapping("/daily")
-    public R<Map<String, Object>> dailyStats(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Map<String, Object>> dailyStats(@RequestParam(required = false) String orgId,
             @RequestParam String date) {
         Map<String, Object> result = new HashMap<>();
-        result.put("daily", transactionService.daily(companyId, orgId, date));
+        result.put("daily", transactionService.daily(orgId, date));
         return R.ok(result);
     }
 

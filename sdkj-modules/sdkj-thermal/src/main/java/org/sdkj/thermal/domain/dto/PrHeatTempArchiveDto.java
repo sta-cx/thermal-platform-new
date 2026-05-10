@@ -23,7 +23,6 @@ public class PrHeatTempArchiveDto implements Serializable {
     private String deviceId;
     private Long houseId;
     private String orgId;
-    private String companyId;
     private String valveStatus;
     private BigDecimal temper;
     private BigDecimal humidity;

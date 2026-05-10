@@ -12,5 +12,5 @@ import org.sdkj.thermal.domain.vo.PrHeatArchiveVo;
 @OrgPermission
 public interface PrHeatArchiveMapper extends BaseMapperPlus<PrHeatArchive, PrHeatArchiveVo> {
 
-    void importData(@Param("companyId") String companyId, @Param("createBy") String createBy);
+    void importData(@Param("createBy") String createBy);
 }

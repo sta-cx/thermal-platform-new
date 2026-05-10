@@ -6,12 +6,11 @@
         SELECT a.id, a.item_code, a.item_name, a.item_group,
                a.is_show, a.is_printmonth, a.price_precision, a.qty_precision,
                a.money_precision, a.is_integer, a.precision_type, a.start_pos,
-               a.sum_precision, a.change_cycle, a.org_id, a.company_id,
+               a.sum_precision, a.change_cycle, a.org_id,
                a.create_time,
                COUNT(b.id) AS num
         FROM pr_expense_item a
-        LEFT JOIN pr_standard b ON b.company_id = a.company_id
-            AND a.org_id = b.org_id
+        LEFT JOIN pr_standard b ON a.org_id = b.org_id
             AND a.item_group = b.item_group
             AND a.item_code = b.item_code
         WHERE a.org_id = #{orgId}
@@ -31,7 +30,7 @@
         SELECT id, item_code, item_name, item_group,
                is_show, is_printmonth, price_precision, qty_precision,
                money_precision, is_integer, precision_type, start_pos,
-               sum_precision, change_cycle, org_id, company_id,
+               sum_precision, change_cycle, org_id,
                create_by, create_time
         FROM pr_expense_item
         WHERE id = #{id}
@@ -41,41 +40,36 @@
         SELECT id, item_code, item_name, item_group,
                is_show, is_printmonth, price_precision, qty_precision,
                money_precision, is_integer, precision_type, start_pos,
-               sum_precision, change_cycle, org_id, company_id
+               sum_precision, change_cycle, org_id
         FROM pr_expense_item
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
           AND item_group = #{itemGroup}
           AND item_code = #{itemCode}
     </select>
 
     <select id="selectByItemGroup" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
-        SELECT id, item_code, item_group, item_name, company_id, org_id
+        SELECT id, item_code, item_group, item_name, org_id
         FROM pr_expense_item
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
           AND item_group = #{itemGroup}
         ORDER BY item_code
     </select>
 
     <select id="selectByCompanyAndOrg" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
-        SELECT id, item_code, item_group, item_name, company_id, org_id
+        SELECT id, item_code, item_group, item_name, org_id
         FROM pr_expense_item
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
         GROUP BY item_group, item_code
         ORDER BY item_code
     </select>
 
     <select id="selectByItemGroupAndUserId" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
         SELECT b.id, b.item_code, b.item_group, b.item_name,
-               a.company_id, a.org_id
+               a.org_id
         FROM pr_account a
         LEFT JOIN pr_expense_item b
             ON b.item_group = a.item_group AND a.item_code = b.item_code
-        WHERE b.company_id = #{companyId}
-          AND b.org_id = #{orgId}
-          AND a.company_id = #{companyId}
+        WHERE b.org_id = #{orgId}
           AND a.org_id = #{orgId}
           AND a.item_group = #{itemGroup}
           AND a.user_id = #{userId}
@@ -84,8 +78,7 @@
     <select id="checkItemName" resultType="org.sdkj.thermal.domain.vo.PrExpenseItemVo">
         SELECT item_name
         FROM pr_expense_item
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
           AND item_name = #{itemName}
         <if test="id != null and id != ''">
             AND id != #{id}

@@ -18,5 +18,4 @@ public class PrRepairPerson extends BaseEntity {
     private String phone;
     private String type;
     private String orgId;
-    private String companyId;
 }

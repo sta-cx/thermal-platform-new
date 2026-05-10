@@ -18,14 +18,6 @@ public class PrHeatStationPartitionServiceImpl extends ServiceImpl<PrHeatStation
     private final PrHeatStationPartitionMapper baseMapper;
 
     @Override
-    public List<PrHeatStationPartition> selectByCompanyId(String companyId) {
-        return baseMapper.selectList(
-            new LambdaQueryWrapper<PrHeatStationPartition>()
-                .eq(PrHeatStationPartition::getCompanyId, companyId)
-                .orderByAsc(PrHeatStationPartition::getSeq));
-    }
-
-    @Override
     public List<PrHeatStationPartition> selectByStationId(String stationId) {
         return baseMapper.selectList(
             new LambdaQueryWrapper<PrHeatStationPartition>()

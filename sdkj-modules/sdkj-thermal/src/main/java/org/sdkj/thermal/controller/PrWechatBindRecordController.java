@@ -43,7 +43,6 @@ public class PrWechatBindRecordController extends BaseController {
         String buildingName = bindRecord.get("buildingName");
         String unitCode = bindRecord.get("unitCode");
         String roomNum = bindRecord.get("roomNum");
-        String companyId = bindRecord.get("companyId");
         String createBy = bindRecord.get("createBy");
 
         if (houseId == null || houseId.isEmpty()) {
@@ -63,7 +62,7 @@ public class PrWechatBindRecordController extends BaseController {
 
         // 执行绑定
         int result = wechatBindRecordService.insertData(houseId, heatPayCode, wxOpenId,
-            orgId, orgName, buildingId, buildingName, unitCode, roomNum, companyId, createBy);
+            orgId, orgName, buildingId, buildingName, unitCode, roomNum, createBy);
         if (result > 0) {
             return R.ok();
         }

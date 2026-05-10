@@ -21,7 +21,6 @@ public class PrInspectionEquipment extends BaseEntity {
 
     private String equipmentCode;
 
-    private String companyId;
 
     private String orgId;
 }

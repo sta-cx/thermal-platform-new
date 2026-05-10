@@ -44,6 +44,11 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
     }
 
     @Override
+    public List<SysOrganization> getAllOrganizations() {
+        return prCompanyMapper.selectAllOrganizations();
+    }
+
+    @Override
     public List<TreeNode> queryBuildingTrees(String companyId) {
         // 获取公司所有组织机构（不含部门）
         List<SysOrganization> orgs = prCompanyMapper.selectOrganizationsByCompanyId(companyId);
@@ -58,7 +63,6 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
         if (!orgIds.isEmpty()) {
             buildings = prBuildingMapper.selectList(
                     new LambdaQueryWrapper<PrBuilding>()
-                            .eq(PrBuilding::getCompanyId, companyId)
                             .in(PrBuilding::getOrgId, orgIds)
                             .orderByAsc(PrBuilding::getCode)
             );

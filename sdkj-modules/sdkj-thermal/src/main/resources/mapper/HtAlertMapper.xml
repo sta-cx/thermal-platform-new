@@ -5,7 +5,7 @@
     <!-- 查询仪表的异常报警列表 -->
     <select id="selectAbnormalAlarmList" resultType="org.sdkj.thermal.domain.vo.HtAlertVo">
         SELECT a.id, a.meter_id, a.alert_type, a.alert_time, a.alert_status,
-               a.in_temp, a.out_temp, a.room_temp, a.valve, a.company_id
+               a.in_temp, a.out_temp, a.room_temp, a.valve
         FROM ht_alert a
         WHERE a.meter_id = #{meterId}
           AND a.alert_status = '0'
@@ -16,7 +16,6 @@
     <select id="selectTypeCount" resultType="java.util.Map">
         SELECT alert_type AS alertType, COUNT(*) AS count
         FROM ht_alert
-        WHERE company_id = #{companyId}
         GROUP BY alert_type
     </select>
 
@@ -27,7 +26,6 @@
                COUNT(*) AS count
         FROM ht_alert a
         LEFT JOIN ht_scope s ON a.meter_id = s.meter_id
-        WHERE a.company_id = #{companyId}
         GROUP BY s.dtu_num, a.alert_type
         ORDER BY s.dtu_num, a.alert_type
     </select>

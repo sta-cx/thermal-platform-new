@@ -28,11 +28,11 @@ public class PrHouseExpenseServiceImpl extends ServiceImpl<PrHouseExpenseMapper,
     private final PrHouseExpenseMapper baseMapper;
 
     @Override
-    public TableDataInfo<PrHouseExpenseVo> selectPageList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHouseExpenseVo> selectPageList(String orgId, String buildingId,
                                                           String unitCode, String itemGroup, String itemCode,
                                                           String search, PageQuery pageQuery) {
         Page<PrHouseExpenseVo> page = pageQuery.build();
-        baseMapper.selectPageList(page, companyId, orgId, buildingId, unitCode, itemGroup, itemCode, search);
+        baseMapper.selectPageList(page, orgId, buildingId, unitCode, itemGroup, itemCode, search);
         return TableDataInfo.build(page);
     }
 
@@ -49,7 +49,7 @@ public class PrHouseExpenseServiceImpl extends ServiceImpl<PrHouseExpenseMapper,
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean batchInsert(List<PrHouseExpense> list, String itemGroup, String itemCode, String orgId, String companyId) {
+    public boolean batchInsert(List<PrHouseExpense> list, String itemGroup, String itemCode, String orgId) {
         for (PrHouseExpense item : list) {
             if (itemGroup != null && !itemGroup.isEmpty()) {
                 item.setItemGroup(itemGroup);
@@ -58,7 +58,6 @@ public class PrHouseExpenseServiceImpl extends ServiceImpl<PrHouseExpenseMapper,
                 item.setItemCode(itemCode);
             }
             item.setOrgId(orgId);
-            item.setCompanyId(companyId);
         }
         return saveBatch(list);
     }

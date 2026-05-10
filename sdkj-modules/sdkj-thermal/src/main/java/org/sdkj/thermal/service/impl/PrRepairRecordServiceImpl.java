@@ -73,9 +73,8 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
     }
 
     @Override
-    public Map<String, Object> getAllTypeCount(String companyId) {
-        long total = baseMapper.selectCount(
-            new LambdaQueryWrapper<PrRepairRecord>().eq(PrRepairRecord::getCompanyId, companyId));
+    public Map<String, Object> getAllTypeCount() {
+        long total = baseMapper.selectCount(new LambdaQueryWrapper<>());
         return Map.of("total", total);
     }
 

@@ -29,12 +29,11 @@ public class PrHeatCommandValveArchiveServiceImpl extends ServiceImpl<PrHeatComm
     }
 
     @Override
-    public TableDataInfo<PrHeatCommandValveArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatCommandValveArchiveVo> selectPageList(String orgId, String buildingId,
                                                                       String unit, String search, String parentId,
                                                                       String valveCategory,
                                                                       PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatCommandValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatCommandValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatCommandValveArchive::getOrgId, orgId);
         // parentId maps to houseId for this entity
         lqw.eq(StringUtils.isNotBlank(parentId), PrHeatCommandValveArchive::getHouseId, parentId);

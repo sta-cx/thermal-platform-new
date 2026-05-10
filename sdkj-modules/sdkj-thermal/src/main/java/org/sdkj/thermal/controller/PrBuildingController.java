@@ -136,10 +136,8 @@ public class PrBuildingController extends BaseController {
     @SaCheckPermission("thermal:property:building:list")
     @SaCheckLogin
     @GetMapping("/byOrg")
-    public R<List<PrBuildingVo>> listByOrg(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId) {
-        return R.ok(buildingService.selectByOrgId(companyId, orgId));
+    public R<List<PrBuildingVo>> listByOrg(@RequestParam(required = false) String orgId) {
+        return R.ok(buildingService.selectByOrgId(orgId));
     }
 
     /**

@@ -50,8 +50,8 @@ public class PrAutoMachineController extends BaseController {
     @SaCheckLogin
     @Log(title = "自助缴费机-生成流水号", businessType = BusinessType.OTHER)
     @GetMapping("/serial-num")
-    public R<String> getSerialNum(@RequestParam String companyId) {
-        return R.ok("生成成功", autoMachineService.generateSerialNum(companyId));
+    public R<String> getSerialNum() {
+        return R.ok("生成成功", autoMachineService.generateSerialNum());
     }
 
     /**
@@ -139,9 +139,7 @@ public class PrAutoMachineController extends BaseController {
     @SaCheckPermission("thermal:property:autoMachine:query")
     @SaCheckLogin
     @GetMapping("/read-card")
-    public R<Boolean> getIsReadCard(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId) {
+    public R<Boolean> getIsReadCard(@RequestParam(required = false) String orgId) {
         // 默认返回 true（读卡器可用）
         return R.ok(true);
     }

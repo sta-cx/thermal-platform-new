@@ -31,12 +31,10 @@ public class PrHeatStationController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<PrHeatStation> list(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String companyId,
             PageQuery pageQuery) {
         Page<PrHeatStation> page = pageQuery.build();
         LambdaQueryWrapper<PrHeatStation> lqw = new LambdaQueryWrapper<>();
         lqw.like(search != null && !search.isEmpty(), PrHeatStation::getName, search);
-        lqw.eq(companyId != null && !companyId.isEmpty(), PrHeatStation::getCompanyId, companyId);
         lqw.orderByAsc(PrHeatStation::getSeq);
         stationService.page(page, lqw);
         return TableDataInfo.build(page);
@@ -71,13 +69,6 @@ public class PrHeatStationController extends BaseController {
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable String id) {
         return toAjax(stationService.removeById(id));
-    }
-
-    @SaCheckPermission("thermal:ht:station:list")
-    @SaCheckLogin
-    @GetMapping("/company/{companyId}")
-    public R<List<PrHeatStation>> listByCompany(@PathVariable String companyId) {
-        return R.ok(stationService.selectByCompanyId(companyId));
     }
 
     @SaCheckPermission("thermal:ht:station:list")

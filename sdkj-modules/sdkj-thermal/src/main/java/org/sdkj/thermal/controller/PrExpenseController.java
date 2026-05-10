@@ -45,9 +45,7 @@ public class PrExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:expense:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrExpenseVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrExpenseVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String itemGroup,
@@ -60,7 +58,7 @@ public class PrExpenseController extends BaseController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             PageQuery pageQuery) {
-        return expenseService.selectPageList(companyId, orgId, buildingId, unitCode, itemGroup, itemCode,
+        return expenseService.selectPageList(orgId, buildingId, unitCode, itemGroup, itemCode,
             search, isCharged, parkingId, startTime, endTime, startDate, endDate, pageQuery);
     }
 
@@ -82,15 +80,13 @@ public class PrExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:expense:list")
     @SaCheckLogin
     @GetMapping("/house-list")
-    public R<List<PrExpenseVo>> queryHouseExpenseList(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrExpenseVo>> queryHouseExpenseList(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String itemGroup,
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) String search) {
-        return R.ok(expenseService.selectHouseExpenseList(companyId, orgId, buildingId, unitCode, itemGroup, itemCode, search));
+        return R.ok(expenseService.selectHouseExpenseList(orgId, buildingId, unitCode, itemGroup, itemCode, search));
     }
 
     /**
@@ -301,8 +297,8 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "费用重算", businessType = BusinessType.UPDATE)
     @PostMapping("/recalculate")
-    public R<Void> recalculate(@RequestParam String companyId, @RequestParam String orgId) {
-        return toAjax(expenseService.recalculate(companyId, orgId));
+    public R<Void> recalculate(@RequestParam String orgId) {
+        return toAjax(expenseService.recalculate(orgId));
     }
 
     /**
@@ -314,8 +310,8 @@ public class PrExpenseController extends BaseController {
     @SaCheckLogin
     @Log(title = "车位费用重算", businessType = BusinessType.UPDATE)
     @PostMapping("/recalculate-parking")
-    public R<Void> recalculateParking(@RequestParam String companyId, @RequestParam String orgId) {
-        return toAjax(expenseService.recalculateCw(companyId, orgId));
+    public R<Void> recalculateParking(@RequestParam String orgId) {
+        return toAjax(expenseService.recalculateCw(orgId));
     }
 
     /**
@@ -338,9 +334,7 @@ public class PrExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:expense:list")
     @SaCheckLogin
     @GetMapping("/parking-list")
-    public TableDataInfo<PrExpenseVo> parkingList(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrExpenseVo> parkingList(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String itemGroup,
@@ -351,7 +345,7 @@ public class PrExpenseController extends BaseController {
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             PageQuery pageQuery) {
-        return expenseService.parkingList(companyId, orgId, buildingId, unitCode, itemGroup, itemCode,
+        return expenseService.parkingList(orgId, buildingId, unitCode, itemGroup, itemCode,
             search, isCharged, parkingId, startTime, endTime, pageQuery);
     }
 
@@ -363,16 +357,14 @@ public class PrExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:expense:query")
     @SaCheckLogin
     @GetMapping("/parking-expense")
-    public R<List<Map<String, Object>>> parkingExpenseList(
-            @RequestParam String companyId,
-            @RequestParam String orgId,
+    public R<List<Map<String, Object>>> parkingExpenseList(@RequestParam String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String itemGroup,
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) String parkingId,
             @RequestParam(required = false) String search) {
-        return R.ok(expenseService.parkingExpenseList(companyId, orgId, buildingId, unitCode,
+        return R.ok(expenseService.parkingExpenseList(orgId, buildingId, unitCode,
             itemGroup, itemCode, parkingId, search));
     }
 
@@ -384,11 +376,9 @@ public class PrExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:expense:query")
     @SaCheckLogin
     @GetMapping("/house-expense-all")
-    public R<List<Map<String, Object>>> houseExpenseAllList(
-            @RequestParam String companyId,
-            @RequestParam String orgId,
+    public R<List<Map<String, Object>>> houseExpenseAllList(@RequestParam String orgId,
             @RequestParam(required = false) String search) {
-        return R.ok(expenseService.houseExpenseAllList(companyId, orgId, search));
+        return R.ok(expenseService.houseExpenseAllList(orgId, search));
     }
 
     /**
@@ -399,9 +389,7 @@ public class PrExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:expense:list")
     @SaCheckLogin
     @GetMapping("/log")
-    public TableDataInfo<Map<String, Object>> expenseLog(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<Map<String, Object>> expenseLog(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String parentId,
@@ -410,7 +398,7 @@ public class PrExpenseController extends BaseController {
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String search,
             PageQuery pageQuery) {
-        return expenseService.expenseLog(companyId, orgId, buildingId, unitCode,
+        return expenseService.expenseLog(orgId, buildingId, unitCode,
             parentId, type, startTime, endTime, search, pageQuery);
     }
 
@@ -422,9 +410,7 @@ public class PrExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:expense:list")
     @SaCheckLogin
     @GetMapping("/wechat")
-    public TableDataInfo<Map<String, Object>> wechatOrderList(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<Map<String, Object>> wechatOrderList(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String parentId,
@@ -433,7 +419,7 @@ public class PrExpenseController extends BaseController {
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String search,
             PageQuery pageQuery) {
-        return expenseService.wechatOrderList(companyId, orgId, buildingId, unitCode,
+        return expenseService.wechatOrderList(orgId, buildingId, unitCode,
             parentId, type, startTime, endTime, search, pageQuery);
     }
 }

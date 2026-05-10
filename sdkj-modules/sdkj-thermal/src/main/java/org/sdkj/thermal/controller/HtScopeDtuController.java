@@ -38,12 +38,10 @@ public class HtScopeDtuController extends BaseController {
     public TableDataInfo<HtScopeDtu> list(
         @RequestParam(required = false) String tasksId,
         @RequestParam(required = false) String orgId,
-        @RequestParam(required = false) String companyId,
         PageQuery pageQuery) {
         QueryWrapper<HtScopeDtu> qw = new QueryWrapper<>();
         qw.eq(tasksId != null && !tasksId.isEmpty(), "tasks_id", tasksId);
         qw.eq(orgId != null && !orgId.isEmpty(), "org_id", orgId);
-        qw.eq(companyId != null && !companyId.isEmpty(), "company_id", companyId);
         qw.orderByDesc("create_time");
         Page<HtScopeDtu> result = htScopeDtuMapper.selectPage(pageQuery.build(), qw);
         return TableDataInfo.build(result);

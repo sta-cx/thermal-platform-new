@@ -92,7 +92,4 @@ public class PrHeatDailyBo extends BaseEntity {
     @NotBlank(message = "小区ID不能为空")
     private String orgId;
 
-    /** 公司ID */
-    @NotBlank(message = "公司ID不能为空")
-    private String companyId;
 }

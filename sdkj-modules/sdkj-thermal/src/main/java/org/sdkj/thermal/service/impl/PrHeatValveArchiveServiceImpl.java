@@ -70,11 +70,10 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     }
 
     @Override
-    public TableDataInfo<PrHeatValveArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatValveArchiveVo> selectPageList(String orgId, String buildingId,
                                                                String unit, String search, String parentId,
                                                                PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
         // parentId maps to houseId for this entity
         lqw.eq(StringUtils.isNotBlank(parentId), PrHeatValveArchive::getHouseId, parentId);
@@ -89,9 +88,8 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     }
 
     @Override
-    public List<PrHeatValveArchiveVo> listAll(String companyId, String orgId) {
+    public List<PrHeatValveArchiveVo> listAll(String orgId) {
         LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
         lqw.eq(PrHeatValveArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
@@ -158,7 +156,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
                 break;
         }
 
-        List<HtTasksPerform> tasks = buildTasks(infos, houseList.get(0).getOrgId(), houseList.get(0).getCompanyId(),
+        List<HtTasksPerform> tasks = buildTasks(infos, houseList.get(0).getOrgId(),
             instructionType, instruction);
         return htTasksPerformService.saveBatchTasks(tasks);
     }
@@ -193,7 +191,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         }
 
         int instructionValue = Integer.parseInt(opening);
-        List<HtTasksPerform> tasks = buildTasks(infos, houseList.get(0).getOrgId(), houseList.get(0).getCompanyId(),
+        List<HtTasksPerform> tasks = buildTasks(infos, houseList.get(0).getOrgId(),
             3, instructionValue);
         return htTasksPerformService.saveBatchTasks(tasks);
     }
@@ -228,7 +226,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         }
 
         // instructionType=6, 设置上报周期
-        List<HtTasksPerform> tasks = buildCycleTasks(infos, houseList.get(0).getOrgId(), houseList.get(0).getCompanyId(),
+        List<HtTasksPerform> tasks = buildCycleTasks(infos, houseList.get(0).getOrgId(),
             interval, unit, valid);
         return htTasksPerformService.saveBatchTasks(tasks);
     }
@@ -283,7 +281,6 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
             entity.setChanNum(dto.getChanNum());
             entity.setHouseId(dto.getHouseId());
             entity.setOrgId(dto.getOrgId());
-            entity.setCompanyId(dto.getCompanyId());
             entity.setIsChanged(0);
             entity.setIsOpen(0);
             entity.setMeterSerial(dto.getMeterSerial());
@@ -304,7 +301,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     /**
      * 构建批量阀门控制任务列表
      */
-    private List<HtTasksPerform> buildTasks(List<ValveArchiveInfo> infos, String orgId, String companyId,
+    private List<HtTasksPerform> buildTasks(List<ValveArchiveInfo> infos, String orgId,
                                              int instructionType, int instruction) {
         return infos.stream().map(info -> {
             HtTasksPerform task = new HtTasksPerform();
@@ -312,7 +309,6 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
             task.setInstruction(instruction);
             task.setNumber(0);
             task.setOrgId(orgId);
-            task.setCompanyId(companyId);
             task.setDeviceId(info.deviceId());
             task.setMeterArcCode(info.meterArcCode());
             task.setMeterId(info.meterId());
@@ -330,7 +326,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     /**
      * 构建批量上报周期设置任务列表（instructionType=6）
      */
-    private List<HtTasksPerform> buildCycleTasks(List<ValveArchiveInfo> infos, String orgId, String companyId,
+    private List<HtTasksPerform> buildCycleTasks(List<ValveArchiveInfo> infos, String orgId,
                                                   String interval, String unit, String valid) {
         return infos.stream().map(info -> {
             HtTasksPerform task = new HtTasksPerform();
@@ -341,7 +337,6 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
             task.setUnit(StringUtils.isNotBlank(unit) ? Integer.parseInt(unit) : null);
             task.setDuration(StringUtils.isNotBlank(valid) ? Integer.parseInt(valid) : null);
             task.setOrgId(orgId);
-            task.setCompanyId(companyId);
             task.setDeviceId(info.deviceId());
             task.setMeterArcCode(info.meterArcCode());
             task.setMeterId(info.meterId());
@@ -399,7 +394,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
             archive.getDtuNum(),
             archive.getChanNum()
         );
-        List<HtTasksPerform> tasks = buildTasks(List.of(info), archive.getOrgId(), archive.getCompanyId(), 3, value);
+        List<HtTasksPerform> tasks = buildTasks(List.of(info), archive.getOrgId(), 3, value);
         return htTasksPerformService.saveBatchTasks(tasks);
     }
 
@@ -462,12 +457,11 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     // ========== 卡表管理实现 ==========
 
     @Override
-    public TableDataInfo<PrHeatValveArchiveVo> pageListHeatCard(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatValveArchiveVo> pageListHeatCard(String orgId, String buildingId,
                                                                  String unit, String meterArcCode, String payStatus,
                                                                  String search, String parentId, String writeCardStatus,
                                                                  PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
         lqw.eq(StringUtils.isNotBlank(parentId), PrHeatValveArchive::getHouseId, parentId);
         // buildingId / unit 需通过 house 关联，这里先按 archive 的直接字段过滤
@@ -569,15 +563,14 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean valveInformationSynchronization(String orgId, String companyId) {
+    public boolean valveInformationSynchronization(String orgId) {
         // 1. 查询该小区下所有有效阀门档案
         LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
         lqw.eq(PrHeatValveArchive::getIsChanged, 0);
         List<PrHeatValveArchive> archives = list(lqw);
         if (archives.isEmpty()) {
-            log.info("同步-未找到阀门档案数据, orgId={}, companyId={}", orgId, companyId);
+            log.info("同步-未找到阀门档案数据, orgId={}", orgId);
             return false;
         }
 
@@ -594,7 +587,6 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
             item.set("dtuNum", archive.getDtuNum());
             item.set("chanNum", archive.getChanNum());
             item.set("orgId", archive.getOrgId());
-            item.set("companyId", archive.getCompanyId());
             dataArray.add(item);
         }
 
@@ -604,15 +596,14 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
 
         // 3. 调用采集平台同步
         boolean result = CollectPlatformUtil.informationSynchronization(payload, ipPort, username, password);
-        log.info("同步户阀信息到采集平台, orgId={}, companyId={}, count={}, result={}",
-            orgId, companyId, archives.size(), result);
+        log.info("同步户阀信息到采集平台, orgId={}, count={}, result={}",
+            orgId, archives.size(), result);
         return result;
     }
 
     @Override
-    public List<PrHeatValveArchiveVo> listSyncData(String companyId, String orgId) {
+    public List<PrHeatValveArchiveVo> listSyncData(String orgId) {
         LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatValveArchive::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
         lqw.eq(PrHeatValveArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
@@ -650,7 +641,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         int instructionType = "1".equals(type) ? 3 : 3; // 默认开阀
         int instruction = StringUtils.isNotBlank(opening) ? Integer.parseInt(opening) : 0;
 
-        List<HtTasksPerform> tasks = buildTasks(List.of(info), archive.getOrgId(), archive.getCompanyId(),
+        List<HtTasksPerform> tasks = buildTasks(List.of(info), archive.getOrgId(),
             instructionType, instruction);
         htTasksPerformService.saveBatchTasks(tasks);
         log.info("蓝牙控制日志-指令下发, meterNum={}, type={}, opening={}", meterNum, type, opening);
@@ -660,7 +651,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String insertUserAndValveInfo(String companyId, String orgId, String orgName,
+    public String insertUserAndValveInfo(String orgId, String orgName,
                                           Long buildingId, String buildingName, String unitCode,
                                           String roomNum, String floor, String otherCode, String payStatus,
                                           String userName, String phone,
@@ -675,7 +666,6 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         house.setFloor(StringUtils.isNotBlank(floor) ? Integer.parseInt(floor) : null);
         house.setOtherCode(otherCode);
         house.setOrgId(orgId);
-        house.setCompanyId(companyId);
         house.setGfloorArea(StringUtils.isNotBlank(gfloorArea) ? new BigDecimal(gfloorArea) : null);
         house.setNfloorArea(StringUtils.isNotBlank(nfloorArea) ? new BigDecimal(nfloorArea) : null);
         house.setHeatingArea(StringUtils.isNotBlank(heatingArea) ? new BigDecimal(heatingArea) : null);
@@ -696,7 +686,6 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         archive.setMeterNum(meterNum);
         archive.setHouseId(house.getId());
         archive.setOrgId(orgId);
-        archive.setCompanyId(companyId);
         archive.setIsChanged(0);
         archive.setIsOpen(0);
         save(archive);
@@ -716,18 +705,18 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     }
 
     @Override
-    public List<PrHeatValveArchive> queryPaidClosedValves(String companyId, String orgId) {
+    public List<PrHeatValveArchive> queryPaidClosedValves(String orgId) {
         // TODO: Implement - query valves where house is paid but valve is closed (from old queryValveStatusGetByPayK)
         // SQL logic: JOIN pr_house on houseId WHERE pr_house.payStatus='1' AND pr_heat_valve_archive.valveStatus != '1'
-        log.warn("queryPaidClosedValves not yet implemented for companyId={}, orgId={}", companyId, orgId);
+        log.warn("queryPaidClosedValves not yet implemented for orgId={}", orgId);
         return List.of();
     }
 
     @Override
-    public List<PrHeatValveArchive> queryUnpaidOpenValves(String companyId, String orgId) {
+    public List<PrHeatValveArchive> queryUnpaidOpenValves(String orgId) {
         // TODO: Implement - query valves where house is unpaid but valve is open (from old queryValveStatusGetByPayG)
         // SQL logic: JOIN pr_house on houseId WHERE pr_house.payStatus!='1' AND pr_heat_valve_archive.valveStatus == '1'
-        log.warn("queryUnpaidOpenValves not yet implemented for companyId={}, orgId={}", companyId, orgId);
+        log.warn("queryUnpaidOpenValves not yet implemented for orgId={}", orgId);
         return List.of();
     }
 }

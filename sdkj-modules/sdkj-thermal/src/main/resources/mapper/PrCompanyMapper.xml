@@ -11,6 +11,12 @@
         ORDER BY code
     </select>
 
+    <select id="selectAllOrganizations" resultType="org.sdkj.thermal.domain.SysOrganization">
+        SELECT *
+        FROM sys_organization
+        ORDER BY code
+    </select>
+
     <select id="getCompany" resultType="org.sdkj.thermal.domain.SysOrganization">
         SELECT *
         FROM sys_organization
@@ -38,6 +44,14 @@
                a.update_time
         FROM sys_organization a
         WHERE a.id = #{id}
+    </select>
+
+    <select id="selectOrgByIds" resultType="org.sdkj.thermal.domain.SysOrganization">
+        SELECT id, name FROM sys_organization
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
     </select>
 
     <select id="getDataGrantOrg" resultType="org.sdkj.thermal.domain.SysOrganization">

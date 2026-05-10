@@ -20,6 +20,5 @@ public class PrUseCardLogVo {
     private Integer valveStatus;
     private Date operationTime;
     private String orgId;
-    private String companyId;
     private String operatorId;
 }

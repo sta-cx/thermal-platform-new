@@ -35,10 +35,9 @@ public class SingleChargeController extends BaseController {
     @GetMapping("/house")
     public R<?> getHouse(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId) {
-        return R.ok(singleChargeService.getHouse(search, companyId, orgId, buildingId));
+        return R.ok(singleChargeService.getHouse(search, orgId, buildingId));
     }
 
     /**
@@ -51,12 +50,11 @@ public class SingleChargeController extends BaseController {
     @GetMapping("/house-room")
     public R<?> getHouseRoomId(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String roomNum) {
-        return R.ok(singleChargeService.getHouseRoomId(search, companyId, orgId, buildingId, unitCode, roomNum));
+        return R.ok(singleChargeService.getHouseRoomId(search, orgId, buildingId, unitCode, roomNum));
     }
 
     /**

@@ -32,8 +32,6 @@ public class HtScope extends BaseEntity {
     /** 单元ID */
     private Long unitId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 房屋ID */
     private Long houseId;

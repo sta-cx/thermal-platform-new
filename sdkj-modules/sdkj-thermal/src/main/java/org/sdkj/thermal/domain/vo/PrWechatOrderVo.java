@@ -25,7 +25,6 @@ public class PrWechatOrderVo {
     private String tradeType;
     private String bankType;
     private String attach;
-    private String companyId;
     private String operator;
     private String remark;
 }

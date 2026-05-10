@@ -18,14 +18,6 @@ public class PrHeatStationServiceImpl extends ServiceImpl<PrHeatStationMapper, P
     private final PrHeatStationMapper baseMapper;
 
     @Override
-    public List<PrHeatStation> selectByCompanyId(String companyId) {
-        return baseMapper.selectList(
-            new LambdaQueryWrapper<PrHeatStation>()
-                .eq(PrHeatStation::getCompanyId, companyId)
-                .orderByAsc(PrHeatStation::getSeq));
-    }
-
-    @Override
     public List<PrHeatStation> selectByOrgId(String orgId) {
         return baseMapper.selectList(
             new LambdaQueryWrapper<PrHeatStation>()

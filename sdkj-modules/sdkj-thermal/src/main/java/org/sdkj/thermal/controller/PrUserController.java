@@ -35,10 +35,8 @@ public class PrUserController extends BaseController {
     @SaCheckPermission("thermal:property:user:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrUserVo> list(
-            @RequestParam(required = false) String companyId,
-            PageQuery pageQuery) {
-        return userService.selectPageList(companyId, pageQuery);
+    public TableDataInfo<PrUserVo> list(PageQuery pageQuery) {
+        return userService.selectPageList(pageQuery);
     }
 
     /**

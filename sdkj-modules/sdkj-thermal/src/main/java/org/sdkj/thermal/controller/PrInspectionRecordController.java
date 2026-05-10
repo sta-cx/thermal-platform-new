@@ -31,10 +31,8 @@ public class PrInspectionRecordController extends BaseController {
     public TableDataInfo<PrInspectionRecord> list(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String orgId,
-            @RequestParam(required = false) String companyId,
             PageQuery pageQuery) {
         LambdaQueryWrapper<PrInspectionRecord> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StrUtil.isNotBlank(companyId), PrInspectionRecord::getCompanyId, companyId);
         lqw.eq(StrUtil.isNotBlank(orgId), PrInspectionRecord::getOrgId, orgId);
         lqw.and(StrUtil.isNotBlank(search), wrapper -> wrapper
             .like(PrInspectionRecord::getPersonName, search)

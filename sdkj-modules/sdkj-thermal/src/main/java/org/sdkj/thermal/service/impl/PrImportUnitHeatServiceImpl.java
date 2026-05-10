@@ -25,13 +25,11 @@ public class PrImportUnitHeatServiceImpl extends ServiceImpl<PrImportUnitHeatMap
     @Transactional(rollbackFor = Exception.class)
     public Integer importData(List<PrImportUnitHeat> objects) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         Date date = new Date();
         List<PrImportUnitHeat> lists = new ArrayList<>();
         if (!objects.isEmpty()) {
             for (PrImportUnitHeat item : objects) {
                 item.setCreateBy(create);
-                item.setCompanyId(companyId);
                 item.setCreateTime(date);
                 item.setType(0);
 
@@ -72,71 +70,68 @@ public class PrImportUnitHeatServiceImpl extends ServiceImpl<PrImportUnitHeatMap
     @Transactional(rollbackFor = Exception.class)
     public void updateIds() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.updateOrgId(create, companyId);
-        mapper.updateBuildingId(create, companyId);
-        mapper.updateUnitId(create, companyId);
+        mapper.updateOrgId(create);
+        mapper.updateBuildingId(create);
+        mapper.updateUnitId(create);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void check(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.updateMeter(create, companyId);
-        mapper.updateStandard(create, companyId);
+        mapper.updateMeter(create);
+        mapper.updateStandard(create);
     }
 
     @Override
     public String getNull(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
 
-        List<PrImportUnitHeat> noOrgIds = mapper.queryNoOrgIds(create, companyId);
+        List<PrImportUnitHeat> noOrgIds = mapper.queryNoOrgIds(create);
         if (!noOrgIds.isEmpty()) {
             return "下列小区信息无法匹配，请核对信息！";
         }
-        List<PrImportUnitHeat> noBuildingIds = mapper.queryNoBuildingIds(create, companyId);
+        List<PrImportUnitHeat> noBuildingIds = mapper.queryNoBuildingIds(create);
         if (!noBuildingIds.isEmpty()) {
             return "下列楼宇信息无法匹配，请核对信息！";
         }
-        List<PrImportUnitHeat> noUnitIds = mapper.queryNoUnitIds(create, companyId);
+        List<PrImportUnitHeat> noUnitIds = mapper.queryNoUnitIds(create);
         if (!noUnitIds.isEmpty()) {
             return "下列单元信息无法匹配，请核对信息！";
         }
-        List<PrImportUnitHeat> noMeterNums = mapper.selectNoMeterNum(create, companyId);
+        List<PrImportUnitHeat> noMeterNums = mapper.selectNoMeterNum(create);
         if (!noMeterNums.isEmpty()) {
             return "下列单元无表号，请核对信息！";
         }
-        List<PrImportUnitHeat> repate = mapper.selectRepateMeterNum(create, companyId);
+        List<PrImportUnitHeat> repate = mapper.selectRepateMeterNum(create);
         if (!repate.isEmpty()) {
             return "下列表号重复，请核对信息！";
         }
-        List<PrImportUnitHeat> noArchiveId = mapper.findNoArchiveId(create, companyId);
+        List<PrImportUnitHeat> noArchiveId = mapper.findNoArchiveId(create);
         if (!noArchiveId.isEmpty()) {
             return "下列单元无法匹配仪表名称，请核对信息！";
         }
-        List<PrImportUnitHeat> noStandardId = mapper.findNoStandardId(create, companyId);
+        List<PrImportUnitHeat> noStandardId = mapper.findNoStandardId(create);
         if (!noStandardId.isEmpty()) {
             return "下列单元无法匹配单价，请核对信息！";
         }
-        List<PrImportUnitHeat> errorMoney = mapper.findErrorMoney(create, companyId);
+        List<PrImportUnitHeat> errorMoney = mapper.findErrorMoney(create);
         if (!errorMoney.isEmpty()) {
             return "下列金额核对不上，请核对信息！";
         }
-        List<PrImportUnitHeat> meterSerialErrors = mapper.selectMeterSerial(create, companyId);
+        List<PrImportUnitHeat> meterSerialErrors = mapper.selectMeterSerial(create);
         if (!meterSerialErrors.isEmpty()) {
             return "下列子表号设置错误，请核对信息！";
         }
-        List<PrImportUnitHeat> numericalErrors = mapper.selectNumericalErrors(create, companyId);
+        List<PrImportUnitHeat> numericalErrors = mapper.selectNumericalErrors(create);
         if (!numericalErrors.isEmpty()) {
             return "下列当前读数小于起始读数，请核对信息！";
         }
-        List<PrImportUnitHeat> hasAllUnit = mapper.hasAllUnit(create, companyId);
+        List<PrImportUnitHeat> hasAllUnit = mapper.hasAllUnit(create);
         if (!hasAllUnit.isEmpty()) {
             return "下列单元已绑定热表，请核对信息！";
         }
-        List<PrImportUnitHeat> hasAllReadly = mapper.hasAllReadly(create, companyId);
+        List<PrImportUnitHeat> hasAllReadly = mapper.hasAllReadly(create);
         if (!hasAllReadly.isEmpty()) {
             return "下列表号系统中已存在，请核对信息！";
         }
@@ -148,8 +143,7 @@ public class PrImportUnitHeatServiceImpl extends ServiceImpl<PrImportUnitHeatMap
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.deleteData(create, companyId);
+        mapper.deleteData(create);
         return true;
     }
 
@@ -157,21 +151,19 @@ public class PrImportUnitHeatServiceImpl extends ServiceImpl<PrImportUnitHeatMap
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.submitData(create, companyId);
-        mapper.deleteImportUnitHeatData(create, companyId);
+        mapper.submitData(create);
+        mapper.deleteImportUnitHeatData(create);
         return true;
     }
 
     @Override
     public Integer select() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return mapper.select(create, companyId);
+        return mapper.select(create);
     }
 
     @Override
-    public List<PrImportUnitHeat> selectByCompanyIdOrgId(String companyId, String orgId) {
-        return mapper.selectByCompanyIdOrgId(companyId, orgId);
+    public List<PrImportUnitHeat> selectByOrgId(String orgId) {
+        return mapper.selectByOrgId(orgId);
     }
 }

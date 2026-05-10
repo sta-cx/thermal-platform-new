@@ -4,7 +4,7 @@
 
     <!-- 查询所有策略列表 -->
     <select id="selectAllList" resultType="org.sdkj.thermal.domain.HtStrategy">
-        SELECT id, name, type, company_id, create_by, create_time, remark
+        SELECT id, name, type, create_by, create_time, remark
         FROM ht_strategy
     </select>
 

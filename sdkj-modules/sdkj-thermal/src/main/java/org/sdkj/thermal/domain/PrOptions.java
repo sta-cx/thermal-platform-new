@@ -21,8 +21,6 @@ public class PrOptions extends BaseEntity {
     @TableId(value = "id")
     private Long id;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 组织/小区ID */
     private String orgId;

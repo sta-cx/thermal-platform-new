@@ -40,9 +40,7 @@ public class PrHeatDailyController extends BaseController {
     @SaCheckPermission("thermal:ht:heatDaily:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrHeatDailyVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHeatDailyVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search,
@@ -50,7 +48,7 @@ public class PrHeatDailyController extends BaseController {
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             PageQuery pageQuery) {
-        return heatDailyService.selectPageList(companyId, orgId, buildingId, unitCode, search, isCharged, startTime, endTime, pageQuery);
+        return heatDailyService.selectPageList(orgId, buildingId, unitCode, search, isCharged, startTime, endTime, pageQuery);
     }
 
     /**
@@ -75,8 +73,8 @@ public class PrHeatDailyController extends BaseController {
     @SaCheckLogin
     @Log(title = "热表日表-生成", businessType = BusinessType.UPDATE)
     @PostMapping("/setHeat")
-    public R<Void> setHeat(@RequestParam String companyId, @RequestParam String orgId) {
-        boolean result = heatDailyService.generateHeatDaily(companyId, orgId);
+    public R<Void> setHeat(@RequestParam String orgId) {
+        boolean result = heatDailyService.generateHeatDaily(orgId);
         return result ? R.ok() : R.fail("日表生成失败");
     }
 
@@ -90,7 +88,6 @@ public class PrHeatDailyController extends BaseController {
     @Log(title = "热表日表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/exportAll")
     public void exportAll(HttpServletResponse response,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
@@ -98,7 +95,7 @@ public class PrHeatDailyController extends BaseController {
             @RequestParam(required = false) Integer isCharged,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) throws IOException {
-        var list = heatDailyService.selectPageList(companyId, orgId, buildingId, unitCode, search, isCharged, startTime, endTime, null).getRows();
+        var list = heatDailyService.selectPageList(orgId, buildingId, unitCode, search, isCharged, startTime, endTime, null).getRows();
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("热表日表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");

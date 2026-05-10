@@ -34,7 +34,6 @@ public class PrExpenseItemVo implements Serializable {
     private Integer sumPrecision;
     private Integer changeCycle;
     private String orgId;
-    private String companyId;
     private Integer num;
     private Date createTime;
     private Date updateTime;

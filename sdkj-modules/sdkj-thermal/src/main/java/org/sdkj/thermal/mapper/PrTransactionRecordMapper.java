@@ -23,7 +23,6 @@ public interface PrTransactionRecordMapper extends BaseMapperPlus<PrTransactionR
     List<PrTransactionRecordVo> selectPageList(
         Page<PrTransactionRecordVo> page,
         @Param("search") String search,
-        @Param("companyId") String companyId,
         @Param("orgId") String orgId,
         @Param("buildingId") String buildingId,
         @Param("unitCode") String unitCode,
@@ -50,7 +49,6 @@ public interface PrTransactionRecordMapper extends BaseMapperPlus<PrTransactionR
      * 综合统计
      */
     Map<String, Object> selectComprehensiveStats(
-        @Param("companyId") String companyId,
         @Param("orgId") String orgId,
         @Param("startTime") String startTime,
         @Param("endTime") String endTime);
@@ -59,7 +57,6 @@ public interface PrTransactionRecordMapper extends BaseMapperPlus<PrTransactionR
      * 收款统计
      */
     Map<String, Object> selectReceivedStats(
-        @Param("companyId") String companyId,
         @Param("orgId") String orgId,
         @Param("startTime") String startTime,
         @Param("endTime") String endTime);
@@ -68,65 +65,63 @@ public interface PrTransactionRecordMapper extends BaseMapperPlus<PrTransactionR
      * 欠费统计
      */
     Map<String, Object> selectArrearsStats(
-        @Param("companyId") String companyId,
         @Param("orgId") String orgId);
 
     /**
      * 日报查询
      */
     List<PrTransactionRecordVo> selectDailyReport(
-        @Param("companyId") String companyId,
         @Param("orgId") String orgId,
         @Param("date") String date);
 
     /** 退费记录查询 */
     List<Map<String, Object>> selectRefundList(
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("buildingId") String buildingId,
         @Param("startTime") String startTime, @Param("endTime") String endTime,
         @Param("search") String search);
 
     /** 水费交易查询 */
     List<Map<String, Object>> selectWaterList(
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("buildingId") String buildingId,
         @Param("startTime") String startTime, @Param("endTime") String endTime,
         @Param("search") String search);
 
     /** 电费交易查询 */
     List<Map<String, Object>> selectEleList(
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("buildingId") String buildingId,
         @Param("startTime") String startTime, @Param("endTime") String endTime,
         @Param("search") String search);
 
     /** 写卡日志查询 */
     List<Map<String, Object>> selectCardLogList(
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("buildingId") String buildingId,
         @Param("startTime") String startTime, @Param("endTime") String endTime,
         @Param("search") String search, @Param("type") String type, @Param("createBy") String createBy);
 
     /** 写卡操作人列表 */
     List<Map<String, Object>> selectCardLogOperators(
-        @Param("companyId") String companyId, @Param("orgId") String orgId);
+        @Param("orgId") String orgId);
 
     /** 未收款查询 */
     List<Map<String, Object>> selectUncollList(
-        @Param("companyId") String companyId, @Param("orgId") String orgId,
+        @Param("orgId") String orgId,
         @Param("buildingId") String buildingId,
         @Param("startTime") String startTime, @Param("endTime") String endTime,
         @Param("search") String search);
 
     /** 本月收款总额 */
     Map<String, Object> selectThisMonthTotal(
-        @Param("companyId") String companyId, @Param("userId") String userId);
+        @Param("userId") String userId);
 
     /** 本月收款明细（按费用项） */
     List<Map<String, Object>> selectThisMonthDetails(
-        @Param("companyId") String companyId, @Param("userId") String userId);
+        @Param("userId") String userId);
 
     /** 本月收款明细（按费用分类） */
     List<Map<String, Object>> selectThisMonthDetailsVarious(
-        @Param("companyId") String companyId, @Param("userId") String userId);
+        @Param("userId") String userId);
 }

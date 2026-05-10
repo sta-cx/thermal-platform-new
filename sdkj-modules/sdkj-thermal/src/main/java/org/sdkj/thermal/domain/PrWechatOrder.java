@@ -45,7 +45,6 @@ public class PrWechatOrder extends BaseEntity {
     private String tradeType;
     private String bankType;
     private String attach;
-    private String companyId;
     private String operator;
     private String remark;
     private String delFlag;

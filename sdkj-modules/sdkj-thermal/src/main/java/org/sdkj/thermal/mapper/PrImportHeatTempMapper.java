@@ -10,25 +10,25 @@ public interface PrImportHeatTempMapper extends BaseMapperPlus<PrImportHeatTemp,
 
     void insert(@Param("list") List<PrImportHeatTemp> lists);
 
-    void updateHouseId(@Param("create") String create, @Param("companyId") String companyId);
+    void updateHouseId(@Param("create") String create);
 
-    void updateMeter(@Param("create") String create, @Param("companyId") String companyId);
+    void updateMeter(@Param("create") String create);
 
-    List<PrImportHeatTemp> selectNoHouseId(@Param("create") String create, @Param("companyId") String companyId);
+    List<PrImportHeatTemp> selectNoHouseId(@Param("create") String create);
 
-    List<PrImportHeatTemp> selectNoMeterNum(@Param("create") String create, @Param("companyId") String companyId);
+    List<PrImportHeatTemp> selectNoMeterNum(@Param("create") String create);
 
-    List<PrImportHeatTemp> selectRepateMeterNum(@Param("create") String create, @Param("companyId") String companyId);
+    List<PrImportHeatTemp> selectRepateMeterNum(@Param("create") String create);
 
-    List<PrImportHeatTemp> findNoArchiveId(@Param("create") String create, @Param("companyId") String companyId);
+    List<PrImportHeatTemp> findNoArchiveId(@Param("create") String create);
 
-    Integer select(@Param("create") String create, @Param("companyId") String companyId);
+    Integer select(@Param("create") String create);
 
-    List<PrImportHeatTemp> selectByCompanyIdOrgId(@Param("companyId") String companyId, @Param("orgId") String orgId);
+    List<PrImportHeatTemp> selectByOrgId(@Param("orgId") String orgId);
 
-    boolean deleteData(@Param("create") String create, @Param("companyId") String companyId);
+    boolean deleteData(@Param("create") String create);
 
-    void submitData(@Param("create") String create, @Param("companyId") String companyId);
+    void submitData(@Param("create") String create);
 
-    void deleteImportHeatTempData(@Param("create") String create, @Param("companyId") String companyId);
+    void deleteImportHeatTempData(@Param("create") String create);
 }

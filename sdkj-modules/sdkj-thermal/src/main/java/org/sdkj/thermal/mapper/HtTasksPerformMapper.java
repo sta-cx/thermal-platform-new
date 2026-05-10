@@ -451,12 +451,12 @@ public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtT
     /**
      * 查询阀门信息
      */
-    List<Object> selectValveInfo(@Param("companyId") String companyId, @Param("list") List<String> meterIds);
+    List<Object> selectValveInfo(@Param("list") List<String> meterIds);
 
     /**
      * 查询列表N
      */
-    List<HtTasksPerform> selectListN(@Param("companyId") String companyId);
+    List<HtTasksPerform> selectListN();
 
     /**
      * 查询最新的任务执行记录

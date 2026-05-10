@@ -144,19 +144,17 @@ public class PrHeatControlController extends BaseController {
     @GetMapping("/valveList")
     public TableDataInfo<PrHeatValveArchiveVo> valveList(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             PageQuery pageQuery) {
-        return valveArchiveService.selectPageList(companyId, orgId, null, null, null, search, pageQuery);
+        return valveArchiveService.selectPageList(orgId, null, null, null, search, pageQuery);
     }
 
     @SaCheckLogin
     @GetMapping("/list")
     public TableDataInfo<PrHeatValveArchiveVo> list(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             PageQuery pageQuery) {
-        return valveArchiveService.selectPageList(companyId, orgId, null, null, null, search, pageQuery);
+        return valveArchiveService.selectPageList(orgId, null, null, null, search, pageQuery);
     }
 }

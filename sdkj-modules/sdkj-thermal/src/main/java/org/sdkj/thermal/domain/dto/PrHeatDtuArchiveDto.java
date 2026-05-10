@@ -23,7 +23,6 @@ public class PrHeatDtuArchiveDto implements Serializable {
     private Date latestTime;
     private Date lastTime;
     private String orgId;
-    private String companyId;
     private String createBy;
     private Date createTime;
     private String updateBy;

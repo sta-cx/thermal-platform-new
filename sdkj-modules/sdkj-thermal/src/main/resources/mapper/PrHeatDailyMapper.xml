@@ -7,13 +7,12 @@
         UPDATE pr_heat_reading a
         LEFT JOIN pr_heat_hot_archive b ON a.meter_num = b.meter_num
         LEFT JOIN (
-            SELECT open_time, close_time, company_id
+            SELECT open_time, close_time, org_id
             FROM pr_options_heat
-            GROUP BY company_id
-        ) c ON c.company_id = b.company_id
+            GROUP BY org_id
+        ) c ON c.org_id = b.org_id
         SET a.is_valid = '1'
-        WHERE b.company_id = #{companyId}
-          AND b.org_id = #{orgId}
+        WHERE b.org_id = #{orgId}
           AND a.create_time BETWEEN c.open_time AND c.close_time
           AND DATE_FORMAT(a.create_time, '%Y-%m-%d') = DATE_FORMAT(#{date}, '%Y-%m-%d')
     </update>
@@ -21,8 +20,7 @@
     <!-- 步骤2: 清空旧日表数据 -->
     <delete id="deleteDaily">
         DELETE FROM pr_heat_daily
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
           AND DATE_FORMAT(daily_date, '%Y-%m-%d') = DATE_FORMAT(#{date}, '%Y-%m-%d')
     </delete>
 
@@ -56,7 +54,6 @@
         ) b ON a.meter_num = b.meter_num
         LEFT JOIN pr_heat_hot_archive c ON c.meter_num = a.meter_num
         WHERE a.is_valid = '1'
-          AND c.company_id = #{companyId}
           AND c.org_id = #{orgId}
           AND c.is_changed = '0'
           AND DATE_FORMAT(a.create_time, '%Y-%m-%d %H:%i:%s') = DATE_FORMAT(b.create_time, '%Y-%m-%d %H:%i:%s')
@@ -73,10 +70,8 @@
             a.standard_price = IFNULL(b.standard_price, 0),
             a.is_calc = '0',
             a.house_id = b.house_id,
-            a.org_id = b.org_id,
-            a.company_id = b.company_id
-        WHERE b.company_id = #{companyId}
-          AND b.org_id = #{orgId}
+            a.org_id = b.org_id
+        WHERE b.org_id = #{orgId}
           AND a.meter_num = b.meter_num
           AND b.is_changed = '0'
           AND DATE_FORMAT(a.daily_date, '%Y-%m-%d') = DATE_FORMAT(#{date}, '%Y-%m-%d')
@@ -89,8 +84,7 @@
             is_calc = '1',
             total_money = ROUND(standard_price * (current_reading - start_reading), 2),
             calc_date = NOW()
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
           AND DATE_FORMAT(daily_date, '%Y-%m-%d') = DATE_FORMAT(#{date}, '%Y-%m-%d')
     </update>
 
@@ -102,8 +96,7 @@
             a.total_used = b.current_reading - a.start_reading,
             a.current_balance = a.total_recharge - (IFNULL(a.total_money, 0) + b.total_money),
             a.total_money = IFNULL(a.total_money, 0) + b.total_money
-        WHERE b.company_id = #{companyId}
-          AND b.org_id = #{orgId}
+        WHERE b.org_id = #{orgId}
           AND DATE_FORMAT(b.daily_date, '%Y-%m-%d') = DATE_FORMAT(#{date}, '%Y-%m-%d')
     </update>
 
@@ -128,16 +121,14 @@
             0                  AS add_arrearage,
             0                  AS add_advances,
             d.house_id,
-            d.org_id,
-            d.company_id
+            d.org_id
         FROM pr_heat_daily d
-        WHERE d.company_id = #{companyId}
-          AND d.org_id = #{orgId}
+        WHERE d.org_id = #{orgId}
           AND YEAR(d.daily_date) = #{year}
           AND MONTH(d.daily_date) = #{month}
           AND d.house_id IS NOT NULL
           AND d.qty > 0
-        GROUP BY d.house_id, d.meter_id, d.meter_num, d.meter_arc_code, d.card_num, d.org_id, d.company_id
+        GROUP BY d.house_id, d.meter_id, d.meter_num, d.meter_arc_code, d.card_num, d.org_id
         ORDER BY d.house_id
     </select>
 

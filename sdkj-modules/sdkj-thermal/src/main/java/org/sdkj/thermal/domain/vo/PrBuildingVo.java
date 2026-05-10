@@ -48,9 +48,6 @@ public class PrBuildingVo {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
-
     /** 小区名称（查询用） */
     private String orgName;
 

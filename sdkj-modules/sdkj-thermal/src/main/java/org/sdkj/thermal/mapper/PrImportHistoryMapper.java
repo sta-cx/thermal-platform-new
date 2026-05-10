@@ -10,19 +10,19 @@ public interface PrImportHistoryMapper extends BaseMapperPlus<PrImportHistory, P
 
     void insert(@Param("list") List<PrImportHistory> lists);
 
-    void updateHouseId(@Param("create") String create, @Param("companyId") String companyId);
+    void updateHouseId(@Param("create") String create);
 
-    void updateStandardId(@Param("create") String create, @Param("companyId") String companyId);
+    void updateStandardId(@Param("create") String create);
 
-    List<PrImportHistory> selectNoHouseId(@Param("create") String create, @Param("companyId") String companyId);
+    List<PrImportHistory> selectNoHouseId(@Param("create") String create);
 
-    List<PrImportHistory> selectNoStandardId(@Param("create") String create, @Param("companyId") String companyId);
+    List<PrImportHistory> selectNoStandardId(@Param("create") String create);
 
-    Integer select(@Param("create") String create, @Param("companyId") String companyId);
+    Integer select(@Param("create") String create);
 
-    boolean deleteData(@Param("create") String create, @Param("companyId") String companyId);
+    boolean deleteData(@Param("create") String create);
 
-    void submitData(@Param("create") String create, @Param("companyId") String companyId);
+    void submitData(@Param("create") String create);
 
-    void deleteImportHistoryData(@Param("create") String create, @Param("companyId") String companyId);
+    void deleteImportHistoryData(@Param("create") String create);
 }

@@ -25,10 +25,10 @@ public class PrTransactionRecordServiceImpl extends ServiceImpl<PrTransactionRec
     private final PrTransactionRecordMapper baseMapper;
 
     @Override
-    public TableDataInfo<PrTransactionRecordVo> pageList(String search, String companyId, String orgId,
+    public TableDataInfo<PrTransactionRecordVo> pageList(String search, String orgId,
             String buildingId, String unitCode, String startTime, String endTime, String status, PageQuery pageQuery) {
         Page<PrTransactionRecordVo> page = pageQuery.build();
-        baseMapper.selectPageList(page, search, companyId, orgId, buildingId, unitCode, startTime, endTime, status);
+        baseMapper.selectPageList(page, search, orgId, buildingId, unitCode, startTime, endTime, status);
         return TableDataInfo.build(page);
     }
 
@@ -58,8 +58,8 @@ public class PrTransactionRecordServiceImpl extends ServiceImpl<PrTransactionRec
     }
 
     @Override
-    public Map<String, Object> comprehensive(String companyId, String orgId, String startTime, String endTime) {
-        Map<String, Object> stats = baseMapper.selectComprehensiveStats(companyId, orgId, startTime, endTime);
+    public Map<String, Object> comprehensive(String orgId, String startTime, String endTime) {
+        Map<String, Object> stats = baseMapper.selectComprehensiveStats(orgId, startTime, endTime);
         return stats != null ? stats : Map.of(
             "totalTransactions", 0, "chargeCount", 0, "refundCount", 0,
             "transferCount", 0, "chargeAmount", 0.0, "refundAmount", 0.0,
@@ -67,76 +67,76 @@ public class PrTransactionRecordServiceImpl extends ServiceImpl<PrTransactionRec
     }
 
     @Override
-    public Map<String, Object> received(String companyId, String orgId, String startTime, String endTime) {
-        Map<String, Object> stats = baseMapper.selectReceivedStats(companyId, orgId, startTime, endTime);
+    public Map<String, Object> received(String orgId, String startTime, String endTime) {
+        Map<String, Object> stats = baseMapper.selectReceivedStats(orgId, startTime, endTime);
         return stats != null ? stats : Map.of(
             "receivedCount", 0, "totalReceived", 0.0,
             "cashAmount", 0.0, "wechatAmount", 0.0, "alipayAmount", 0.0, "cardAmount", 0.0);
     }
 
     @Override
-    public Map<String, Object> arrears(String companyId, String orgId) {
-        Map<String, Object> stats = baseMapper.selectArrearsStats(companyId, orgId);
+    public Map<String, Object> arrears(String orgId) {
+        Map<String, Object> stats = baseMapper.selectArrearsStats(orgId);
         return stats != null ? stats : Map.of(
             "arrearsHouseCount", 0, "arrearsCount", 0, "totalArrears", 0.0);
     }
 
     @Override
-    public List<PrTransactionRecordVo> daily(String companyId, String orgId, String date) {
-        return baseMapper.selectDailyReport(companyId, orgId, date);
+    public List<PrTransactionRecordVo> daily(String orgId, String date) {
+        return baseMapper.selectDailyReport(orgId, date);
     }
 
     @Override
-    public Map<String, Object> refund(String companyId, String orgId, String buildingId,
+    public Map<String, Object> refund(String orgId, String buildingId,
             String startTime, String endTime, String search) {
-        List<Map<String, Object>> list = baseMapper.selectRefundList(companyId, orgId, buildingId, startTime, endTime, search);
+        List<Map<String, Object>> list = baseMapper.selectRefundList(orgId, buildingId, startTime, endTime, search);
         return Map.of("list", list, "total", list.size());
     }
 
     @Override
-    public Map<String, Object> getWater(String companyId, String orgId, String buildingId,
+    public Map<String, Object> getWater(String orgId, String buildingId,
             String startTime, String endTime, String search) {
-        List<Map<String, Object>> list = baseMapper.selectWaterList(companyId, orgId, buildingId, startTime, endTime, search);
+        List<Map<String, Object>> list = baseMapper.selectWaterList(orgId, buildingId, startTime, endTime, search);
         return Map.of("list", list, "total", list.size());
     }
 
     @Override
-    public Map<String, Object> getEle(String companyId, String orgId, String buildingId,
+    public Map<String, Object> getEle(String orgId, String buildingId,
             String startTime, String endTime, String search) {
-        List<Map<String, Object>> list = baseMapper.selectEleList(companyId, orgId, buildingId, startTime, endTime, search);
+        List<Map<String, Object>> list = baseMapper.selectEleList(orgId, buildingId, startTime, endTime, search);
         return Map.of("list", list, "total", list.size());
     }
 
     @Override
-    public Map<String, Object> cardLog(String companyId, String orgId, String buildingId,
+    public Map<String, Object> cardLog(String orgId, String buildingId,
             String startTime, String endTime, String search, String type, String createBy) {
-        List<Map<String, Object>> list = baseMapper.selectCardLogList(companyId, orgId, buildingId, startTime, endTime, search, type, createBy);
+        List<Map<String, Object>> list = baseMapper.selectCardLogList(orgId, buildingId, startTime, endTime, search, type, createBy);
         return Map.of("list", list, "total", list.size());
     }
 
     @Override
-    public List<Map<String, Object>> cardLogCreateByName(String companyId, String orgId) {
-        return baseMapper.selectCardLogOperators(companyId, orgId);
+    public List<Map<String, Object>> cardLogCreateByName(String orgId) {
+        return baseMapper.selectCardLogOperators(orgId);
     }
 
     @Override
-    public Map<String, Object> uncoll(String companyId, String orgId, String buildingId,
+    public Map<String, Object> uncoll(String orgId, String buildingId,
             String startTime, String endTime, String search) {
-        List<Map<String, Object>> list = baseMapper.selectUncollList(companyId, orgId, buildingId, startTime, endTime, search);
+        List<Map<String, Object>> list = baseMapper.selectUncollList(orgId, buildingId, startTime, endTime, search);
         return Map.of("list", list, "total", list.size());
     }
 
     @Override
-    public Map<String, Object> getThisMonth(String companyId, String userId) {
-        Map<String, Object> record = baseMapper.selectThisMonthTotal(companyId, userId);
-        List<Map<String, Object>> details = baseMapper.selectThisMonthDetails(companyId, userId);
+    public Map<String, Object> getThisMonth(String userId) {
+        Map<String, Object> record = baseMapper.selectThisMonthTotal(userId);
+        List<Map<String, Object>> details = baseMapper.selectThisMonthDetails(userId);
         return Map.of("record", record != null ? record : Map.of("paidIn", 0), "details", details);
     }
 
     @Override
-    public Map<String, Object> getThisMonthVarious(String companyId, String userId) {
-        Map<String, Object> record = baseMapper.selectThisMonthTotal(companyId, userId);
-        List<Map<String, Object>> details = baseMapper.selectThisMonthDetailsVarious(companyId, userId);
+    public Map<String, Object> getThisMonthVarious(String userId) {
+        Map<String, Object> record = baseMapper.selectThisMonthTotal(userId);
+        List<Map<String, Object>> details = baseMapper.selectThisMonthDetailsVarious(userId);
         return Map.of("record", record != null ? record : Map.of("paidIn", 0), "details", details);
     }
 }

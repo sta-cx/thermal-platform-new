@@ -37,7 +37,6 @@ public class PrTransactionRecordController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<PrTransactionRecordVo> list(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
@@ -46,7 +45,7 @@ public class PrTransactionRecordController extends BaseController {
             @RequestParam(required = false) String status,
             PageQuery pageQuery) {
         return transactionRecordService.pageList(
-            search, companyId, orgId, buildingId, unitCode, startTime, endTime, status, pageQuery);
+            search, orgId, buildingId, unitCode, startTime, endTime, status, pageQuery);
     }
 
     @SaCheckPermission("thermal:property:transaction:query")
@@ -73,42 +72,34 @@ public class PrTransactionRecordController extends BaseController {
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/comprehensive")
-    public R<Map<String, Object>> comprehensive(
-            @RequestParam String companyId,
-            @RequestParam String orgId,
+    public R<Map<String, Object>> comprehensive(@RequestParam String orgId,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) {
-        return R.ok(transactionRecordService.comprehensive(companyId, orgId, startTime, endTime));
+        return R.ok(transactionRecordService.comprehensive(orgId, startTime, endTime));
     }
 
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/received")
-    public R<Map<String, Object>> received(
-            @RequestParam String companyId,
-            @RequestParam String orgId,
+    public R<Map<String, Object>> received(@RequestParam String orgId,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) {
-        return R.ok(transactionRecordService.received(companyId, orgId, startTime, endTime));
+        return R.ok(transactionRecordService.received(orgId, startTime, endTime));
     }
 
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/arrears")
-    public R<Map<String, Object>> arrears(
-            @RequestParam String companyId,
-            @RequestParam String orgId) {
-        return R.ok(transactionRecordService.arrears(companyId, orgId));
+    public R<Map<String, Object>> arrears(@RequestParam String orgId) {
+        return R.ok(transactionRecordService.arrears(orgId));
     }
 
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/daily")
-    public R<List<PrTransactionRecordVo>> daily(
-            @RequestParam String companyId,
-            @RequestParam String orgId,
+    public R<List<PrTransactionRecordVo>> daily(@RequestParam String orgId,
             @RequestParam String date) {
-        return R.ok(transactionRecordService.daily(companyId, orgId, date));
+        return R.ok(transactionRecordService.daily(orgId, date));
     }
 
     /**
@@ -119,14 +110,12 @@ public class PrTransactionRecordController extends BaseController {
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/refund")
-    public R<Map<String, Object>> refund(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Map<String, Object>> refund(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String search) {
-        return R.ok(transactionRecordService.refund(companyId, orgId, buildingId, startTime, endTime, search));
+        return R.ok(transactionRecordService.refund(orgId, buildingId, startTime, endTime, search));
     }
 
     /**
@@ -137,14 +126,12 @@ public class PrTransactionRecordController extends BaseController {
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/water")
-    public R<Map<String, Object>> getWater(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Map<String, Object>> getWater(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String search) {
-        return R.ok(transactionRecordService.getWater(companyId, orgId, buildingId, startTime, endTime, search));
+        return R.ok(transactionRecordService.getWater(orgId, buildingId, startTime, endTime, search));
     }
 
     /**
@@ -155,14 +142,12 @@ public class PrTransactionRecordController extends BaseController {
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/ele")
-    public R<Map<String, Object>> getEle(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Map<String, Object>> getEle(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String search) {
-        return R.ok(transactionRecordService.getEle(companyId, orgId, buildingId, startTime, endTime, search));
+        return R.ok(transactionRecordService.getEle(orgId, buildingId, startTime, endTime, search));
     }
 
     /**
@@ -173,16 +158,14 @@ public class PrTransactionRecordController extends BaseController {
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/card-log")
-    public R<Map<String, Object>> cardLog(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Map<String, Object>> cardLog(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String createBy) {
-        return R.ok(transactionRecordService.cardLog(companyId, orgId, buildingId, startTime, endTime, search, type, createBy));
+        return R.ok(transactionRecordService.cardLog(orgId, buildingId, startTime, endTime, search, type, createBy));
     }
 
     /**
@@ -193,10 +176,8 @@ public class PrTransactionRecordController extends BaseController {
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/card-log-operators")
-    public R<List<Map<String, Object>>> cardLogCreateByName(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId) {
-        return R.ok(transactionRecordService.cardLogCreateByName(companyId, orgId));
+    public R<List<Map<String, Object>>> cardLogCreateByName(@RequestParam(required = false) String orgId) {
+        return R.ok(transactionRecordService.cardLogCreateByName(orgId));
     }
 
     /**
@@ -207,14 +188,12 @@ public class PrTransactionRecordController extends BaseController {
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/uncoll")
-    public R<Map<String, Object>> uncoll(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Map<String, Object>> uncoll(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String search) {
-        return R.ok(transactionRecordService.uncoll(companyId, orgId, buildingId, startTime, endTime, search));
+        return R.ok(transactionRecordService.uncoll(orgId, buildingId, startTime, endTime, search));
     }
 
     /**
@@ -225,10 +204,8 @@ public class PrTransactionRecordController extends BaseController {
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/monthly")
-    public R<Map<String, Object>> getThisMonth(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String userId) {
-        return R.ok(transactionRecordService.getThisMonth(companyId, userId));
+    public R<Map<String, Object>> getThisMonth(@RequestParam(required = false) String userId) {
+        return R.ok(transactionRecordService.getThisMonth(userId));
     }
 
     /**
@@ -239,9 +216,7 @@ public class PrTransactionRecordController extends BaseController {
     @SaCheckPermission("thermal:property:transaction:query")
     @SaCheckLogin
     @GetMapping("/monthly-various")
-    public R<Map<String, Object>> getThisMonthVarious(
-            @RequestParam String companyId,
-            @RequestParam(required = false) String userId) {
-        return R.ok(transactionRecordService.getThisMonthVarious(companyId, userId));
+    public R<Map<String, Object>> getThisMonthVarious(@RequestParam(required = false) String userId) {
+        return R.ok(transactionRecordService.getThisMonthVarious(userId));
     }
 }

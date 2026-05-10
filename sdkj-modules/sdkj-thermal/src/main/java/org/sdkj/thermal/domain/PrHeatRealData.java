@@ -28,8 +28,6 @@ public class PrHeatRealData extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 楼栋ID */
     private Long buildingId;

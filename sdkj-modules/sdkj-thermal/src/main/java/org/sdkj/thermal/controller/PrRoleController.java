@@ -76,8 +76,8 @@ public class PrRoleController extends BaseController {
     @SaCheckPermission("thermal:property:role:query")
     @SaCheckLogin
     @GetMapping("/allRoles")
-    public R<List<AgRole>> allRoles(@RequestParam String companyId) {
-        return R.ok(prRoleService.getAllRoles(companyId));
+    public R<List<AgRole>> allRoles() {
+        return R.ok(prRoleService.getAllRoles());
     }
 
     @SaCheckPermission("thermal:property:role:query")

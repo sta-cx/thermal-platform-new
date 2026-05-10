@@ -35,9 +35,8 @@ public class PrOptionsHeatController extends BaseController {
     @GetMapping
     public R<PrOptionsHeat> getDataById(
             @RequestParam String orgId,
-            @RequestParam String companyId,
             @RequestParam(required = false) String level) {
-        PrOptionsHeat result = optionsHeatService.getByOrgAndCompany(orgId, companyId, level);
+        PrOptionsHeat result = optionsHeatService.getByOrgAndCompany(orgId, level);
         if (result == null) {
             return R.fail("未找到配置数据");
         }
@@ -68,7 +67,7 @@ public class PrOptionsHeatController extends BaseController {
     public R<Void> upsertCompanyData(@RequestBody PrOptionsHeatBo bo) {
         PrOptionsHeat options = MapstructUtils.convert(bo, PrOptionsHeat.class);
         PrOptionsHeat existing = optionsHeatService.getByOrgAndCompany(
-                options.getOrgId(), options.getCompanyId(), options.getLevel());
+                options.getOrgId(), options.getLevel());
         if (existing != null) {
             options.setId(existing.getId());
             return toAjax(optionsHeatService.updateById(options));
@@ -79,7 +78,7 @@ public class PrOptionsHeatController extends BaseController {
     @SaCheckPermission("thermal:property:optionsHeat:add")
     @SaCheckLogin
     @PostMapping("/init")
-    public R<Void> initData(@RequestParam String orgId, @RequestParam String companyId) {
-        return toAjax(optionsHeatService.initData(orgId, companyId));
+    public R<Void> initData(@RequestParam String orgId) {
+        return toAjax(optionsHeatService.initData(orgId));
     }
 }

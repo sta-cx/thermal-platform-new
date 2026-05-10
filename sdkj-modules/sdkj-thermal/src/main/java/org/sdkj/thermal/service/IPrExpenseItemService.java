@@ -33,22 +33,22 @@ public interface IPrExpenseItemService extends IService<PrExpenseItem> {
     /**
      * 按编号查询费用项目
      */
-    List<PrExpenseItemVo> selectByItemCode(String companyId, String orgId, String itemGroup, String itemCode);
+    List<PrExpenseItemVo> selectByItemCode(String orgId, String itemGroup, String itemCode);
 
     /**
      * 按费项分组查询列表
      */
-    List<PrExpenseItemVo> selectByItemGroup(String companyId, String orgId, String itemGroup, String userId);
+    List<PrExpenseItemVo> selectByItemGroup(String orgId, String itemGroup, String userId);
 
     /**
      * 获取费项分组下的所有 itemCode
      */
-    List<PrExpenseItemVo> getItemCodesByItemGroup(String companyId, String orgId, String itemGroup);
+    List<PrExpenseItemVo> getItemCodesByItemGroup(String orgId, String itemGroup);
 
     /**
      * 按公司/小区查询费用项目
      */
-    List<PrExpenseItemVo> selectByCompanyAndOrg(String companyId, String orgId);
+    List<PrExpenseItemVo> selectByCompanyAndOrg(String orgId);
 
     /**
      * 删除费用项目（检查是否有关联收费标准）
@@ -58,5 +58,5 @@ public interface IPrExpenseItemService extends IService<PrExpenseItem> {
     /**
      * 检查项目名称是否重复
      */
-    boolean isItemName(String companyId, String orgId, String itemName, String id);
+    boolean isItemName(String orgId, String itemName, String id);
 }

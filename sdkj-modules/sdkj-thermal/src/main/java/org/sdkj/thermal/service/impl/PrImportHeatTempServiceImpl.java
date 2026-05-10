@@ -25,12 +25,10 @@ public class PrImportHeatTempServiceImpl extends ServiceImpl<PrImportHeatTempMap
     @Transactional(rollbackFor = Exception.class)
     public Integer importData(List<PrImportHeatTemp> objects) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         Date date = new Date();
         List<PrImportHeatTemp> lists = new ArrayList<>();
         for (PrImportHeatTemp item : objects) {
             item.setCreateBy(create);
-            item.setCompanyId(companyId);
             item.setCreateTime(date);
             item.setType(0);
 
@@ -52,30 +50,27 @@ public class PrImportHeatTempServiceImpl extends ServiceImpl<PrImportHeatTempMap
     @Transactional(rollbackFor = Exception.class)
     public void updateHouseId() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.updateHouseId(create, companyId);
+        mapper.updateHouseId(create);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void check() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.updateMeter(create, companyId);
+        mapper.updateMeter(create);
     }
 
     @Override
     public String getNull(Integer r) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
 
-        if (!mapper.selectNoHouseId(create, companyId).isEmpty())
+        if (!mapper.selectNoHouseId(create).isEmpty())
             return "下列房屋信息无法匹配！";
-        if (!mapper.selectNoMeterNum(create, companyId).isEmpty())
+        if (!mapper.selectNoMeterNum(create).isEmpty())
             return "下列无表号！";
-        if (!mapper.selectRepateMeterNum(create, companyId).isEmpty())
+        if (!mapper.selectRepateMeterNum(create).isEmpty())
             return "下列表号重复！";
-        if (!mapper.findNoArchiveId(create, companyId).isEmpty())
+        if (!mapper.findNoArchiveId(create).isEmpty())
             return "下列无法匹配仪表名称！";
 
         return "成功导入" + r + "条记录！\n请提交数据！";
@@ -85,29 +80,26 @@ public class PrImportHeatTempServiceImpl extends ServiceImpl<PrImportHeatTempMap
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return mapper.deleteData(create, companyId);
+        return mapper.deleteData(create);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        mapper.submitData(create, companyId);
-        mapper.deleteImportHeatTempData(create, companyId);
+        mapper.submitData(create);
+        mapper.deleteImportHeatTempData(create);
         return true;
     }
 
     @Override
     public Integer select() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return mapper.select(create, companyId);
+        return mapper.select(create);
     }
 
     @Override
-    public List<PrImportHeatTemp> selectByCompanyIdOrgId(String companyId, String orgId) {
-        return mapper.selectByCompanyIdOrgId(companyId, orgId);
+    public List<PrImportHeatTemp> selectByOrgId(String orgId) {
+        return mapper.selectByOrgId(orgId);
     }
 }

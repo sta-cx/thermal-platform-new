@@ -40,9 +40,7 @@ public class PrHeatMonthController extends BaseController {
     @SaCheckPermission("thermal:ht:heatMonth:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrHeatMonthVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHeatMonthVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search,
@@ -50,7 +48,7 @@ public class PrHeatMonthController extends BaseController {
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             PageQuery pageQuery) {
-        return heatMonthService.selectPageList(companyId, orgId, buildingId, unitCode, search, isCharged, startTime, endTime, pageQuery);
+        return heatMonthService.selectPageList(orgId, buildingId, unitCode, search, isCharged, startTime, endTime, pageQuery);
     }
 
     /**
@@ -75,9 +73,9 @@ public class PrHeatMonthController extends BaseController {
     @SaCheckLogin
     @Log(title = "热表月表-生成", businessType = BusinessType.UPDATE)
     @PostMapping("/setHeat")
-    public R<Void> setHeat(@RequestParam String companyId, @RequestParam String orgId,
+    public R<Void> setHeat(@RequestParam String orgId,
                            @RequestParam(required = false, defaultValue = "false") Boolean force) {
-        heatMonthService.setHeat(companyId, orgId, force);
+        heatMonthService.setHeat(orgId, force);
         return R.ok();
     }
 
@@ -91,7 +89,6 @@ public class PrHeatMonthController extends BaseController {
     @Log(title = "热表月表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/exportAll")
     public void exportAll(HttpServletResponse response,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
@@ -99,7 +96,7 @@ public class PrHeatMonthController extends BaseController {
             @RequestParam(required = false) String isCharged,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime) throws IOException {
-        var list = heatMonthService.selectPageList(companyId, orgId, buildingId, unitCode, search, isCharged, startTime, endTime, null).getRows();
+        var list = heatMonthService.selectPageList(orgId, buildingId, unitCode, search, isCharged, startTime, endTime, null).getRows();
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("热表月表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");

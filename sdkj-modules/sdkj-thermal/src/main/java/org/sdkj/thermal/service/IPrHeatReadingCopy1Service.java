@@ -26,7 +26,6 @@ public interface IPrHeatReadingCopy1Service {
     /**
      * 热表配表读数情况分页查询
      *
-     * @param companyId   公司ID
      * @param orgId       小区ID
      * @param buildingId  楼栋ID
      * @param unitCode    单元编码
@@ -35,6 +34,6 @@ public interface IPrHeatReadingCopy1Service {
      * @param page        分页参数
      * @return 分页结果
      */
-    Page<PrHeatReadingCopy1Vo> pageHeatReadingList(String companyId, String orgId, String buildingId,
+    Page<PrHeatReadingCopy1Vo> pageHeatReadingList(String orgId, String buildingId,
                                                     String unitCode, String meterArcCode, String search, Page<?> page);
 }

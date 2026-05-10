@@ -156,9 +156,6 @@ public class PrImportBasicData {
     private String otherCode;
 
     @ExcelIgnore
-    private String companyId;
-
-    @ExcelIgnore
     private String createBy;
 
     @ExcelIgnore

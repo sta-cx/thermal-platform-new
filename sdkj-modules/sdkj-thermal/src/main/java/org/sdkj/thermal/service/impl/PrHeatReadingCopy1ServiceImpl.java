@@ -42,11 +42,11 @@ public class PrHeatReadingCopy1ServiceImpl implements IPrHeatReadingCopy1Service
     }
 
     @Override
-    public Page<PrHeatReadingCopy1Vo> pageHeatReadingList(String companyId, String orgId, String buildingId,
+    public Page<PrHeatReadingCopy1Vo> pageHeatReadingList(String orgId, String buildingId,
                                                            String unitCode, String meterArcCode, String search,
                                                            Page<?> page) {
         // 旧系统使用 MyBatis-Plus 自动分页，此处保持一致
-        return baseMapper.selectPageHeatReadingList(page, companyId, orgId, buildingId,
+        return baseMapper.selectPageHeatReadingList(page, orgId, buildingId,
             unitCode, meterArcCode, search);
     }
 }

@@ -106,27 +106,27 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
     }
 
     @Override
-    public List<PrStandardVo> findEleStandard(String companyId, String orgId) {
-        return baseMapper.selectEleStandard(companyId, orgId);
+    public List<PrStandardVo> findEleStandard(String orgId) {
+        return baseMapper.selectEleStandard(orgId);
     }
 
     @Override
-    public List<PrStandardVo> findWaterStandard(String companyId, String orgId) {
-        return baseMapper.selectWaterStandard(companyId, orgId);
+    public List<PrStandardVo> findWaterStandard(String orgId) {
+        return baseMapper.selectWaterStandard(orgId);
     }
 
     @Override
-    public List<PrStandardVo> findHeatStandard(String companyId, String orgId) {
-        return baseMapper.selectHeatStandard(companyId, orgId);
+    public List<PrStandardVo> findHeatStandard(String orgId) {
+        return baseMapper.selectHeatStandard(orgId);
     }
 
     @Override
-    public boolean isName(String companyId, String orgId, String itemGroup, String name, String id) {
-        return baseMapper.checkName(companyId, orgId, itemGroup, name, id).isEmpty();
+    public boolean isName(String orgId, String itemGroup, String name, String id) {
+        return baseMapper.checkName(orgId, itemGroup, name, id).isEmpty();
     }
 
     @Override
-    public PurchaseCheckResult checkPurchase(String meterId, String standardId, String companyId, String orgId, BigDecimal amount) {
+    public PurchaseCheckResult checkPurchase(String meterId, String standardId, String orgId, BigDecimal amount) {
         PrStandard standard = getById(standardId);
         if (standard == null) {
             return new PurchaseCheckResult(false, null);
@@ -146,11 +146,11 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
 
         // 按月
         if ("1".equals(standard.getLimitedType())) {
-            int num = baseMapper.getPurchaseNumMonth(meterId, companyId, orgId);
+            int num = baseMapper.getPurchaseNumMonth(meterId, orgId);
             if (num >= standard.getLimitedTimes()) {
                 return new PurchaseCheckResult(true, "超出限购次数，本月不可再次购买！");
             }
-            BigDecimal usedAmount = baseMapper.getPurchaseAmountMonth(meterId, companyId, orgId);
+            BigDecimal usedAmount = baseMapper.getPurchaseAmountMonth(meterId, orgId);
             BigDecimal remaining = standard.getLimitedMoney().subtract(usedAmount).setScale(2, RoundingMode.HALF_UP);
             if (amount.compareTo(remaining) > 0) {
                 return new PurchaseCheckResult(true, "超出限购金额，本月还可购买" + remaining + "元。");
@@ -158,11 +158,11 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
         }
         // 按季度
         else if ("2".equals(standard.getLimitedType())) {
-            int num = baseMapper.getPurchaseNumQuarter(meterId, companyId, orgId);
+            int num = baseMapper.getPurchaseNumQuarter(meterId, orgId);
             if (num >= standard.getLimitedTimes()) {
                 return new PurchaseCheckResult(true, "超出限购次数，本季度不可再次购买！");
             }
-            BigDecimal usedAmount = baseMapper.getPurchaseAmountQuarter(meterId, companyId, orgId);
+            BigDecimal usedAmount = baseMapper.getPurchaseAmountQuarter(meterId, orgId);
             BigDecimal remaining = standard.getLimitedMoney().subtract(usedAmount).setScale(2, RoundingMode.HALF_UP);
             if (amount.compareTo(remaining) > 0) {
                 return new PurchaseCheckResult(true, "超出限购金额，本季度还可购买" + remaining + "元。");
@@ -170,11 +170,11 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
         }
         // 按年
         else if ("3".equals(standard.getLimitedType())) {
-            int num = baseMapper.getPurchaseNumYear(meterId, companyId, orgId);
+            int num = baseMapper.getPurchaseNumYear(meterId, orgId);
             if (num >= standard.getLimitedTimes()) {
                 return new PurchaseCheckResult(true, "超出限购次数，本年度不可再次购买！");
             }
-            BigDecimal usedAmount = baseMapper.getPurchaseAmountYear(meterId, companyId, orgId);
+            BigDecimal usedAmount = baseMapper.getPurchaseAmountYear(meterId, orgId);
             BigDecimal remaining = standard.getLimitedMoney().subtract(usedAmount).setScale(2, RoundingMode.HALF_UP);
             if (amount.compareTo(remaining) > 0) {
                 return new PurchaseCheckResult(true, "超出限购金额，本年度还可购买" + remaining + "元。");
@@ -185,8 +185,8 @@ public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStand
     }
 
     @Override
-    public PrExpenseItem getExpenseItemByStandardId(String companyId, String orgId, String standardId) {
-        return baseMapper.selectExpenseItemByStandardId(companyId, orgId, standardId);
+    public PrExpenseItem getExpenseItemByStandardId(String orgId, String standardId) {
+        return baseMapper.selectExpenseItemByStandardId(orgId, standardId);
     }
 
     @Override

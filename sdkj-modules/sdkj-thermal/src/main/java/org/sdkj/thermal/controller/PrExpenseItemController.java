@@ -95,12 +95,10 @@ public class PrExpenseItemController extends BaseController {
     @SaCheckPermission("thermal:property:expenseItem:list")
     @SaCheckLogin
     @GetMapping("/by-code")
-    public R<List<PrExpenseItemVo>> getByItemCode(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrExpenseItemVo>> getByItemCode(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String itemGroup,
             @RequestParam(required = false) String itemCode) {
-        return R.ok(expenseItemService.selectByItemCode(companyId, orgId, itemGroup, itemCode));
+        return R.ok(expenseItemService.selectByItemCode(orgId, itemGroup, itemCode));
     }
 
     /**
@@ -111,12 +109,10 @@ public class PrExpenseItemController extends BaseController {
     @SaCheckPermission("thermal:property:expenseItem:list")
     @SaCheckLogin
     @GetMapping("/by-group")
-    public R<List<PrExpenseItemVo>> getByItemGroup(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrExpenseItemVo>> getByItemGroup(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String itemGroup,
             @RequestParam(required = false) String userId) {
-        return R.ok(expenseItemService.selectByItemGroup(companyId, orgId, itemGroup, userId));
+        return R.ok(expenseItemService.selectByItemGroup(orgId, itemGroup, userId));
     }
 
     /**
@@ -127,11 +123,9 @@ public class PrExpenseItemController extends BaseController {
     @SaCheckPermission("thermal:property:expenseItem:list")
     @SaCheckLogin
     @GetMapping("/codes")
-    public R<List<PrExpenseItemVo>> getItemCodes(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrExpenseItemVo>> getItemCodes(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String itemGroup) {
-        return R.ok(expenseItemService.getItemCodesByItemGroup(companyId, orgId, itemGroup));
+        return R.ok(expenseItemService.getItemCodesByItemGroup(orgId, itemGroup));
     }
 
     /**
@@ -142,10 +136,8 @@ public class PrExpenseItemController extends BaseController {
     @SaCheckPermission("thermal:property:expenseItem:list")
     @SaCheckLogin
     @GetMapping("/by-org")
-    public R<List<PrExpenseItemVo>> getByOrg(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId) {
-        return R.ok(expenseItemService.selectByCompanyAndOrg(companyId, orgId));
+    public R<List<PrExpenseItemVo>> getByOrg(@RequestParam(required = false) String orgId) {
+        return R.ok(expenseItemService.selectByCompanyAndOrg(orgId));
     }
 
     /**
@@ -171,11 +163,9 @@ public class PrExpenseItemController extends BaseController {
     @SaCheckPermission("thermal:property:expenseItem:query")
     @SaCheckLogin
     @GetMapping("/check-name")
-    public R<Boolean> checkName(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<Boolean> checkName(@RequestParam(required = false) String orgId,
             @RequestParam String itemName,
             @RequestParam(required = false) String id) {
-        return R.ok(expenseItemService.isItemName(companyId, orgId, itemName, id));
+        return R.ok(expenseItemService.isItemName(orgId, itemName, id));
     }
 }

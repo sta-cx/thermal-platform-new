@@ -98,8 +98,6 @@ public class PrApprovalSub extends BaseEntity {
     /** 物料用途 */
     private String materialUse;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 小区ID */
     private String orgId;

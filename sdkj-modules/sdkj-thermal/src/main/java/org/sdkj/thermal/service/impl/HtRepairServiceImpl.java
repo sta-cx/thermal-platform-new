@@ -34,8 +34,8 @@ public class HtRepairServiceImpl extends ServiceImpl<HtRepairMapper, HtRepair> i
     }
 
     @Override
-    public List<Map<String, Object>> selectTypeCount(String companyId) {
-        return baseMapper.selectTypeCount(companyId);
+    public List<Map<String, Object>> selectTypeCount() {
+        return baseMapper.selectTypeCount();
     }
 
     @Override
@@ -44,8 +44,8 @@ public class HtRepairServiceImpl extends ServiceImpl<HtRepairMapper, HtRepair> i
     }
 
     @Override
-    public int markAsDeleted(String repairNo, String companyId) {
-        return baseMapper.markAsDeleted(repairNo, companyId);
+    public int markAsDeleted(String repairNo) {
+        return baseMapper.markAsDeleted(repairNo);
     }
 
     @Override

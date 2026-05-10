@@ -25,14 +25,13 @@ public interface IPrHeatDtuArchiveService extends IService<PrHeatDtuArchive> {
 
     /**
      * 分页查询DTU采集器配表列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param search 搜索关键字（DTU编号）
      * @param status 状态
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<PrHeatDtuArchiveVo> selectPageList(String companyId, String orgId, String search,
+    TableDataInfo<PrHeatDtuArchiveVo> selectPageList(String orgId, String search,
                                                       String status, PageQuery pageQuery);
 
     /**
@@ -46,11 +45,10 @@ public interface IPrHeatDtuArchiveService extends IService<PrHeatDtuArchive> {
 
     /**
      * 查询全部DTU档案信息（用于导出）
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return DTU档案列表
      */
-    List<PrHeatDtuArchiveVo> listAll(String companyId, String orgId);
+    List<PrHeatDtuArchiveVo> listAll(String orgId);
 
     /**
      * 导入DTU采集器配表

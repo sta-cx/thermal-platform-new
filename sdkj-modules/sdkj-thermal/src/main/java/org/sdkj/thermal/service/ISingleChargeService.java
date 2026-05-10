@@ -13,12 +13,12 @@ public interface ISingleChargeService {
     /**
      * 根据手机号或房号获取房屋列表
      */
-    List<?> getHouse(String search, String companyId, String orgId, String buildingId);
+    List<?> getHouse(String search, String orgId, String buildingId);
 
     /**
      * 根据房间号获取房屋
      */
-    List<?> getHouseRoomId(String search, String companyId, String orgId, String buildingId, String unitCode, String roomNum);
+    List<?> getHouseRoomId(String search, String orgId, String buildingId, String unitCode, String roomNum);
 
     /**
      * 根据房屋ID查询费用明细

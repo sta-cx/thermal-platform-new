@@ -42,13 +42,11 @@ public class PrHeatDtuArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:dtuArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrHeatDtuArchiveVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHeatDtuArchiveVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
             PageQuery pageQuery) {
-        return dtuArchiveService.selectPageList(companyId, orgId, search, status, pageQuery);
+        return dtuArchiveService.selectPageList(orgId, search, status, pageQuery);
     }
 
     /**
@@ -119,9 +117,8 @@ public class PrHeatDtuArchiveController extends BaseController {
     @Log(title = "DTU采集器配表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public void exportAll(HttpServletResponse response,
-                           @RequestParam(required = false) String companyId,
                            @RequestParam(required = false) String orgId) throws IOException {
-        List<PrHeatDtuArchiveVo> list = dtuArchiveService.listAll(companyId, orgId);
+        List<PrHeatDtuArchiveVo> list = dtuArchiveService.listAll(orgId);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("DTU采集器配表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");

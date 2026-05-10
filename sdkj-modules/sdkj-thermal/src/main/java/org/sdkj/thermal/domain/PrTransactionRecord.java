@@ -52,8 +52,6 @@ public class PrTransactionRecord extends BaseEntity {
     /** 机构ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 费用分组 */
     private String itemGroup;

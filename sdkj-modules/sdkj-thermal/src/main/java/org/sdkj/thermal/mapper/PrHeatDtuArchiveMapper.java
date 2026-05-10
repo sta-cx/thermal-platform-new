@@ -14,45 +14,41 @@ public interface PrHeatDtuArchiveMapper extends BaseMapperPlus<PrHeatDtuArchive,
 
     /**
      * 生成阀门查询指令
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param dtuNum DTU编号
      * @param createBy 创建人
      * @return 是否成功
      */
-    boolean setTasksPerformValve(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    boolean setTasksPerformValve(@Param("orgId") String orgId,
                                   @Param("dtuNum") String dtuNum, @Param("createBy") String createBy);
 
     /**
      * 生成单元阀门查询指令
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param dtuNum DTU编号
      * @param createBy 创建人
      * @return 是否成功
      */
-    boolean setTasksPerformUnitValve(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    boolean setTasksPerformUnitValve(@Param("orgId") String orgId,
                                       @Param("dtuNum") String dtuNum, @Param("createBy") String createBy);
 
     /**
      * 生成热表查询指令
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param dtuNum DTU编号
      * @param createBy 创建人
      * @return 是否成功
      */
-    boolean setTasksPerformHot(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    boolean setTasksPerformHot(@Param("orgId") String orgId,
                                 @Param("dtuNum") String dtuNum, @Param("createBy") String createBy);
 
     /**
      * 生成单元热表查询指令
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param dtuNum DTU编号
      * @param createBy 创建人
      * @return 是否成功
      */
-    boolean setTasksPerformUnitHot(@Param("companyId") String companyId, @Param("orgId") String orgId,
+    boolean setTasksPerformUnitHot(@Param("orgId") String orgId,
                                     @Param("dtuNum") String dtuNum, @Param("createBy") String createBy);
 }

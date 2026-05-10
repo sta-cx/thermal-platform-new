@@ -94,8 +94,6 @@ public class PrUser extends BaseEntity {
     /** 小区id */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 排序 */
     private String seq;

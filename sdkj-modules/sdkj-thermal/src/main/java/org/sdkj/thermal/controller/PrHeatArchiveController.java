@@ -43,15 +43,13 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrHeatArchiveVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHeatArchiveVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String archiveId,
             PageQuery pageQuery) {
-        return heatArchiveService.selectPageList(companyId, orgId, buildingId, unitCode, search, archiveId, pageQuery);
+        return heatArchiveService.selectPageList(orgId, buildingId, unitCode, search, archiveId, pageQuery);
     }
 
     /**
@@ -131,8 +129,8 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @GetMapping("/queryCompanyHeat")
-    public R<List<PrHeatArchiveVo>> queryCompanyHeat(@RequestParam String companyId) {
-        return R.ok(heatArchiveService.queryCompanyHeat(companyId));
+    public R<List<PrHeatArchiveVo>> queryCompanyHeat() {
+        return R.ok(heatArchiveService.queryCompanyHeat());
     }
 
     /**
@@ -225,12 +223,11 @@ public class PrHeatArchiveController extends BaseController {
             @RequestParam(required = false) Integer scale,
             @RequestParam String adjust,
             @RequestParam String orgId,
-            @RequestParam String companyId,
             @RequestParam(required = false) String intervall,
             @RequestParam(required = false) String unit,
             @RequestParam(required = false) String duration) {
         return toAjax(heatArchiveService.manualControl(prHeatVoList, switch1, scale, adjust,
-                orgId, companyId, intervall, unit, duration));
+                orgId, intervall, unit, duration));
     }
 
     /**
@@ -241,14 +238,12 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @PostMapping("/realTimeData")
-    public TableDataInfo<PrHeatArchiveVo> realTimeData(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHeatArchiveVo> realTimeData(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search,
             PageQuery pageQuery) {
-        return heatArchiveService.realTimeData(companyId, orgId, buildingId, unitCode, search, pageQuery);
+        return heatArchiveService.realTimeData(orgId, buildingId, unitCode, search, pageQuery);
     }
 
     /**
@@ -259,16 +254,14 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @PostMapping("/zonghe")
-    public TableDataInfo<PrHeatArchiveVo> zonghe(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHeatArchiveVo> zonghe(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String moneyType,
             @RequestParam(required = false) String valveStatus,
             PageQuery pageQuery) {
-        return heatArchiveService.zonghe(companyId, orgId, buildingId, unitCode, search, moneyType, valveStatus, pageQuery);
+        return heatArchiveService.zonghe(orgId, buildingId, unitCode, search, moneyType, valveStatus, pageQuery);
     }
 
     /**
@@ -281,9 +274,8 @@ public class PrHeatArchiveController extends BaseController {
     @Log(title = "房屋热表配表-巡测", businessType = BusinessType.UPDATE)
     @PostMapping("/xunce")
     public R<Void> xunce(@RequestBody List<PrHeatVo> prHeatVoList,
-                         @RequestParam String orgId,
-                         @RequestParam String companyId) {
-        return toAjax(heatArchiveService.xunce(prHeatVoList, orgId, companyId));
+                         @RequestParam String orgId) {
+        return toAjax(heatArchiveService.xunce(prHeatVoList, orgId));
     }
 
     /**
@@ -297,9 +289,8 @@ public class PrHeatArchiveController extends BaseController {
     @PostMapping("/setValveGroupParam")
     public R<Void> setValveGroupParam(@RequestBody List<PrHeatVo> prHeatVoList,
                                       @RequestParam String commandParam,
-                                      @RequestParam String orgId,
-                                      @RequestParam String companyId) {
-        return toAjax(heatArchiveService.setValveGroupParam(prHeatVoList, commandParam, orgId, companyId));
+                                      @RequestParam String orgId) {
+        return toAjax(heatArchiveService.setValveGroupParam(prHeatVoList, commandParam, orgId));
     }
 
     /**
@@ -310,9 +301,8 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @GetMapping("/findMeter")
-    public R<List<PrHeatArchiveVo>> findMeter(@RequestParam String search,
-                                              @RequestParam String companyId) {
-        return R.ok(heatArchiveService.findMeter(search, companyId));
+    public R<List<PrHeatArchiveVo>> findMeter(@RequestParam String search) {
+        return R.ok(heatArchiveService.findMeter(search));
     }
 
     /**
@@ -324,9 +314,8 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckLogin
     @Log(title = "房屋热表配表", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public R<List<PrHeatArchiveVo>> exportAll(@RequestParam(required = false) String companyId,
-                                              @RequestParam(required = false) String orgId) {
-        return R.ok(heatArchiveService.exportAll(companyId, orgId));
+    public R<List<PrHeatArchiveVo>> exportAll(@RequestParam(required = false) String orgId) {
+        return R.ok(heatArchiveService.exportAll(orgId));
     }
 
     /**
@@ -337,15 +326,13 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @PostMapping("/selectReport")
-    public R<List<PrHeatArchiveVo>> selectReport(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrHeatArchiveVo>> selectReport(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String search) {
-        return R.ok(heatArchiveService.selectReport(companyId, orgId, buildingId, unitCode, startTime, endTime, search));
+        return R.ok(heatArchiveService.selectReport(orgId, buildingId, unitCode, startTime, endTime, search));
     }
 
     /**
@@ -356,14 +343,12 @@ public class PrHeatArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @PostMapping("/selectMeterReport")
-    public R<List<PrHeatArchiveVo>> selectMeterReport(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrHeatArchiveVo>> selectMeterReport(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String startTime,
             @RequestParam(required = false) String endTime,
             @RequestParam(required = false) String search) {
-        return R.ok(heatArchiveService.selectMeterReport(companyId, orgId, buildingId, unitCode, startTime, endTime, search));
+        return R.ok(heatArchiveService.selectMeterReport(orgId, buildingId, unitCode, startTime, endTime, search));
     }
 }

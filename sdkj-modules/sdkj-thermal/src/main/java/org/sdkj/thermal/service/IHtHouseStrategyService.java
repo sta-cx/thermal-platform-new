@@ -22,7 +22,7 @@ public interface IHtHouseStrategyService extends IService<HtHouseStrategy> {
     /**
      * 批量插入房屋策略绑定
      */
-    boolean insertBatch(List<HtHouseStrategy> list, String orgId, String companyId);
+    boolean insertBatch(List<HtHouseStrategy> list, String orgId);
 
     /**
      * 批量更新房屋策略绑定

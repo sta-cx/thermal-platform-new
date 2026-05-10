@@ -29,12 +29,11 @@ public class PrHeatReadingServiceImpl extends ServiceImpl<PrHeatReadingMapper, P
     }
 
     @Override
-    public TableDataInfo<PrHeatReadingVo> selectPageList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatReadingVo> selectPageList(String orgId, String buildingId,
                                                           String unitCode, String meterArcCode, String search,
                                                           String startTime, String endTime, String type,
                                                           String valveType, String parentId, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatReading> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatReading::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatReading::getOrgId, orgId);
         lqw.eq(StringUtils.isNotBlank(meterArcCode), PrHeatReading::getMeterArcCode, meterArcCode);
         if (StringUtils.isNotBlank(search)) {
@@ -49,10 +48,9 @@ public class PrHeatReadingServiceImpl extends ServiceImpl<PrHeatReadingMapper, P
     }
 
     @Override
-    public TableDataInfo<PrHeatReadingVo> selectPageListTrend(String companyId, String orgId, String startTime,
+    public TableDataInfo<PrHeatReadingVo> selectPageListTrend(String orgId, String startTime,
                                                                String endTime, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatReading> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatReading::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatReading::getOrgId, orgId);
         lqw.ge(StringUtils.isNotBlank(startTime), PrHeatReading::getReadTime, startTime);
         lqw.le(StringUtils.isNotBlank(endTime), PrHeatReading::getReadTime, endTime);
@@ -63,13 +61,13 @@ public class PrHeatReadingServiceImpl extends ServiceImpl<PrHeatReadingMapper, P
 
     @Override
     public List<PrHeatReadingVo> selectTrendList(List<String> meterNums, String startTime, String endTime,
-                                                  String companyId, String status, String orgId, String parentId) {
-        return baseMapper.selectTrendList(meterNums, startTime, endTime, companyId, status, orgId, parentId);
+                                                  String status, String orgId, String parentId) {
+        return baseMapper.selectTrendList(meterNums, startTime, endTime, status, orgId, parentId);
     }
 
     @Override
-    public List<PrHeatReadingVo> selectHomeTrendList(String stationId, String stationPartitionId, String companyId) {
-        return baseMapper.selectHomeTrendList(stationId, stationPartitionId, companyId);
+    public List<PrHeatReadingVo> selectHomeTrendList(String stationId, String stationPartitionId) {
+        return baseMapper.selectHomeTrendList(stationId, stationPartitionId);
     }
 
     @Override

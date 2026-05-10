@@ -239,7 +239,6 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                 record.setChanNum(row.get("chan_num") != null ? row.get("chan_num").toString() : null);
                 record.setMeterArcCode(row.get("meter_arc_code") != null ? row.get("meter_arc_code").toString() : null);
                 record.setOrgId(row.get("org_id") != null ? row.get("org_id").toString() : null);
-                record.setCompanyId(row.get("company_id") != null ? row.get("company_id").toString() : null);
                 record.setStatus(0);
                 record.setInstructionStatus(0);
                 record.setSendTime(now);
@@ -305,10 +304,9 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     }
 
     @Override
-    public TableDataInfo<HtTasksVo> selectDeviceList(String orgId, String companyId, String deviceType, PageQuery pageQuery) {
+    public TableDataInfo<HtTasksVo> selectDeviceList(String orgId, String deviceType, PageQuery pageQuery) {
         LambdaQueryWrapper<HtTasks> lqw = new LambdaQueryWrapper<>();
         lqw.eq(orgId != null && !orgId.isEmpty(), HtTasks::getOrgId, orgId);
-        lqw.eq(companyId != null && !companyId.isEmpty(), HtTasks::getCompanyId, companyId);
         lqw.orderByDesc(HtTasks::getCreateTime);
         Page<HtTasksVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -436,7 +434,6 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                     htTasksPerform.setUnit(htStrategyPerform.getUnit());
                     htTasksPerform.setDuration(htStrategyPerform.getDuration());
                     htTasksPerform.setOrgId(htScopeDtu.getOrgId());
-                    htTasksPerform.setCompanyId(htScopeDtu.getCompanyId());
                     htTasksPerform.setConcentratorCode(htScopeDtu.getConcentratorCode());
                     htTasksPerform.setMeterNum("AAAAAAAAAAAAAAAA");
                     htTasksPerform.setMeterArcCode(htScopeDtu.getMeterArcCode());

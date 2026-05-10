@@ -734,7 +734,7 @@
     <insert id="insertList">
         INSERT INTO ht_tasks_perform (
             id, instruction_id, instruction_type, instruction, number, intervall, unit, duration,
-            org_id, company_id, concentrator_code, tele_product_id, tele_api_key, tele_app_key,
+            org_id, concentrator_code, tele_product_id, tele_api_key, tele_app_key,
             device_id, meter_num, meter_id, meter_arc_code, status, instruction_status, send_time,
             tasks_id, group_id, strategy_id, command_index, fore_start, orderr, create_time, create_by,
             in_temp, out_temp, room_temp, valve_open, imei, dtu_num, chan_num, out_temp_pj, cur_flow_compute, group_data
@@ -743,7 +743,7 @@
         <foreach collection="list" item="item" index="index" separator=",">
             (#{item.id}, #{item.instructionId}, #{item.instructionType}, #{item.instruction},
              #{item.number}, #{item.intervall}, #{item.unit}, #{item.duration}, #{item.orgId},
-             #{item.companyId}, #{item.concentratorCode}, #{item.teleProductId}, #{item.teleApiKey}, #{item.teleAppKey},
+             #{item.concentratorCode}, #{item.teleProductId}, #{item.teleApiKey}, #{item.teleAppKey},
              #{item.deviceId}, #{item.meterNum}, #{item.meterId}, #{item.meterArcCode}, #{item.status},
              #{item.instructionStatus}, #{item.sendTime}, #{item.tasksId}, #{item.groupId}, #{item.strategyId},
              #{item.commandIndex}, #{item.foreStart}, #{item.orderr}, #{item.createTime}, #{item.createBy},
@@ -880,7 +880,7 @@
     </update>
 
     <insert id="inserHtAlert">
-        INSERT INTO ht_alert (id, meter_id, is_charged, alert_type, alert_time, org_id, company_id,
+        INSERT INTO ht_alert (id, meter_id, is_charged, alert_type, alert_time, org_id,
                              valve, in_temp, out_temp, room_temp, create_time)
         SELECT CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
                a.id,
@@ -888,7 +888,6 @@
                #{valveStatus},
                NOW(),
                a.org_id,
-               a.company_id,
                a.actual_status,
                c.in_temp,
                c.out_temp,
@@ -900,14 +899,13 @@
     </insert>
 
     <insert id="inserHtAlertUnit">
-        INSERT INTO ht_alert (id, meter_id, alert_type, alert_time, org_id, company_id, valve,
+        INSERT INTO ht_alert (id, meter_id, alert_type, alert_time, org_id, valve,
                              in_temp, out_temp, room_temp, create_time)
         SELECT CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
                a.id,
                a.actual_status,
                NOW(),
                a.org_id,
-               a.company_id,
                #{valveStatus},
                a.in_temperature,
                a.out_temperature,
@@ -1045,7 +1043,7 @@
     <insert id="insertValveOCLog">
         INSERT INTO pr_use_valve_log (
             id, type, meter_num, content, room_num, other_code, org_name, building_name, building_id,
-            unit_code, house_id, pay_status, user_name, phone, org_id, company_id, create_by, create_by_name, create_time
+            unit_code, house_id, pay_status, user_name, phone, org_id, create_by, create_by_name, create_time
         )
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
@@ -1071,7 +1069,6 @@
                        uh.user_name,
                        uh.phone,
                        #{item.orgId},
-                       #{item.companyId},
                        #{item.createBy},
                        su.user_name,
                        NOW()
@@ -1087,13 +1084,12 @@
 
     <select id="selectValveInfo" resultType="java.lang.Object">
         SELECT b.id, b.org_name, b.org_id, b.building_name, b.building_id, b.unit_code, b.room_num,
-               b.company_id, b.other_code, b.pay_status, b.update_time, c.user_name, c.phone,
+               b.other_code, b.pay_status, b.update_time, c.user_name, c.phone,
                a.meter_num, a.valve_status, a.meter_arc_code, a.meter_arc_name, a.update_time AS 'meterUpdateTime'
         FROM pr_heat_valve_archive a
                  INNER JOIN pr_house b ON b.id = a.house_id
                  LEFT JOIN pr_user_house c ON c.house_id = a.house_id
-        WHERE a.company_id = #{companyId}
-          AND a.id IN
+        WHERE a.id IN
         <foreach collection="list" item="meterId" index="index" separator="," open="(" close=")">
             #{meterId}
         </foreach>
@@ -1103,8 +1099,7 @@
         SELECT a.*, b.name AS 'meterInfo'
         FROM ht_tasks_perform a
                  LEFT JOIN mt_tc_valve b ON b.code = a.meter_arc_code
-        WHERE a.company_id = #{companyId}
-          AND a.status = '0'
+        WHERE a.status = '0'
     </select>
 
     <!-- 查询最新的任务执行记录 -->

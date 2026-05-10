@@ -540,7 +540,7 @@ public class ControlReturnApiController {
             }
 
             PrOptionsHeat optionsHeat = prOptionsHeatService.getDataById(
-                archive.getOrgId(), archive.getCompanyId(), "2");
+                archive.getOrgId(), "2");
             if (optionsHeat == null || optionsHeat.getIsAbnormalEnable() == null
                 || optionsHeat.getIsAbnormalEnable() != 1) {
                 return;

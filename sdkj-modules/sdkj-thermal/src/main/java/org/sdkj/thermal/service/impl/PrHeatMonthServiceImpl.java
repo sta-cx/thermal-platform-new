@@ -38,11 +38,10 @@ public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHea
     }
 
     @Override
-    public TableDataInfo<PrHeatMonthVo> selectPageList(String companyId, String orgId, String buildingId,
+    public TableDataInfo<PrHeatMonthVo> selectPageList(String orgId, String buildingId,
                                                         String unitCode, String search, String isCharged,
                                                         String startTime, String endTime, PageQuery pageQuery) {
         LambdaQueryWrapper<PrHeatMonth> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHeatMonth::getCompanyId, companyId);
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatMonth::getOrgId, orgId);
         if (StringUtils.isNotBlank(search)) {
             lqw.and(w -> w.like(PrHeatMonth::getMeterNum, search.trim())
@@ -76,20 +75,20 @@ public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHea
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean generateHeatMonth(String companyId, String orgId) {
+    public boolean generateHeatMonth(String orgId) {
         // TODO: Implement monthly heat report generation (5-step flow from old system)
         // 1. insertPrHeatMonth - Insert monthly records
         // 2. updateStartReading - Update start reading
         // 3. updateQty - Update quantity
         // 4. setFee - Calculate fees
         // 5. updateArrearage - Update arrearage status
-        log.warn("generateHeatMonth not yet implemented for companyId={}, orgId={}", companyId, orgId);
+        log.warn("generateHeatMonth not yet implemented for orgId={}", orgId);
         return false;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public String setHeat(String companyId, String orgId, Boolean force) {
+    public String setHeat(String orgId, Boolean force) {
         // 1. 确定生成月份: 默认上月, force=true时当月
         Calendar cal = Calendar.getInstance();
         if (!Boolean.TRUE.equals(force)) {
@@ -99,14 +98,13 @@ public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHea
         int month = cal.get(Calendar.MONTH) + 1;
         String recordYm = String.format("%04d%02d", year, month);
 
-        log.info("开始生成月表数据: year={}, month={}, recordYm={}, companyId={}, orgId={}, force={}",
-            year, month, recordYm, companyId, orgId, force);
+        log.info("开始生成月表数据: year={}, month={}, recordYm={}, orgId={}, force={}",
+            year, month, recordYm, orgId, force);
 
         // 2. 检查是否已生成
         long exists = baseMapper.selectCount(
             new LambdaQueryWrapper<PrHeatMonth>()
                 .eq(PrHeatMonth::getRecordYm, recordYm)
-                .eq(PrHeatMonth::getCompanyId, companyId)
                 .eq(PrHeatMonth::getOrgId, orgId));
 
         if (exists > 0 && !Boolean.TRUE.equals(force)) {
@@ -116,7 +114,7 @@ public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHea
         }
 
         // 3. 从日表汇总
-        List<PrHeatMonth> monthList = prHeatDailyMapper.aggregateToMonth(year, month, companyId, orgId);
+        List<PrHeatMonth> monthList = prHeatDailyMapper.aggregateToMonth(year, month, orgId);
 
         if (monthList.isEmpty()) {
             String msg = String.format("未找到 %s 的日表数据，请先生成日表", recordYm);
@@ -129,7 +127,6 @@ public class PrHeatMonthServiceImpl extends ServiceImpl<PrHeatMonthMapper, PrHea
             baseMapper.delete(
                 new LambdaQueryWrapper<PrHeatMonth>()
                     .eq(PrHeatMonth::getRecordYm, recordYm)
-                    .eq(PrHeatMonth::getCompanyId, companyId)
                     .eq(PrHeatMonth::getOrgId, orgId));
             log.info("已删除 {} 条旧月表数据", exists);
         }

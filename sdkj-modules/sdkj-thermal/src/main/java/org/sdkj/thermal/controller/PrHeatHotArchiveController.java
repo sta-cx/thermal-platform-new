@@ -43,15 +43,13 @@ public class PrHeatHotArchiveController extends BaseController {
     @SaCheckPermission("thermal:ht:heatArchive:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrHeatHotArchiveVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHeatHotArchiveVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unit,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String parentId,
             PageQuery pageQuery) {
-        return hotArchiveService.selectPageList(companyId, orgId, buildingId, unit, search, parentId, pageQuery);
+        return hotArchiveService.selectPageList(orgId, buildingId, unit, search, parentId, pageQuery);
     }
 
     /**
@@ -158,9 +156,8 @@ public class PrHeatHotArchiveController extends BaseController {
     @Log(title = "房屋热量表配表-同步采集平台", businessType = BusinessType.UPDATE)
     @PostMapping("/sync")
     public R<Boolean> valveInformationSynchronization(
-            @RequestParam String orgId,
-            @RequestParam String companyId) {
-        boolean result = hotArchiveService.valveInformationSynchronization(orgId, companyId);
+            @RequestParam String orgId) {
+        boolean result = hotArchiveService.valveInformationSynchronization(orgId);
         return result ? R.ok(true) : R.fail("同步失败，请检查采集平台配置");
     }
 
@@ -174,9 +171,8 @@ public class PrHeatHotArchiveController extends BaseController {
     @Log(title = "房屋热量表配表-同步信息下载", businessType = BusinessType.EXPORT)
     @GetMapping("/sync-download")
     public void downloadInfoSync(HttpServletResponse response,
-                                  @RequestParam String companyId,
                                   @RequestParam String orgId) throws IOException {
-        List<PrHeatHotArchiveVo> list = hotArchiveService.listSyncData(companyId, orgId);
+        List<PrHeatHotArchiveVo> list = hotArchiveService.listSyncData(orgId);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("户热同步信息", StandardCharsets.UTF_8).replaceAll("\\+", "%20");
@@ -194,9 +190,8 @@ public class PrHeatHotArchiveController extends BaseController {
     @Log(title = "房屋热量表配表-导出", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public void exportAll(HttpServletResponse response,
-                           @RequestParam(required = false) String companyId,
                            @RequestParam(required = false) String orgId) throws IOException {
-        List<PrHeatHotArchiveVo> list = hotArchiveService.listAll(companyId, orgId);
+        List<PrHeatHotArchiveVo> list = hotArchiveService.listAll(orgId);
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setCharacterEncoding("utf-8");
         String fileName = URLEncoder.encode("热量表配表", StandardCharsets.UTF_8).replaceAll("\\+", "%20");

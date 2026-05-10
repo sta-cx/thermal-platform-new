@@ -7,7 +7,5 @@ import java.util.List;
 
 public interface IPrHeatStationPartitionService extends IService<PrHeatStationPartition> {
 
-    List<PrHeatStationPartition> selectByCompanyId(String companyId);
-
     List<PrHeatStationPartition> selectByStationId(String stationId);
 }

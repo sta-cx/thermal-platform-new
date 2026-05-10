@@ -53,8 +53,6 @@ public class PrHeatDtuArchive extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     // ========== 非数据库字段 ==========
 

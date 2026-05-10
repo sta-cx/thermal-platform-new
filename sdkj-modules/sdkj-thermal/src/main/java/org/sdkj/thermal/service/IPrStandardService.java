@@ -50,33 +50,33 @@ public interface IPrStandardService extends IService<PrStandard> {
     /**
      * 查询电表收费标准
      */
-    List<PrStandardVo> findEleStandard(String companyId, String orgId);
+    List<PrStandardVo> findEleStandard(String orgId);
 
     /**
      * 查询水表收费标准
      */
-    List<PrStandardVo> findWaterStandard(String companyId, String orgId);
+    List<PrStandardVo> findWaterStandard(String orgId);
 
     /**
      * 查询热力收费标准
      */
-    List<PrStandardVo> findHeatStandard(String companyId, String orgId);
+    List<PrStandardVo> findHeatStandard(String orgId);
 
     /**
      * 检查标准名称是否重复
      */
-    boolean isName(String companyId, String orgId, String itemGroup, String name, String id);
+    boolean isName(String orgId, String itemGroup, String name, String id);
 
     /**
      * 购买限额校验
      * @return true=超出限额，data中有msg；false=未超出
      */
-    PurchaseCheckResult checkPurchase(String meterId, String standardId, String companyId, String orgId, BigDecimal amount);
+    PurchaseCheckResult checkPurchase(String meterId, String standardId, String orgId, BigDecimal amount);
 
     /**
      * 根据标准 ID 查询关联的费用项目
      */
-    PrExpenseItem getExpenseItemByStandardId(String companyId, String orgId, String standardId);
+    PrExpenseItem getExpenseItemByStandardId(String orgId, String standardId);
 
     /**
      * 按项目名称分页查询收费标准

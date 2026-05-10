@@ -22,6 +22,5 @@ public class PrHeatStation extends BaseEntity {
     private String address;
     private String seq;
     private String orgId;
-    private String companyId;
     private String companyName;
 }

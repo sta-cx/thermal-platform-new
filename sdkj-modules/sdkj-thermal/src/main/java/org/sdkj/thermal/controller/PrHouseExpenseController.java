@@ -52,16 +52,14 @@ public class PrHouseExpenseController extends BaseController {
     @SaCheckPermission("thermal:property:houseExpense:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrHouseExpenseVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHouseExpenseVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String itemGroup,
             @RequestParam(required = false) String itemCode,
             @RequestParam(required = false) String search,
             PageQuery pageQuery) {
-        return houseExpenseService.selectPageList(companyId, orgId, buildingId, unitCode, itemGroup, itemCode, search, pageQuery);
+        return houseExpenseService.selectPageList(orgId, buildingId, unitCode, itemGroup, itemCode, search, pageQuery);
     }
 
     /**
@@ -108,10 +106,9 @@ public class PrHouseExpenseController extends BaseController {
     public R<Void> batchInsert(@RequestBody List<PrHouseExpenseBo> boList,
                                @RequestParam(required = false) String itemGroup,
                                @RequestParam(required = false) String itemCode,
-                               @RequestParam(required = false) String orgId,
-                               @RequestParam(required = false) String companyId) {
+                               @RequestParam(required = false) String orgId) {
         List<PrHouseExpense> list = MapstructUtils.convert(boList, PrHouseExpense.class);
-        return toAjax(houseExpenseService.batchInsert(list, itemGroup, itemCode, orgId, companyId));
+        return toAjax(houseExpenseService.batchInsert(list, itemGroup, itemCode, orgId));
     }
 
     /**

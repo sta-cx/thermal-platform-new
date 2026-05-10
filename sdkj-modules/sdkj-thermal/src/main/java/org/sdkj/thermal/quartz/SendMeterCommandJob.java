@@ -24,10 +24,9 @@ public class SendMeterCommandJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap data = context.getJobDetail().getJobDataMap();
         String jobName = data.getString("jobName");
-        String companyId = data.getString("companyId");
         String orgId = data.getString("orgId");
 
-        log.info("仪表指令下发 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgId);
+        log.info("仪表指令下发 Job 启动: {} (小区: {})", jobName, orgId);
 
         boolean tenantPushed = TenantQuartzContext.push(context);
         try {
@@ -35,10 +34,10 @@ public class SendMeterCommandJob implements Job {
                 .getContext().get("applicationContext");
             IHtTasksPerformService performService = ctx.getBean(IHtTasksPerformService.class);
 
-            performService.executePendingCommands(companyId, orgId);
-            log.info("仪表指令下发 Job 完成: {} (公司: {}, 小区: {})", jobName, companyId, orgId);
+            performService.executePendingCommands(orgId);
+            log.info("仪表指令下发 Job 完成: {} (小区: {})", jobName, orgId);
         } catch (Exception e) {
-            log.error("仪表指令下发 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgId, e);
+            log.error("仪表指令下发 Job 失败: {} (小区: {})", jobName, orgId, e);
         } finally {
             TenantQuartzContext.clear(tenantPushed);
         }

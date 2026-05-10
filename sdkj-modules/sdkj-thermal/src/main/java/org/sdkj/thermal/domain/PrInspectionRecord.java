@@ -23,5 +23,4 @@ public class PrInspectionRecord extends BaseEntity {
     private String content;
     private String images;
     private String orgId;
-    private String companyId;
 }

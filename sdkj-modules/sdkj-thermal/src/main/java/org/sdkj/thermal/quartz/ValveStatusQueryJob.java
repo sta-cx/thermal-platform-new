@@ -37,10 +37,9 @@ public class ValveStatusQueryJob implements Job {
     public void execute(JobExecutionContext context) {
         JobDataMap data = context.getJobDetail().getJobDataMap();
         String jobName = data.getString("jobName");
-        String companyId = data.getString("companyId");
         String orgIdStr = data.getString("orgId");
 
-        log.info("阀门状态查询 Job 启动: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr);
+        log.info("阀门状态查询 Job 启动: {} (小区: {})", jobName, orgIdStr);
 
         boolean tenantPushed = TenantQuartzContext.push(context);
         try {
@@ -61,14 +60,14 @@ public class ValveStatusQueryJob implements Job {
                 log.info("执行阀门状态查询: 小区ID={}", orgId);
                 try {
                     processValveStatusQuery(valveArchiveService, performService,
-                        optionsHeatService, companyId, orgId);
+                        optionsHeatService, orgId);
                 } catch (Exception e) {
                     log.error("阀门状态查询失败: 小区ID={}", orgId, e);
                 }
             }
-            log.info("阀门状态查询 Job 完成: {} (公司: {})", jobName, companyId);
+            log.info("阀门状态查询 Job 完成: {}", jobName);
         } catch (Exception e) {
-            log.error("阀门状态查询 Job 失败: {} (公司: {}, 小区: {})", jobName, companyId, orgIdStr, e);
+            log.error("阀门状态查询 Job 失败: {} (小区: {})", jobName, orgIdStr, e);
         } finally {
             TenantQuartzContext.clear(tenantPushed);
         }
@@ -77,13 +76,13 @@ public class ValveStatusQueryJob implements Job {
     private void processValveStatusQuery(IPrHeatValveArchiveService valveArchiveService,
                                           IHtTasksPerformService performService,
                                           IPrOptionsHeatService optionsHeatService,
-                                          String companyId, String orgId) {
+                                          String orgId) {
         // 查询已缴费但未开阀的阀门 -> 查询其开阀状态
-        List<PrHeatValveArchive> paidClosedList = valveArchiveService.queryPaidClosedValves(companyId, orgId);
+        List<PrHeatValveArchive> paidClosedList = valveArchiveService.queryPaidClosedValves(orgId);
         // 查询未缴费但已开阀的阀门 -> 查询其关阀状态
-        List<PrHeatValveArchive> unpaidOpenList = valveArchiveService.queryUnpaidOpenValves(companyId, orgId);
+        List<PrHeatValveArchive> unpaidOpenList = valveArchiveService.queryUnpaidOpenValves(orgId);
 
-        PrOptionsHeat optionsHeat = optionsHeatService.getDataById(orgId, companyId, "2");
+        PrOptionsHeat optionsHeat = optionsHeatService.getDataById(orgId, "2");
         if (optionsHeat == null) {
             log.warn("未找到小区 {} 的调控配置，跳过", orgId);
             return;
@@ -91,7 +90,7 @@ public class ValveStatusQueryJob implements Job {
 
         // 为已缴费用户生成状态查询指令
         if (CollUtil.isNotEmpty(paidClosedList)) {
-            List<HtTasksPerform> tasks = buildQueryTasks(paidClosedList, companyId, orgId,
+            List<HtTasksPerform> tasks = buildQueryTasks(paidClosedList, orgId,
                 optionsHeat, "valve_pay_query_open_");
             if (CollUtil.isNotEmpty(tasks)) {
                 try {
@@ -106,7 +105,7 @@ public class ValveStatusQueryJob implements Job {
 
         // 为未缴费用户生成状态查询指令
         if (CollUtil.isNotEmpty(unpaidOpenList)) {
-            List<HtTasksPerform> tasks = buildQueryTasks(unpaidOpenList, companyId, orgId,
+            List<HtTasksPerform> tasks = buildQueryTasks(unpaidOpenList, orgId,
                 optionsHeat, "valve_pay_query_close_");
             if (CollUtil.isNotEmpty(tasks)) {
                 try {
@@ -121,7 +120,7 @@ public class ValveStatusQueryJob implements Job {
     }
 
     private List<HtTasksPerform> buildQueryTasks(List<PrHeatValveArchive> archives,
-                                                  String companyId, String orgId,
+                                                  String orgId,
                                                   PrOptionsHeat optionsHeat, String instructionIdPrefix) {
         List<HtTasksPerform> tasks = new ArrayList<>();
         Date now = new Date();
@@ -132,7 +131,6 @@ public class ValveStatusQueryJob implements Job {
             task.setInstruction(0);
             task.setNumber(0);
             task.setOrgId(orgId);
-            task.setCompanyId(companyId);
             task.setDeviceId(archive.getDeviceId());
             task.setMeterArcCode(archive.getMeterArcCode());
             task.setMeterId(archive.getId());

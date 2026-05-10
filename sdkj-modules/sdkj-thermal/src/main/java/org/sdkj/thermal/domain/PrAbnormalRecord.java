@@ -21,5 +21,4 @@ public class PrAbnormalRecord extends BaseEntity {
     private String handleStatus;
     private String handleResult;
     private String orgId;
-    private String companyId;
 }

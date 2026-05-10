@@ -14,7 +14,7 @@ public interface IPrRoleService {
     /**
      * 根据公司ID查询所有角色
      */
-    List<AgRole> getAllRoles(String companyId);
+    List<AgRole> getAllRoles();
 
     /**
      * 查询当前用户创建的角色

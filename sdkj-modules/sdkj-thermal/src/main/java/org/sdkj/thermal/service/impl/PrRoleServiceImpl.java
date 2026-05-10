@@ -26,9 +26,8 @@ public class PrRoleServiceImpl implements IPrRoleService {
      * 根据公司ID查询所有角色
      */
     @Override
-    public List<AgRole> getAllRoles(String companyId) {
+    public List<AgRole> getAllRoles() {
         return agRoleService.lambdaQuery()
-            .eq(StrUtil.isNotBlank(companyId), AgRole::getCompanyId, companyId)
             .list();
     }
 

@@ -13,12 +13,12 @@ public interface IPrPrintTemplateService extends IService<PrPrintTemplate> {
     /**
      * 查询模板列表
      */
-    List<PrPrintTemplate> listByOrgAndCompany(String companyId, String orgId, String name);
+    List<PrPrintTemplate> listByOrgAndCompany(String orgId, String name);
 
     /**
      * 保存或更新模板
      */
-    boolean saveOrUpdateTemplate(String companyId, String orgId, String name, String templateContent);
+    boolean saveOrUpdateTemplate(String orgId, String name, String templateContent);
 
     /**
      * 根据序列号查询模板

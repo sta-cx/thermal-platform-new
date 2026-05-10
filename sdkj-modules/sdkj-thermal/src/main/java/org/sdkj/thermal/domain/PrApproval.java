@@ -53,8 +53,6 @@ public class PrApproval extends BaseEntity {
     /** 审批类型 */
     private Integer approvalType;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 小区ID */
     private String orgId;

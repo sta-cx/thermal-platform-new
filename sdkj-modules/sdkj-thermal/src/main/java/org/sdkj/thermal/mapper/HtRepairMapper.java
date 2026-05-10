@@ -19,10 +19,9 @@ public interface HtRepairMapper extends BaseMapperPlus<HtRepair, HtRepairVo> {
 
     /**
      * 按报修类型统计数量
-     * @param companyId 公司ID
      * @return 类型统计列表
      */
-    List<Map<String, Object>> selectTypeCount(@Param("companyId") String companyId);
+    List<Map<String, Object>> selectTypeCount();
 
     /**
      * 根据房间ID查询报修记录
@@ -34,10 +33,9 @@ public interface HtRepairMapper extends BaseMapperPlus<HtRepair, HtRepairVo> {
     /**
      * 逻辑删除报修记录
      * @param repairNo 报修编号
-     * @param companyId 公司ID
      * @return 影响行数
      */
-    int markAsDeleted(@Param("repairNo") String repairNo, @Param("companyId") String companyId);
+    int markAsDeleted(@Param("repairNo") String repairNo);
 
     @Select("SELECT MAX(repair_no) FROM ht_repair WHERE repair_no LIKE CONCAT(#{prefix}, '%')")
     String selectMaxRepairNoByPrefix(@Param("prefix") String prefix);

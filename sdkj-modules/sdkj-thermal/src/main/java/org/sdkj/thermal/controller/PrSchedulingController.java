@@ -29,11 +29,9 @@ public class PrSchedulingController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<PrScheduling> list(
             @RequestParam(required = false) String orgId,
-            @RequestParam(required = false) String companyId,
             PageQuery pageQuery) {
         Page<PrScheduling> page = pageQuery.build();
         LambdaQueryWrapper<PrScheduling> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(companyId != null && !companyId.isEmpty(), PrScheduling::getCompanyId, companyId);
         lqw.eq(orgId != null && !orgId.isEmpty(), PrScheduling::getOrgId, orgId);
         lqw.orderByDesc(PrScheduling::getWorkDate);
         schedulingService.page(page, lqw);

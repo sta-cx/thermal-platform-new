@@ -18,5 +18,4 @@ public class PrNotice extends BaseEntity {
     private String content;
     private String type;
     private String orgId;
-    private String companyId;
 }

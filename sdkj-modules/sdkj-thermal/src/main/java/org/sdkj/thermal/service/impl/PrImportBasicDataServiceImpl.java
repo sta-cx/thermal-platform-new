@@ -37,7 +37,6 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
     @Override
     public Integer importData(List<PrImportBasicData> objects) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         Date date = new Date();
         List<PrImportBasicData> lists = new ArrayList<>(objects.size());
         for (PrImportBasicData item : objects) {
@@ -46,69 +45,67 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
             }
             item.setCreateTime(date);
             item.setCreateBy(create);
-            item.setCompanyId(companyId);
             if (item.getUserName() != null && !item.getUserName().isEmpty()) {
                 item.setUserId(String.valueOf(IdGeneratorUtil.nextLongId()));
             }
             lists.add(item);
         }
         mapper.insertList(lists);
-        mapper.updateOrgId(companyId, create);
+        mapper.updateOrgId(create);
         return lists.size();
     }
 
     @Override
     public R check(long size) {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
 
-        List<PrImportBasicData> noOrgIds = mapper.selectNoOrgIds(companyId, create);
+        List<PrImportBasicData> noOrgIds = mapper.selectNoOrgIds(create);
         if (!noOrgIds.isEmpty()) {
             return R.fail("下列" + noOrgIds.size() + "条数据小区名称错误或不存在！");
         }
 
-        List<PrImportBasicData> noRoomNum = mapper.selectNoRoomNum(companyId, create);
+        List<PrImportBasicData> noRoomNum = mapper.selectNoRoomNum(create);
         if (!noRoomNum.isEmpty()) {
             return R.fail("下列" + noRoomNum.size() + "条数据没有房号！");
         }
 
-        List<PrImportBasicData> repeatHouse = mapper.selectRepeatHouse(companyId, create);
+        List<PrImportBasicData> repeatHouse = mapper.selectRepeatHouse(create);
         if (!repeatHouse.isEmpty()) {
             return R.fail("下列" + repeatHouse.size() + "条数据房号重复！");
         }
 
-        List<PrImportBasicData> noDate = mapper.selectError1(companyId, create);
+        List<PrImportBasicData> noDate = mapper.selectError1(create);
         if (!noDate.isEmpty()) {
             return R.fail("下列" + noDate.size() + "条数据需填写建费日期！");
         }
 
-        List<PrImportBasicData> hasAlready = mapper.selectHasAlready(companyId, create);
+        List<PrImportBasicData> hasAlready = mapper.selectHasAlready(create);
         if (!hasAlready.isEmpty()) {
             return R.fail("下列房屋已存在，请勿重复导入。");
         }
 
-        mapper.updateBuildId(companyId, create);
-        List<PrImportBasicData> noBuildId = mapper.selectNoBuildId(companyId, create);
+        mapper.updateBuildId(create);
+        List<PrImportBasicData> noBuildId = mapper.selectNoBuildId(create);
         if (!noBuildId.isEmpty()) {
             return R.fail("下列" + noBuildId.size() + "条数据楼宇信息无法匹配，请核对信息！");
         }
 
-        mapper.updateUnitId(companyId, create);
-        mapper.updateStationId(companyId, create);
-        List<PrImportBasicData> noStation = mapper.selectStationId(companyId, create);
+        mapper.updateUnitId(create);
+        mapper.updateStationId(create);
+        List<PrImportBasicData> noStation = mapper.selectStationId(create);
         if (!noStation.isEmpty()) {
             return R.fail("下列数据无换热站信息，请填写完整");
         }
 
-        mapper.updateSubstationId(companyId, create);
-        List<PrImportBasicData> noSubstation = mapper.selectNoSubstationId(companyId, create);
+        mapper.updateSubstationId(create);
+        List<PrImportBasicData> noSubstation = mapper.selectNoSubstationId(create);
         if (!noSubstation.isEmpty()) {
             return R.fail("下列数据无换热分站信息，请填写完整");
         }
 
-        mapper.updateHouseId(companyId, create);
-        mapper.updateStandardId(companyId, create);
-        List<PrImportBasicData> noStandardId = mapper.selectNoStandardId(companyId, create);
+        mapper.updateHouseId(create);
+        mapper.updateStandardId(create);
+        List<PrImportBasicData> noStandardId = mapper.selectNoStandardId(create);
         if (!noStandardId.isEmpty()) {
             return R.fail("下列数据项目名称或标准名称不匹配，请检查后重新填写");
         }
@@ -119,16 +116,13 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
     @Override
     public boolean deleteData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        return mapper.deleteData(companyId, create);
+        return mapper.deleteData(create);
     }
 
     @Override
     public long count() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
         LambdaQueryWrapper<PrImportBasicData> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(PrImportBasicData::getCompanyId, companyId);
         lqw.eq(PrImportBasicData::getCreateBy, create);
         lqw.eq(PrImportBasicData::getType, 0);
         return count(lqw);
@@ -137,15 +131,14 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
     @Override
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
-        String companyId = LoginHelper.getTenantId();
-        List<String> orgIds = mapper.groupOrgId(companyId, create);
+        List<String> orgIds = mapper.groupOrgId(create);
         if (orgIds != null && !orgIds.isEmpty()) {
-            mapper.insertUsers(companyId, create, "e10adc3949ba59abbe56e057f20f883e");
-            mapper.insertUserHouse(companyId, create);
-            mapper.insertHouseChange(companyId, create);
-            mapper.insertHouseExpense(companyId, create);
-            mapper.deleteImportBasicData(companyId, create);
-            mapper.deleteUserHouseDataByNoHouseId(companyId, orgIds);
+            mapper.insertUsers(create, "e10adc3949ba59abbe56e057f20f883e");
+            mapper.insertUserHouse(create);
+            mapper.insertHouseChange(create);
+            mapper.insertHouseExpense(create);
+            mapper.deleteImportBasicData(create);
+            mapper.deleteUserHouseDataByNoHouseId(orgIds);
             return true;
         }
         return false;
@@ -153,7 +146,6 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
 
     @Override
     public R<String> importDataByHeatCode(List<PrImportBasicDataByCode> objects) {
-        String companyId = LoginHelper.getTenantId();
         String createBy = LoginHelper.getUserIdStr();
         Date now = new Date();
 
@@ -176,7 +168,6 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
             PrHouse house = houseMapper.selectOne(
                 new LambdaQueryWrapper<PrHouse>()
                     .eq(PrHouse::getCode, code)
-                    .eq(PrHouse::getCompanyId, companyId)
                     .last("LIMIT 1")
             );
 
@@ -241,7 +232,6 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
                         newUser.setIdType(1); // ID card
                     }
                     newUser.setOrgId(house.getOrgId());
-                    newUser.setCompanyId(companyId);
                     newUser.setPassword("e10adc3949ba59abbe56e057f20f883e"); // default password
                     mapper.insertUserDirect(newUser);
                     userId = newUser.getId();
@@ -249,19 +239,19 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
 
                 // 4. Link user to house
                 if (userId != null) {
-                    mapper.insertUserHouseRelation(userId, house.getId(), companyId, createBy, now);
+                    mapper.insertUserHouseRelation(userId, house.getId(), createBy, now);
                 }
 
                 // 5. Handle house expense (if standardName is provided)
                 if (row.getStandardName() != null && !row.getStandardName().isEmpty()) {
                     mapper.insertHouseExpenseByCode(house.getId(), row.getStandardName(),
-                        row.getStandardPrice(), row.getItemName(), companyId, createBy, now);
+                        row.getStandardPrice(), row.getItemName(), createBy, now);
                 }
 
                 // 6. Handle account balance if provided
                 if (row.getAccount() != null && row.getAccount().compareTo(new java.math.BigDecimal("0.00")) != 0) {
                     mapper.updateAccountBalance(house.getId(), userId, row.getAccount(),
-                        row.getItemName(), companyId, createBy, now);
+                        row.getItemName(), createBy, now);
                 }
 
                 successCount++;
@@ -299,11 +289,9 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
         if (code == null || code.trim().isEmpty()) {
             return false;
         }
-        String companyId = LoginHelper.getTenantId();
         PrHouse house = houseMapper.selectOne(
             new LambdaQueryWrapper<PrHouse>()
                 .eq(PrHouse::getCode, code.trim())
-                .eq(PrHouse::getCompanyId, companyId)
                 .last("LIMIT 1")
         );
         return house != null;

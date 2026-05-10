@@ -73,9 +73,6 @@ public class PrImportHistory {
     private String userName;
 
     @ExcelIgnore
-    private String companyId;
-
-    @ExcelIgnore
     private String createBy;
 
     @ExcelIgnore

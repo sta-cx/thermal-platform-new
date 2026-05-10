@@ -12,7 +12,7 @@ public interface IPrRepairRecordService extends IService<PrRepairRecord> {
 
     boolean updateService(String id, String value, String type);
 
-    Map<String, Object> getAllTypeCount(String companyId);
+    Map<String, Object> getAllTypeCount();
 
     String generateRepairNo();
 

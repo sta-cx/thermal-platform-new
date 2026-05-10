@@ -10,7 +10,6 @@
             instruction,
             number,
             org_id,
-            company_id,
             concentrator_code,
             device_id,
             meter_num,
@@ -29,7 +28,6 @@
             0,
             0,
             a.org_id,
-            a.company_id,
             a.concentrator_code,
             a.id,
             a.meter_num,
@@ -43,8 +41,7 @@
             a.chan_num
         FROM pr_heat_valve_archive a
         LEFT JOIN pr_options_heat b ON b.org_id = a.org_id
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.dtu_num = #{dtuNum}
           AND a.is_changed = '0'
     </insert>
@@ -57,7 +54,6 @@
             instruction,
             number,
             org_id,
-            company_id,
             concentrator_code,
             device_id,
             meter_num,
@@ -76,7 +72,6 @@
             0,
             0,
             a.org_id,
-            a.company_id,
             a.concentrator_code,
             a.id,
             a.meter_num,
@@ -90,8 +85,7 @@
             a.chan_num
         FROM pr_heat_unit_valve_archive a
         LEFT JOIN pr_options_heat b ON b.org_id = a.org_id
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.dtu_num = #{dtuNum}
           AND a.is_changed = '0'
     </insert>
@@ -104,7 +98,6 @@
             instruction,
             number,
             org_id,
-            company_id,
             concentrator_code,
             device_id,
             meter_num,
@@ -124,7 +117,6 @@
             0,
             0,
             a.org_id,
-            a.company_id,
             a.concentrator_code,
             a.id,
             a.meter_num,
@@ -139,8 +131,7 @@
             a.chan_num
         FROM pr_heat_hot_archive a
         LEFT JOIN pr_options_heat b ON b.org_id = a.org_id
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.dtu_num = #{dtuNum}
           AND a.is_changed = '0'
     </insert>
@@ -153,7 +144,6 @@
             instruction,
             number,
             org_id,
-            company_id,
             concentrator_code,
             device_id,
             meter_num,
@@ -173,7 +163,6 @@
             0,
             0,
             a.org_id,
-            a.company_id,
             a.concentrator_code,
             a.id,
             a.meter_num,
@@ -188,8 +177,7 @@
             a.chan_num
         FROM pr_heat_unit_hot_archive a
         LEFT JOIN pr_options_heat b ON b.org_id = a.org_id
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.dtu_num = #{dtuNum}
           AND a.is_changed = '0'
     </insert>

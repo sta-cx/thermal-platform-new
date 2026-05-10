@@ -24,7 +24,6 @@ public interface IPrHeatTempArchiveService extends IService<PrHeatTempArchive> {
 
     /**
      * 分页查询温采器配表列表
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @param buildingId 楼宇ID
      * @param unit 单元
@@ -33,7 +32,7 @@ public interface IPrHeatTempArchiveService extends IService<PrHeatTempArchive> {
      * @param pageQuery 分页参数
      * @return 分页结果
      */
-    TableDataInfo<PrHeatTempArchiveVo> selectPageList(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHeatTempArchiveVo> selectPageList(String orgId, String buildingId,
                                                        String unit, String search, String parentId,
                                                        PageQuery pageQuery);
 
@@ -42,26 +41,23 @@ public interface IPrHeatTempArchiveService extends IService<PrHeatTempArchive> {
     /**
      * 同步户温采器信息到采集平台
      * @param orgId 小区ID
-     * @param companyId 公司ID
      * @return 是否同步成功
      */
-    boolean valveInformationSynchronization(String orgId, String companyId);
+    boolean valveInformationSynchronization(String orgId);
 
     /**
      * 获取同步数据列表（用于下载Excel）
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 温采器配表列表
      */
-    List<PrHeatTempArchiveVo> listSyncData(String companyId, String orgId);
+    List<PrHeatTempArchiveVo> listSyncData(String orgId);
 
     /**
      * 查询全部温采器信息（用于导出）
-     * @param companyId 公司ID
      * @param orgId 小区ID
      * @return 温采器配表列表
      */
-    List<PrHeatTempArchiveVo> listAll(String companyId, String orgId);
+    List<PrHeatTempArchiveVo> listAll(String orgId);
 
     /**
      * 导入温采器配表

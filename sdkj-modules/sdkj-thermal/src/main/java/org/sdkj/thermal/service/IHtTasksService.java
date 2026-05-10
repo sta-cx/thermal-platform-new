@@ -84,7 +84,7 @@ public interface IHtTasksService extends IService<HtTasks> {
     /**
      * 按设备类型分页查询阀门配表列表
      */
-    TableDataInfo<HtTasksVo> selectDeviceList(String orgId, String companyId, String deviceType, PageQuery pageQuery);
+    TableDataInfo<HtTasksVo> selectDeviceList(String orgId, String deviceType, PageQuery pageQuery);
 
     /**
      * 重新设定开度日志

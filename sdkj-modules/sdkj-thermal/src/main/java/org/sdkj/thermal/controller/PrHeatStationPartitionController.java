@@ -31,13 +31,11 @@ public class PrHeatStationPartitionController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo<PrHeatStationPartition> list(
             @RequestParam(required = false) String search,
-            @RequestParam(required = false) String companyId,
             @RequestParam(required = false) String stationId,
             PageQuery pageQuery) {
         Page<PrHeatStationPartition> page = pageQuery.build();
         LambdaQueryWrapper<PrHeatStationPartition> lqw = new LambdaQueryWrapper<>();
         lqw.like(search != null && !search.isEmpty(), PrHeatStationPartition::getName, search);
-        lqw.eq(companyId != null && !companyId.isEmpty(), PrHeatStationPartition::getCompanyId, companyId);
         lqw.eq(stationId != null && !stationId.isEmpty(), PrHeatStationPartition::getStationId, stationId);
         lqw.orderByAsc(PrHeatStationPartition::getSeq);
         partitionService.page(page, lqw);
@@ -73,13 +71,6 @@ public class PrHeatStationPartitionController extends BaseController {
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable String id) {
         return toAjax(partitionService.removeById(id));
-    }
-
-    @SaCheckPermission("thermal:ht:station:list")
-    @SaCheckLogin
-    @GetMapping("/company/{companyId}")
-    public R<List<PrHeatStationPartition>> listByCompany(@PathVariable String companyId) {
-        return R.ok(partitionService.selectByCompanyId(companyId));
     }
 
     @SaCheckPermission("thermal:ht:station:list")

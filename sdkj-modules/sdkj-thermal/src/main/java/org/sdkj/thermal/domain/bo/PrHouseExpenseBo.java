@@ -32,6 +32,4 @@ public class PrHouseExpenseBo extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 }

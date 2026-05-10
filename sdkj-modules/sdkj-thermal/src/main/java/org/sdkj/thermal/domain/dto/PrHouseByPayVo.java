@@ -23,8 +23,6 @@ public class PrHouseByPayVo implements Serializable {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 房屋ID */
     private Long houseId;

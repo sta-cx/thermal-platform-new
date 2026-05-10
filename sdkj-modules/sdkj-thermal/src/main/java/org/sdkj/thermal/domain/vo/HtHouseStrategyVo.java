@@ -39,7 +39,6 @@ public class HtHouseStrategyVo {
     private Integer isManagePolice;
     private Integer managePoliceNumber;
     private String orgId;
-    private String companyId;
     private Integer presetAngle;
     private BigDecimal presetFlowRate;
     private String createName;

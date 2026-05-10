@@ -36,15 +36,12 @@ public class PrHouseChangeController extends BaseController {
     @SaCheckPermission("thermal:property:houseChange:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<PrHouse> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<PrHouse> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String unitCode,
             @RequestParam(required = false) String search,
             PageQuery pageQuery) {
-        LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(StringUtils.isNotBlank(companyId), PrHouse::getCompanyId, companyId)
+        LambdaQueryWrapper<PrHouse> lqw = new LambdaQueryWrapper<PrHouse>()
                 .eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId)
                 .eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId)
                 .eq(StringUtils.isNotBlank(unitCode), PrHouse::getUnitCode, unitCode)

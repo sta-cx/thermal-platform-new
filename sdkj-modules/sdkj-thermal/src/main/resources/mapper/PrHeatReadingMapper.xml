@@ -16,9 +16,9 @@
             d.room_num AS 'roomNum'
         FROM pr_heat_reading h
         LEFT JOIN pr_heat_valve_archive b ON h.meter_num = b.meter_num
-        LEFT JOIN pr_house d ON b.house_id = d.id AND b.company_id = d.company_id AND b.org_id = d.org_id
+        LEFT JOIN pr_house d ON b.house_id = d.id AND b.org_id = d.org_id
         LEFT JOIN sys_organization F ON b.ORG_ID = F.ID
-        WHERE b.company_id = #{companyId}
+        WHERE 1=1
         <if test="meterNums != null and meterNums.size() > 0">
             AND h.meter_num IN
             <foreach item="item" collection="meterNums" separator="," open="(" close=")">
@@ -63,7 +63,7 @@
                     hh.open_time,
                     hh.close_time
                 FROM pr_heat_valve_archive b
-                INNER JOIN pr_house d ON b.house_id = d.id AND b.company_id = #{companyId} AND b.org_id = d.org_id
+                INNER JOIN pr_house d ON b.house_id = d.id AND b.org_id = d.org_id
                 INNER JOIN pr_heat_station_partition f ON f.id = d.station_type
                 <if test="stationPartitionId != null and stationPartitionId != ''">
                     AND f.id = #{stationPartitionId}
@@ -72,7 +72,7 @@
                 <if test="stationId != null and stationId != ''">
                     AND g.id = #{stationId}
                 </if>
-                INNER JOIN pr_options_heat hh ON hh.company_id = b.company_id AND hh.org_id IS NULL
+                INNER JOIN pr_options_heat hh ON hh.org_id IS NULL
                 WHERE d.pay_status = 1 AND b.out_temperature > 0 AND b.valve_time > hh.open_time AND d.is_special = '0'
                 LIMIT 50
             ) hhh ON h.meter_num = hhh.meter_num
@@ -159,8 +159,7 @@
         LEFT JOIN pr_house c ON a.house_id = c.id
         LEFT JOIN pr_building d ON c.building_id = d.id
         LEFT JOIN pr_user_house f ON a.house_id = f.house_id
-        WHERE a.company_id = #{companyId}
-          AND a.is_changed = '0'
+        WHERE a.is_changed = '0'
         <if test="orgId != null and orgId != ''">
             AND a.org_id = #{orgId}
         </if>

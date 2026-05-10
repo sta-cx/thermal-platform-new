@@ -58,26 +58,26 @@ public class PrExpenseItemServiceImpl extends ServiceImpl<PrExpenseItemMapper, P
     }
 
     @Override
-    public List<PrExpenseItemVo> selectByItemCode(String companyId, String orgId, String itemGroup, String itemCode) {
-        return baseMapper.selectByItemCode(companyId, orgId, itemGroup, itemCode);
+    public List<PrExpenseItemVo> selectByItemCode(String orgId, String itemGroup, String itemCode) {
+        return baseMapper.selectByItemCode(orgId, itemGroup, itemCode);
     }
 
     @Override
-    public List<PrExpenseItemVo> selectByItemGroup(String companyId, String orgId, String itemGroup, String userId) {
+    public List<PrExpenseItemVo> selectByItemGroup(String orgId, String itemGroup, String userId) {
         if (StrUtil.isNotBlank(userId)) {
-            return baseMapper.selectByItemGroupAndUserId(companyId, orgId, itemGroup, userId);
+            return baseMapper.selectByItemGroupAndUserId(orgId, itemGroup, userId);
         }
-        return baseMapper.selectByItemGroup(companyId, orgId, itemGroup);
+        return baseMapper.selectByItemGroup(orgId, itemGroup);
     }
 
     @Override
-    public List<PrExpenseItemVo> getItemCodesByItemGroup(String companyId, String orgId, String itemGroup) {
-        return baseMapper.selectByItemGroup(companyId, orgId, itemGroup);
+    public List<PrExpenseItemVo> getItemCodesByItemGroup(String orgId, String itemGroup) {
+        return baseMapper.selectByItemGroup(orgId, itemGroup);
     }
 
     @Override
-    public List<PrExpenseItemVo> selectByCompanyAndOrg(String companyId, String orgId) {
-        return baseMapper.selectByCompanyAndOrg(companyId, orgId);
+    public List<PrExpenseItemVo> selectByCompanyAndOrg(String orgId) {
+        return baseMapper.selectByCompanyAndOrg(orgId);
     }
 
     @Override
@@ -92,8 +92,8 @@ public class PrExpenseItemServiceImpl extends ServiceImpl<PrExpenseItemMapper, P
     }
 
     @Override
-    public boolean isItemName(String companyId, String orgId, String itemName, String id) {
-        List<PrExpenseItemVo> duplicates = baseMapper.checkItemName(companyId, orgId, itemName, id);
+    public boolean isItemName(String orgId, String itemName, String id) {
+        List<PrExpenseItemVo> duplicates = baseMapper.checkItemName(orgId, itemName, id);
         return duplicates.isEmpty();
     }
 }

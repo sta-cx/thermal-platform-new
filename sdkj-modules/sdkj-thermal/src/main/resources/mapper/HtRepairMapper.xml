@@ -5,7 +5,7 @@
     <select id="selectTypeCount" resultType="java.util.Map">
         SELECT repair_type AS repairType, COUNT(*) AS count
         FROM ht_repair
-        WHERE company_id = #{companyId} AND is_delete = 0
+        WHERE is_delete = 0
         GROUP BY repair_type
     </select>
 
@@ -20,7 +20,7 @@
     <update id="markAsDeleted">
         UPDATE ht_repair
         SET is_delete = 1, update_time = NOW()
-        WHERE repair_no = #{repairNo} AND company_id = #{companyId}
+        WHERE repair_no = #{repairNo}
     </update>
 
 </mapper>

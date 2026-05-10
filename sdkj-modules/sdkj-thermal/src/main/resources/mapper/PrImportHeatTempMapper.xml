@@ -6,14 +6,14 @@
         insert into pr_import_heat_temp
         (org_name, building_name, room_num, meter_name, specification, model,
          meter_serial, meter_num, card_num, imei, dtu_num, dtu_type, concentrator_code,
-         chan_num, device_id, caliber, company_id, create_by, type, create_time)
+         chan_num, device_id, caliber, create_by, type, create_time)
         values
         <foreach collection="list" item="item" separator=",">
             (#{item.orgName}, #{item.buildingName}, #{item.roomNum}, #{item.meterName},
              #{item.specification}, #{item.model}, #{item.meterSerial}, #{item.meterNum},
              #{item.cardNum}, #{item.imei}, #{item.dtuNum}, #{item.dtuType},
              #{item.concentratorCode}, #{item.chanNum}, #{item.deviceId}, #{item.caliber},
-             #{item.companyId}, #{item.createBy}, #{item.type}, #{item.createTime})
+             #{item.createBy}, #{item.type}, #{item.createTime})
         </foreach>
     </insert>
 
@@ -21,79 +21,79 @@
         update pr_import_heat_temp a
             left join pr_house b on a.room_num = b.room_num
         set a.house_id = b.id, a.org_id = b.org_id
-        where a.company_id = #{companyId} and a.type = '0' and a.create_by = #{create}
-          and b.company_id = #{companyId} and b.del_flag = '0'
+        where a.type = '0' and a.create_by = #{create}
+          and b.del_flag = '0'
     </update>
 
     <update id="updateMeter">
         update pr_import_heat_temp a
-            left join mt_meter_match b on a.company_id = b.company_id
+            left join mt_meter_match b on 1=1
             left join mt_heat_temp_archive mha on b.archive_id = mha.id
         set a.meter_arc_code = mha.code, a.archive_id = mha.id
-        where a.company_id = #{companyId} and a.create_by = #{create}
+        where a.create_by = #{create}
           and a.type = '0' and b.meter_type = '04' and a.meter_name = mha.name
     </update>
 
     <select id="selectNoHouseId" resultType="org.sdkj.thermal.domain.PrImportHeatTemp">
         select * from pr_import_heat_temp
-        where company_id = #{companyId} and type = '0' and create_by = #{create}
+        where type = '0' and create_by = #{create}
           and (house_id is null or org_id is null) limit 500
     </select>
 
     <select id="selectNoMeterNum" resultType="org.sdkj.thermal.domain.PrImportHeatTemp">
         select * from pr_import_heat_temp
-        where company_id = #{companyId} and create_by = #{create} and type = '0'
+        where create_by = #{create} and type = '0'
           and (meter_num is null or meter_num = '') limit 500
     </select>
 
     <select id="selectRepateMeterNum" resultType="org.sdkj.thermal.domain.PrImportHeatTemp">
         select * from pr_import_heat_temp t inner join (
             select meter_num from pr_import_heat_temp
-            where company_id = #{companyId} and type = '0' and create_by = #{create}
+            where type = '0' and create_by = #{create}
             group by meter_num having count(1) > 1
         ) dup on t.meter_num = dup.meter_num
-        where t.company_id = #{companyId} and t.type = '0' and t.create_by = #{create}
+        where t.type = '0' and t.create_by = #{create}
         limit 500
     </select>
 
     <select id="findNoArchiveId" resultType="org.sdkj.thermal.domain.PrImportHeatTemp">
         select * from pr_import_heat_temp
-        where company_id = #{companyId} and create_by = #{create} and type = '0'
+        where create_by = #{create} and type = '0'
           and archive_id is null limit 500
     </select>
 
     <select id="select" resultType="int">
         select count(1) from pr_import_heat_temp
-        where company_id = #{companyId} and create_by = #{create} and type = '0'
+        where create_by = #{create} and type = '0'
     </select>
 
-    <select id="selectByCompanyIdOrgId" resultType="org.sdkj.thermal.domain.PrImportHeatTemp">
+    <select id="selectByOrgId" resultType="org.sdkj.thermal.domain.PrImportHeatTemp">
         select org_name, building_name, room_num from pr_house
-        where company_id = #{companyId} and org_id = #{orgId} and del_flag = '0'
+        where org_id = #{orgId} and del_flag = '0'
     </select>
 
     <delete id="deleteData">
         delete from pr_import_heat_temp
-        where company_id = #{companyId} and create_by = #{create} and type = '0'
+        where create_by = #{create} and type = '0'
     </delete>
 
     <insert id="submitData">
         insert into pr_heat_temp_archive
-        (id, company_id, org_id, house_id, archive_id, meter_arc_code, meter_arc_name,
+        (id, org_id, house_id, archive_id, meter_arc_code, meter_arc_name,
          meter_num, card_num, imei_num, dtu_num, dtu_type, chan_num, device_id,
          meter_serial, concentrator_code, caliber, specification, model, create_by, create_time)
-        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), company_id, org_id, house_id, archive_id,
+        select CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED), org_id, house_id, archive_id,
                meter_arc_code, meter_name, meter_num, card_num, imei, dtu_num, dtu_type,
                chan_num, device_id, meter_serial, concentrator_code, caliber,
                specification, model, create_by, create_time
         from pr_import_heat_temp
-        where company_id = #{companyId} and create_by = #{create} and type = '0'
+        where create_by = #{create} and type = '0'
           and house_id is not null and archive_id is not null
     </insert>
 
     <delete id="deleteImportHeatTempData">
         delete from pr_import_heat_temp
-        where company_id = #{companyId} and create_by = #{create}
+        where create_by = #{create}
     </delete>
 
 </mapper>

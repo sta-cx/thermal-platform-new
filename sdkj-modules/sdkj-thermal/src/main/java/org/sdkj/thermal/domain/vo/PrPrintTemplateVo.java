@@ -14,6 +14,5 @@ public class PrPrintTemplateVo {
     private String name;
     private String templateContent;
     private String serialNum;
-    private String companyId;
     private String orgId;
 }

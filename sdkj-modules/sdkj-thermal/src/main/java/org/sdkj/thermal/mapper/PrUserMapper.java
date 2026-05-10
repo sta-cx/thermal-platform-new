@@ -2,6 +2,7 @@ package org.sdkj.thermal.mapper;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrUser;
 import org.sdkj.thermal.domain.vo.PrUserVo;
@@ -12,12 +13,13 @@ import java.util.List;
  * 客户档案 Mapper
  * 迁移自旧系统 PrUserMapper
  */
+@OrgPermission
 public interface PrUserMapper extends BaseMapperPlus<PrUser, PrUserVo> {
 
     /**
-     * 分页查询客户列表（按公司）
+     * 分页查询客户列表
      */
-    List<PrUserVo> selectPageList(Page<PrUserVo> page, @Param("companyId") String companyId);
+    List<PrUserVo> selectPageList(Page<PrUserVo> page);
 
     /**
      * 查询客户详情（含房屋关联信息）

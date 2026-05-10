@@ -130,9 +130,6 @@ public class PrImportUnitHeat {
     private String orgId;
 
     @ExcelIgnore
-    private String companyId;
-
-    @ExcelIgnore
     private String createBy;
 
     @ExcelIgnore

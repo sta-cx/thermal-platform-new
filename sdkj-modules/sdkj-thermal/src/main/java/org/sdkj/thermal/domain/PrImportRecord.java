@@ -23,9 +23,6 @@ public class PrImportRecord {
     private String orgId;
 
     @ExcelIgnore
-    private String companyId;
-
-    @ExcelIgnore
     private Long houseId;
 
     @ExcelProperty(value = {TITLE, "小区*"}, index = 0)

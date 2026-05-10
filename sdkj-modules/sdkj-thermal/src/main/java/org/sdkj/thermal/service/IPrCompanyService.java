@@ -13,6 +13,8 @@ public interface IPrCompanyService extends IService<PrCompany> {
 
     List<SysOrganization> getOrganizationsByCompanyId(String companyId);
 
+    List<SysOrganization> getAllOrganizations();
+
     /**
      * 含楼栋的组织机构树
      */

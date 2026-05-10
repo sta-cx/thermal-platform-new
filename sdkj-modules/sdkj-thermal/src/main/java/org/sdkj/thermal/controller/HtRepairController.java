@@ -44,9 +44,7 @@ public class HtRepairController extends BaseController {
     @SaCheckPermission("thermal:ht:repair:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public TableDataInfo<HtRepairVo> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public TableDataInfo<HtRepairVo> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
             @RequestParam(required = false) Integer repairType,
             @RequestParam(required = false) Integer repairStatus,
@@ -54,7 +52,6 @@ public class HtRepairController extends BaseController {
             PageQuery pageQuery) {
         LambdaQueryWrapper<HtRepair> lqw = new LambdaQueryWrapper<>();
         lqw.eq(HtRepair::getIsDelete, 0);
-        lqw.eq(companyId != null, HtRepair::getCompanyId, companyId);
         lqw.eq(orgId != null, HtRepair::getOrgId, orgId);
         lqw.eq(buildingId != null, HtRepair::getBuildingId, buildingId);
         lqw.eq(repairType != null, HtRepair::getRepairType, repairType);
@@ -139,8 +136,7 @@ public class HtRepairController extends BaseController {
     @Log(title = "报修记录", businessType = BusinessType.DELETE)
     @DeleteMapping("/{repairNo}")
     public R<Void> delete(@PathVariable String repairNo) {
-        Long deptId = LoginHelper.getDeptId();
-        int rows = htRepairService.markAsDeleted(repairNo, deptId != null ? deptId.toString() : null);
+        int rows = htRepairService.markAsDeleted(repairNo);
         if (rows > 0) {
             return toAjax(true);
         }
@@ -195,8 +191,8 @@ public class HtRepairController extends BaseController {
     @SaCheckPermission("thermal:ht:repair:query")
     @SaCheckLogin
     @GetMapping("/typeCount")
-    public R<List<Map<String, Object>>> typeCount(@RequestParam String companyId) {
-        return R.ok(htRepairService.selectTypeCount(companyId));
+    public R<List<Map<String, Object>>> typeCount() {
+        return R.ok(htRepairService.selectTypeCount());
     }
 
     /**

@@ -56,8 +56,6 @@ public class HtTasks extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
-    /** 公司ID */
-    private String companyId;
 
     /** 调控依据 */
     private Integer adjustBasis;

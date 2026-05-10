@@ -27,7 +27,6 @@ public class PrAccountBalanceVo {
 
     private String orgId;
 
-    private String companyId;
 
     /** 房间号 */
     private String roomNum;

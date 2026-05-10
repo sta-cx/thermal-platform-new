@@ -154,7 +154,6 @@ CREATE TABLE `ht_alert` (
   `alert_time` datetime NOT NULL,
   `alert_status` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -162,8 +161,7 @@ CREATE TABLE `ht_alert` (
   `update_time` datetime DEFAULT NULL COMMENT '更新时间',
   `in_maintenance` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `meter_id` (`meter_id`),
-  KEY `idx_company_id` (`company_id`)
+  KEY `meter_id` (`meter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='报警表';
 
 CREATE TABLE `ht_house_strategy` (
@@ -194,7 +192,6 @@ CREATE TABLE `ht_house_strategy` (
   `is_manage_police` tinyint DEFAULT '0',
   `manage_police_number` tinyint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -242,7 +239,6 @@ CREATE TABLE `ht_repair` (
   `repair_result` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `org_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `is_delete` tinyint DEFAULT '0',
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
@@ -264,8 +260,7 @@ CREATE TABLE `ht_repair` (
   `urgent_type` tinyint DEFAULT NULL,
   `service_type` tinyint DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `meter_id` (`meter_id`),
-  KEY `idx_company_id` (`company_id`)
+  KEY `meter_id` (`meter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='报修表';
 
 CREATE TABLE `ht_scope` (
@@ -274,7 +269,6 @@ CREATE TABLE `ht_scope` (
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `building_id` bigint DEFAULT NULL,
   `unit_id` bigint DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `house_id` bigint DEFAULT NULL,
   `meter_num` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `meter_id` bigint DEFAULT NULL,
@@ -298,7 +292,6 @@ CREATE TABLE `ht_scope_dtu` (
   `id` bigint NOT NULL COMMENT '主键',
   `tasks_id` bigint DEFAULT NULL,
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `meter_arc_code` varchar(64) DEFAULT NULL COMMENT '档案编号',
   `dtu_num` varchar(64) DEFAULT NULL COMMENT 'DTU编号',
   `chan_nums` varchar(255) DEFAULT NULL COMMENT '通道号集合',
@@ -316,7 +309,6 @@ CREATE TABLE `ht_strategy` (
   `id` bigint NOT NULL COMMENT '主键',
   `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '策略名称',
   `type` tinyint DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `remark` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
@@ -447,7 +439,6 @@ CREATE TABLE `ht_tasks` (
   `last_time` datetime DEFAULT NULL,
   `total` tinyint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `adjust_basis` tinyint NOT NULL,
   `scope_type` tinyint NOT NULL,
   `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -485,7 +476,6 @@ CREATE TABLE `ht_tasks_perform` (
   `unit` int DEFAULT NULL,
   `duration` int DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `concentrator_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `device_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `meter_num` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -526,7 +516,6 @@ CREATE TABLE `ht_tasks_perform_last` (
   `unit` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '单位',
   `duration` tinyint(1) DEFAULT NULL COMMENT '作用时长',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `concentrator_code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '集中器编号',
   `tele_product_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '电信产品ID',
   `tele_api_key` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '电信平台Master-APIkey',
@@ -561,8 +550,7 @@ CREATE TABLE `ht_tasks_perform_last` (
   PRIMARY KEY (`id`),
   KEY `idx_tasks_id` (`tasks_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_send_time` (`send_time`),
-  KEY `idx_company_id` (`company_id`)
+  KEY `idx_send_time` (`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='调控任务上次执行记录表';
 
 CREATE TABLE `ht_tasks_perform_ls` (
@@ -577,7 +565,6 @@ CREATE TABLE `ht_tasks_perform_ls` (
   `unit` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '单位 01分钟 02小时 03天',
   `duration` tinyint(1) DEFAULT NULL COMMENT '作用时长',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `concentrator_code` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '集中器编号',
   `tele_product_id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '电信产品ID',
   `tele_api_key` varchar(256) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '电信平台Master-APIkey',
@@ -611,8 +598,7 @@ CREATE TABLE `ht_tasks_perform_ls` (
   PRIMARY KEY (`id`),
   KEY `idx_tasks_id` (`tasks_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_send_time` (`send_time`),
-  KEY `idx_company_id` (`company_id`)
+  KEY `idx_send_time` (`send_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='调控任务执行历史表';
 
 CREATE TABLE `mt_centrator_archive` (
@@ -725,7 +711,6 @@ CREATE TABLE `mt_heat_archive` (
 CREATE TABLE `mt_meter_match` (
   `id` bigint NOT NULL COMMENT '主键',
   `archive_id` bigint DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `meter_type` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
@@ -845,7 +830,6 @@ CREATE TABLE `pm_parking_space` (
   `parkinglot_name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `area` decimal(18,4) DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -855,8 +839,8 @@ CREATE TABLE `pm_parking_space` (
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `standard_id` bigint DEFAULT NULL,
   `standard_price` decimal(12,4) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='车位';
 
 CREATE TABLE `pr_abnormal_record` (
@@ -868,7 +852,6 @@ CREATE TABLE `pr_abnormal_record` (
   `handle_status` varchar(10) DEFAULT '0' COMMENT '处理状态(0待处理/1已处理)',
   `handle_result` varchar(255) DEFAULT NULL COMMENT '处理结果',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -876,10 +859,10 @@ CREATE TABLE `pr_abnormal_record` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
   KEY `idx_house_id` (`house_id`),
-  KEY `idx_meter_id` (`meter_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_meter_id` (`meter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='异常记录表';
 
 CREATE TABLE `pr_account_balance` (
@@ -890,7 +873,6 @@ CREATE TABLE `pr_account_balance` (
   `item_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `balance` decimal(18,4) DEFAULT '0.0000',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -898,9 +880,9 @@ CREATE TABLE `pr_account_balance` (
   `update_time` datetime DEFAULT NULL,
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_user_house` (`user_id`,`house_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_user_house` (`user_id`,`house_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='个人账户余额';
 
 CREATE TABLE `pr_approval` (
@@ -915,7 +897,6 @@ CREATE TABLE `pr_approval` (
   `preferential_reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '减免原因',
   `approval_link` int DEFAULT NULL COMMENT '审批环节',
   `approval_type` int DEFAULT NULL COMMENT '审批类型',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
   `approval_users` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '审批人(当前环节)',
   `approval_users_all` varchar(1024) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '所有审批人',
@@ -925,8 +906,8 @@ CREATE TABLE `pr_approval` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL,
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_approval_user` (`approval_user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='审批单表';
 
@@ -938,7 +919,6 @@ CREATE TABLE `pr_approval_opinion` (
   `opinions` varchar(512) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '意见',
   `approval_status` int DEFAULT NULL COMMENT '审批状态 0待审批 1通过 2驳回',
   `approval_link` int DEFAULT NULL COMMENT '审批环节',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
@@ -977,7 +957,6 @@ CREATE TABLE `pr_approval_sub` (
   `material_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `material_user` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `material_use` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
@@ -1016,7 +995,6 @@ CREATE TABLE `pr_building` (
   `delivery_time` datetime DEFAULT NULL COMMENT '交付时间',
   `station_id` bigint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -1025,7 +1003,6 @@ CREATE TABLE `pr_building` (
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0' COMMENT '删除标志',
   PRIMARY KEY (`id`),
   KEY `idx_org_id` (`org_id`),
-  KEY `idx_company_id` (`company_id`),
   KEY `idx_station_id` (`station_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='楼宇信息表';
 
@@ -1085,7 +1062,6 @@ CREATE TABLE `pr_expense` (
   `year` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `month` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `parking_space_id` bigint DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
@@ -1094,9 +1070,9 @@ CREATE TABLE `pr_expense` (
   `update_time` datetime DEFAULT NULL,
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_house_id` (`house_id`)
   KEY `idx_is_charged` (`is_charged`),
   KEY `idx_standard_id` (`standard_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='费用明细';
@@ -1117,7 +1093,6 @@ CREATE TABLE `pr_expense_item` (
   `sum_precision` int DEFAULT NULL,
   `change_cycle` int DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -1126,9 +1101,9 @@ CREATE TABLE `pr_expense_item` (
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `num` int DEFAULT NULL,
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_item_code` (`item_code`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_item_code` (`item_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='费目';
 
 CREATE TABLE `pr_expense_log` (
@@ -1137,7 +1112,6 @@ CREATE TABLE `pr_expense_log` (
   `log_type` varchar(32) DEFAULT NULL COMMENT '日志类型',
   `content` text COMMENT '日志内容',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -1145,8 +1119,8 @@ CREATE TABLE `pr_expense_log` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_house_id` (`house_id`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='费用操作日志表';
@@ -1173,7 +1147,6 @@ CREATE TABLE `pr_family` (
 
 CREATE TABLE `pr_heat_archive` (
   `id` bigint NOT NULL COMMENT '主键',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
   `org_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区名称',
   `building_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '楼栋名称',
@@ -1239,13 +1212,11 @@ CREATE TABLE `pr_heat_archive` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`),
   KEY `idx_house_id` (`house_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_archive_id` (`archive_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_archive_id` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='房屋热表配表';
 
 CREATE TABLE `pr_heat_command_unit_valve_archive` (
@@ -1262,7 +1233,6 @@ CREATE TABLE `pr_heat_command_unit_valve_archive` (
   `meter_serial` int DEFAULT NULL COMMENT '仪表序号',
   `unit_id` bigint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `valve_status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '阀门状态',
   `setting_status` int DEFAULT NULL COMMENT '设定状态',
   `actual_status` int DEFAULT NULL COMMENT '实际状态',
@@ -1291,13 +1261,11 @@ CREATE TABLE `pr_heat_command_unit_valve_archive` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`),
   KEY `idx_unit_id` (`unit_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_archive_id` (`archive_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_archive_id` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='单元控制阀门配表';
 
 CREATE TABLE `pr_heat_command_valve_archive` (
@@ -1314,7 +1282,6 @@ CREATE TABLE `pr_heat_command_valve_archive` (
   `meter_serial` int DEFAULT NULL COMMENT '仪表序号',
   `house_id` bigint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `valve_status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '阀门状态',
   `setting_status` int DEFAULT NULL COMMENT '设定状态',
   `actual_status` int DEFAULT NULL COMMENT '实际状态',
@@ -1345,13 +1312,11 @@ CREATE TABLE `pr_heat_command_valve_archive` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`),
   KEY `idx_house_id` (`house_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_archive_id` (`archive_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_archive_id` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='户间控制阀门配表';
 
 CREATE TABLE `pr_heat_daily` (
@@ -1378,14 +1343,13 @@ CREATE TABLE `pr_heat_daily` (
   `calc_date` datetime DEFAULT NULL COMMENT '费用结算时间',
   `house_id` bigint DEFAULT NULL,
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_house_id` (`house_id`),
   KEY `idx_meter_num` (`meter_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='热表日记录表';
@@ -1402,18 +1366,15 @@ CREATE TABLE `pr_heat_dtu_archive` (
   `latest_time` datetime DEFAULT NULL COMMENT '最新数据时间',
   `last_time` datetime DEFAULT NULL COMMENT '最后在线时间',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`),
-  KEY `idx_dtu_num` (`dtu_num`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_dtu_num` (`dtu_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='DTU采集器配表';
 
 CREATE TABLE `pr_heat_hot_archive` (
@@ -1464,7 +1425,6 @@ CREATE TABLE `pr_heat_hot_archive` (
   `is_changed` int DEFAULT '0' COMMENT '是否换表 0否1是',
   `is_stop` int DEFAULT '0' COMMENT '是否停用 0否1是',
   `house_id` bigint DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
   `imei_num` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IMEI号',
   `dtu_num` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'DTU号',
@@ -1479,13 +1439,11 @@ CREATE TABLE `pr_heat_hot_archive` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`),
   KEY `idx_house_id` (`house_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_archive_id` (`archive_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_archive_id` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='房屋热量表配表';
 
 CREATE TABLE `pr_heat_month` (
@@ -1513,14 +1471,13 @@ CREATE TABLE `pr_heat_month` (
   `add_advances` decimal(12,2) DEFAULT '0.00' COMMENT '累计预收',
   `house_id` bigint DEFAULT NULL,
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_house_id` (`house_id`),
   KEY `idx_meter_num` (`meter_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='热表月记录表';
@@ -1550,7 +1507,6 @@ CREATE TABLE `pr_heat_reading` (
   `is_used` int DEFAULT NULL COMMENT '是否使用',
   `is_valid` int DEFAULT NULL COMMENT '是否有效(是否系统内表号)',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `csq` varchar(20) DEFAULT NULL COMMENT '信号',
   `voltage` varchar(20) DEFAULT NULL COMMENT '电压',
   `humi` varchar(20) DEFAULT NULL COMMENT '湿度',
@@ -1574,8 +1530,8 @@ CREATE TABLE `pr_heat_reading` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_meter_num` (`meter_num`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='热表抄表记录表';
 
@@ -1583,7 +1539,6 @@ CREATE TABLE `pr_heat_real_data` (
   `id` bigint NOT NULL COMMENT '主键',
   `house_id` bigint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `building_id` bigint DEFAULT NULL,
   `building_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '楼栋名称',
   `org_name` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区名称',
@@ -1618,8 +1573,7 @@ CREATE TABLE `pr_heat_real_data` (
   `rbin` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `rbout` decimal(12,4) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_company_id` (`company_id`),
+  KEY `idx_house_id` (`house_id`)
   KEY `idx_meter_num` (`meter_num`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='热力实时数据表';
@@ -1634,7 +1588,6 @@ CREATE TABLE `pr_heat_station` (
   `address` varchar(255) DEFAULT NULL COMMENT '地址',
   `seq` varchar(32) DEFAULT NULL COMMENT '排序',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `company_name` varchar(128) DEFAULT NULL COMMENT '热力公司名称',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
@@ -1643,8 +1596,7 @@ CREATE TABLE `pr_heat_station` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='换热站表';
 
@@ -1664,7 +1616,6 @@ CREATE TABLE `pr_heat_station_partition` (
   `principal` varchar(64) DEFAULT NULL COMMENT '负责人',
   `address` varchar(255) DEFAULT NULL COMMENT '地址',
   `seq` varchar(32) DEFAULT NULL COMMENT '排序',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -1673,8 +1624,7 @@ CREATE TABLE `pr_heat_station_partition` (
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   PRIMARY KEY (`id`),
-  KEY `idx_station_id` (`station_id`),
-  KEY `idx_company_id` (`company_id`)
+  KEY `idx_station_id` (`station_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='换热站分区表';
 
 CREATE TABLE `pr_heat_temp_archive` (
@@ -1704,7 +1654,6 @@ CREATE TABLE `pr_heat_temp_archive` (
   `is_stop` int DEFAULT '0' COMMENT '是否停用 0否1是',
   `house_id` bigint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `concentrator_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '集中器编码',
   `imei_num` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IMEI号',
   `product_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '产品ID',
@@ -1715,13 +1664,11 @@ CREATE TABLE `pr_heat_temp_archive` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`),
   KEY `idx_house_id` (`house_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_archive_id` (`archive_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_archive_id` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='温采器配表';
 
 CREATE TABLE `pr_heat_unit_hot_archive` (
@@ -1772,7 +1719,6 @@ CREATE TABLE `pr_heat_unit_hot_archive` (
   `is_changed` int DEFAULT '0' COMMENT '是否换表 0否1是',
   `is_stop` int DEFAULT '0' COMMENT '是否停用 0否1是',
   `unit_id` bigint DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
   `imei_num` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'IMEI号',
   `dtu_num` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT 'DTU号',
@@ -1787,13 +1733,11 @@ CREATE TABLE `pr_heat_unit_hot_archive` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`),
   KEY `idx_unit_id` (`unit_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_archive_id` (`archive_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_archive_id` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='单元热表配表';
 
 CREATE TABLE `pr_heat_unit_valve_archive` (
@@ -1810,7 +1754,6 @@ CREATE TABLE `pr_heat_unit_valve_archive` (
   `meter_serial` int DEFAULT NULL COMMENT '仪表序号',
   `unit_id` bigint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `valve_status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '阀门状态',
   `setting_status` int DEFAULT NULL COMMENT '设定状态',
   `actual_status` int DEFAULT NULL COMMENT '实际状态',
@@ -1839,13 +1782,11 @@ CREATE TABLE `pr_heat_unit_valve_archive` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`),
   KEY `idx_unit_id` (`unit_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_archive_id` (`archive_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_archive_id` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='单元阀门配表';
 
 CREATE TABLE `pr_heat_valve_archive` (
@@ -1862,7 +1803,6 @@ CREATE TABLE `pr_heat_valve_archive` (
   `meter_serial` int DEFAULT NULL COMMENT '仪表序号',
   `house_id` bigint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `valve_status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '阀门状态',
   `setting_status` int DEFAULT NULL COMMENT '设定状态',
   `actual_status` int DEFAULT NULL COMMENT '实际状态',
@@ -1909,13 +1849,11 @@ CREATE TABLE `pr_heat_valve_archive` (
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`),
   KEY `idx_house_id` (`house_id`),
   KEY `idx_meter_num` (`meter_num`),
-  KEY `idx_archive_id` (`archive_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_archive_id` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='户间阀门配表';
 
 CREATE TABLE `pr_house` (
@@ -1967,7 +1905,6 @@ CREATE TABLE `pr_house` (
   `is_charged` tinyint DEFAULT NULL,
   `is_calc` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -1977,7 +1914,7 @@ CREATE TABLE `pr_house` (
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_building_unit` (`building_id`,`unit_code`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_org_id` (`org_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='房屋';
 
 CREATE TABLE `pr_house_expense` (
@@ -1987,7 +1924,6 @@ CREATE TABLE `pr_house_expense` (
   `item_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `standard_id` bigint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -1995,9 +1931,9 @@ CREATE TABLE `pr_house_expense` (
   `update_time` datetime DEFAULT NULL,
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_house_id` (`house_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='房屋费用绑定';
 
 CREATE TABLE `pr_house_log` (
@@ -2006,7 +1942,6 @@ CREATE TABLE `pr_house_log` (
   `change_type` varchar(32) DEFAULT NULL COMMENT '变更类型',
   `change_val` int DEFAULT NULL COMMENT '变更值',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2014,9 +1949,9 @@ CREATE TABLE `pr_house_log` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_house_id` (`house_id`)
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='房屋变更日志表';
 
@@ -2029,7 +1964,6 @@ CREATE TABLE `pr_import_account` (
   `item_code` varchar(32) DEFAULT NULL COMMENT '费项编码',
   `amount` decimal(18,4) DEFAULT NULL COMMENT '金额',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2037,9 +1971,9 @@ CREATE TABLE `pr_import_account` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_type` (`type`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_type` (`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='导入暂存表';
 
 CREATE TABLE `pr_import_basic_data` (
@@ -2081,7 +2015,6 @@ CREATE TABLE `pr_import_basic_data` (
   `standard_price` decimal(18,4) DEFAULT NULL,
   `pay_status` varchar(64) DEFAULT NULL,
   `other_code` varchar(255) DEFAULT NULL,
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
   `update_by` bigint DEFAULT NULL COMMENT '更新者',
@@ -2117,7 +2050,6 @@ CREATE TABLE `pr_import_heat` (
   `standard_price` decimal(18,4) DEFAULT NULL COMMENT '单价金额',
   `install_type` varchar(64) DEFAULT NULL COMMENT '安装类型',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL COMMENT '更新者',
@@ -2148,7 +2080,6 @@ CREATE TABLE `pr_import_heat_temp` (
   `device_id` varchar(128) DEFAULT NULL,
   `caliber` varchar(64) DEFAULT NULL,
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
   `update_by` bigint DEFAULT NULL COMMENT '更新者',
@@ -2178,7 +2109,6 @@ CREATE TABLE `pr_import_history` (
   `payment_balance` decimal(18,4) DEFAULT NULL,
   `status` varchar(64) DEFAULT NULL,
   `user_name` varchar(255) DEFAULT NULL,
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
   `update_by` bigint DEFAULT NULL COMMENT '更新者',
@@ -2192,7 +2122,6 @@ CREATE TABLE `pr_import_history` (
 CREATE TABLE `pr_import_record` (
   `id` bigint NOT NULL AUTO_INCREMENT,
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `house_id` bigint DEFAULT NULL,
   `org_name` varchar(255) DEFAULT NULL,
   `room_num` varchar(255) DEFAULT NULL,
@@ -2251,7 +2180,6 @@ CREATE TABLE `pr_import_unit_heat` (
   `standard_name` varchar(255) DEFAULT NULL,
   `standard_price` decimal(18,4) DEFAULT NULL,
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
   `update_by` bigint DEFAULT NULL COMMENT '更新者',
@@ -2276,7 +2204,6 @@ CREATE TABLE `pr_import_unit_valve` (
   `concentrator_code` varchar(128) DEFAULT NULL,
   `chan_num` varchar(64) DEFAULT NULL,
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
   `update_by` bigint DEFAULT NULL COMMENT '更新者',
@@ -2302,7 +2229,6 @@ CREATE TABLE `pr_import_valve` (
   `concentrator_code` varchar(128) DEFAULT NULL,
   `chan_num` varchar(64) DEFAULT NULL,
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
   `update_by` bigint DEFAULT NULL COMMENT '更新者',
@@ -2318,15 +2244,13 @@ CREATE TABLE `pr_inspection_equipment` (
   `id` bigint NOT NULL COMMENT '主键',
   `equipment_name` varchar(128) DEFAULT NULL COMMENT '设备名称',
   `equipment_code` varchar(64) DEFAULT NULL COMMENT '设备编码',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='巡检设备';
 
@@ -2335,7 +2259,6 @@ CREATE TABLE `pr_inspection_person` (
   `name` varchar(64) DEFAULT NULL COMMENT '巡检人姓名',
   `phone` varchar(32) DEFAULT NULL COMMENT '巡检人手机号',
   `type` varchar(32) DEFAULT NULL COMMENT '工种',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2343,8 +2266,7 @@ CREATE TABLE `pr_inspection_person` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='巡检人员表';
 
 CREATE TABLE `pr_inspection_plan` (
@@ -2354,7 +2276,6 @@ CREATE TABLE `pr_inspection_plan` (
   `end_time` datetime DEFAULT NULL COMMENT '结束时间',
   `equipment_id` text COMMENT '设备ID集合',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2362,8 +2283,8 @@ CREATE TABLE `pr_inspection_plan` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='巡检计划表';
 
 CREATE TABLE `pr_inspection_record` (
@@ -2377,7 +2298,6 @@ CREATE TABLE `pr_inspection_record` (
   `content` text COMMENT '巡检内容',
   `images` text COMMENT '巡检图片',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2385,8 +2305,8 @@ CREATE TABLE `pr_inspection_record` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_plan_id` (`plan_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='巡检记录表';
 
@@ -2396,7 +2316,6 @@ CREATE TABLE `pr_notice` (
   `content` text COMMENT '内容',
   `type` varchar(32) DEFAULT NULL COMMENT '类型',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2404,8 +2323,8 @@ CREATE TABLE `pr_notice` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='通知公告表';
 
@@ -2415,7 +2334,6 @@ CREATE TABLE `pr_operate_card_log` (
   `type` varchar(32) DEFAULT NULL COMMENT '操作类型',
   `card_type` varchar(32) DEFAULT NULL COMMENT '卡类型',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2423,8 +2341,8 @@ CREATE TABLE `pr_operate_card_log` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_meter_id` (`meter_id`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='写卡操作日志表';
@@ -2432,7 +2350,6 @@ CREATE TABLE `pr_operate_card_log` (
 CREATE TABLE `pr_options` (
   `id` bigint NOT NULL COMMENT '主键',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `option_key` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `option_value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `option_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -2446,14 +2363,13 @@ CREATE TABLE `pr_options` (
   `level` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `forbidden_buy_electric` tinyint DEFAULT NULL,
   `forbidden_buy_water` tinyint DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='物业选项';
 
 CREATE TABLE `pr_options_heat` (
   `id` bigint NOT NULL COMMENT '主键',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `option_key` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `option_value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `option_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -2532,8 +2448,8 @@ CREATE TABLE `pr_options_heat` (
   `invoice_notes` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `payment_reminder` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `mrphwd` decimal(12,4) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='供热选项';
 
 CREATE TABLE `pr_pet` (
@@ -2545,7 +2461,6 @@ CREATE TABLE `pr_pet` (
   `color` varchar(32) DEFAULT NULL COMMENT '颜色',
   `vaccine_status` varchar(10) DEFAULT NULL COMMENT '疫苗状态(0未接种/1已接种)',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2553,15 +2468,14 @@ CREATE TABLE `pr_pet` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_house_id` (`house_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='宠物管理表';
 
 CREATE TABLE `pr_print_template` (
   `id` bigint NOT NULL COMMENT '主键',
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `name` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `template_content` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   `create_dept` bigint DEFAULT NULL,
@@ -2572,8 +2486,8 @@ CREATE TABLE `pr_print_template` (
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `serial_num` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='打印模板';
 
 CREATE TABLE `pr_reconciliation_diff` (
@@ -2591,7 +2505,6 @@ CREATE TABLE `pr_reconciliation_diff` (
   `handle_remark` varchar(500) DEFAULT NULL COMMENT '处理备注',
   `handler` varchar(40) DEFAULT NULL COMMENT '处理人',
   `handle_time` datetime DEFAULT NULL COMMENT '处理时间',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '所属公司',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2609,7 +2522,6 @@ CREATE TABLE `pr_repair_person` (
   `phone` varchar(32) DEFAULT NULL COMMENT '维修人手机号',
   `type` varchar(32) DEFAULT NULL COMMENT '工种',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2617,8 +2529,7 @@ CREATE TABLE `pr_repair_person` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_org_id` (`org_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='维修人员表';
 
@@ -2660,7 +2571,6 @@ CREATE TABLE `pr_repair_record` (
   `why_failure` varchar(255) DEFAULT NULL COMMENT '失败原因',
   `alert_status` varchar(32) DEFAULT NULL COMMENT '处理结果',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2668,8 +2578,8 @@ CREATE TABLE `pr_repair_record` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_user_id` (`user_id`),
   KEY `idx_dispatch_id` (`dispatch_id`),
   KEY `idx_repair_no` (`repair_no`),
@@ -2683,7 +2593,6 @@ CREATE TABLE `pr_scheduling` (
   `work_date` datetime DEFAULT NULL COMMENT '工作日期',
   `shift` varchar(32) DEFAULT NULL COMMENT '班次',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2691,8 +2600,8 @@ CREATE TABLE `pr_scheduling` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_person_id` (`person_id`),
   KEY `idx_work_date` (`work_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='排班管理表';
@@ -2725,7 +2634,6 @@ CREATE TABLE `pr_standard` (
   `money_formula` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `max_money` decimal(18,4) DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -2735,9 +2643,9 @@ CREATE TABLE `pr_standard` (
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `step2type` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `step2maxgrade` int DEFAULT NULL,
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_item_code` (`item_code`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_item_code` (`item_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='收费标准';
 
 CREATE TABLE `pr_standard_price` (
@@ -2748,7 +2656,6 @@ CREATE TABLE `pr_standard_price` (
   `max_qty` decimal(18,4) DEFAULT NULL,
   `price` decimal(18,4) DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -2781,7 +2688,6 @@ CREATE TABLE `pr_strategy` (
   `type` varchar(32) DEFAULT NULL COMMENT '策略类型',
   `content` text COMMENT '策略内容(JSON)',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2789,8 +2695,8 @@ CREATE TABLE `pr_strategy` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='物业策略表';
 
 CREATE TABLE `pr_transaction_detail` (
@@ -2805,7 +2711,6 @@ CREATE TABLE `pr_transaction_detail` (
   `item_group` varchar(32) DEFAULT NULL COMMENT '费项分组',
   `item_code` varchar(32) DEFAULT NULL COMMENT '费项编码',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `record_time` datetime DEFAULT NULL COMMENT '交易时间',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
@@ -2814,9 +2719,9 @@ CREATE TABLE `pr_transaction_detail` (
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_meter_id` (`meter_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_meter_id` (`meter_id`)
   KEY `idx_record_time` (`record_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='交易明细表';
 
@@ -2831,7 +2736,6 @@ CREATE TABLE `pr_transaction_record` (
   `house_id` bigint DEFAULT NULL,
   `user_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `item_group` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `item_code` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `transaction_time` datetime DEFAULT NULL,
@@ -2846,10 +2750,10 @@ CREATE TABLE `pr_transaction_record` (
   `update_time` datetime DEFAULT NULL,
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
   KEY `idx_serial_num` (`serial_num`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_house_id` (`house_id`)
   KEY `idx_transaction_time` (`transaction_time`),
   KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='交易记录主表';
@@ -2890,7 +2794,6 @@ CREATE TABLE `pr_unit` (
   `seq` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '排序',
   `station_id` bigint DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2900,7 +2803,6 @@ CREATE TABLE `pr_unit` (
   PRIMARY KEY (`id`),
   KEY `idx_building_id` (`building_id`),
   KEY `idx_org_id` (`org_id`),
-  KEY `idx_company_id` (`company_id`),
   KEY `idx_station_id` (`station_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='单元信息表';
 
@@ -2913,7 +2815,6 @@ CREATE TABLE `pr_use_card_log` (
   `valve_status` int DEFAULT NULL,
   `operation_time` datetime DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `operator_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
@@ -2922,9 +2823,9 @@ CREATE TABLE `pr_use_card_log` (
   `update_time` datetime DEFAULT NULL,
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0',
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_meter_id` (`meter_id`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_meter_id` (`meter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='写卡日志';
 
 CREATE TABLE `pr_user` (
@@ -2934,7 +2835,6 @@ CREATE TABLE `pr_user` (
   `id_no` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `org_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL,
@@ -2966,9 +2866,9 @@ CREATE TABLE `pr_user` (
   `head_photo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `front_photo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `back_photo` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+  KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_phone` (`phone`),
-  KEY `idx_company_org` (`company_id`,`org_id`)
+  KEY `idx_phone` (`phone`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='客户';
 
 CREATE TABLE `pr_user_house` (
@@ -2978,7 +2878,6 @@ CREATE TABLE `pr_user_house` (
   `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '手机号',
   `house_id` bigint DEFAULT NULL,
   `relation_type` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '关系类型',
-  `company_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -2990,8 +2889,7 @@ CREATE TABLE `pr_user_house` (
   `record_source` varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '记录来源',
   PRIMARY KEY (`id`),
   KEY `idx_user_id` (`user_id`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_company_id` (`company_id`)
+  KEY `idx_house_id` (`house_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户-房屋关联表';
 
 CREATE TABLE `pr_wechat_bill` (
@@ -3008,7 +2906,6 @@ CREATE TABLE `pr_wechat_bill` (
   `total_count` int DEFAULT NULL COMMENT '总笔数',
   `success_count` int DEFAULT NULL COMMENT '成功笔数',
   `diff_count` int DEFAULT NULL COMMENT '差异笔数',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `operator` varchar(40) DEFAULT NULL COMMENT '操作人',
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
@@ -3017,8 +2914,7 @@ CREATE TABLE `pr_wechat_bill` (
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` bigint DEFAULT NULL,
   `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_bill_date` (`bill_date`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='微信对账单';
@@ -3028,7 +2924,6 @@ CREATE TABLE `pr_wechat_bind_record` (
   `house_id` bigint DEFAULT NULL,
   `heat_pay_code` varchar(64) DEFAULT NULL COMMENT '供热缴费编码',
   `wx_open_id` varchar(64) DEFAULT NULL COMMENT '微信openId',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -3051,7 +2946,6 @@ CREATE TABLE `pr_wechat_order` (
   `item_group` varchar(32) DEFAULT NULL COMMENT '费项分组',
   `item_code` varchar(32) DEFAULT NULL COMMENT '费项编码',
   `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
   `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
   `create_by` bigint DEFAULT NULL COMMENT '创建者',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
@@ -3073,8 +2967,8 @@ CREATE TABLE `pr_wechat_order` (
   `bank_type` varchar(255) DEFAULT NULL,
   `attach` varchar(255) DEFAULT NULL,
   `operator` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_company_org` (`company_id`,`org_id`),
+  KEY `idx_org_id` (`org_id`),
+  PRIMARY KEY (`id`)
   KEY `idx_house_id` (`house_id`),
   KEY `idx_order_no` (`order_no`),
   KEY `idx_create_time` (`create_time`)

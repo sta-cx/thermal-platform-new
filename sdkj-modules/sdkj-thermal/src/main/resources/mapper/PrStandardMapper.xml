@@ -8,15 +8,15 @@
                a.step2_maxgrade, a.is_latefee, a.latefee_type, a.latefee_startdate,
                a.latefee_startdays, a.latefee_formula, a.is_limited, a.limited_type,
                a.limited_cond, a.limited_times, a.limited_money, a.limited_single_money,
-               a.standard_price, a.money_formula, a.max_money, a.org_id, a.company_id,
+               a.standard_price, a.money_formula, a.max_money, a.org_id,
                a.create_time,
                b.item_name,
                c.price_formula
         FROM pr_standard a
         LEFT JOIN pr_expense_item b
-            ON b.item_code = a.item_code AND b.company_id = a.company_id AND b.org_id = a.org_id
+            ON b.item_code = a.item_code AND b.org_id = a.org_id
         LEFT JOIN pr_standard_price c
-            ON c.standard_id = a.id AND c.company_id = a.company_id AND c.org_id = a.org_id AND c.grade = 1
+            ON c.standard_id = a.id AND c.org_id = a.org_id AND c.grade = 1
         WHERE a.org_id = #{orgId}
           AND a.item_code = #{type}
         GROUP BY a.id
@@ -34,7 +34,7 @@
                step2_maxgrade, is_latefee, latefee_type, latefee_startdate,
                latefee_startdays, latefee_formula, is_limited, limited_type,
                limited_cond, limited_times, limited_money, limited_single_money,
-               standard_price, money_formula, max_money, org_id, company_id
+               standard_price, money_formula, max_money, org_id
         FROM pr_standard
         WHERE id = #{id}
     </select>
@@ -45,7 +45,7 @@
                step2_maxgrade, is_latefee, latefee_type, latefee_startdate,
                latefee_startdays, latefee_formula, limited_single_money,
                is_limited, limited_type, limited_cond, limited_times, limited_money,
-               standard_price, money_formula, max_money, org_id, company_id
+               standard_price, money_formula, max_money, org_id
         FROM pr_standard
         WHERE item_code = #{itemCode} AND org_id = #{orgId}
     </select>
@@ -55,10 +55,9 @@
                b.line_amount, b.line_mode
         FROM pr_standard a
         LEFT JOIN pr_standard_price b
-            ON b.standard_id = a.id AND b.company_id = #{companyId} AND b.org_id = #{orgId}
+            ON b.standard_id = a.id AND b.org_id = #{orgId}
                AND b.grade = 1 AND b.step12 = 1
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.item_group = '5'
           AND a.item_code = '01'
     </select>
@@ -68,10 +67,9 @@
                b.line_amount, b.line_mode
         FROM pr_standard a
         LEFT JOIN pr_standard_price b
-            ON b.standard_id = a.id AND b.company_id = #{companyId} AND b.org_id = #{orgId}
+            ON b.standard_id = a.id AND b.org_id = #{orgId}
                AND b.grade = 1 AND b.step12 = 1
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.item_group = '5'
           AND a.item_code = '02'
     </select>
@@ -81,17 +79,16 @@
                b.line_amount, b.line_mode
         FROM pr_standard a
         LEFT JOIN pr_standard_price b
-            ON b.standard_id = a.id AND b.company_id = #{companyId} AND b.org_id = #{orgId}
+            ON b.standard_id = a.id AND b.org_id = #{orgId}
                AND b.grade = 1 AND b.step12 = 1
-        WHERE a.company_id = #{companyId}
-          AND a.org_id = #{orgId}
+        WHERE a.org_id = #{orgId}
           AND a.item_group = '6'
     </select>
 
     <select id="selectPriceList" resultType="org.sdkj.thermal.domain.PrStandardPrice">
         SELECT id, standard_id, step12, grade, minimum, maximum, standard_price,
                price_formula, other1_price, other2_price, other3_price, max_price,
-               line_mode, line_amount, money_formula, org_id, company_id
+               line_mode, line_amount, money_formula, org_id
         FROM pr_standard_price
         WHERE standard_id = #{standardId} AND grade = 1
         ORDER BY grade, step12
@@ -100,7 +97,7 @@
     <select id="selectPriceListAll" resultType="org.sdkj.thermal.domain.PrStandardPrice">
         SELECT id, standard_id, step12, grade, minimum, maximum, standard_price,
                price_formula, other1_price, other2_price, other3_price, max_price,
-               line_mode, line_amount, money_formula, org_id, company_id
+               line_mode, line_amount, money_formula, org_id
         FROM pr_standard_price
         WHERE standard_id = #{standardId}
         ORDER BY grade
@@ -108,8 +105,7 @@
 
     <select id="checkName" resultType="org.sdkj.thermal.domain.vo.PrStandardVo">
         SELECT name FROM pr_standard
-        WHERE company_id = #{companyId}
-          AND org_id = #{orgId}
+        WHERE org_id = #{orgId}
           AND item_group = #{itemGroup}
           AND name = #{name}
         <if test="id != null and id != ''">
@@ -120,7 +116,6 @@
     <select id="getPurchaseNumMonth" resultType="int">
         SELECT COUNT(1) FROM pr_transaction_detail
         WHERE meter_id = #{meterId}
-          AND company_id = #{companyId}
           AND org_id = #{orgId}
           AND del_flag = '0'
           AND DATE_FORMAT(record_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
@@ -129,7 +124,6 @@
     <select id="getPurchaseAmountMonth" resultType="java.math.BigDecimal">
         SELECT ROUND(IFNULL(SUM(receivable), '0'), 2) FROM pr_transaction_detail
         WHERE meter_id = #{meterId}
-          AND company_id = #{companyId}
           AND org_id = #{orgId}
           AND del_flag = '0'
           AND DATE_FORMAT(record_time, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')
@@ -138,7 +132,6 @@
     <select id="getPurchaseNumQuarter" resultType="int">
         SELECT COUNT(1) FROM pr_transaction_detail
         WHERE meter_id = #{meterId}
-          AND company_id = #{companyId}
           AND org_id = #{orgId}
           AND del_flag = '0'
           AND YEAR(record_time) = YEAR(NOW())
@@ -148,7 +141,6 @@
     <select id="getPurchaseAmountQuarter" resultType="java.math.BigDecimal">
         SELECT ROUND(IFNULL(SUM(receivable), '0'), 2) FROM pr_transaction_detail
         WHERE meter_id = #{meterId}
-          AND company_id = #{companyId}
           AND org_id = #{orgId}
           AND del_flag = '0'
           AND YEAR(record_time) = YEAR(NOW())
@@ -158,7 +150,6 @@
     <select id="getPurchaseNumYear" resultType="int">
         SELECT COUNT(1) FROM pr_transaction_detail
         WHERE meter_id = #{meterId}
-          AND company_id = #{companyId}
           AND org_id = #{orgId}
           AND del_flag = '0'
           AND YEAR(record_time) = YEAR(NOW())
@@ -167,7 +158,6 @@
     <select id="getPurchaseAmountYear" resultType="java.math.BigDecimal">
         SELECT ROUND(IFNULL(SUM(receivable), '0'), 2) FROM pr_transaction_detail
         WHERE meter_id = #{meterId}
-          AND company_id = #{companyId}
           AND org_id = #{orgId}
           AND del_flag = '0'
           AND YEAR(record_time) = YEAR(NOW())
@@ -177,10 +167,9 @@
         SELECT b.*
         FROM pr_standard a
         LEFT JOIN pr_expense_item b
-            ON a.company_id = b.company_id AND a.org_id = b.org_id
+            ON a.org_id = b.org_id
                AND a.item_group = b.item_group AND a.item_code = b.item_code
         WHERE a.id = #{standardId}
-          AND a.company_id = #{companyId}
           AND a.org_id = #{orgId}
     </select>
 
@@ -190,15 +179,15 @@
                a.step2_maxgrade, a.is_latefee, a.latefee_type, a.latefee_startdate,
                a.latefee_startdays, a.latefee_formula, a.is_limited, a.limited_type,
                a.limited_cond, a.limited_times, a.limited_money, a.limited_single_money,
-               a.standard_price, a.money_formula, a.max_money, a.org_id, a.company_id,
+               a.standard_price, a.money_formula, a.max_money, a.org_id,
                a.create_time,
                b.item_name,
                c.price_formula
         FROM pr_standard a
         LEFT JOIN pr_expense_item b
-            ON b.item_code = a.item_code AND b.company_id = a.company_id AND b.org_id = a.org_id
+            ON b.item_code = a.item_code AND b.org_id = a.org_id
         LEFT JOIN pr_standard_price c
-            ON c.standard_id = a.id AND c.company_id = a.company_id AND c.org_id = a.org_id AND c.grade = 1
+            ON c.standard_id = a.id AND c.org_id = a.org_id AND c.grade = 1
         WHERE a.org_id = #{orgIdCopy}
           AND b.item_name = #{itemName}
         GROUP BY a.id
@@ -216,7 +205,7 @@
     <insert id="insertPriceList">
         INSERT INTO pr_standard_price(id, standard_id, step12, grade, minimum, maximum,
             standard_price, price_formula, other1_price, other2_price, other3_price, max_price,
-            start_time, end_time, line_mode, line_amount, money_formula, org_id, company_id,
+            start_time, end_time, line_mode, line_amount, money_formula, org_id,
             create_by, create_time)
         VALUES
         <foreach collection="list" separator="," item="item">
@@ -224,7 +213,7 @@
              #{item.maximum}, #{item.standardPrice}, #{item.priceFormula}, #{item.other1Price},
              #{item.other2Price}, #{item.other3Price}, #{item.maxPrice}, #{item.startTime},
              #{item.endTime}, #{item.lineMode}, #{item.lineAmount}, #{item.moneyFormula},
-             #{item.orgId}, #{item.companyId}, #{item.createBy}, NOW())
+             #{item.orgId}, #{item.createBy}, NOW())
         </foreach>
     </insert>
 

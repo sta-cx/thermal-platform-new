@@ -4,7 +4,7 @@
 
     <select id="selectAllByOrgId" resultType="org.sdkj.thermal.domain.HtTasks">
         SELECT id, name, type, cron_expression, strategy_id, priority, status,
-               number, last_time, total, org_id, company_id, adjust_basis, scope_type,
+               number, last_time, total, org_id, adjust_basis, scope_type,
                description, bean_class, job_group, days, nums, standard, end_time,
                execution_time, out_temp_pj, is_use_report_rate, report_rate, is_use_first_control
         FROM ht_tasks
@@ -64,7 +64,7 @@
     <select id="selectScopeForAngleH" resultType="java.util.HashMap">
         SELECT s.id AS scope_id, s.meter_num, s.device_id, s.imei,
                s.meter_id, s.meter_arc_code, s.dtu_num, s.chan_num,
-               s.org_id, s.company_id, ss.valve_angle, ss.instruction_id,
+               s.org_id, ss.valve_angle, ss.instruction_id,
                ss.sort AS instruction_sort
         FROM ht_scope s
         INNER JOIN ht_strategy_sub ss ON ss.strategy_id = (
@@ -78,7 +78,7 @@
     <select id="selectScopeForAngleD" resultType="java.util.HashMap">
         SELECT s.id AS scope_id, s.meter_num, s.device_id, s.imei,
                s.meter_id, s.meter_arc_code, s.dtu_num, s.chan_num,
-               s.org_id, s.company_id, ss.valve_angle, ss.instruction_id,
+               s.org_id, ss.valve_angle, ss.instruction_id,
                ss.sort AS instruction_sort
         FROM ht_scope s
         INNER JOIN ht_strategy_sub ss ON ss.strategy_id = (
@@ -94,7 +94,7 @@
         INSERT INTO ht_tasks_perform (
             id, instruction_id, group_id, strategy_id, command_index, orderr,
             instruction_type, instruction, number, intervall, fore_start, unit,
-            duration, org_id, company_id, concentrator_code, device_id,
+            duration, org_id, concentrator_code, device_id,
             meter_num, meter_id, meter_arc_code, status, instruction_status,
             send_time, tasks_id, in_temp, out_temp, room_temp, valve_open,
             imei, dtu_num, chan_num, out_temp_pj, ref_heat,
@@ -105,7 +105,7 @@
                 #{r.id}, #{r.instructionId}, #{r.groupId}, #{r.strategyId},
                 #{r.commandIndex}, #{r.orderr}, #{r.instructionType}, #{r.instruction},
                 #{r.number}, #{r.intervall}, #{r.foreStart}, #{r.unit},
-                #{r.duration}, #{r.orgId}, #{r.companyId}, #{r.concentratorCode},
+                #{r.duration}, #{r.orgId}, #{r.concentratorCode},
                 #{r.deviceId}, #{r.meterNum}, #{r.meterId}, #{r.meterArcCode},
                 #{r.status}, #{r.instructionStatus}, #{r.sendTime}, #{r.tasksId},
                 #{r.inTemp}, #{r.outTemp}, #{r.roomTemp}, #{r.valveOpen},
@@ -216,7 +216,7 @@
     <insert id="insertHtTasksPerformByRadio">
         INSERT INTO ht_tasks_perform (
             id, tasks_id, strategy_id, instruction_id, group_id, command_index,
-            orderr, org_id, company_id, concentrator_code, meter_arc_code,
+            orderr, org_id, concentrator_code, meter_arc_code,
             dtu_num, chan_num, status, instruction_status, create_time, create_by
         )
         SELECT
@@ -228,7 +228,6 @@
             #{commandIndex} AS command_index,
             sp.orderr AS orderr,
             sd.org_id,
-            sd.company_id,
             sd.concentrator_code,
             sd.meter_arc_code,
             sd.dtu_num,
@@ -330,7 +329,7 @@
     <insert id="insertHtTasksPerformLsHfPj">
         INSERT INTO ht_tasks_perform_ls (
             id, instruction_id, orderr, instruction_type, instruction,
-            number, org_id, company_id, concentrator_code, meter_num,
+            number, org_id, concentrator_code, meter_num,
             meter_id, meter_arc_code, status, in_temp, out_temp,
             room_temp, valve_open, instruction_status, send_time,
             tasks_id, alert_type, device_id, fore_start, imei,
@@ -338,7 +337,7 @@
         )
         SELECT
             id, instruction_id, orderr, instruction_type, instruction,
-            number, org_id, company_id, concentrator_code, meter_num,
+            number, org_id, concentrator_code, meter_num,
             meter_id, meter_arc_code, status, in_temp, out_temp,
             room_temp, valve_open, instruction_status, send_time,
             tasks_id, alert_type, device_id, fore_start, imei,
@@ -352,7 +351,6 @@
                 IFNULL(d.instruction, f.instruction) AS instruction,
                 IFNULL(d.number, '1') AS number,
                 a.org_id,
-                a.company_id,
                 h.concentrator_code,
                 a.meter_num,
                 a.meter_id,
@@ -405,7 +403,7 @@
     <insert id="insertHtTasksPerformLsDyPj">
         INSERT INTO ht_tasks_perform_ls (
             id, instruction_id, orderr, instruction_type, instruction,
-            number, org_id, company_id, concentrator_code, meter_num,
+            number, org_id, concentrator_code, meter_num,
             meter_id, meter_arc_code, status, in_temp, out_temp,
             room_temp, valve_open, instruction_status, send_time,
             tasks_id, alert_type, device_id, imei, dtu_num, chan_num
@@ -418,7 +416,6 @@
             IFNULL(d.instruction, f.instruction),
             IFNULL(d.number, '1'),
             a.org_id,
-            a.company_id,
             h.concentrator_code,
             a.meter_num,
             a.meter_id,
@@ -442,7 +439,7 @@
             LEFT JOIN (
                 SELECT MAX(send_time) AS send_time, number, id, instruction_id,
                     instruction_type, instruction, intervall, unit, duration,
-                    org_id, company_id, device_id, meter_num, meter_id,
+                    org_id, device_id, meter_num, meter_id,
                     meter_arc_code, status, instruction_status, tasks_id, orderr
                 FROM ht_tasks_perform_last
                 WHERE tasks_id = #{tasksId}
@@ -908,7 +905,7 @@
     <insert id="inserHtTasksPerformPj">
         INSERT INTO ht_tasks_perform (
             id, instruction_id, instruction_type, instruction,
-            number, intervall, unit, duration, org_id, company_id,
+            number, intervall, unit, duration, org_id,
             concentrator_code, device_id, meter_num, meter_id,
             meter_arc_code, status, instruction_status, tasks_id,
             orderr, fore_start, create_time, create_by,
@@ -925,7 +922,6 @@
             a.unit,
             a.duration,
             a.org_id,
-            a.company_id,
             a.concentrator_code,
             a.device_id,
             a.meter_num,
@@ -956,7 +952,7 @@
     <insert id="inserHtTasksPerform">
         INSERT INTO ht_tasks_perform (
             id, instruction_id, instruction_type, instruction,
-            number, intervall, unit, duration, org_id, company_id,
+            number, intervall, unit, duration, org_id,
             concentrator_code, device_id, meter_num, meter_id,
             meter_arc_code, status, instruction_status, send_time,
             tasks_id, orderr, fore_start, create_time, create_by,
@@ -973,7 +969,6 @@
             a.unit,
             a.duration,
             a.org_id,
-            a.company_id,
             a.concentrator_code,
             a.device_id,
             a.meter_num,
@@ -1004,7 +999,7 @@
     <insert id="inserHtTasksPerformW">
         INSERT INTO ht_tasks_perform (
             id, instruction_id, instruction_type, instruction,
-            number, intervall, unit, duration, org_id, company_id,
+            number, intervall, unit, duration, org_id,
             concentrator_code, device_id, meter_num, meter_id,
             meter_arc_code, status, instruction_status, send_time,
             tasks_id, orderr, fore_start, create_time, create_by,
@@ -1021,7 +1016,6 @@
             a.unit,
             a.duration,
             a.org_id,
-            a.company_id,
             a.concentrator_code,
             a.device_id,
             a.meter_num,
@@ -1050,14 +1044,13 @@
 
     <!-- 插入异常报警记录 -->
     <insert id="insertHtAlert">
-        INSERT INTO ht_alert (id, meter_id, alert_type, alert_time, org_id, company_id, valve, in_temp, out_temp, room_temp)
+        INSERT INTO ht_alert (id, meter_id, alert_type, alert_time, org_id, valve, in_temp, out_temp, room_temp)
         SELECT
             CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
             a.meter_id,
             a.alert_type,
             NOW(),
             a.org_id,
-            a.company_id,
             a.valve_open,
             a.in_temp,
             a.out_temp,
@@ -1084,7 +1077,7 @@
     <insert id="inserHtTasksPerformLast">
         INSERT INTO ht_tasks_perform_last (
             id, instruction_id, instruction_type, instruction,
-            number, intervall, unit, duration, org_id, company_id,
+            number, intervall, unit, duration, org_id,
             concentrator_code, device_id, meter_num, meter_id,
             meter_arc_code, status, instruction_status, send_time,
             tasks_id, orderr, fore_start, create_time, create_by,
@@ -1102,7 +1095,6 @@
             a.unit,
             a.duration,
             a.org_id,
-            a.company_id,
             a.concentrator_code,
             a.device_id,
             a.meter_num,

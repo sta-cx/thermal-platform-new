@@ -30,33 +30,27 @@ public class PrPrintTemplateController extends BaseController {
     @SaCheckPermission("thermal:property:printTemplate:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<List<PrPrintTemplate>> list(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrPrintTemplate>> list(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String name) {
-        return R.ok(printTemplateService.listByOrgAndCompany(companyId, orgId, name));
+        return R.ok(printTemplateService.listByOrgAndCompany(orgId, name));
     }
 
     @SaCheckPermission("thermal:property:printTemplate:add")
     @SaCheckLogin
     @Log(title = "打印模板", businessType = BusinessType.INSERT)
     @PostMapping("/upload")
-    public R<Void> uploadTemplate(
-            @RequestParam String companyId,
-            @RequestParam String orgId,
+    public R<Void> uploadTemplate(@RequestParam String orgId,
             @RequestParam String name,
             @RequestParam String templateContent) {
-        return toAjax(printTemplateService.saveOrUpdateTemplate(companyId, orgId, name, templateContent));
+        return toAjax(printTemplateService.saveOrUpdateTemplate(orgId, name, templateContent));
     }
 
     @SaCheckPermission("thermal:property:printTemplate:query")
     @SaCheckLogin
     @GetMapping("/find")
-    public R<List<PrPrintTemplate>> findTemplate(
-            @RequestParam(required = false) String companyId,
-            @RequestParam(required = false) String orgId,
+    public R<List<PrPrintTemplate>> findTemplate(@RequestParam(required = false) String orgId,
             @RequestParam(required = false) String name) {
-        return R.ok(printTemplateService.listByOrgAndCompany(companyId, orgId, name));
+        return R.ok(printTemplateService.listByOrgAndCompany(orgId, name));
     }
 
     @SaCheckPermission("thermal:property:printTemplate:query")

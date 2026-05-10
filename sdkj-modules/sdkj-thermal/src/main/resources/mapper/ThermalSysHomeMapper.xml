@@ -6,8 +6,8 @@
         SELECT ifnull(COUNT(*), '0') as 'orgNum'
         from sys_organization a
                  left join pr_data_grant b on b.org_id = a.id and b.user_id = #{userId}
-        where a.company_id = #{companyId}
-          and a.level = 2
+        where
+            a.level = 2
           and b.user_id = #{userId}
     </select>
 
@@ -24,10 +24,10 @@
     <select id="queryBuildingNum" resultType="string">
         select ifnull(count(1),0) as 'buildingNum' from (
         SELECT DISTINCT a.id from pr_building a
-        INNER JOIN pr_heat_station b on a.company_id=b.company_id and a.station_id=b.id
+        INNER JOIN pr_heat_station b on a.station_id=b.id
         INNER JOIN pr_heat_station_partition c on c.station_id=b.id
         INNER join pr_data_grant d on d.org_id=a.org_id and d.user_id=#{userId}
-        where a.company_id=#{companyId} and d.user_id=#{userId}
+        where d.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and b.id=#{stationId}
         </if>
@@ -37,10 +37,10 @@
     <select id="queryAllBuildingNum" resultType="string">
         select ifnull(count(1),0) as 'buildingAllNum' from (
         SELECT DISTINCT a.id from pr_building a
-        INNER JOIN pr_heat_station b on a.company_id=b.company_id and a.station_id=b.id
+        INNER JOIN pr_heat_station b on a.station_id=b.id
         INNER JOIN pr_heat_station_partition c on c.station_id=b.id
         INNER join pr_data_grant d on d.org_id=a.org_id and d.user_id=#{userId}
-        where a.company_id=#{companyId} and d.user_id=#{userId}
+        where d.user_id=#{userId}
         ) x
     </select>
 
@@ -50,18 +50,18 @@
             (SELECT DISTINCT a.id FROM pr_heat_station_partition a
               LEFT JOIN pr_data_grant b on b.user_id = #{userId}
               LEFT JOIN pr_heat_station_org c on c.org_id = b.org_id and a.station_id = c.station_id
-             where a.company_id = #{companyId}
-               and a.del_flag = '0'
+             where
+            a.del_flag = '0'
                and a.station_id = c.station_id) b
 
     </select>
 
     <select id="queryHouseNum" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'houseNum' from pr_house a
-        LEFT JOIN pr_heat_station_partition c on c.id=a.station_type and a.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=a.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.del_flag='0' and e.user_id=#{userId}
+        where a.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -74,17 +74,17 @@
         SELECT ifnull(COUNT(*), '0') as 'prUserNum'
         FROM pr_house a
                  left join pr_data_grant d on d.org_id=a.org_id and d.user_id = #{userId}
-        where a.company_id = #{companyId}
-          and a.del_flag = '0'
+        where
+            a.del_flag = '0'
           and d.user_id = #{userId}
     </select>
 
     <select id="queryHeatingArea" resultType="string">
         SELECT ifnull(SUM(a.heating_area),'0') as 'heatingArea' from pr_house a
-        INNER JOIN pr_heat_station_partition c on c.id=a.station_type and a.company_id=c.company_id
+        INNER JOIN pr_heat_station_partition c on c.id=a.station_type
         INNER JOIN pr_heat_station d on c.station_id=d.id
         INNER join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.del_flag='0' and e.user_id=#{userId}
+        where a.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -95,20 +95,20 @@
 
     <select id="queryHeatingAreaSum" resultType="string">
         SELECT ifnull(SUM(a.heating_area),'0') as 'heatingAreaSum' from pr_house a
-        INNER JOIN pr_heat_station_partition c on c.id=a.station_type and a.company_id=c.company_id
+        INNER JOIN pr_heat_station_partition c on c.id=a.station_type
         INNER JOIN pr_heat_station d on c.station_id=d.id
         INNER join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.del_flag='0' and e.user_id=#{userId}
+        where a.del_flag='0' and e.user_id=#{userId}
 
     </select>
 
     <select id="queryValveNum" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'valveNum' from pr_heat_valve_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -120,10 +120,10 @@
     <select id="queryValveNumZ" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'valveNum' from pr_heat_valve_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId} and
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId} and
         (a.valve_status in (1,2) or a.valve_status is null)
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
@@ -136,10 +136,10 @@
     <select id="queryValveNumL" resultType="java.util.HashMap">
         SELECT a.meter_arc_name as 'name',ifnull(COUNT(*),'0') as 'value' from pr_heat_valve_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -156,7 +156,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId}
+        where a.is_changed='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and c.id=#{stationId}
         </if>
@@ -171,7 +171,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId} and
+        where a.is_changed='0' and e.user_id=#{userId} and
         (a.valve_status in (1,2) or a.valve_status is null)
         <if test="stationId != null and stationId != ''">
             and c.id=#{stationId}
@@ -187,7 +187,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId}
+        where a.is_changed='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and c.id=#{stationId}
         </if>
@@ -200,10 +200,10 @@
     <select id="queryHotArchiveNum" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'hotArchiveNum' from pr_heat_hot_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -215,10 +215,10 @@
     <select id="queryHotArchiveNumZ" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'hotArchiveNum' from pr_heat_hot_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId} and
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId} and
         LOCATE('异常', COALESCE(a.status2, '')) = 0
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
@@ -231,10 +231,10 @@
     <select id="queryHotArchiveNumL" resultType="java.util.HashMap">
         SELECT a.meter_arc_name as 'name',ifnull(COUNT(*),'0') as 'value' from pr_heat_hot_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -250,7 +250,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId}
+        where a.is_changed='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and c.id=#{stationId}
         </if>
@@ -265,7 +265,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id and e.user_id=#{userId}
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId} and
+        where a.is_changed='0' and e.user_id=#{userId} and
         LOCATE('异常', COALESCE(a.status2, '')) = 0
         <if test="stationId != null and stationId != ''">
             and c.id=#{stationId}
@@ -281,7 +281,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId}
+        where a.is_changed='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and c.id=#{stationId}
         </if>
@@ -294,10 +294,10 @@
     <select id="queryTempArchiveNum" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'tempArchiveNum' from pr_heat_temp_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -309,10 +309,10 @@
     <select id="queryTempArchiveNumZ" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'tempArchiveNum' from pr_heat_temp_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         AND (
         a.valve_status IS NULL
         OR LENGTH( a.valve_status ) != 4
@@ -356,10 +356,10 @@
     <select id="queryTempArchiveNumL" resultType="java.util.HashMap">
         SELECT a.meter_arc_name as 'name',ifnull(COUNT(*),'0') as 'value' from pr_heat_temp_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -374,8 +374,8 @@
         from pr_heat_dtu_archive a
         left join pr_data_grant e on e.org_id=a.org_id
         left join pr_heat_station_org f on f.org_id = a.org_id
-        where a.company_id = #{companyId}
-          and e.user_id = #{userId}
+        where
+            e.user_id = #{userId}
         <if test="stationId != null and stationId != ''">
             and f.station_id=#{stationId}
         </if>
@@ -386,8 +386,8 @@
         from pr_heat_dtu_archive a
         left join pr_data_grant e on e.org_id=a.org_id
         left join pr_heat_station_org f on f.org_id = a.org_id
-        where a.company_id = #{companyId}
-          and e.user_id = #{userId}
+        where
+            e.user_id = #{userId}
           and a.status = '1'
         <if test="stationId != null and stationId != ''">
             and f.station_id=#{stationId}
@@ -396,10 +396,10 @@
 
     <select id="queryJFNum" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'jfNum' from pr_house b
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=b.org_id
-        where b.pay_status = '1' and b.is_special = '0' and b.company_id=#{companyId} and b.del_flag='0' and e.user_id=#{userId}
+        where b.pay_status = '1' and b.is_special = '0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -410,10 +410,10 @@
 
     <select id="queryQFNum" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'qfNum' from pr_house b
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=b.org_id
-        where (b.pay_status is null or b.pay_status = '0') and b.is_special = '0' and b.company_id=#{companyId} and b.del_flag='0' and e.user_id=#{userId}
+        where (b.pay_status is null or b.pay_status = '0') and b.is_special = '0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -424,10 +424,10 @@
 
     <select id="queryTGNum" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'kzNum' from pr_house b
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=b.org_id
-        where b.pay_status = '2' and b.is_special = '0' and b.company_id=#{companyId} and b.del_flag='0' and e.user_id=#{userId}
+        where b.pay_status = '2' and b.is_special = '0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -438,10 +438,10 @@
 
     <select id="queryKZNum" resultType="string">
         SELECT ifnull(COUNT(*),'0') as 'kzNum' from pr_house b
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=b.org_id
-        where b.pay_status = '3' and b.is_special = '0' and b.company_id=#{companyId} and b.del_flag='0' and e.user_id=#{userId}
+        where b.pay_status = '3' and b.is_special = '0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -455,10 +455,10 @@
         SELECT ifnull(CAST(SUM(a.out_temperature)/COUNT(*) as DECIMAL(20,2)),'0') as 'valveArchiveOut' from
         pr_heat_valve_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where b.pay_status = '1' and b.is_special = '0' and a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where b.pay_status = '1' and b.is_special = '0' and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -471,10 +471,10 @@
         SELECT ifnull(CAST(SUM(a.in_temperature)/COUNT(*) as DECIMAL(20,2)),'0') as 'valveArchiveIn' from
         pr_heat_valve_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where b.pay_status = '1' and b.is_special = '0' and a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where b.pay_status = '1' and b.is_special = '0' and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -487,10 +487,10 @@
         SELECT ifnull(CAST(SUM(a.actual_status)/COUNT(*) as DECIMAL(20,2)),'0') as 'valveArchiveActualStatus' from
         pr_heat_valve_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where b.pay_status = '1' and b.is_special = '0' and a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where b.pay_status = '1' and b.is_special = '0' and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -506,7 +506,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId}
+        where a.is_changed='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -522,7 +522,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId}
+        where a.is_changed='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -538,7 +538,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId}
+        where a.is_changed='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -551,10 +551,10 @@
         SELECT ifnull(CAST(SUM(a.temper)/COUNT(*) as DECIMAL(20,2)),'0') as 'tempArchiveTemper' from
         pr_heat_temp_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -567,10 +567,10 @@
         SELECT ifnull(CAST(SUM(a.total_used-a.start_reading)/COUNT(*) as DECIMAL(20,2)),'0') as 'unitHotArchiveTotal'
         from pr_heat_hot_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -586,7 +586,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId}
+        where a.is_changed='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -598,10 +598,10 @@
     <select id="queryHotArchiveTotalAll" resultType="string">
         SELECT ifnull(SUM(a.total_used-a.start_reading),'0') as 'hotArchiveTotalAll' from pr_heat_hot_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -616,7 +616,7 @@
         LEFT JOIN pr_heat_station_partition d on d.id=b.station_id
         LEFT JOIN pr_heat_station c on c.id=d.station_id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and e.user_id=#{userId}
+        where a.is_changed='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -628,10 +628,10 @@
     <select id="queryHeatValveArchiveList" resultType="org.sdkj.thermal.domain.PrHeatValveArchive">
         SELECT a.* from pr_heat_valve_archive a
         LEFT JOIN pr_house b on b.id=a.house_id
-        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type and b.company_id=c.company_id
+        LEFT JOIN pr_heat_station_partition c on c.id=b.station_type
         LEFT JOIN pr_heat_station d on c.station_id=d.id
         left join pr_data_grant e on e.org_id=a.org_id
-        where a.company_id=#{companyId} and a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
+        where a.is_changed='0' and b.del_flag='0' and e.user_id=#{userId}
         <if test="stationId != null and stationId != ''">
             and d.id=#{stationId}
         </if>
@@ -660,7 +660,7 @@
         INNER JOIN pr_heat_station_partition t2 ON t1.station_type = t2.id
         INNER JOIN pr_heat_valve_archive t4 ON t1.id = t4.house_id
         INNER JOIN pr_data_grant t5 ON t5.org_id=t1.org_id
-        INNER JOIN pr_options_heat t6 ON t5.company_id=t6.company_id and t6.org_id is null and t6.mrphwd > 0 and t6.hswdpcz > 0
+        INNER JOIN pr_options_heat t6 ON t6.org_id is null and t6.mrphwd > 0 and t6.hswdpcz > 0
         WHERE t2.del_flag = '0'
         AND t1.del_flag = 0
         AND t1.pay_status = 1

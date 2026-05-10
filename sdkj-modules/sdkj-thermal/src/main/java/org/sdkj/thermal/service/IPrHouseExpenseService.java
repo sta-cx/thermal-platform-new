@@ -20,7 +20,7 @@ public interface IPrHouseExpenseService extends IService<PrHouseExpense> {
     /**
      * 分页查询房屋-费目绑定列表
      */
-    TableDataInfo<PrHouseExpenseVo> selectPageList(String companyId, String orgId, String buildingId,
+    TableDataInfo<PrHouseExpenseVo> selectPageList(String orgId, String buildingId,
                                                    String unitCode, String itemGroup, String itemCode,
                                                    String search, PageQuery pageQuery);
 
@@ -38,7 +38,7 @@ public interface IPrHouseExpenseService extends IService<PrHouseExpense> {
     /**
      * 批量保存房屋-费目绑定
      */
-    boolean batchInsert(List<PrHouseExpense> list, String itemGroup, String itemCode, String orgId, String companyId);
+    boolean batchInsert(List<PrHouseExpense> list, String itemGroup, String itemCode, String orgId);
 
     /**
      * 批量更新绑定信息
