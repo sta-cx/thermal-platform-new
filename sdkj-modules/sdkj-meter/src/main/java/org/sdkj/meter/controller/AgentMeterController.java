@@ -45,9 +45,12 @@ public class AgentMeterController extends BaseController {
     @SaCheckLogin
     @GetMapping("/allocated")
     public TableDataInfo<?> allocated(
-            @RequestParam String meterType,
+            @RequestParam(required = false) String meterType,
             @RequestParam(required = false) String search,
             PageQuery pageQuery) {
+        if (meterType == null || meterType.isBlank()) {
+            return TableDataInfo.build();
+        }
         return switch (meterType) {
             case "01" -> {
                 LambdaQueryWrapper<MtElectricArchive> lqw = archiveSearch(MtElectricArchive::getCode, MtElectricArchive::getName, search);
@@ -76,8 +79,11 @@ public class AgentMeterController extends BaseController {
     @SaCheckLogin
     @GetMapping("/all")
     public R<List<?>> all(
-            @RequestParam String meterType,
+            @RequestParam(required = false) String meterType,
             @RequestParam(required = false) String search) {
+        if (meterType == null || meterType.isBlank()) {
+            return R.ok(List.of());
+        }
         return switch (meterType) {
             case "01" -> R.ok(electricService.list(archiveSearch(MtElectricArchive::getCode, MtElectricArchive::getName, search)));
             case "02" -> R.ok(waterService.list(archiveSearch(MtWaterArchive::getCode, MtWaterArchive::getName, search)));
