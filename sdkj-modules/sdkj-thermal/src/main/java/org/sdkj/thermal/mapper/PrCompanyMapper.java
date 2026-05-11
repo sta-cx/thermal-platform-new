@@ -46,6 +46,11 @@ public interface PrCompanyMapper extends BaseMapperPlus<PrCompany, PrCompanyVo> 
     List<SysOrganization> getUserOrgByUserId(@Param("userId") Long userId);
 
     /**
+     * 按层级查询所有组织（供超管/租户管理员使用）
+     */
+    List<SysOrganization> listAllOrgsByLevel(@Param("level") String level);
+
+    /**
      * 获取用户可访问的分公司列表
      */
     List<SysOrganization> getUserOrgBranchByUserId(@Param("userId") Long userId);

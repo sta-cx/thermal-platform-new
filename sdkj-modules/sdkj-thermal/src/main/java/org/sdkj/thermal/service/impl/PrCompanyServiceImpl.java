@@ -16,6 +16,7 @@ import org.sdkj.thermal.service.IPrCompanyService;
 import org.sdkj.thermal.vo.TreeNode;
 import org.sdkj.thermal.vo.TreeUtil;
 import org.sdkj.common.core.exception.ServiceException;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,6 +95,9 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
 
     @Override
     public List<SysOrganization> getUserOrg(Long userId) {
+        if (LoginHelper.isSuperAdmin(userId) || LoginHelper.isTenantAdmin()) {
+            return prCompanyMapper.listAllOrgsByLevel("2");
+        }
         return prCompanyMapper.getUserOrgByUserId(userId);
     }
 
