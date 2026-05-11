@@ -51,15 +51,21 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
 
     @Override
     public List<TreeNode> queryBuildingTrees(String companyId) {
-        // 获取公司所有组织机构（不含部门）
         List<SysOrganization> orgs = prCompanyMapper.selectOrganizationsByCompanyId(companyId);
+        return buildBuildingTree(orgs);
+    }
 
-        // 收集所有小区ID (level = '2')，用于查询楼栋
+    @Override
+    public List<TreeNode> queryUserBuildingTrees(Long userId) {
+        List<SysOrganization> orgs = getUserOrg(userId);
+        return buildBuildingTree(orgs);
+    }
+
+    private List<TreeNode> buildBuildingTree(List<SysOrganization> orgs) {
         List<String> orgIds = orgs.stream()
                 .map(SysOrganization::getId)
                 .collect(Collectors.toList());
 
-        // 批量查询楼栋
         List<PrBuilding> buildings = new ArrayList<>();
         if (!orgIds.isEmpty()) {
             buildings = prBuildingMapper.selectList(
@@ -69,10 +75,7 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
             );
         }
 
-        // 将组织机构转换为 TreeNode
         List<TreeNode> nodes = TreeUtil.fromSysOrganizationList(orgs);
-
-        // 将楼栋转换为虚拟 TreeNode（作为对应的 org 的子节点）
         for (PrBuilding b : buildings) {
             TreeNode node = new TreeNode();
             node.setId(String.valueOf(b.getId()));
@@ -81,7 +84,6 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
             nodes.add(node);
         }
 
-        // 构建树形结构
         return TreeUtil.buildByLoop(nodes, "-1");
     }
 

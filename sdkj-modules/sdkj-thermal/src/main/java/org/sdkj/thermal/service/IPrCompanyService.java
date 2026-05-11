@@ -21,6 +21,11 @@ public interface IPrCompanyService extends IService<PrCompany> {
     List<TreeNode> queryBuildingTrees(String companyId);
 
     /**
+     * 基于当前用户可访问小区的含楼栋组织机构树
+     */
+    List<TreeNode> queryUserBuildingTrees(Long userId);
+
+    /**
      * 获取用户数据权限树
      */
     List<TreeNode> getDataGrantOrg(String companyId, Long userId);

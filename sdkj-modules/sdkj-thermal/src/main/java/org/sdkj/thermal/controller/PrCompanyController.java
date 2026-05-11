@@ -103,6 +103,17 @@ public class PrCompanyController extends BaseController {
     }
 
     /**
+     * 基于当前用户权限的含楼栋组织机构树
+     */
+    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckLogin
+    @GetMapping("/buildingTree/user")
+    public R<List<TreeNode>> queryUserBuildingTrees() {
+        Long userId = LoginHelper.getUserId();
+        return R.ok(companyService.queryUserBuildingTrees(userId));
+    }
+
+    /**
      * 获取用户数据权限树
      */
     @SaCheckPermission("thermal:property:company:query")

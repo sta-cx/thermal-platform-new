@@ -69,11 +69,6 @@ public interface PrCompanyMapper extends BaseMapperPlus<PrCompany, PrCompanyVo> 
     int findChild(@Param("id") String id, @Param("companyId") String companyId);
 
     /**
-     * 查询小区下是否存在楼宇
-     */
-    int findBuilding(@Param("id") String id, @Param("companyId") String companyId);
-
-    /**
      * 查询部门下是否存在人员
      */
     int findDeptById(@Param("id") String id, @Param("companyId") String companyId);
