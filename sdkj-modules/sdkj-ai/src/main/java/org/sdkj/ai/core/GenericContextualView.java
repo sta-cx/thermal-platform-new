@@ -6,7 +6,7 @@ public class GenericContextualView extends ContextualView {
         ContextualView v = new ContextualView();
         v.setViewId("fallback-" + System.currentTimeMillis());
 
-        Section narrative = new Section();
+        Section.Narrative narrative = new Section.Narrative();
         narrative.setId("fallback-1");
         narrative.setType(SectionType.NARRATIVE);
         narrative.setTitle("AI 旁注");
