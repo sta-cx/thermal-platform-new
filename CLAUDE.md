@@ -24,15 +24,16 @@ mvn spring-boot:run -pl sdkj-admin         # 开发运行（端口 8080）
 ## 模块结构
 
 ```
-sdkj-admin/           # 启动入口 + 配置文件，依赖三个业务模块
+sdkj-admin/           # 启动入口 + 配置文件，依赖四个业务模块
 sdkj-common/          # 24个公共模块（core/mybatis/redis/security/satoken/oss/sms/...）
 sdkj-modules/
   sdkj-system/        # 系统管理（用户/角色/菜单/部门/字典/租户/OSS）
   sdkj-meter/         # 仪表管理（热力表/水表/电表/燃气表/集中器/温控器/阀门）
   sdkj-thermal/       # 热力调控 + 物业收费（核心业务，约90个Controller）
+  sdkj-ai/            # AI 集成（Spring AI 1.0.7，Alt+A 旁注 + Alt+K 助手 + Tool Calling 基建，OpenAI 兼容协议）
 ```
 
-**模块依赖**: `sdkj-thermal` → `sdkj-system`（唯一跨业务模块依赖）。`sdkj-meter` 与 `sdkj-system` 无互相依赖。
+**模块依赖**: `sdkj-thermal` → `sdkj-system`（唯一跨业务模块依赖）。`sdkj-meter`、`sdkj-ai` 与 `sdkj-system` 无互相依赖。四个业务模块都依赖 `sdkj-common-*` 公共模块。
 
 ## 分层架构
 
@@ -60,6 +61,7 @@ Mapper.selectVoXxx() → MapstructUtils.convert→Vo → 返回前端
 | `IoT*`/`Control*` | sdkj-thermal | IoT 回调 |
 | `PrImport*` | sdkj-thermal | 批量导入 |
 | `PrInspection*` | sdkj-thermal | 巡检 |
+| `Ai*` | sdkj-ai | AI 调用记录 / 用量日志 / 上下文视图 |
 
 ## 数据源 & 多租户
 
@@ -143,6 +145,16 @@ Sa-Token JWT 简单模式：`Authorization: Bearer <token>`，允许并发登录
 | IoT | `/thermal/iot/*` |
 | 认证 | `/auth/*` |
 | 小程序 | `/thermal/wxma/*` |
+| AI 集成 | `/ai/*`（`/ai/contextual-view`、`/ai/health`、`/ai/admin/*`） |
+
+## AI 模块（sdkj-ai）
+
+基于 Spring AI 1.0.7 + OpenAI 兼容协议（可对接 DeepSeek / Qwen 等）。配置位于 `application-thermal.yml` 的 `spring.ai.openai.*` 与 `sdkj.ai.*`。
+
+- **核心包**: `core/`（ContextualPrompt 注册表 + 视图模型）、`advisor/`（TenantContextAdvisor / SafetyAuditAdvisor / UsageMetricsAdvisor 三个 Spring AI Advisor）、`safety/`（PiiMasker / ApiKeyLogMasker / AiCircuitBreaker）、`cache/`（AiViewCache + 命中率指标）、`job/`（AiLogCleanupJob，每日清理 90 天前的 `ai_call_record`）
+- **Controller**: `AiContextualController`（POST `/ai/contextual-view`，限流 30/min，503 ExceptionHandler 统一兜底）、`AiHealthController`、`AiAdminController`
+- **可观测性**: Micrometer counter+timer + 缓存命中/未命中指标；`ApiKeyLogMasker` 作为 Logback conversion rule 自动注册
+- **数据表**: `ai_call_record`、`ai_usage_log`（位于租户库）
 
 ## 数据库
 
