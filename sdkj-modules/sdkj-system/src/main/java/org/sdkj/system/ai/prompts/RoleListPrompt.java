@@ -1,11 +1,14 @@
 package org.sdkj.system.ai.prompts;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.annotation.Resource;
 import org.sdkj.ai.core.ContextualPrompt;
 import org.sdkj.ai.core.ContextualRequest;
 import org.sdkj.ai.core.ContextualView;
 import org.sdkj.ai.core.PromptPayload;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.system.ai.views.RoleListView;
+import org.sdkj.system.domain.SysRole;
 import org.sdkj.system.mapper.SysRoleMapper;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +33,10 @@ public class RoleListPrompt implements ContextualPrompt {
 
     @Override
     public PromptPayload buildPrompt(ContextualRequest ctx) {
-        long total = roleMapper.selectCount(null);
+        String tenantId = LoginHelper.getTenantId();
+        long total = roleMapper.selectCount(
+            new LambdaQueryWrapper<SysRole>().eq(SysRole::getTenantId, tenantId)
+        );
 
         Map<String, Object> vars = new HashMap<>();
         vars.put("total", total);

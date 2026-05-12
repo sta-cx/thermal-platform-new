@@ -1,11 +1,14 @@
 package org.sdkj.system.ai.prompts;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.annotation.Resource;
 import org.sdkj.ai.core.ContextualPrompt;
 import org.sdkj.ai.core.ContextualRequest;
 import org.sdkj.ai.core.ContextualView;
 import org.sdkj.ai.core.PromptPayload;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.system.ai.views.DeptListView;
+import org.sdkj.system.domain.SysDept;
 import org.sdkj.system.mapper.SysDeptMapper;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +33,10 @@ public class DeptListPrompt implements ContextualPrompt {
 
     @Override
     public PromptPayload buildPrompt(ContextualRequest ctx) {
-        long total = deptMapper.selectCount(null);
+        String tenantId = LoginHelper.getTenantId();
+        long total = deptMapper.selectCount(
+            new LambdaQueryWrapper<SysDept>().eq(SysDept::getTenantId, tenantId)
+        );
 
         Map<String, Object> vars = new HashMap<>();
         vars.put("total", total);
