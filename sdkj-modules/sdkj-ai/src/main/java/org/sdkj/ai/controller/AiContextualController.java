@@ -16,6 +16,7 @@ import org.sdkj.ai.core.PromptPayload;
 import org.sdkj.ai.exception.AiUnavailableException;
 import org.sdkj.ai.safety.AiCircuitBreaker;
 import org.sdkj.common.core.domain.R;
+import org.sdkj.common.ratelimiter.annotation.RateLimiter;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,6 +40,7 @@ public class AiContextualController {
     private final CacheKeyBuilder keyBuilder;
     private final AiCircuitBreaker circuitBreaker;
 
+    @RateLimiter(time = 60, count = 30)
     @SaCheckLogin
     @PostMapping("/contextual-view")
     public R<ContextualView> getContextualView(@RequestBody @Valid ContextualRequest req) {
