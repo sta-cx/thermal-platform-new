@@ -90,7 +90,8 @@ public class TenantFilter {
             return path.startsWith("/thermal/")
                 || path.startsWith("/dashboard/")
                 || path.startsWith("/api/iot/")
-                || path.startsWith("/api/returnControl/");
+                || path.startsWith("/api/returnControl/")
+                || path.startsWith("/ai/");
         }
 
         private boolean isPublicPath(String path) {
