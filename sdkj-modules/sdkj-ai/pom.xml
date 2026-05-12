@@ -55,11 +55,5 @@
             <groupId>org.sdkj</groupId>
             <artifactId>sdkj-common-log</artifactId>
         </dependency>
-
-        <!-- 系统管理表查询(租户/字典) -->
-        <dependency>
-            <groupId>org.sdkj</groupId>
-            <artifactId>sdkj-system</artifactId>
-        </dependency>
     </dependencies>
 </project>
