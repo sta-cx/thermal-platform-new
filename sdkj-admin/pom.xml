@@ -84,6 +84,12 @@
             <artifactId>sdkj-thermal</artifactId>
         </dependency>
 
+        <!-- AI 集成模块 -->
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-ai</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

@@ -95,3 +95,37 @@ spring:
           url: jdbc:mysql://localhost:3306/rltk_pro?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
           username: root
           password: root
+
+--- # ============== Spring AI ==============
+spring:
+  ai:
+    openai:
+      api-key: ${SDKJ_AI_DEEPSEEK_KEY:}
+      base-url: https://api.deepseek.com
+      chat:
+        options:
+          model: deepseek-chat
+          temperature: 0.3
+
+# ============== AI 业务配置 ==============
+thermal:
+  ai:
+    enabled: true
+    default-model: deepseek-chat
+    contextual:
+      cache-default-ttl: 5m
+      max-tokens: 4000
+      fallback-to-generic: true
+    circuit-breaker:
+      failure-threshold: 5
+      window-seconds: 60
+      open-duration-seconds: 60
+    rate-limit:
+      contextual-per-user-per-minute: 30
+      contextual-per-tenant-per-minute: 200
+    audit:
+      log-context: true
+      log-output: true
+      pii-mask-patterns:
+        - '\d{18}'
+        - '1\d{10}'
