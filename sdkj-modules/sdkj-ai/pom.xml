@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>org.sdkj</groupId>
+        <artifactId>sdkj-modules</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>sdkj-ai</artifactId>
+
+    <description>
+        AI 集成模块(Spring AI 1.0.7):提供 Alt+A 旁注 + Alt+K 助手 + Tool Calling 基建
+    </description>
+
+    <dependencies>
+        <!-- Spring AI core (OpenAI 兼容协议,可对接 DeepSeek / Qwen) -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
+        </dependency>
+
+        <!-- 公共基建 -->
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-mybatis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-tenant</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-satoken</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-ratelimiter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-common-log</artifactId>
+        </dependency>
+
+        <!-- 系统管理表查询(租户/字典) -->
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-system</artifactId>
+        </dependency>
+    </dependencies>
+</project>

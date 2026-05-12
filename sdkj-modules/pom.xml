@@ -13,6 +13,7 @@
         <module>sdkj-system</module>
         <module>sdkj-meter</module>
         <module>sdkj-thermal</module>
+        <module>sdkj-ai</module>
     </modules>
 
     <artifactId>sdkj-modules</artifactId>
