@@ -48,7 +48,11 @@ public class AiContextualController {
     private final CacheKeyBuilder keyBuilder;
     private final AiCircuitBreaker circuitBreaker;
 
-    @RateLimiter(time = 60, count = 30)
+    @RateLimiter(
+        time = 60,
+        count = 30,
+        key = "#{T(org.sdkj.common.satoken.utils.LoginHelper).getUserId()}"
+    )
     @SaCheckLogin
     @PostMapping("/contextual-view")
     public R<ContextualView> getContextualView(@RequestBody @Valid ContextualRequest req) {
