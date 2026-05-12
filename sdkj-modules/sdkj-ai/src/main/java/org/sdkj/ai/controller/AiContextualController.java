@@ -1,6 +1,8 @@
 package org.sdkj.ai.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,9 @@ import org.sdkj.common.core.domain.R;
 import org.sdkj.common.ratelimiter.annotation.RateLimiter;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +39,9 @@ public class AiContextualController {
 
     @Resource(name = "contextualChatClient")
     private ChatClient contextualChatClient;
+
+    @Resource
+    private MeterRegistry meterRegistry;
 
     private final ContextualPromptRegistry registry;
     private final AiViewCache cache;
@@ -65,6 +73,9 @@ public class AiContextualController {
         // 4. 缓存查
         String cacheKey = keyBuilder.build(tenantId, req, prompt);
         ContextualView cached = cache.get(cacheKey);
+        meterRegistry.counter("ai.contextual.cache",
+            Tags.of("result", cached != null ? "hit" : "miss"))
+            .increment();
         if (cached != null) {
             log.debug("AI view cache HIT: {}", cacheKey);
             return R.ok(cached);
@@ -112,5 +123,13 @@ public class AiContextualController {
             cache.put(cacheKey, view, prompt.cacheTtl());
         }
         return R.ok(view);
+    }
+
+    @ExceptionHandler(AiUnavailableException.class)
+    public ResponseEntity<R<Void>> handleUnavailable(AiUnavailableException e) {
+        log.warn("AI unavailable: {}", e.getMessage());
+        return ResponseEntity
+            .status(HttpStatus.SERVICE_UNAVAILABLE)
+            .body(R.fail(503, e.getMessage()));
     }
 }
