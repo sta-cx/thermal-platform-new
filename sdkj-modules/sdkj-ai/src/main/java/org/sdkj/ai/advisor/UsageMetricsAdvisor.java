@@ -1,6 +1,9 @@
 package org.sdkj.ai.advisor;
 
-import lombok.RequiredArgsConstructor;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Tags;
+import io.micrometer.core.instrument.Timer;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.domain.AiUsageLog;
 import org.sdkj.ai.mapper.AiUsageLogMapper;
@@ -14,10 +17,15 @@ import org.springframework.lang.NonNull;
 import java.util.Date;
 
 @Slf4j
-@RequiredArgsConstructor
 public class UsageMetricsAdvisor implements CallAdvisor {
 
     private final AiUsageLogMapper usageLogMapper;
+    private final MeterRegistry meterRegistry;
+
+    public UsageMetricsAdvisor(AiUsageLogMapper usageLogMapper, MeterRegistry meterRegistry) {
+        this.usageLogMapper = usageLogMapper;
+        this.meterRegistry = meterRegistry;
+    }
 
     @Override
     public String getName() {
@@ -89,5 +97,17 @@ public class UsageMetricsAdvisor implements CallAdvisor {
         log.setDurationMs(durationMs);
         log.setCreatedAt(new Date());
         usageLogMapper.insert(log);
+
+        Counter.builder("ai.contextual.calls")
+            .tags(Tags.of("feature", "contextual",
+                          "tenant", tenantId == null ? "unknown" : tenantId,
+                          "success", String.valueOf(success)))
+            .register(meterRegistry)
+            .increment();
+
+        Timer.builder("ai.contextual.duration")
+            .tags(Tags.of("feature", "contextual"))
+            .register(meterRegistry)
+            .record(java.time.Duration.ofMillis(durationMs));
     }
 }

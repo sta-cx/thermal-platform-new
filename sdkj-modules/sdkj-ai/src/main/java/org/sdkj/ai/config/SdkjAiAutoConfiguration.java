@@ -15,6 +15,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.mybatis.spring.annotation.MapperScan;
 
+import io.micrometer.core.instrument.MeterRegistry;
+
 @AutoConfiguration
 @ComponentScan("org.sdkj.ai")
 @MapperScan("org.sdkj.ai.mapper")
@@ -39,8 +41,9 @@ public class SdkjAiAutoConfiguration {
     }
 
     @Bean
-    public UsageMetricsAdvisor usageMetricsAdvisor(AiUsageLogMapper usageLogMapper) {
-        return new UsageMetricsAdvisor(usageLogMapper);
+    public UsageMetricsAdvisor usageMetricsAdvisor(AiUsageLogMapper usageLogMapper,
+                                                    MeterRegistry meterRegistry) {
+        return new UsageMetricsAdvisor(usageLogMapper, meterRegistry);
     }
 
     @Bean("contextualChatClient")
