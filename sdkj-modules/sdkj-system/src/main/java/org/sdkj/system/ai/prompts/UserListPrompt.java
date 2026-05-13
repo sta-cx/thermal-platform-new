@@ -34,7 +34,8 @@ public class UserListPrompt implements ContextualPrompt {
     @Override
     public PromptPayload buildPrompt(ContextualRequest ctx) {
         // tenant.enable=false 关闭了行级 SQL 过滤,demo prompt 必须显式按当前租户过滤,
-        // 否则每个租户看到的统计都是全平台合计,违反多租户展示原则
+        // 否则每个租户看到的统计都是全平台合计,违反多租户展示原则。
+        // SysUserMapper 类级 @DS("master") 已强制路由到 master,无需手动 push DS。
         String tenantId = LoginHelper.getTenantId();
         long total = userMapper.selectCount(
             new LambdaQueryWrapper<SysUser>().eq(SysUser::getTenantId, tenantId)

@@ -33,6 +33,7 @@ public class RoleListPrompt implements ContextualPrompt {
 
     @Override
     public PromptPayload buildPrompt(ContextualRequest ctx) {
+        // SysRoleMapper 类级 @DS("master") 已强制路由到 master
         String tenantId = LoginHelper.getTenantId();
         long total = roleMapper.selectCount(
             new LambdaQueryWrapper<SysRole>().eq(SysRole::getTenantId, tenantId)

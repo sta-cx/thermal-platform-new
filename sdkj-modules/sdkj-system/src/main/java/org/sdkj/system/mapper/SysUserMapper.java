@@ -1,5 +1,6 @@
 package org.sdkj.system.mapper;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
@@ -17,8 +18,12 @@ import java.util.List;
 /**
  * 用户表 数据层
  *
+ * sys_user 物理表存在 master 库。这里类级 @DS("master") 让任何调用方都自动路由到 master,
+ * 即便 TenantFilter 已把当前线程上下文推到 tenant_xxx(如 /ai/* 这种路径)。
+ *
  * @author Lion Li
  */
+@DS("master")
 public interface SysUserMapper extends BaseMapperPlus<SysUser, SysUserVo> {
 
     /**

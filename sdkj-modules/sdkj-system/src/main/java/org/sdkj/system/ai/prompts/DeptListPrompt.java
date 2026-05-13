@@ -33,6 +33,7 @@ public class DeptListPrompt implements ContextualPrompt {
 
     @Override
     public PromptPayload buildPrompt(ContextualRequest ctx) {
+        // SysDeptMapper 类级 @DS("master") 已强制路由到 master
         String tenantId = LoginHelper.getTenantId();
         long total = deptMapper.selectCount(
             new LambdaQueryWrapper<SysDept>().eq(SysDept::getTenantId, tenantId)

@@ -1,5 +1,6 @@
 package org.sdkj.system.mapper;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Constants;
@@ -16,8 +17,11 @@ import java.util.List;
 /**
  * 角色表 数据层
  *
+ * sys_role 物理表存在 master 库。@DS("master") 强制任何调用方路由到 master。
+ *
  * @author Lion Li
  */
+@DS("master")
 public interface SysRoleMapper extends BaseMapperPlus<SysRole, SysRoleVo> {
 
     /**
