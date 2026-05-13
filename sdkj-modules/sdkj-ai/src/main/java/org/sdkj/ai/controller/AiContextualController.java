@@ -13,8 +13,9 @@ import org.sdkj.ai.core.ContextualPrompt;
 import org.sdkj.ai.core.ContextualPromptRegistry;
 import org.sdkj.ai.core.ContextualRequest;
 import org.sdkj.ai.core.ContextualView;
-import org.sdkj.ai.core.GenericContextualView;
+import org.sdkj.ai.core.GenericPromptBuilder;
 import org.sdkj.ai.core.PromptPayload;
+import org.sdkj.ai.core.RouteWhitelistProvider;
 import org.sdkj.ai.exception.AiUnavailableException;
 import org.sdkj.ai.safety.AiCircuitBreaker;
 import org.sdkj.common.core.domain.R;
@@ -29,6 +30,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -47,6 +50,7 @@ public class AiContextualController {
     private final AiViewCache cache;
     private final CacheKeyBuilder keyBuilder;
     private final AiCircuitBreaker circuitBreaker;
+    private final RouteWhitelistProvider routeWhitelistProvider;
 
     @RateLimiter(
         time = 60,
@@ -63,18 +67,21 @@ public class AiContextualController {
         // 1. 熔断检查
         circuitBreaker.checkAllowed(feature, tenantId);
 
-        // 2. 路由匹配
+        // 2. 获取可用路由列表（每次查 DB，轻量不缓存）
+        List<String> availableRoutes = routeWhitelistProvider.getAvailableRoutes();
+
+        // 3. 路由匹配
         ContextualPrompt prompt = registry.match(req.getRoute());
         if (prompt == null) {
-            return R.ok(GenericContextualView.fallbackFor(req));
+            return handleGenericMode(req, tenantId, feature, availableRoutes);
         }
 
-        // 3. 权限校验(可选)
+        // 4. 权限校验(可选)
         if (prompt.requiredPermission() != null) {
             cn.dev33.satoken.stp.StpUtil.checkPermission(prompt.requiredPermission());
         }
 
-        // 4. 缓存查
+        // 5. 缓存查
         String cacheKey = keyBuilder.build(tenantId, req, prompt);
         ContextualView cached = cache.get(cacheKey);
         meterRegistry.counter("ai.contextual.cache",
@@ -85,7 +92,7 @@ public class AiContextualController {
             return R.ok(cached);
         }
 
-        // 5. 业务模块拉数据 + 构 prompt
+        // 6. 业务模块拉数据 + 构 prompt
         PromptPayload payload;
         try {
             payload = prompt.buildPrompt(req);
@@ -95,7 +102,7 @@ public class AiContextualController {
             throw new AiUnavailableException("AI 旁注准备数据失败", e);
         }
 
-        // 6. 调用 LLM(Advisor Chain 自动跑)
+        // 7. 调用 LLM(Advisor Chain 自动跑)
         Map<String, Object> vars = payload.getTemplateVars() == null
             ? Map.of()
             : payload.getTemplateVars();
@@ -122,10 +129,63 @@ public class AiContextualController {
             throw new AiUnavailableException("AI 助手暂时不可用,稍后重试", e);
         }
 
-        // 7. 缓存 + 返回
+        // 8. 缓存 + 返回
         if (payload.getCacheKey() != null) {
             cache.put(cacheKey, view, prompt.cacheTtl());
         }
+        return R.ok(view);
+    }
+
+    /**
+     * 通用模式：无专用 Prompt 的页面走 LLM 生成通用旁注
+     */
+    private R<ContextualView> handleGenericMode(ContextualRequest req, String tenantId,
+                                                 String feature, List<String> availableRoutes) {
+        // 缓存查
+        String cacheKey = keyBuilder.buildGenericKey(tenantId, req.getRoute());
+        ContextualView cached = cache.get(cacheKey);
+        meterRegistry.counter("ai.contextual.cache",
+            Tags.of("result", cached != null ? "hit" : "miss"))
+            .increment();
+        if (cached != null) {
+            log.debug("AI generic view cache HIT: {}", cacheKey);
+            return R.ok(cached);
+        }
+
+        // 构建通用 prompt
+        PromptPayload payload = GenericPromptBuilder.build(
+            req.getRoute(), req.getRouteName(), availableRoutes, req.getExtraContext()
+        );
+
+        // 调用 LLM
+        Map<String, Object> vars = payload.getTemplateVars() == null
+            ? Map.of()
+            : payload.getTemplateVars();
+
+        ContextualView view;
+        try {
+            view = contextualChatClient.prompt()
+                .system(payload.getSystemPrompt())
+                .user(spec -> {
+                    spec.text(payload.getUserPromptTemplate());
+                    vars.forEach(spec::param);
+                })
+                .advisors(a -> {
+                    a.param("ai.route", req.getRoute());
+                    a.param("ai.promptName", "GenericPrompt");
+                })
+                .call()
+                .entity(ContextualView.class);
+
+            circuitBreaker.recordSuccess(feature, tenantId);
+        } catch (RuntimeException e) {
+            circuitBreaker.recordFailure(feature, tenantId);
+            log.error("LLM call failed for generic prompt on route {}", req.getRoute(), e);
+            throw new AiUnavailableException("AI 助手暂时不可用,稍后重试", e);
+        }
+
+        // 缓存 30 分钟 + 返回
+        cache.put(cacheKey, view, Duration.ofMinutes(30));
         return R.ok(view);
     }
 
