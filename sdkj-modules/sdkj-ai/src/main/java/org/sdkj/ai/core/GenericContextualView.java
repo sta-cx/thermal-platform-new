@@ -1,5 +1,9 @@
 package org.sdkj.ai.core;
 
+/**
+ * @deprecated 由 GenericPromptBuilder + LLM 替代，不再需要硬编码 fallback 视图。
+ */
+@Deprecated(since = "2026-05-13", forRemoval = true)
 public class GenericContextualView extends ContextualView {
 
     public static ContextualView fallbackFor(ContextualRequest req) {
