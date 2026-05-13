@@ -29,6 +29,11 @@ public class CacheKeyBuilder {
         return PREFIX + tenantId + ":" + prompt.getClass().getSimpleName() + ":" + sha1(raw);
     }
 
+    public String buildGenericKey(String tenantId, String route) {
+        String raw = tenantId + "|GenericPrompt|" + route;
+        return PREFIX + tenantId + ":GenericPrompt:" + sha1(raw);
+    }
+
     private static String sortedToString(Map<String, Object> map) {
         if (map == null || map.isEmpty()) {
             return "{}";
