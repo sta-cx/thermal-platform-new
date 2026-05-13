@@ -7,8 +7,8 @@ import java.util.regex.Pattern;
 
 public class ApiKeyLogMasker extends ClassicConverter {
 
-    private static final Pattern SK_PATTERN = Pattern.compile("sk-[A-Za-z0-9]{20,}");
-    private static final Pattern BEARER_PATTERN = Pattern.compile("(?i)Bearer\\s+[A-Za-z0-9._-]{20,}");
+    private static final Pattern SK_PATTERN = Pattern.compile("sk-[A-Za-z0-9]{30,}");
+    private static final Pattern BEARER_PATTERN = Pattern.compile("(?i)Bearer\\s+[A-Za-z0-9._-]{30,}");
 
     @Override
     public String convert(ILoggingEvent event) {

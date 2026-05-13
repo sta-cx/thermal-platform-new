@@ -1,5 +1,6 @@
 package org.sdkj.ai.job;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ public class AiLogCleanupJob {
     private final AiCallRecordMapper callRecordMapper;
 
     @Scheduled(cron = "0 0 3 * * ?")
+    @DS("master")
     public void cleanupCallRecord() {
         Calendar cal = Calendar.getInstance();
         cal.add(Calendar.DATE, -90);

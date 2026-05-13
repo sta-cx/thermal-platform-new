@@ -57,8 +57,8 @@ public class AiProperties {
         private boolean logContext = true;
         private boolean logOutput = true;
         private List<String> piiMaskPatterns = List.of(
-            "\\d{18}",
-            "1\\d{10}"
+            "(?<!\\d)\\d{17}[\\dXx](?!\\d)",
+            "(?<!\\d)1[3-9]\\d{9}(?!\\d)"
         );
     }
 }
