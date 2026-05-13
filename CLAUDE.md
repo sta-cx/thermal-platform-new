@@ -154,7 +154,7 @@ Sa-Token JWT 简单模式：`Authorization: Bearer <token>`，允许并发登录
 - **核心包**: `core/`（ContextualPrompt 注册表 + 视图模型）、`advisor/`（TenantContextAdvisor / SafetyAuditAdvisor / UsageMetricsAdvisor 三个 Spring AI Advisor）、`safety/`（PiiMasker / ApiKeyLogMasker / AiCircuitBreaker）、`cache/`（AiViewCache + 命中率指标）、`job/`（AiLogCleanupJob，每日清理 90 天前的 `ai_call_record`）
 - **Controller**: `AiContextualController`（POST `/ai/contextual-view`，限流 30/min，503 ExceptionHandler 统一兜底）、`AiHealthController`、`AiAdminController`
 - **可观测性**: Micrometer counter+timer + 缓存命中/未命中指标；`ApiKeyLogMasker` 作为 Logback conversion rule 自动注册
-- **数据表**: `ai_call_record`、`ai_usage_log`（位于租户库）
+- **数据表**: `ai_call_record`、`ai_usage_log`、`ai_pending_tool_call`（**位于 master 库 `ry-vue`**,通过 Mapper 上 `@DS("master")` 强制路由；TenantFilter 把 `/ai/*` 推到租户 DS 后,这些 Mapper 仍会切回 master）
 
 ## 数据库
 
