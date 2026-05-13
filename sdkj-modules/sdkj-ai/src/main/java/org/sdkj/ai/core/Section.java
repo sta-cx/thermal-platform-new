@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 旁注面板中的一个 section。LLM 必须按 SectionType 选择对应子类型,
@@ -41,7 +40,7 @@ public abstract class Section {
     private String title;
 
     /** 可选操作按钮(复制/标记/跳转),非核心展示数据 */
-    private List<Map<String, String>> actions;
+    private List<SectionAction> actions;
 
     /** 📊 数据统计 */
     @Data
@@ -78,6 +77,15 @@ public abstract class Section {
     @lombok.EqualsAndHashCode(callSuper = true)
     public static class Link extends Section {
         private List<LinkItem> content;
+    }
+
+    // ───── 操作按钮 ─────
+
+    @Data
+    public static class SectionAction {
+        private String label;
+        private String type;
+        private String url;
     }
 
     // ───── 内容条目 ─────
