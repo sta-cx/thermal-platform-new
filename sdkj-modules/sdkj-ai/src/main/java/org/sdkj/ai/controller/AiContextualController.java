@@ -105,10 +105,15 @@ public class AiContextualController {
             ? Map.of()
             : payload.getTemplateVars();
 
+        String systemPrompt = payload.getSystemPrompt()
+            + "\n\n如果要生成跳转链接（SUGGESTION 的 actionUrl 或 LINK 的 url），"
+            + "只能从以下可用页面路径中选择，不要编造不存在的路径: "
+            + String.join(", ", routeWhitelistProvider.getAvailableRoutes());
+
         ContextualView view;
         try {
             view = contextualChatClient.prompt()
-                .system(payload.getSystemPrompt())
+                .system(systemPrompt)
                 .user(spec -> {
                     spec.text(payload.getUserPromptTemplate());
                     vars.forEach(spec::param);
