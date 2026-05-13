@@ -38,7 +38,6 @@ public final class GenericPromptBuilder {
             .systemPrompt(SYSTEM_PROMPT)
             .userPromptTemplate(userPrompt)
             .templateVars(vars)
-            .cacheKey("generic-" + route)
             .build();
     }
 }

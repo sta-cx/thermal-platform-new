@@ -26,17 +26,15 @@ public class MenuRouteWhitelistProvider implements RouteWhitelistProvider {
     public List<String> getAvailableRoutes() {
         List<SysMenu> allMenus = sysMenuMapper.selectMenuTreeAll();
 
-        // 构建 parentId → children 映射
-        Map<Long, List<SysMenu>> childrenMap = new HashMap<>();
+        Map<Long, SysMenu> menuByIdMap = new HashMap<>();
         for (SysMenu menu : allMenus) {
-            childrenMap.computeIfAbsent(menu.getParentId(), k -> new ArrayList<>()).add(menu);
+            menuByIdMap.put(menu.getMenuId(), menu);
         }
 
-        // 拼接叶子菜单路径
         List<String> routes = new ArrayList<>();
         for (SysMenu menu : allMenus) {
             if (SystemConstants.TYPE_MENU.equals(menu.getMenuType())) {
-                String fullPath = buildFullPath(menu, childrenMap);
+                String fullPath = buildFullPath(menu, menuByIdMap);
                 if (fullPath != null && !fullPath.isBlank()) {
                     routes.add(fullPath);
                 }
@@ -45,10 +43,7 @@ public class MenuRouteWhitelistProvider implements RouteWhitelistProvider {
         return routes;
     }
 
-    /**
-     * 构建菜单完整路径：从根目录到叶子菜单拼接 path
-     */
-    private String buildFullPath(SysMenu menu, Map<Long, List<SysMenu>> childrenMap) {
+    private String buildFullPath(SysMenu menu, Map<Long, SysMenu> menuByIdMap) {
         String path = menu.getPath();
         if (path == null || path.isBlank()) {
             return null;
@@ -56,7 +51,7 @@ public class MenuRouteWhitelistProvider implements RouteWhitelistProvider {
 
         Long parentId = menu.getParentId();
         while (parentId != null && parentId != 0L) {
-            SysMenu parent = findMenuById(parentId, childrenMap);
+            SysMenu parent = menuByIdMap.get(parentId);
             if (parent == null) break;
             String parentPath = parent.getPath();
             if (parentPath != null && !parentPath.isBlank()) {
@@ -69,16 +64,5 @@ public class MenuRouteWhitelistProvider implements RouteWhitelistProvider {
             path = "/" + path;
         }
         return path;
-    }
-
-    private SysMenu findMenuById(Long menuId, Map<Long, List<SysMenu>> childrenMap) {
-        for (List<SysMenu> menus : childrenMap.values()) {
-            for (SysMenu menu : menus) {
-                if (menu.getMenuId().equals(menuId)) {
-                    return menu;
-                }
-            }
-        }
-        return null;
     }
 }

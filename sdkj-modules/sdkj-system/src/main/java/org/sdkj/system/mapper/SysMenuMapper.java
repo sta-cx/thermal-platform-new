@@ -1,5 +1,6 @@
 package org.sdkj.system.mapper;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.sdkj.common.core.constant.SystemConstants;
 import org.sdkj.common.core.utils.StreamUtils;
@@ -14,9 +15,12 @@ import java.util.Set;
 
 /**
  * 菜单表 数据层
+ * <p>
+ * sys_menu 物理表存在 master 库。@DS("master") 强制任何调用方路由到 master。
  *
  * @author Lion Li
  */
+@DS("master")
 public interface SysMenuMapper extends BaseMapperPlus<SysMenu, SysMenuVo> {
 
     /**

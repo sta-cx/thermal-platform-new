@@ -67,12 +67,10 @@ public class AiContextualController {
         // 1. 熔断检查
         circuitBreaker.checkAllowed(feature, tenantId);
 
-        // 2. 获取可用路由列表（每次查 DB，轻量不缓存）
-        List<String> availableRoutes = routeWhitelistProvider.getAvailableRoutes();
-
-        // 3. 路由匹配
+        // 2. 路由匹配
         ContextualPrompt prompt = registry.match(req.getRoute());
         if (prompt == null) {
+            List<String> availableRoutes = routeWhitelistProvider.getAvailableRoutes();
             return handleGenericMode(req, tenantId, feature, availableRoutes);
         }
 
