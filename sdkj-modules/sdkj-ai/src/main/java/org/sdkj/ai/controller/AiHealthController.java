@@ -3,6 +3,7 @@ package org.sdkj.ai.controller;
 import io.qdrant.client.QdrantClient;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
+import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,9 @@ public class AiHealthController {
     @Autowired(required = false)
     private QdrantClient qdrantClient;
 
+    @Autowired(required = false)
+    private EmbeddingModel embeddingModel;
+
     @GetMapping("/health")
     public R<Map<String, Object>> health() {
         boolean qdrantOk = false;
@@ -38,11 +42,24 @@ public class AiHealthController {
             }
         }
 
+        boolean embeddingOk = false;
+        if (embeddingModel != null) {
+            try {
+                float[] vec = embeddingModel.embed("ping");
+                embeddingOk = vec != null && vec.length > 0;
+            } catch (Exception e) {
+                embeddingOk = false;
+                log.warn("Embedding health check failed", e);
+            }
+        }
+
+        boolean allOk = qdrantOk && embeddingOk;
         Map<String, Object> data = new LinkedHashMap<>();
-        data.put("status", qdrantOk ? "UP" : "DEGRADED");
+        data.put("status", allOk ? "UP" : "DEGRADED");
         data.put("module", "sdkj-ai");
         data.put("phase", "2A");
         data.put("qdrant", qdrantOk);
+        data.put("embedding", embeddingOk);
         return R.ok(data);
     }
 }
