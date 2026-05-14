@@ -1,0 +1,80 @@
+package org.sdkj.ai.assistant;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import lombok.RequiredArgsConstructor;
+import org.sdkj.ai.domain.AiChatMessage;
+import org.sdkj.ai.domain.AiChatSession;
+import org.sdkj.ai.mapper.AiChatMessageMapper;
+import org.sdkj.ai.mapper.AiChatSessionMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class SessionService {
+
+    private final AiChatSessionMapper sessionMapper;
+    private final AiChatMessageMapper messageMapper;
+
+    public AiChatSession create(String tenantId, Long userId, String title) {
+        AiChatSession s = new AiChatSession();
+        s.setTenantId(tenantId);
+        s.setUserId(userId);
+        s.setTitle(title);
+        s.setLastActiveAt(new Date());
+        s.setCreateTime(new Date());
+        sessionMapper.insert(s);
+        return s;
+    }
+
+    public List<AiChatSession> listByUser(String tenantId, Long userId) {
+        return sessionMapper.selectList(
+            new LambdaQueryWrapper<AiChatSession>()
+                .eq(AiChatSession::getTenantId, tenantId)
+                .eq(AiChatSession::getUserId, userId)
+                .orderByDesc(AiChatSession::getLastActiveAt)
+                .last("limit 50")
+        );
+    }
+
+    public AiChatSession requireOwned(Long sessionId, String tenantId, Long userId) {
+        AiChatSession s = sessionMapper.selectById(sessionId);
+        if (s == null
+            || !tenantId.equals(s.getTenantId())
+            || !userId.equals(s.getUserId())) {
+            throw new IllegalArgumentException("session 不存在或无权访问");
+        }
+        return s;
+    }
+
+    public void appendMessage(Long sessionId, String role, String content, Integer tokenCount) {
+        AiChatMessage m = new AiChatMessage();
+        m.setSessionId(sessionId);
+        m.setRole(role);
+        m.setContent(content);
+        m.setTokenCount(tokenCount);
+        m.setCreateTime(new Date());
+        messageMapper.insert(m);
+        AiChatSession update = new AiChatSession();
+        update.setId(sessionId);
+        update.setLastActiveAt(new Date());
+        sessionMapper.updateById(update);
+    }
+
+    public List<AiChatMessage> listMessages(Long sessionId) {
+        return messageMapper.selectList(
+            new LambdaQueryWrapper<AiChatMessage>()
+                .eq(AiChatMessage::getSessionId, sessionId)
+                .orderByAsc(AiChatMessage::getCreateTime)
+        );
+    }
+
+    public void delete(Long sessionId) {
+        messageMapper.delete(
+            new LambdaQueryWrapper<AiChatMessage>().eq(AiChatMessage::getSessionId, sessionId)
+        );
+        sessionMapper.deleteById(sessionId);
+    }
+}
