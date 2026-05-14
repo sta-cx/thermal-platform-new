@@ -1,0 +1,246 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - complementary [ref=e5]:
+      - generic [ref=e6]:
+        - img [ref=e8] [cursor=pointer]
+        - link "世达科技 世达科技" [ref=e12] [cursor=pointer]:
+          - /url: javascript:void 0
+          - img "世达科技" [ref=e15]
+          - generic [ref=e16]: 世达科技
+        - menu [ref=e19]:
+          - listitem [ref=e20]:
+            - generic [ref=e21] [cursor=pointer]:
+              - img [ref=e22]
+              - generic [ref=e24]: 仪表盘
+              - img [ref=e25]
+            - list [ref=e27]:
+              - menuitem "首页概览" [ref=e28] [cursor=pointer]:
+                - generic [ref=e29]:
+                  - img [ref=e30]
+                  - generic [ref=e32]: 首页概览
+          - listitem [ref=e33]:
+            - generic [ref=e34] [cursor=pointer]:
+              - img [ref=e35]
+              - generic [ref=e39]: 系统管理
+              - img [ref=e40]
+          - listitem [ref=e42]:
+            - generic [ref=e43] [cursor=pointer]:
+              - img [ref=e44]
+              - generic [ref=e49]: 租户管理
+              - img [ref=e50]
+          - listitem [ref=e52]:
+            - generic [ref=e53] [cursor=pointer]:
+              - img [ref=e54]
+              - generic [ref=e56]: 供热系统
+              - img [ref=e57]
+          - listitem [ref=e59]:
+            - generic [ref=e60] [cursor=pointer]:
+              - img [ref=e61]
+              - generic [ref=e65]: 系统监控
+              - img [ref=e66]
+        - img [ref=e70] [cursor=pointer]
+    - generic [ref=e74]:
+      - generic [ref=e75]:
+        - banner [ref=e76]:
+          - button [ref=e77]:
+            - img [ref=e78]
+          - button [ref=e80]:
+            - img [ref=e81]
+          - navigation "breadcrumb" [ref=e85]:
+            - list [ref=e86]:
+              - listitem [ref=e87]:
+                - link "仪表盘" [ref=e88] [cursor=pointer]:
+                  - /url: javascript:void 0
+                  - generic [ref=e89]:
+                    - img [ref=e90]
+                    - text: 仪表盘
+                - listitem [ref=e92]:
+                  - img [ref=e93]
+              - listitem [ref=e95]:
+                - link "首页概览" [disabled] [ref=e96]:
+                  - generic [ref=e97]:
+                    - img [ref=e98]
+                    - text: 首页概览
+          - generic [ref=e101]:
+            - generic [ref=e103]:
+              - generic [ref=e104]:
+                - generic: 选择租户
+                - combobox [ref=e105]
+              - img "down" [ref=e107]:
+                - img [ref=e108]
+            - button "bulb" [ref=e110] [cursor=pointer]:
+              - img "bulb" [ref=e111]:
+                - img [ref=e112]
+            - button "robot" [ref=e114] [cursor=pointer]:
+              - img "robot" [ref=e115]:
+                - img [ref=e116]
+            - generic [ref=e119] [cursor=pointer]:
+              - img [ref=e120]
+              - generic [ref=e123]: 搜索
+              - generic [ref=e124]: Ctrl K
+            - button [ref=e127]:
+              - img [ref=e128]
+            - button "dark" [ref=e132] [cursor=pointer]:
+              - img [ref=e133]
+            - button [ref=e141]:
+              - img [ref=e142]
+            - button [ref=e146]:
+              - img [ref=e147]
+            - button [ref=e152]:
+              - button [ref=e154]:
+                - img [ref=e155]
+            - button "系统管理员" [ref=e158]:
+              - img "系统管理员" [ref=e163] [cursor=pointer]
+        - generic [ref=e165]:
+          - generic [ref=e172] [cursor=pointer]:
+            - generic [ref=e173]:
+              - img [ref=e175]
+              - img [ref=e177]
+            - generic [ref=e180]:
+              - img [ref=e181]
+              - generic [ref=e183]: 首页概览
+          - generic [ref=e184]:
+            - button [ref=e185]:
+              - img [ref=e187] [cursor=pointer]
+            - img [ref=e193] [cursor=pointer]
+            - img [ref=e197] [cursor=pointer]
+      - main [ref=e203]:
+        - generic [ref=e209]:
+          - generic [ref=e210]:
+            - text: 智慧供热综合管理平台
+            - button "全屏模式" [ref=e211] [cursor=pointer]:
+              - img [ref=e212]
+          - generic [ref=e214]:
+            - generic [ref=e215]:
+              - generic [ref=e216]:
+                - generic [ref=e217]:
+                  - generic [ref=e218]: 换热站概况
+                  - generic [ref=e220]:
+                    - generic [ref=e225]: 户间平衡率
+                    - generic [ref=e226]:
+                      - generic [ref=e227]:
+                        - generic [ref=e228]: 进水温度
+                        - generic [ref=e229]: 0℃
+                      - generic [ref=e230]:
+                        - generic [ref=e231]: 回水温度
+                        - generic [ref=e232]: 0℃
+                      - generic [ref=e233]:
+                        - generic [ref=e234]: 平均室温
+                        - generic [ref=e235]: 0℃
+                      - generic [ref=e236]:
+                        - generic [ref=e237]: 阀门开度
+                        - generic [ref=e238]: "0"
+                - generic [ref=e239]:
+                  - generic [ref=e240]: 供暖质量
+                  - table [ref=e242]:
+                    - rowgroup [ref=e243]:
+                      - row "换热站名称 平衡户数 总户数 平衡率" [ref=e244]:
+                        - columnheader "换热站名称" [ref=e245]
+                        - columnheader "平衡户数" [ref=e246]
+                        - columnheader "总户数" [ref=e247]
+                        - columnheader "平衡率" [ref=e248]
+                    - rowgroup [ref=e249]:
+                      - row "系统运行正常，暂无供暖数据" [ref=e250]:
+                        - cell "系统运行正常，暂无供暖数据" [ref=e251]:
+                          - img [ref=e252]
+                          - text: 系统运行正常，暂无供暖数据
+              - generic [ref=e255]:
+                - generic [ref=e256]:
+                  - generic [ref=e257]:
+                    - generic [ref=e258]: "0"
+                    - generic [ref=e259]: 换热站(个)
+                  - generic [ref=e260]:
+                    - generic [ref=e261]: "0"
+                    - generic [ref=e262]: 换热分站(个)
+                  - generic [ref=e263]:
+                    - generic [ref=e264]: "0"
+                    - generic [ref=e265]: 小区(个)
+                  - generic [ref=e266]:
+                    - generic [ref=e267]: "0"
+                    - generic [ref=e268]: 楼宇(栋)
+                  - generic [ref=e269]:
+                    - generic [ref=e270]: "0"
+                    - generic [ref=e271]: 用户总数(户)
+                  - generic [ref=e272]:
+                    - generic [ref=e273]: "0"
+                    - generic [ref=e274]: 总供暖面积(㎡)
+                - generic [ref=e275]:
+                  - generic [ref=e276]: 换热站平衡数据
+                  - generic [ref=e280]:
+                    - img [ref=e281]
+                    - generic [ref=e284]: 暂无换热站数据
+              - generic [ref=e285]:
+                - generic [ref=e286]:
+                  - generic [ref=e287]: 缴费情况
+                  - generic [ref=e288]:
+                    - generic [ref=e289]:
+                      - generic [ref=e290]:
+                        - text: 已缴费
+                        - generic [ref=e292]: "0"
+                      - generic [ref=e293]:
+                        - text: 未缴费
+                        - generic [ref=e295]: "0"
+                    - generic [ref=e296]:
+                      - generic [ref=e297]:
+                        - text: 停供
+                        - generic [ref=e299]: "0"
+                      - generic [ref=e300]:
+                        - text: 空置
+                        - generic [ref=e302]: "0"
+                - generic [ref=e304]: 设备统计(台)
+            - generic [ref=e307]:
+              - generic [ref=e308]: 最近报警
+              - table [ref=e310]:
+                - rowgroup [ref=e311]:
+                  - row "设备ID 报警类型 状态 进水(°C) 回水(°C) 室温(°C) 报警时间" [ref=e312]:
+                    - columnheader "设备ID" [ref=e313]
+                    - columnheader "报警类型" [ref=e314]
+                    - columnheader "状态" [ref=e315]
+                    - columnheader "进水(°C)" [ref=e316]
+                    - columnheader "回水(°C)" [ref=e317]
+                    - columnheader "室温(°C)" [ref=e318]
+                    - columnheader "报警时间" [ref=e319]
+                - rowgroup [ref=e320]:
+                  - row "所有设备运行正常，暂无报警" [ref=e321]:
+                    - cell "所有设备运行正常，暂无报警" [ref=e322]:
+                      - img [ref=e323]
+                      - text: 所有设备运行正常，暂无报警
+  - dialog "AI 助手" [ref=e327]:
+    - generic [ref=e328]:
+      - heading "AI 助手" [level=2] [ref=e330]
+      - button [ref=e333] [cursor=pointer]:
+        - img [ref=e334]
+    - generic [ref=e338]:
+      - complementary [ref=e339]:
+        - generic [ref=e340]:
+          - button "+ 新会话" [ref=e342] [cursor=pointer]:
+            - generic [ref=e343]: + 新会话
+          - generic [ref=e344]:
+            - generic [ref=e383] [cursor=pointer]:
+              - generic [ref=e384]: 你好，一句话介绍你自己
+              - button "删除" [ref=e385]:
+                - generic [ref=e386]: 删除
+            - generic [ref=e345] [cursor=pointer]:
+              - generic [ref=e346]: 你好，一句话介绍你自己
+              - button "删除" [ref=e347]:
+                - generic [ref=e348]: 删除
+            - generic [ref=e349] [cursor=pointer]:
+              - generic [ref=e350]: 你好，请用一句话介绍自己
+              - button "删除" [ref=e351]:
+                - generic [ref=e352]: 删除
+            - generic [ref=e353] [cursor=pointer]:
+              - generic [ref=e354]: 你好，请介绍一下你自己
+              - button "删除" [ref=e355]:
+                - generic [ref=e356]: 删除
+            - generic [ref=e357] [cursor=pointer]:
+              - generic [ref=e358]: 你好
+              - button "删除" [ref=e359]:
+                - generic [ref=e360]: 删除
+      - generic [ref=e361]:
+        - generic [ref=e362]:
+          - paragraph [ref=e390]: 你好，一句话介绍你自己
+          - paragraph [ref=e394]: 我是 SDKJ 智慧供热平台的智能助手，专注于解答供热系统相关问题。
+        - generic [ref=e378]:
+          - textbox "问点什么 (Enter 发送, Shift+Enter 换行)" [ref=e379]
+          - button "发送" [disabled] [ref=e395]:
+            - generic: 发送

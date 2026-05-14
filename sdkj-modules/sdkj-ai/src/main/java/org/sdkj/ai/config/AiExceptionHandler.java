@@ -1,5 +1,6 @@
 package org.sdkj.ai.config;
 
+import cn.dev33.satoken.exception.SaTokenContextException;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.exception.AiDisabledException;
 import org.sdkj.common.core.domain.R;
@@ -27,5 +28,15 @@ public class AiExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(R.fail(503, e.getMessage()));
+    }
+
+    /**
+     * SSE async dispatch 完成后 Servlet 容器做 ASYNC dispatch，
+     * 此时 SaInterceptor 在无 HTTP 上下文的线程中执行导致此异常。
+     * SSE 响应已在主线程完成，此处静默忽略。
+     */
+    @ExceptionHandler(SaTokenContextException.class)
+    public void handleAsyncDispatch(SaTokenContextException e) {
+        log.debug("SSE async dispatch SaToken context missing (expected): {}", e.getMessage());
     }
 }

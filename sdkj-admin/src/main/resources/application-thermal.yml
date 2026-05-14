@@ -137,7 +137,7 @@ thermal:
       window-seconds: 60
       open-duration-seconds: 60
     embedding:
-      base-url: https://api.siliconflow.cn/v1
+      base-url: https://api.siliconflow.cn
       api-key: ${SDKJ_AI_SILICONFLOW_KEY:sk-nmaivhfaojupkrwqfrdhegxuigdudsjgwpeymxmcaoljicas}
       model: BAAI/bge-large-zh-v1.5
     rate-limit:
