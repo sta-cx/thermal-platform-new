@@ -1,0 +1,59 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - generic:
+            - button [ref=e8]:
+              - img [ref=e10]
+            - button [ref=e12]
+            - button [ref=e14]
+            - button [ref=e16]
+            - button [ref=e18]
+            - button [ref=e20]
+            - button [ref=e22]
+          - button [ref=e24]:
+            - img [ref=e25]
+        - button [ref=e31]:
+          - img [ref=e32]
+      - button [ref=e35]:
+        - img [ref=e36]
+      - button "dark" [ref=e41] [cursor=pointer]:
+        - img [ref=e42]
+    - generic [ref=e50]:
+      - img "世达科技" [ref=e51]
+      - paragraph [ref=e52]: 世达科技
+    - generic [ref=e56]:
+      - img "87667-SVG8" [ref=e57]
+      - generic [ref=e361]: 智慧供热管理平台
+      - generic [ref=e362]: 监控 · 计量 · 收费 · 调控
+    - generic [ref=e363]:
+      - generic [ref=e364]:
+        - generic [ref=e365]:
+          - heading "欢迎回来 👋🏻" [level=2] [ref=e366]
+          - paragraph [ref=e367]:
+            - generic [ref=e368]: 请输入账户信息登录智慧供热综合管理平台
+        - generic [ref=e370]:
+          - generic [ref=e374]:
+            - textbox "请输入用户名" [ref=e375]: admin
+            - button "close-circle" [ref=e377] [cursor=pointer]:
+              - img "close-circle" [ref=e378]:
+                - img [ref=e379]
+          - generic [ref=e384]:
+            - textbox "请输入密码" [ref=e385]: admin123
+            - img "eye-invisible" [ref=e387] [cursor=pointer]:
+              - img [ref=e388]
+        - generic [ref=e391]:
+          - generic [ref=e393]:
+            - checkbox "记住账号" [ref=e394]
+            - generic [ref=e395] [cursor=pointer]: 记住账号
+          - generic [ref=e396] [cursor=pointer]: 忘记密码?
+        - button "login" [ref=e397]: 登录
+      - generic [ref=e399]:
+        - text: Copyright © 2026
+        - link "世达科技" [ref=e400] [cursor=pointer]:
+          - /url: https://www.vben.pro
+  - generic [ref=e402]:
+    - img "close-circle" [ref=e403]:
+      - img [ref=e404]
+    - generic [ref=e406]: 内部服务器错误，请稍后再试。

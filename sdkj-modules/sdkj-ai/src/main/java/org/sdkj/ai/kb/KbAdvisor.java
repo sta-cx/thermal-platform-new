@@ -82,7 +82,13 @@ public class KbAdvisor implements CallAdvisor, StreamAdvisor {
             return request;
         }
 
-        List<String> fragments = retrievalService.retrieve(tenantId, lastUserText);
+        List<String> fragments;
+        try {
+            fragments = retrievalService.retrieve(tenantId, lastUserText);
+        } catch (Exception e) {
+            log.warn("[KbAdvisor] RAG retrieval failed, proceeding without context: {}", e.getMessage());
+            return request;
+        }
         if (fragments.isEmpty()) {
             return request;
         }
