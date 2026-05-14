@@ -107,6 +107,14 @@ spring:
         options:
           model: deepseek-chat
           temperature: 0.3
+    vectorstore:
+      qdrant:
+        host: 192.168.2.206
+        port: 6334            # gRPC port (HTTP is 6333)
+        use-tls: false
+        api-key: ${SDKJ_AI_QDRANT_KEY:}   # no auth currently, empty
+        initialize-schema: false           # we manage collection lifecycle ourselves
+        collection-name: sdkj_kb_default   # default, actual queries use per-tenant collection
 
 # ============== AI 业务配置 ==============
 thermal:
