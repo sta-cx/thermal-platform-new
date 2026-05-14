@@ -9,12 +9,9 @@ import org.sdkj.ai.mapper.AiKnowledgeChunkMapper;
 import org.sdkj.ai.mapper.AiKnowledgeDocMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
@@ -57,8 +54,8 @@ public class KbIngestPipeline {
             throw new IllegalArgumentException("切片数 " + chunks.size() + " 超过单文档上限 " + maxChunksPerDoc);
         }
 
-        // 4. 入库 doc 元数据 + chunks (事务内)
-        Long docId = persistDocAndChunks(tenantId, title, format, bytes.length, hash, chunks);
+        // 4. 入库 doc 元数据 + chunks(独立 Bean 让 @Transactional 生效,见 Phase 2A 审查 B-C3)
+        Long docId = docService.persistDocAndChunks(tenantId, title, format, bytes.length, hash, chunks);
 
         // 5. 调 embedding + Qdrant (事务外, 失败标 FAILED)
         try {
@@ -71,36 +68,6 @@ public class KbIngestPipeline {
         }
 
         return docId;
-    }
-
-    @Transactional(rollbackFor = Exception.class)
-    Long persistDocAndChunks(String tenantId, String title, DocFormat format,
-                             int sourceSize, String hash, List<ChunkResult> chunks) {
-        AiKnowledgeDoc doc = new AiKnowledgeDoc();
-        doc.setTenantId(tenantId);
-        doc.setTitle(title);
-        doc.setSourceFormat(format.name());
-        doc.setSourceSize(sourceSize);
-        doc.setSourceHash(hash);
-        doc.setChunkCount(chunks.size());
-        doc.setStatus(DocStatus.CHUNKED.name());
-        docMapper.insert(doc);
-
-        Date now = new Date();
-        List<AiKnowledgeChunk> chunkEntities = new ArrayList<>();
-        for (ChunkResult c : chunks) {
-            AiKnowledgeChunk e = new AiKnowledgeChunk();
-            e.setDocId(doc.getId());
-            e.setTenantId(tenantId);
-            e.setChunkIndex(c.getIndex());
-            e.setText(c.getText());
-            e.setTokenCount(c.getEstimatedTokens());
-            e.setQdrantPointId("");
-            e.setCreateTime(now);
-            chunkEntities.add(e);
-        }
-        chunkMapper.insertBatch(chunkEntities);
-        return doc.getId();
     }
 
     private void updateChunkQdrantIds(Long docId, Map<Integer, String> idMap) {
