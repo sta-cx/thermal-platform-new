@@ -110,6 +110,11 @@ spring:
       embedding:
         options:
           model: text-embedding-v1
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always   # 启动时自动建表(AI_CHAT_MEMORY / AI_CHAT_MEMORY_MESSAGES)
     vectorstore:
       qdrant:
         host: 192.168.2.206
