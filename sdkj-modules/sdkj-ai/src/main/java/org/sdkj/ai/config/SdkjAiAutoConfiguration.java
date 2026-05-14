@@ -4,10 +4,13 @@ import org.sdkj.ai.advisor.SafetyAuditAdvisor;
 import org.sdkj.ai.advisor.TenantContextAdvisor;
 import org.sdkj.ai.advisor.UsageMetricsAdvisor;
 import org.sdkj.ai.core.ContextualPromptRegistry;
+import org.sdkj.ai.kb.KbAdvisor;
+import org.sdkj.ai.kb.KbRetrievalService;
 import org.sdkj.ai.mapper.AiCallRecordMapper;
 import org.sdkj.ai.mapper.AiUsageLogMapper;
 import org.sdkj.ai.safety.PiiMasker;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -58,6 +61,36 @@ public class SdkjAiAutoConfiguration {
                 输出必须严格遵循指定的 JSON Schema,不要添加额外字段或自然语言前后缀。
                 """)
             .defaultAdvisors(tenantAdvisor, auditAdvisor, usageAdvisor)
+            .build();
+    }
+
+    @Bean
+    public KbAdvisor kbAdvisor(KbRetrievalService retrievalService) {
+        return new KbAdvisor(retrievalService);
+    }
+
+    @Bean("assistantChatClient")
+    public ChatClient assistantChatClient(ChatClient.Builder builder,
+                                           TenantContextAdvisor tenantAdvisor,
+                                           KbAdvisor kbAdvisor,
+                                           SafetyAuditAdvisor auditAdvisor,
+                                           MessageChatMemoryAdvisor memoryAdvisor,
+                                           UsageMetricsAdvisor usageAdvisor) {
+        return builder
+            .defaultSystem("""
+                你是 SDKJ 智慧供热平台的助手。回答问题时:
+                1. 如果有"参考资料",优先依据这些资料回答;参考资料里没有的事实不要编造
+                2. 答案简明,中文回答
+                3. 涉及数据库实际数据时,可以调用提供的 Tool 查询(只读)
+                4. 不回答与供热平台无关的话题
+                """)
+            .defaultAdvisors(
+                tenantAdvisor,    // 1. 注入 tenantId/userId
+                kbAdvisor,        // 2. RAG 检索 + 拼提示
+                memoryAdvisor,    // 3. 多轮上下文加载
+                auditAdvisor,     // 4. PII 脱敏 + 落审计
+                usageAdvisor      // 5. token 用量统计
+            )
             .build();
     }
 }
