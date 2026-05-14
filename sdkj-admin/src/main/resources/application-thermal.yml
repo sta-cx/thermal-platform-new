@@ -117,7 +117,7 @@ spring:
     vectorstore:
       qdrant:
         host: 192.168.2.206
-        port: 6334            # gRPC port (HTTP is 6333)
+        port: 6333            # HTTP/gRPC unified port (6334 gRPC not exposed)
         use-tls: false
         api-key: ${SDKJ_AI_QDRANT_KEY:}   # no auth currently, empty
         initialize-schema: false           # we manage collection lifecycle ourselves
