@@ -33,7 +33,7 @@ public class AiAssistantController {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @SaCheckLogin
-    @RateLimiter(time = 60, count = 20,
+    @RateLimiter(time = 60, count = 30,
         key = "#{T(org.sdkj.common.satoken.utils.LoginHelper).getUserId()}")
     @PostMapping("/chat")
     public R<AssistantResponse> chat(@RequestBody @Valid AssistantRequest req) {
@@ -42,12 +42,14 @@ public class AiAssistantController {
     }
 
     @SaCheckLogin
-    @RateLimiter(time = 60, count = 20,
+    @RateLimiter(time = 60, count = 30,
         key = "#{T(org.sdkj.common.satoken.utils.LoginHelper).getUserId()}")
     @PostMapping(value = "/chat/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter chatStream(@RequestBody @Valid AssistantRequest req) {
         aiTenantGate.requireEnabled(LoginHelper.getTenantId());
-        SseEmitter emitter = new SseEmitter(60_000L);
+        // 5 分钟超时;长回复(>1k tokens)在 60s 内常常无法完成,且 SSE 自身的 token
+        // 流就是隐式心跳,不需要额外 keepalive。审查 I2。
+        SseEmitter emitter = new SseEmitter(300_000L);
 
         assistantService.streamChat(req)
             .doOnNext(chunk -> {

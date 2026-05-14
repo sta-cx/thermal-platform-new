@@ -7,6 +7,7 @@ import org.sdkj.ai.domain.AiChatSession;
 import org.sdkj.ai.mapper.AiChatMessageMapper;
 import org.sdkj.ai.mapper.AiChatSessionMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -49,6 +50,11 @@ public class SessionService {
         return s;
     }
 
+    /**
+     * 插入消息 + 更新 session.lastActiveAt 必须原子,否则失败时:
+     * 消息插入成功但 session 时钟未刷新,会话排序会失真。
+     */
+    @Transactional(rollbackFor = Exception.class)
     public void appendMessage(Long sessionId, String role, String content, Integer tokenCount) {
         AiChatMessage m = new AiChatMessage();
         m.setSessionId(sessionId);
@@ -71,6 +77,11 @@ public class SessionService {
         );
     }
 
+    /**
+     * 删除 session + 所有附属 message 必须原子,否则失败时孤儿 message 永留(snowflake ID
+     * 不复用,但储存膨胀)。
+     */
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long sessionId) {
         messageMapper.delete(
             new LambdaQueryWrapper<AiChatMessage>().eq(AiChatMessage::getSessionId, sessionId)

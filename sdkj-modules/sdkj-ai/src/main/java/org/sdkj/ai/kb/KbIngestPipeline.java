@@ -57,7 +57,8 @@ public class KbIngestPipeline {
         // 4. 入库 doc 元数据 + chunks(独立 Bean 让 @Transactional 生效,见 Phase 2A 审查 B-C3)
         Long docId = docService.persistDocAndChunks(tenantId, title, format, bytes.length, hash, chunks);
 
-        // 5. 调 embedding + Qdrant (事务外, 失败标 FAILED)
+        // 5. 调 embedding + Qdrant — 失败时标 FAILED 后抛出,让 controller 返回 500/503
+        //    让用户清楚地看到"上传失败"而不是误以为成功(审查 I5)
         try {
             Map<Integer, String> idMap = embeddingService.embedAndStore(tenantId, docId, chunks);
             updateChunkQdrantIds(docId, idMap);
@@ -65,6 +66,7 @@ public class KbIngestPipeline {
         } catch (Exception e) {
             log.error("Embedding/Qdrant ingest failed for doc {}", docId, e);
             markStatus(docId, DocStatus.FAILED, truncate(e.getMessage(), 500));
+            throw new KbIngestException("知识库索引失败:" + e.getMessage(), docId, e);
         }
 
         return docId;
@@ -84,11 +86,10 @@ public class KbIngestPipeline {
     }
 
     private void markStatus(Long docId, DocStatus status, String errMsg) {
-        AiKnowledgeDoc update = new AiKnowledgeDoc();
-        update.setId(docId);
-        update.setStatus(status.name());
-        update.setErrorMessage(errMsg);
-        docMapper.updateById(update);
+        // 用原生 SQL UPDATE,绕开 MyBatis-Plus 全局 NOT_NULL 更新策略 —
+        // 否则 errMsg=null 时无法清掉旧错误信息(FAILED→EMBEDDED 时旧 message 残留)。
+        // 审查 I7。
+        docMapper.updateStatusWithErrorMessage(docId, status.name(), errMsg);
     }
 
     private String truncate(String s, int max) {

@@ -2,6 +2,7 @@ package org.sdkj.ai.config;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.exception.AiDisabledException;
+import org.sdkj.ai.kb.KbIngestException;
 import org.sdkj.common.core.domain.R;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -27,5 +28,17 @@ public class AiExceptionHandler {
         return ResponseEntity
             .status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(R.fail(503, e.getMessage()));
+    }
+
+    /**
+     * KB 摄取失败 → 500,把 docId 也带回去让前端可以重试或删除。
+     * 审查 I5。
+     */
+    @ExceptionHandler(KbIngestException.class)
+    public ResponseEntity<R<Long>> handleKbIngestFailure(KbIngestException e) {
+        log.error("KB ingest failed for docId={}: {}", e.getDocId(), e.getMessage());
+        return ResponseEntity
+            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(R.fail(e.getMessage(), e.getDocId()));
     }
 }
