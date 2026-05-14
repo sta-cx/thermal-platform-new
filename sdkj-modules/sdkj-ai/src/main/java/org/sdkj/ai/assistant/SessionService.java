@@ -2,6 +2,7 @@ package org.sdkj.ai.assistant;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import org.sdkj.ai.domain.AiChatMessage;
 import org.sdkj.ai.domain.AiChatSession;
 import org.sdkj.ai.mapper.AiChatMessageMapper;
@@ -13,6 +14,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@DS("master")
 @RequiredArgsConstructor
 public class SessionService {
 

@@ -1,5 +1,6 @@
 package org.sdkj.ai.kb;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.ai.domain.AiKnowledgeChunk;
@@ -14,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 @Service
+@DS("master")
 @RequiredArgsConstructor
 public class KnowledgeDocService {
 

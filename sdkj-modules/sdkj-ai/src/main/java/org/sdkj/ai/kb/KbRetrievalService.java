@@ -1,5 +1,6 @@
 package org.sdkj.ai.kb;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.WithPayloadSelectorFactory;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
+@DS("master")
 @RequiredArgsConstructor
 public class KbRetrievalService {
 
