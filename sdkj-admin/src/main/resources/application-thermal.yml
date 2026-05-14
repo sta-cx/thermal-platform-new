@@ -143,3 +143,8 @@ thermal:
         - '(?<!\d)\d{17}[\dXx](?!\d)'
         # 国内手机号(13x-19x),边界同上
         - '(?<!\d)1[3-9]\d{9}(?!\d)'
+    kb:
+      chunk-size-tokens: 500
+      chunk-overlap-tokens: 50
+      max-doc-bytes: 5242880     # 5MB
+      max-chunks-per-doc: 2000
