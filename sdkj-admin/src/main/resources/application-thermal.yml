@@ -153,3 +153,6 @@ thermal:
       chunk-overlap-tokens: 50
       max-doc-bytes: 5242880     # 5MB
       max-chunks-per-doc: 2000
+      retrieval:
+        top-k: 4
+        score-threshold: 0.7
