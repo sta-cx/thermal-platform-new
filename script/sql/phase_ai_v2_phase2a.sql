@@ -64,3 +64,8 @@ CREATE TABLE ai_chat_message (
 ) COMMENT='AI 对话消息';
 
 -- 6. Spring AI ChatMemory 表由框架启动时自动创建
+
+-- 7. AI 知识库管理菜单
+INSERT INTO sys_menu (menu_name, parent_id, order_num, path, component, menu_type, visible, status, perms, icon, create_time, create_dept)
+VALUES ('AI 知识库', (SELECT menu_id FROM sys_menu WHERE menu_name='系统管理' LIMIT 1),
+        100, 'ai-kb', 'system/ai-kb/index', 'C', '0', '0', 'ai:kb:manage', 'cloud', NOW(), 1);
