@@ -199,5 +199,9 @@ public class SysTenantBo extends BaseEntity {
      */
     private String status;
 
+    /**
+     * AI 功能总闸(0=关 1=开)
+     */
+    private Boolean aiEnabled;
 
 }

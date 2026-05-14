@@ -1,5 +1,6 @@
 package org.sdkj.system.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -174,6 +175,12 @@ public class SysTenant extends BaseEntity {
      * 租户状态（0正常 1停用）
      */
     private String status;
+
+    /**
+     * AI 功能总闸(0=关 1=开),默认开
+     */
+    @TableField("ai_enabled")
+    private Boolean aiEnabled;
 
     /**
      * 删除标志（0代表存在 1代表删除）

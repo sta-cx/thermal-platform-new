@@ -220,5 +220,9 @@ public class SysTenantVo implements Serializable {
     @ExcelDictFormat(readConverterExp = "0=正常,1=停用")
     private String status;
 
+    /**
+     * AI 功能总闸(0=关 1=开)
+     */
+    private Boolean aiEnabled;
 
 }

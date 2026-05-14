@@ -16,8 +16,10 @@ import org.sdkj.ai.core.ContextualView;
 import org.sdkj.ai.core.GenericPromptBuilder;
 import org.sdkj.ai.core.PromptPayload;
 import org.sdkj.ai.core.RouteWhitelistProvider;
+import org.sdkj.ai.exception.AiDisabledException;
 import org.sdkj.ai.exception.AiUnavailableException;
 import org.sdkj.ai.safety.AiCircuitBreaker;
+import org.sdkj.ai.safety.AiTenantGate;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.ratelimiter.annotation.RateLimiter;
 import org.sdkj.common.satoken.utils.LoginHelper;
@@ -51,6 +53,7 @@ public class AiContextualController {
     private final CacheKeyBuilder keyBuilder;
     private final AiCircuitBreaker circuitBreaker;
     private final RouteWhitelistProvider routeWhitelistProvider;
+    private final AiTenantGate aiTenantGate;
 
     @RateLimiter(
         time = 60,
@@ -67,7 +70,10 @@ public class AiContextualController {
         // 1. 熔断检查
         circuitBreaker.checkAllowed(feature, tenantId);
 
-        // 2. 路由匹配
+        // 2. 租户 AI 总闸校验
+        aiTenantGate.requireEnabled(tenantId);
+
+        // 3. 路由匹配
         ContextualPrompt prompt = registry.match(req.getRoute());
         if (prompt == null) {
             List<String> availableRoutes = routeWhitelistProvider.getAvailableRoutes();
@@ -195,6 +201,14 @@ public class AiContextualController {
     @ExceptionHandler(AiUnavailableException.class)
     public ResponseEntity<R<Void>> handleUnavailable(AiUnavailableException e) {
         log.warn("AI unavailable: {}", e.getMessage());
+        return ResponseEntity
+            .status(HttpStatus.SERVICE_UNAVAILABLE)
+            .body(R.fail(503, e.getMessage()));
+    }
+
+    @ExceptionHandler(AiDisabledException.class)
+    public ResponseEntity<R<Void>> handleDisabled(AiDisabledException e) {
+        log.warn("AI disabled for tenant: {}", e.getMessage());
         return ResponseEntity
             .status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(R.fail(503, e.getMessage()));
