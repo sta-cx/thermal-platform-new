@@ -1,26 +1,39 @@
 package org.sdkj.ai.config;
 
-import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.ai.document.MetadataMode;
+import org.springframework.ai.openai.OpenAiEmbeddingModel;
+import org.springframework.ai.openai.OpenAiEmbeddingOptions;
+import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.ai.retry.RetryUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 /**
- * Embedding 模型配置。
+ * 使用 Silicon Flow 创建 EmbeddingModel bean。
  * <p>
- * Spring AI auto-configures {@code OpenAiEmbeddingModel} when the starter is present
- * and {@code spring.ai.openai.embedding.options.model} is set.
- * This class provides a {@code @Primary} alias so that Phase 4 can swap implementations
- * without changing injection sites.
+ * Spring AI 自动配置的 OpenAiEmbeddingModel 复用 chat 的 base-url（DeepSeek），
+ * 但 DeepSeek 不提供 embedding API。这里手动指向 Silicon Flow 端点。
  */
 @Configuration
 public class EmbeddingConfig {
 
     @Bean
     @Primary
-    @ConditionalOnBean(EmbeddingModel.class)
-    public EmbeddingModel primaryEmbeddingModel(EmbeddingModel openAiEmbeddingModel) {
-        return openAiEmbeddingModel;
+    public OpenAiEmbeddingModel siliconFlowEmbeddingModel(
+        @Value("${thermal.ai.embedding.base-url:https://api.siliconflow.cn/v1}") String baseUrl,
+        @Value("${thermal.ai.embedding.api-key:}") String apiKey,
+        @Value("${thermal.ai.embedding.model:BAAI/bge-large-zh-v1.5}") String model
+    ) {
+        OpenAiApi api = OpenAiApi.builder()
+            .baseUrl(baseUrl)
+            .apiKey(apiKey)
+            .build();
+        OpenAiEmbeddingOptions options = OpenAiEmbeddingOptions.builder()
+            .model(model)
+            .build();
+        return new OpenAiEmbeddingModel(api, MetadataMode.EMBED, options,
+            RetryUtils.DEFAULT_RETRY_TEMPLATE);
     }
 }

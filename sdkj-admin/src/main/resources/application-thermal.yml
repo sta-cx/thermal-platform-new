@@ -107,9 +107,8 @@ spring:
         options:
           model: deepseek-chat
           temperature: 0.3
-      embedding:
-        options:
-          model: text-embedding-v1
+      # embedding 由 EmbeddingConfig.java 手动创建 bean，不复用 chat base-url
+      # DeepSeek 不提供 embedding API，使用 Silicon Flow
     chat:
       memory:
         repository:
@@ -137,6 +136,10 @@ thermal:
       failure-threshold: 5
       window-seconds: 60
       open-duration-seconds: 60
+    embedding:
+      base-url: https://api.siliconflow.cn/v1
+      api-key: ${SDKJ_AI_SILICONFLOW_KEY:sk-nmaivhfaojupkrwqfrdhegxuigdudsjgwpeymxmcaoljicas}
+      model: BAAI/bge-large-zh-v1.5
     rate-limit:
       contextual-per-user-per-minute: 30
       contextual-per-tenant-per-minute: 200
