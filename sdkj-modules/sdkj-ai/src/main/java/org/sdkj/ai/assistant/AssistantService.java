@@ -53,6 +53,7 @@ public class AssistantService {
                 .advisors(spec -> spec
                     .param(TenantContextAdvisor.CTX_TENANT_ID, tenantId)
                     .param(TenantContextAdvisor.CTX_USER_ID, userId)
+                    .param("ai.feature", FEATURE)
                     .param(ChatMemory.CONVERSATION_ID, conversationId)
                 )
                 .call()
@@ -63,6 +64,7 @@ public class AssistantService {
         }
 
         sessionService.appendMessage(sessionId, "ASSISTANT", reply, null);
+        circuitBreaker.recordSuccess(FEATURE, tenantId);
 
         List<org.sdkj.ai.domain.AiChatMessage> messages = sessionService.listMessages(sessionId);
         Long messageId = messages.isEmpty() ? null : messages.get(messages.size() - 1).getId();
@@ -97,6 +99,7 @@ public class AssistantService {
             .advisors(spec -> spec
                 .param(TenantContextAdvisor.CTX_TENANT_ID, tenantId)
                 .param(TenantContextAdvisor.CTX_USER_ID, userId)
+                .param("ai.feature", FEATURE)
                 .param(ChatMemory.CONVERSATION_ID, conversationId)
             )
             .stream()
@@ -107,6 +110,7 @@ public class AssistantService {
             })
             .concatWith(Flux.defer(() -> {
                 sessionService.appendMessage(finalSessionId, "ASSISTANT", fullReply.toString(), null);
+                circuitBreaker.recordSuccess(FEATURE, tenantId);
                 var messages = sessionService.listMessages(finalSessionId);
                 Long messageId = messages.isEmpty() ? null : messages.get(messages.size() - 1).getId();
                 return Flux.just(new AssistantChunk(null, finalSessionId, messageId, true, null));
