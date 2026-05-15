@@ -74,4 +74,15 @@ public class ToolRegistry {
     public Collection<ToolMetadata> all() {
         return Collections.unmodifiableCollection(byName.values());
     }
+
+    /**
+     * 返回所有去重的 Tool Bean 实例(用于 ChatClient.prompt().tools() 注册)。
+     * 同一个 Bean 可能有多个 @Tool 方法,但只需注册一次。
+     */
+    public Object[] getToolBeans() {
+        return byName.values().stream()
+            .map(ToolMetadata::bean)
+            .distinct()
+            .toArray();
+    }
 }

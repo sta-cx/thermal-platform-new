@@ -15,6 +15,8 @@ import org.sdkj.ai.tools.registry.ToolRegistry;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.prompt.ChatOptions;
+import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -114,8 +116,17 @@ public class AssistantService {
             return Flux.just(AssistantChunk.builder().error("tool loop too deep").finish(true).build());
         }
 
+        // Tool callbacks 从 ToolRegistry 动态获取(避免 Bean 创建时序问题)
+        Object[] toolBeans = toolRegistry.getToolBeans();
+
+        ChatOptions toolOptions = ToolCallingChatOptions.builder()
+            .internalToolExecutionEnabled(false)
+            .build();
+
         return chatClient.prompt()
             .user(userMessage)
+            .options(toolOptions)
+            .tools(toolBeans)
             .advisors(spec -> spec
                 .param(TenantContextAdvisor.CTX_TENANT_ID, tenantId)
                 .param(TenantContextAdvisor.CTX_USER_ID, userId)
