@@ -11,6 +11,8 @@ import org.sdkj.thermal.domain.dto.YunGuDataResponse;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.sdkj.thermal.domain.dto.ValveCommandResultDto;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -206,4 +208,25 @@ public interface IPrHeatValveArchiveService extends IService<PrHeatValveArchive>
      */
     void updateHouseTemperature(Long houseId, BigDecimal inTemperature,
                                  BigDecimal outTemperature, Integer actualOpen);
+
+    /**
+     * AI Tool 调用的阀门指令下发入口（Command 类）。
+     *
+     * <p>校验规则：
+     * <ul>
+     *   <li>houseId 对应的阀门必须存在</li>
+     *   <li>action 必须是 OPEN / CLOSE / SET_OPENNESS 之一</li>
+     *   <li>SET_OPENNESS 时 openness 必须在 [0, 100] 区间</li>
+     * </ul>
+     *
+     * @param houseId    房屋 ID（必填）
+     * @param action     动作：OPEN / CLOSE / SET_OPENNESS（必填）
+     * @param openness   开度 0-100，仅 SET_OPENNESS 时必填
+     * @param dryRun     是否仅模拟
+     * @param operatorId 操作者用户 ID
+     * @return 指令下发结果
+     * @throws IllegalArgumentException 阀门不存在、action 非法、openness 越界
+     */
+    ValveCommandResultDto dispatchFromAi(Long houseId, String action, Integer openness,
+                                          Boolean dryRun, Long operatorId);
 }

@@ -20,6 +20,7 @@ import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.dto.PrHeatValveArchiveDto;
 import org.sdkj.thermal.domain.dto.PrHouseByPayVo;
 import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
+import org.sdkj.thermal.domain.dto.ValveCommandResultDto;
 import org.sdkj.thermal.domain.dto.LtValveDataResponse;
 import org.sdkj.thermal.domain.dto.YunGuDataResponse;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
@@ -41,6 +42,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -718,5 +720,59 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         // SQL logic: JOIN pr_house on houseId WHERE pr_house.payStatus!='1' AND pr_heat_valve_archive.valveStatus == '1'
         log.warn("queryUnpaidOpenValves not yet implemented for orgId={}", orgId);
         return List.of();
+    }
+
+    // ========== AI Tool 阀门指令下发 ==========
+
+    private static final Set<String> VALID_ACTIONS = Set.of("OPEN", "CLOSE", "SET_OPENNESS");
+
+    @Override
+    public ValveCommandResultDto dispatchFromAi(Long houseId, String action, Integer openness,
+                                                  Boolean dryRun, Long operatorId) {
+        // 1. 参数校验
+        if (houseId == null) {
+            throw new IllegalArgumentException("房屋 ID 不能为空");
+        }
+        if (action == null || !VALID_ACTIONS.contains(action.toUpperCase())) {
+            throw new IllegalArgumentException(
+                "action 必须是 OPEN / CLOSE / SET_OPENNESS 之一，当前值: " + action);
+        }
+        String normalizedAction = action.toUpperCase();
+
+        if ("SET_OPENNESS".equals(normalizedAction)) {
+            if (openness == null || openness < 0 || openness > 100) {
+                throw new IllegalArgumentException(
+                    "SET_OPENNESS 时 openness 必须在 0-100 范围内，当前值: " + openness);
+            }
+        }
+
+        // 2. 查阀门确认存在
+        PrHeatValveArchive valve = baseMapper.selectOne(
+            new LambdaQueryWrapper<PrHeatValveArchive>()
+                .eq(PrHeatValveArchive::getHouseId, houseId)
+                .last("LIMIT 1")
+        );
+        if (valve == null) {
+            throw new IllegalArgumentException("房屋 ID " + houseId + " 未配置阀门，无法下发指令");
+        }
+
+        boolean effectiveDryRun = dryRun == null || dryRun;
+
+        // 3. dryRun 模式
+        if (effectiveDryRun) {
+            String summary = String.format("模拟指令：房屋 %s 阀门 %s %s",
+                houseId, normalizedAction,
+                "SET_OPENNESS".equals(normalizedAction) ? "开度 " + openness : "");
+            return new ValveCommandResultDto(houseId, normalizedAction, openness, false,
+                summary, "dryRun:命令已生成,未真实下发到 IoT。请运维确认 IoT 链路后改 dryRun=false 重试。");
+        }
+
+        // 4. 真实下发（Phase 3 占位）
+        // TODO Phase 3: 真实 IoT 下发 — 调用 MBus/AG 平台 API，失败写指令记录表
+        String summary = String.format("指令已下发：房屋 %s 阀门 %s %s",
+            houseId, normalizedAction,
+            "SET_OPENNESS".equals(normalizedAction) ? "开度 " + openness : "");
+        return new ValveCommandResultDto(houseId, normalizedAction, openness, true,
+            summary, "指令已下发(IoT 链路待接入,当前为占位实现)");
     }
 }
