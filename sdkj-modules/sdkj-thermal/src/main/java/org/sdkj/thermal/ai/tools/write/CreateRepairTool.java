@@ -10,6 +10,8 @@ import java.util.Date;
 import org.sdkj.ai.tools.annotation.RiskLevel;
 import org.sdkj.ai.tools.annotation.WriteTool;
 import org.sdkj.thermal.domain.HtRepair;
+import org.sdkj.thermal.domain.PrHouse;
+import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.service.IHtRepairService;
 
 @Slf4j
@@ -18,6 +20,7 @@ import org.sdkj.thermal.service.IHtRepairService;
 public class CreateRepairTool {
 
     private final IHtRepairService repairService;
+    private final PrHouseMapper houseMapper;
 
     public record CreatedRepair(
         Long repairId,
@@ -50,6 +53,14 @@ public class CreateRepairTool {
         repair.setRepairType(0); // 默认:供暖问题
         repair.setRepairTime(new Date());
         repair.setRepairStatus(0); // 待处理
+        // org_id 为 NOT NULL,从房屋表查找
+        PrHouse house = houseMapper.selectById(houseId);
+        if (house != null) {
+            repair.setOrgId(house.getOrgId());
+            repair.setOrgName(house.getOrgName());
+        } else {
+            repair.setOrgId("0");
+        }
         repairService.save(repair);
         return new CreatedRepair(repair.getId(), houseId, repairInfo, "PENDING");
     }
