@@ -4,6 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -31,6 +32,9 @@ public class AiProperties {
 
     /** 审计 */
     private Audit audit = new Audit();
+
+    /** Tool Calling 配置(Phase 2B) */
+    private Tools tools = new Tools();
 
     @Data
     public static class Contextual {
@@ -60,5 +64,22 @@ public class AiProperties {
             "(?<!\\d)\\d{17}[\\dXx](?!\\d)",
             "(?<!\\d)1[3-9]\\d{9}(?!\\d)"
         );
+    }
+
+    @Data
+    public static class Tools {
+        /** Tool Bean 黑名单,如 ["valveControlTool"];运维侧禁用 */
+        private List<String> disabled = new ArrayList<>();
+
+        /** 每用户每分钟最多写 Tool 调用数,默认 10 */
+        private int writeRateLimitPerMinute = 10;
+
+        /** 阀门 Tool dryRun 默认值(IoT 未就绪期建议 true) */
+        private Valve valve = new Valve();
+
+        @Data
+        public static class Valve {
+            private boolean dryRun = true;
+        }
     }
 }

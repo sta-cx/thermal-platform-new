@@ -159,3 +159,8 @@ thermal:
       retrieval:
         top-k: 4
         score-threshold: 0.7
+    tools:
+      disabled: []                              # 例: [valveControlTool]
+      write-rate-limit-per-minute: 10
+      valve:
+        dry-run: true                           # IoT 就绪后改 false
