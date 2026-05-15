@@ -27,6 +27,7 @@ public class AssistantResumeService {
         }
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         return assistantService.streamRound(
-            "请基于刚才工具执行的结果继续回复。", tenantId, userId, sessionId, conversationId, 0);
+            "请基于刚才工具执行的结果继续回复。", tenantId, userId, sessionId, conversationId, 0,
+            false);
     }
 }

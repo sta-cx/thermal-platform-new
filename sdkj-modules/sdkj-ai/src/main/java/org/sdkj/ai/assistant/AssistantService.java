@@ -112,24 +112,30 @@ public class AssistantService {
      */
     Flux<AssistantChunk> streamRound(String userMessage, String tenantId, Long userId,
                                       Long sessionId, String conversationId, int round) {
+        return streamRound(userMessage, tenantId, userId, sessionId, conversationId, round, true);
+    }
+
+    Flux<AssistantChunk> streamRound(String userMessage, String tenantId, Long userId,
+                                      Long sessionId, String conversationId, int round,
+                                      boolean enableTools) {
         if (round >= 5) {
             return Flux.just(AssistantChunk.builder().error("tool loop too deep").finish(true).build());
         }
 
-        // Tool callbacks 从 ToolRegistry 动态获取(避免 Bean 创建时序问题)
-        Object[] toolBeans = toolRegistry.getToolBeans();
-
-        ChatOptions toolOptions = ToolCallingChatOptions.builder()
-            .internalToolExecutionEnabled(false)
-            .build();
-
         // Spring AI .user() 不接受空字符串,递归调用时用 toolSummary 替代
         String prompt = (userMessage == null || userMessage.isBlank()) ? "请继续。" : userMessage;
 
-        return chatClient.prompt()
-            .user(prompt)
-            .options(toolOptions)
-            .tools(toolBeans)
+        var promptSpec = chatClient.prompt().user(prompt);
+
+        if (enableTools) {
+            Object[] toolBeans = toolRegistry.getToolBeans();
+            ChatOptions toolOptions = ToolCallingChatOptions.builder()
+                .internalToolExecutionEnabled(false)
+                .build();
+            promptSpec = promptSpec.options(toolOptions).tools(toolBeans);
+        }
+
+        return promptSpec
             .advisors(spec -> spec
                 .param(TenantContextAdvisor.CTX_TENANT_ID, tenantId)
                 .param(TenantContextAdvisor.CTX_USER_ID, userId)
