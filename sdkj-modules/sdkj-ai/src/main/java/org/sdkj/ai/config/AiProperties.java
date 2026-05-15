@@ -36,6 +36,9 @@ public class AiProperties {
     /** Tool Calling 配置(Phase 2B) */
     private Tools tools = new Tools();
 
+    /** RAG 配置 */
+    private Rag rag = new Rag();
+
     @Data
     public static class Contextual {
         private Duration cacheDefaultTtl = Duration.ofMinutes(5);
@@ -64,6 +67,12 @@ public class AiProperties {
             "(?<!\\d)\\d{17}[\\dXx](?!\\d)",
             "(?<!\\d)1[3-9]\\d{9}(?!\\d)"
         );
+    }
+
+    @Data
+    public static class Rag {
+        /** 是否启用 RAG 知识库检索 */
+        private boolean enabled = true;
     }
 
     @Data

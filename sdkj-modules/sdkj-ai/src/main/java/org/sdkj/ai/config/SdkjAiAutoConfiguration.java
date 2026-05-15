@@ -11,6 +11,7 @@ import org.sdkj.ai.mapper.AiUsageLogMapper;
 import org.sdkj.ai.safety.PiiMasker;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,6 +21,8 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.mybatis.spring.annotation.MapperScan;
 
 import io.micrometer.core.instrument.MeterRegistry;
+
+import java.util.List;
 
 @AutoConfiguration
 @ComponentScan("org.sdkj.ai")
@@ -67,6 +70,7 @@ public class SdkjAiAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "thermal.ai.rag", name = "enabled", havingValue = "true", matchIfMissing = true)
     public KbAdvisor kbAdvisor(KbRetrievalService retrievalService) {
         return new KbAdvisor(retrievalService);
     }
@@ -74,7 +78,7 @@ public class SdkjAiAutoConfiguration {
     @Bean("assistantChatClient")
     public ChatClient assistantChatClient(ChatClient.Builder builder,
                                            TenantContextAdvisor tenantAdvisor,
-                                           KbAdvisor kbAdvisor,
+                                           @Autowired(required = false) KbAdvisor kbAdvisor,
                                            SafetyAuditAdvisor auditAdvisor,
                                            MessageChatMemoryAdvisor memoryAdvisor,
                                            UsageMetricsAdvisor usageAdvisor) {
@@ -88,11 +92,12 @@ public class SdkjAiAutoConfiguration {
                 """)
             .defaultAdvisors(
                 tenantAdvisor,    // 1. 注入 tenantId/userId
-                kbAdvisor,        // 2. RAG 检索 + 拼提示
-                memoryAdvisor,    // 3. 多轮上下文加载
-                auditAdvisor,     // 4. PII 脱敏 + 落审计
-                usageAdvisor      // 5. token 用量统计
+                memoryAdvisor,    // 2. 多轮上下文加载
+                auditAdvisor,     // 3. PII 脱敏 + 落审计
+                usageAdvisor      // 4. token 用量统计
             )
+            .defaultAdvisors(kbAdvisor != null
+                ? List.of(kbAdvisor) : List.of())
             .build();
     }
 }
