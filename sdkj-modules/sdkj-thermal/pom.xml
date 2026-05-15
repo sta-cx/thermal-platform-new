@@ -84,6 +84,12 @@
             <artifactId>sdkj-system</artifactId>
         </dependency>
 
+        <!-- AI Tool Calling 基础设施(@WriteTool/@Tool 注解) -->
+        <dependency>
+            <groupId>org.sdkj</groupId>
+            <artifactId>sdkj-ai</artifactId>
+        </dependency>
+
         <!-- Quartz 调度器 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
