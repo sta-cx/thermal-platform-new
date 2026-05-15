@@ -80,6 +80,26 @@ public class SessionService {
     }
 
     /**
+     * 把 Tool 调用结果作为对话消息落库(role=TOOL)。
+     * Content 是给前端流里展示的"短摘要"(如"已创建报修 #123"),完整入参出参在 ai_tool_invocation 表。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Long appendToolMessage(Long sessionId, String summaryContent) {
+        AiChatMessage row = new AiChatMessage();
+        row.setSessionId(sessionId);
+        row.setRole("TOOL");
+        row.setContent(summaryContent);
+        row.setCreateTime(new Date());
+        messageMapper.insert(row);
+        // 更新 session lastActiveAt
+        AiChatSession update = new AiChatSession();
+        update.setId(sessionId);
+        update.setLastActiveAt(new Date());
+        sessionMapper.updateById(update);
+        return row.getId();
+    }
+
+    /**
      * 删除 session + 所有附属 message 必须原子,否则失败时孤儿 message 永留(snowflake ID
      * 不复用,但储存膨胀)。
      */
