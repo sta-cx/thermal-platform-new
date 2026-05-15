@@ -123,8 +123,11 @@ public class AssistantService {
             .internalToolExecutionEnabled(false)
             .build();
 
+        // Spring AI .user() 不接受空字符串,递归调用时用 toolSummary 替代
+        String prompt = (userMessage == null || userMessage.isBlank()) ? "请继续。" : userMessage;
+
         return chatClient.prompt()
-            .user(userMessage)
+            .user(prompt)
             .options(toolOptions)
             .tools(toolBeans)
             .advisors(spec -> spec
@@ -184,8 +187,10 @@ public class AssistantService {
                     if (!fullText.isEmpty()) {
                         sessionService.appendMessage(sessionId, "ASSISTANT", fullText, null);
                     }
+                    // 构建 Tool 结果摘要作为下一轮 prompt,让 LLM 能看到结果
+                    String toolSummary = buildToolSummary(tcr.getToolResults());
                     return deltaFlux.concatWith(
-                        streamRound("", tenantId, userId, sessionId, conversationId, round + 1));
+                        streamRound(toolSummary, tenantId, userId, sessionId, conversationId, round + 1));
 
                 } catch (PendingConfirmationException pe) {
                     // 暂停 — 存已有文本 + 发 pending 帧 + 结束流
@@ -247,5 +252,19 @@ public class AssistantService {
     private String truncate(String s, int max) {
         if (s == null) return "";
         return s.length() <= max ? s : s.substring(0, max) + "...";
+    }
+
+    private String buildToolSummary(List<ToolCallResult.ToolExecResult> results) {
+        if (results == null || results.isEmpty()) return "请继续。";
+        StringBuilder sb = new StringBuilder("以下是工具调用的结果，请基于这些结果回答用户：\n");
+        for (ToolCallResult.ToolExecResult r : results) {
+            sb.append("- ").append(r.getToolName()).append(": ");
+            String json = r.getResultJson();
+            if (json != null && json.length() > 800) {
+                json = json.substring(0, 800) + "...(truncated)";
+            }
+            sb.append(json).append("\n");
+        }
+        return sb.toString();
     }
 }
