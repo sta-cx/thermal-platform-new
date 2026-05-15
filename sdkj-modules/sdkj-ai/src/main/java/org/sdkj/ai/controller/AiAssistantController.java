@@ -30,7 +30,8 @@ public class AiAssistantController {
     private final AssistantService assistantService;
     private final SessionService sessionService;
     private final org.sdkj.ai.safety.AiTenantGate aiTenantGate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    // Use Spring-configured ObjectMapper (includes BigNumberSerializer for Long → String)
+    private final ObjectMapper objectMapper;
 
     @SaCheckLogin
     @RateLimiter(time = 60, count = 30,

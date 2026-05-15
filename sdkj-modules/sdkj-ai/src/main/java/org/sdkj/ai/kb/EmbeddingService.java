@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.embedding.EmbeddingResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -30,6 +31,9 @@ public class EmbeddingService {
     private final QdrantClient qdrantClient;
     private final QdrantCollectionManager collectionManager;
 
+    @Value("${thermal.ai.kb.embed-batch-size:64}")
+    private int embedBatchSize;
+
     /**
      * Batch-embed chunks and upsert to Qdrant.
      *
@@ -43,13 +47,22 @@ public class EmbeddingService {
             return Map.of();
         }
 
-        // 1. Batch embed
-        List<String> texts = chunks.stream().map(ChunkResult::getText).toList();
-        EmbeddingResponse embedResp = embeddingModel.embedForResponse(texts);
-        List<float[]> vectors = embedResp.getResults().stream()
-            .map(r -> r.getOutput())
-            .toList();
-        int vecSize = vectors.get(0).length;
+        // 1. Batch embed — split into smaller batches to avoid API parameter limits
+        List<float[]> allVectors = new ArrayList<>(chunks.size());
+        for (int offset = 0; offset < chunks.size(); offset += embedBatchSize) {
+            int end = Math.min(offset + embedBatchSize, chunks.size());
+            List<String> batchTexts = chunks.subList(offset, end).stream()
+                .map(ChunkResult::getText).toList();
+            EmbeddingResponse embedResp = embeddingModel.embedForResponse(batchTexts);
+            List<float[]> batchVectors = embedResp.getResults().stream()
+                .map(r -> r.getOutput()).toList();
+            allVectors.addAll(batchVectors);
+            log.info("Embedded batch {}/{} ({} texts) for doc {}",
+                (offset / embedBatchSize) + 1,
+                (chunks.size() + embedBatchSize - 1) / embedBatchSize,
+                batchTexts.size(), docId);
+        }
+        int vecSize = allVectors.get(0).length;
 
         // 2. Ensure collection exists
         collectionManager.ensureCollection(tenantId, vecSize);
@@ -66,7 +79,7 @@ public class EmbeddingService {
 
                 PointStruct point = PointStruct.newBuilder()
                     .setId(PointIdFactory.id(UUID.fromString(pointId)))
-                    .setVectors(VectorsFactory.vectors(toFloatList(vectors.get(i))))
+                    .setVectors(VectorsFactory.vectors(toFloatList(allVectors.get(i))))
                     .putPayload("doc_id", ValueFactory.value(docId))
                     .putPayload("chunk_index", ValueFactory.value(chunk.getIndex()))
                     .build();
