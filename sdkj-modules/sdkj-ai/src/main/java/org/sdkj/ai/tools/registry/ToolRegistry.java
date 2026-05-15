@@ -26,7 +26,10 @@ public class ToolRegistry {
     private final ConfigurableListableBeanFactory beanFactory;
     private final AiProperties aiProperties;
 
-    private final Map<String, ToolMetadata> byName = new ConcurrentHashMap<>();
+    /** fullName → metadata */
+    private final Map<String, ToolMetadata> byFullName = new ConcurrentHashMap<>();
+    /** Spring AI 生成的短名(methodName) → metadata，用于查找 LLM 返回的 tool call */
+    private final Map<String, ToolMetadata> byMethodName = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void scan() {
@@ -38,7 +41,6 @@ public class ToolRegistry {
             Class<?> type;
             try { type = beanFactory.getType(beanName); } catch (Exception e) { continue; }
             if (type == null) continue;
-            // 跳过黑名单 Bean
             if (disabled.contains(beanName)) {
                 log.warn("[ToolRegistry] Bean {} disabled by config (ai.tools.disabled)", beanName);
                 continue;
@@ -60,19 +62,34 @@ public class ToolRegistry {
                     m,
                     beanFactory.getBean(beanName)
                 );
-                byName.put(md.fullName(), md);
+                byFullName.put(md.fullName(), md);
+                if (byMethodName.putIfAbsent(m.getName(), md) != null) {
+                    log.warn("[ToolRegistry] duplicate method name '{}' across beans, lookup may be ambiguous", m.getName());
+                }
                 log.info("[ToolRegistry] registered tool: {} risk={} confirm={}",
                     md.fullName(), md.risk(), md.requireConfirm());
             }
         }
     }
 
+    /**
+     * 按 fullName(beanName.methodName) 查找。用于 confirm 端点恢复 PendingToolCall。
+     */
     public ToolMetadata byName(String fullName) {
-        return byName.get(fullName);
+        return byFullName.get(fullName);
+    }
+
+    /**
+     * 按方法名查找。Spring AI 生成 tool name 时只使用方法名(不含 beanName 前缀)，
+     * 因此 LLM 返回的 tool call name 需要靠此方法匹配。
+     */
+    public ToolMetadata resolve(String toolCallName) {
+        ToolMetadata md = byFullName.get(toolCallName);
+        return md != null ? md : byMethodName.get(toolCallName);
     }
 
     public Collection<ToolMetadata> all() {
-        return Collections.unmodifiableCollection(byName.values());
+        return Collections.unmodifiableCollection(byFullName.values());
     }
 
     /**
@@ -80,7 +97,7 @@ public class ToolRegistry {
      * 同一个 Bean 可能有多个 @Tool 方法,但只需注册一次。
      */
     public Object[] getToolBeans() {
-        return byName.values().stream()
+        return byFullName.values().stream()
             .map(ToolMetadata::bean)
             .distinct()
             .toArray();

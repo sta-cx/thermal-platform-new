@@ -1,12 +1,15 @@
 package org.sdkj.ai.domain.vo;
 
+import io.github.linpeilie.annotations.AutoMapper;
 import lombok.Data;
+import org.sdkj.ai.domain.AiToolInvocation;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
 
 @Data
+@AutoMapper(target = AiToolInvocation.class)
 public class AiToolInvocationVo implements Serializable {
 
     @Serial

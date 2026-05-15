@@ -56,6 +56,7 @@ public class AiToolCallController {
     public R<PendingToolCall> get(@PathVariable @NotBlank String callId) {
         tenantGate.requireEnabled(LoginHelper.getTenantId());
         return store.findByCallId(callId)
+            .filter(c -> requireOwner(c))
             .map(R::ok)
             .orElseGet(() -> R.fail("call expired or not found"));
     }
@@ -66,6 +67,10 @@ public class AiToolCallController {
     @PostMapping("/{callId}/reject")
     public R<Void> reject(@PathVariable @NotBlank String callId) {
         tenantGate.requireEnabled(LoginHelper.getTenantId());
+        var opt = store.findByCallId(callId);
+        if (opt.isEmpty() || !requireOwner(opt.get())) {
+            return R.fail("call expired or not found");
+        }
         boolean ok = store.transition(callId,
             PendingToolCallStatus.PENDING, PendingToolCallStatus.REJECTED,
             c -> c.setDecidedAt(Instant.now())
@@ -90,6 +95,9 @@ public class AiToolCallController {
             throw new IllegalStateException("call state mismatch or expired: " + callId);
         }
         PendingToolCall call = transitioned.get();
+        if (!requireOwner(call)) {
+            throw new IllegalStateException("not your tool call: " + callId);
+        }
 
         SseEmitter emitter = new SseEmitter(60_000L);
         long t0 = System.currentTimeMillis();
@@ -107,9 +115,9 @@ public class AiToolCallController {
             );
             recorder.record(call, outcome.resultJson(), execStatus, latency, null);
 
-            // 拉起 LLM 继续生成
+            // 拉起 LLM 继续生成（传入工具执行结果作为上下文）
             resumeService.resumeAfterToolCall(
-                call.getTenantId(), call.getUserId(), call.getSessionId()
+                call.getTenantId(), call.getUserId(), call.getSessionId(), outcome.resultJson()
             ).doOnNext(chunk -> {
                 try {
                     emitter.send(SseEmitter.event()
@@ -154,5 +162,9 @@ public class AiToolCallController {
             }
         }
         return emitter;
+    }
+
+    private boolean requireOwner(PendingToolCall call) {
+        return call.getUserId() != null && call.getUserId().equals(LoginHelper.getUserId());
     }
 }

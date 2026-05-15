@@ -1,6 +1,7 @@
 package org.sdkj.ai.tools.store;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.domain.AiPendingToolCall;
@@ -28,6 +29,7 @@ public class MysqlConfirmationStoreSidecar {
 
     @Async
     public void upsert(PendingToolCall call) {
+        DynamicDataSourceContextHolder.push("master");
         try {
             AiPendingToolCall row = toRow(call);
             AiPendingToolCall existing = mapper.selectOne(
@@ -45,6 +47,8 @@ public class MysqlConfirmationStoreSidecar {
             // 审计写失败不能影响主流程,只记日志
             log.error("[MysqlConfirmationStoreSidecar] upsert failed for {}: {}",
                 call.getCallId(), e.getMessage(), e);
+        } finally {
+            DynamicDataSourceContextHolder.poll();
         }
     }
 

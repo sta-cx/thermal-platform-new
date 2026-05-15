@@ -193,7 +193,7 @@ public class AssistantService {
                         sessionService.appendMessage(sessionId, "ASSISTANT", fullText, null);
                     }
                     var firstCall = toolCalls.get(0);
-                    var md = toolRegistry.byName(firstCall.name());
+                    var md = toolRegistry.resolve(firstCall.name());
                     var view = AssistantChunk.PendingToolCallView.builder()
                         .callId(pe.getCallId())
                         .toolName(firstCall.name())
