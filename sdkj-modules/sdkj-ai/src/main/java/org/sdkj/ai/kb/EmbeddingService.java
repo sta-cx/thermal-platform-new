@@ -31,7 +31,7 @@ public class EmbeddingService {
     private final QdrantClient qdrantClient;
     private final QdrantCollectionManager collectionManager;
 
-    @Value("${thermal.ai.kb.embed-batch-size:64}")
+    @Value("${thermal.ai.kb.embed-batch-size:32}")
     private int embedBatchSize;
 
     /**
