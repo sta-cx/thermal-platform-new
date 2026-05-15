@@ -12,6 +12,8 @@ import org.sdkj.ai.tools.store.ConfirmationStore;
 import org.sdkj.ai.tools.store.PendingToolCall;
 import org.sdkj.ai.tools.store.PendingToolCallStatus;
 
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
+
 import java.time.Instant;
 import java.util.*;
 
@@ -68,7 +70,7 @@ public class ToolCallDispatcher {
 
             // LOW:立即执行
             if (md.risk() == RiskLevel.LOW) {
-                String result = executeSafely(md, call.arguments());
+                String result = executeSafely(md, call.arguments(), call.tenantId());
                 lowResponses.add(ToolCallResult.ToolExecResult.builder()
                     .toolName(call.toolName())
                     .resultJson(result)
@@ -116,15 +118,25 @@ public class ToolCallDispatcher {
     }
 
     /** LOW Tool 立即执行 — 异常吃掉转 error JSON,不让单个 Tool 失败 break 整条对话 */
-    private String executeSafely(ToolMetadata md, Map<String, Object> args) {
+    private String executeSafely(ToolMetadata md, Map<String, Object> args, String tenantId) {
         try {
-            Object[] params = ToolArgBinder.bind(md, args);
-            Object out = md.method().invoke(md.bean(), params);
-            return out == null ? "null" : objectMapper.writeValueAsString(out);
+            // Tool 在 reactive 线程执行,TenantFilter 不会切数据源;
+            // 业务 Tool 需要访问租户库,强制切到 tenant_{tenantId}
+            if (tenantId != null && !tenantId.isBlank()) {
+                DynamicDataSourceContextHolder.push("tenant_" + tenantId);
+            }
+            try {
+                Object[] params = ToolArgBinder.bind(md, args);
+                Object out = md.method().invoke(md.bean(), params);
+                return out == null ? "null" : objectMapper.writeValueAsString(out);
+            } finally {
+                DynamicDataSourceContextHolder.clear();
+            }
         } catch (Exception e) {
             log.error("[Dispatcher] LOW tool {} failed: {}", md.fullName(), e.getMessage(), e);
+            String errMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
             try {
-                return objectMapper.writeValueAsString(Map.of("error", e.getMessage()));
+                return objectMapper.writeValueAsString(Map.of("error", errMsg));
             } catch (JsonProcessingException ignored) {
                 return "{\"error\":\"unexpected\"}";
             }
