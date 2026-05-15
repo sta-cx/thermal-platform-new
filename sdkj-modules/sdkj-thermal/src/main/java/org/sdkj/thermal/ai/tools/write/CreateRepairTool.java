@@ -5,63 +5,50 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
 import org.sdkj.ai.tools.annotation.RiskLevel;
 import org.sdkj.ai.tools.annotation.WriteTool;
-import org.sdkj.thermal.domain.HtRepair;
-import org.sdkj.thermal.domain.PrHouse;
-import org.sdkj.thermal.mapper.PrHouseMapper;
+import org.sdkj.thermal.domain.dto.CreatedRepairResult;
 import org.sdkj.thermal.service.IHtRepairService;
+import org.sdkj.common.satoken.utils.LoginHelper;
 
+/**
+ * 创建报修工单（CRUD 类 WriteTool）。
+ * 薄层：仅收集参数 + 委托 Service，不注入 Mapper、不查 DB。
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class CreateRepairTool {
 
     private final IHtRepairService repairService;
-    private final PrHouseMapper houseMapper;
-
-    public record CreatedRepair(
-        Long repairId,
-        Long houseId,
-        String repairInfo,
-        String status
-    ) {}
 
     @Tool(description = """
         给指定热户创建一条报修工单。
         典型用途:客服在与用户对话时,用户口述报修原因后调用本 Tool 录入。
+        如果用户只给了门牌号(如"3号楼201"),先调用 queryHouseByAddress 查到 houseId 再调用本 Tool。
         """)
     @WriteTool(
         risk = RiskLevel.MEDIUM,
         confirm = true,
         permission = "thermal:ht:repair:add"
     )
-    public CreatedRepair create(
-        @ToolParam(description = "房屋 ID") Long houseId,
-        @ToolParam(description = "报修描述") String repairInfo,
-        @ToolParam(description = "联系人姓名,可选", required = false) String userName,
-        @ToolParam(description = "联系电话,可选", required = false) String userPhone
+    public CreatedRepairResult create(
+        @ToolParam(description = "房屋 ID,必填。如果用户只提供地址,请先调用 queryHouseByAddress 查询")
+        Long houseId,
+
+        @ToolParam(description = "报修描述,用户原话或概括")
+        String repairInfo,
+
+        @ToolParam(description = "联系人姓名,可选。不传时取房屋户主姓名;户主姓名也缺失时不填",
+                   required = false)
+        String userName,
+
+        @ToolParam(description = "联系电话,可选。格式 1[3-9]xxxxxxxxx;不传时取户主电话",
+                   required = false)
+        String userPhone
     ) {
-        log.info("[Tool] createRepairTool.create houseId={} info={}", houseId, repairInfo);
-        HtRepair repair = new HtRepair();
-        repair.setHouseId(houseId);
-        repair.setRepairInfo(repairInfo);
-        repair.setUserName(userName);
-        repair.setUserPhone(userPhone);
-        repair.setRepairType(0); // 默认:供暖问题
-        repair.setRepairTime(new Date());
-        repair.setRepairStatus(0); // 待处理
-        // org_id 为 NOT NULL,从房屋表查找
-        PrHouse house = houseMapper.selectById(houseId);
-        if (house != null) {
-            repair.setOrgId(house.getOrgId());
-            repair.setOrgName(house.getOrgName());
-        } else {
-            repair.setOrgId("0");
-        }
-        repairService.save(repair);
-        return new CreatedRepair(repair.getId(), houseId, repairInfo, "PENDING");
+        Long operatorId = LoginHelper.getUserId();
+        log.info("[Tool] createRepairTool.create houseId={} operator={}", houseId, operatorId);
+        return repairService.createFromAi(houseId, repairInfo, userName, userPhone, operatorId);
     }
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.HtRepair;
+import org.sdkj.thermal.domain.dto.CreatedRepairResult;
 import org.sdkj.thermal.domain.vo.HtRepairVo;
 
 import java.util.List;
@@ -50,5 +51,29 @@ public interface IHtRepairService extends IService<HtRepair> {
      * @return 报修编号
      */
     String generateRepairNo();
+
+    /**
+     * AI Tool 调用的报修工单创建入口。
+     *
+     * <p>校验规则：
+     * <ul>
+     *   <li>houseId 对应的 PrHouse 必须存在</li>
+     *   <li>repairInfo 不能为空</li>
+     * </ul>
+     *
+     * <p>补全字段：buildingId/buildingName/unitCode/roomNum/orgId/orgName/repairNo，
+     * 与 {@link org.sdkj.thermal.controller.HtRepairController#insert} 路径保持一致。
+     *
+     * @param houseId    房屋 ID（必填）
+     * @param repairInfo 报修描述（必填）
+     * @param userName   联系人姓名（可空，缺省取户主姓名）
+     * @param userPhone  联系电话（可空，缺省取户主电话）
+     * @param operatorId 操作者用户 ID（由 Tool 层注入）
+     * @return 创建结果
+     * @throws IllegalArgumentException houseId 不存在或 repairInfo 为空
+     */
+    CreatedRepairResult createFromAi(Long houseId, String repairInfo,
+                                     String userName, String userPhone,
+                                     Long operatorId);
 
 }
