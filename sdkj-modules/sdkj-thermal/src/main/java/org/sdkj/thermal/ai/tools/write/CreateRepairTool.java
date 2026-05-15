@@ -5,6 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 import org.sdkj.ai.tools.annotation.RiskLevel;
 import org.sdkj.ai.tools.annotation.WriteTool;
 import org.sdkj.thermal.domain.HtRepair;
@@ -46,6 +48,7 @@ public class CreateRepairTool {
         repair.setUserName(userName);
         repair.setUserPhone(userPhone);
         repair.setRepairType(0); // 默认:供暖问题
+        repair.setRepairTime(new Date());
         repair.setRepairStatus(0); // 待处理
         repairService.save(repair);
         return new CreatedRepair(repair.getId(), houseId, repairInfo, "PENDING");

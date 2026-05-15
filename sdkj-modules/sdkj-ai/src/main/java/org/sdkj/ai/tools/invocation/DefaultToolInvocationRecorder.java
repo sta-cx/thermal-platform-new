@@ -9,7 +9,7 @@ import org.sdkj.ai.mapper.AiToolInvocationMapper;
 import org.sdkj.ai.tools.store.PendingToolCall;
 import org.sdkj.common.json.utils.JsonUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.Date;
 import java.util.Map;
@@ -23,9 +23,9 @@ public class DefaultToolInvocationRecorder implements ToolInvocationRecorder {
     private final AiToolInvocationMapper invocationMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void record(PendingToolCall call, String resultJson, String status, int latencyMs, String errorMessage) {
         // TenantFilter 把 HTTP 线程切到租户库;本方法写 master 表,强制切回
+        // 注意:不能用 @Transactional,否则事务在 push 之前就绑定了租户数据源
         DynamicDataSourceContextHolder.push("master");
         try {
             String summary = buildSummary(call, status, errorMessage);
