@@ -12,6 +12,7 @@ import org.sdkj.thermal.domain.PrHouseExpense;
 import org.sdkj.thermal.domain.PmParkingSpace;
 import org.sdkj.thermal.domain.PrStandard;
 import org.sdkj.thermal.domain.PrStandardPrice;
+import org.sdkj.thermal.domain.dto.MarkedPaymentResult;
 import org.sdkj.thermal.domain.vo.PrExpenseVo;
 import org.sdkj.thermal.mapper.PrExpenseMapper;
 import org.sdkj.thermal.mapper.PrStandardMapper;
@@ -818,5 +819,37 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Override
     public boolean updateFinalMoneyAfterLateFee(String orgId, Long standardId) {
         return baseMapper.updateFinalMoneyAfterLateFee(orgId, standardId) > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public MarkedPaymentResult markPaidFromAi(Long expenseId, String note, Long operatorId) {
+        if (expenseId == null) {
+            throw new IllegalArgumentException("费用条目 ID 不能为空");
+        }
+
+        PrExpense expense = baseMapper.selectById(expenseId);
+        if (expense == null) {
+            throw new IllegalArgumentException("费用条目 " + expenseId + " 不存在，请核实后重试");
+        }
+
+        if (Integer.valueOf(1).equals(expense.getIsCharged())) {
+            throw new IllegalArgumentException("费用条目 " + expenseId + " 已是缴费状态，无需重复标记");
+        }
+
+        expense.setIsCharged(1);
+        expense.setChargedTime(new Date());
+        if (expense.getReceivable() != null) {
+            expense.setPaidIn(expense.getReceivable());
+        }
+        expense.setUpdateBy(operatorId);
+
+        baseMapper.updateById(expense);
+
+        String summary = String.format("费用条目 %s 已标记为缴费，金额 %s",
+            expenseId,
+            expense.getFinalMoney() != null ? expense.getFinalMoney().toPlainString() + " 元" : "未知");
+
+        return new MarkedPaymentResult(expenseId, expense.getFinalMoney(), summary, "PAID");
     }
 }

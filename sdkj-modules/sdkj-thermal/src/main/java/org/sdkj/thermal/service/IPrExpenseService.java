@@ -9,6 +9,8 @@ import org.sdkj.thermal.domain.PrHouseExpense;
 import org.sdkj.thermal.domain.PmParkingSpace;
 import org.sdkj.thermal.domain.vo.PrExpenseVo;
 
+import org.sdkj.thermal.domain.dto.MarkedPaymentResult;
+
 import java.util.List;
 import java.util.Map;
 
@@ -182,4 +184,21 @@ public interface IPrExpenseService extends IService<PrExpense> {
      * 滞纳金计算后更新最终金额
      */
     boolean updateFinalMoneyAfterLateFee(String orgId, Long standardId);
+
+    /**
+     * AI Tool 调用的标记缴费入口。
+     *
+     * <p>校验规则：
+     * <ul>
+     *   <li>expenseId 对应的费用条目必须存在</li>
+     *   <li>isCharged 必须为 0 或 null（未缴费），已缴费则拒绝重复标记</li>
+     * </ul>
+     *
+     * @param expenseId  费用条目 ID（必填）
+     * @param note       备注（可空）
+     * @param operatorId 操作者用户 ID
+     * @return 标记结果
+     * @throws IllegalArgumentException expenseId 不存在或已缴费
+     */
+    MarkedPaymentResult markPaidFromAi(Long expenseId, String note, Long operatorId);
 }
