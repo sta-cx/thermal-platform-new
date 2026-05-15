@@ -1,16 +1,18 @@
 package org.sdkj.ai.tools.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.assistant.AssistantChunk;
 import org.sdkj.ai.assistant.AssistantResumeService;
+import org.sdkj.ai.domain.AiToolInvocation;
+import org.sdkj.ai.domain.vo.AiToolInvocationVo;
+import org.sdkj.ai.mapper.AiToolInvocationMapper;
 import org.sdkj.ai.safety.AiTenantGate;
 import org.sdkj.ai.tools.dispatcher.ToolExecutor;
-import org.sdkj.ai.mapper.AiToolInvocationMapper;
-import org.sdkj.ai.domain.vo.AiToolInvocationVo;
 import org.sdkj.ai.tools.invocation.ToolInvocationRecorder;
 import org.sdkj.ai.tools.store.ConfirmationStore;
 import org.sdkj.ai.tools.store.PendingToolCall;
@@ -44,8 +46,8 @@ public class AiToolCallController {
     public R<AiToolInvocationVo> getByMessageId(@PathVariable Long messageId) {
         tenantGate.requireEnabled(LoginHelper.getTenantId());
         var vo = invocationMapper.selectVoOne(
-            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<org.sdkj.ai.domain.AiToolInvocation>()
-                .eq(org.sdkj.ai.domain.AiToolInvocation::getMessageId, messageId)
+            new LambdaQueryWrapper<AiToolInvocation>()
+                .eq(AiToolInvocation::getMessageId, messageId)
         );
         return vo != null ? R.ok(vo) : R.fail("invocation not found");
     }

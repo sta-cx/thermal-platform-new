@@ -10,7 +10,6 @@ import org.sdkj.ai.tools.registry.ToolRegistry;
 import org.sdkj.ai.tools.store.PendingToolCall;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +49,7 @@ public class ToolExecutor {
         boolean effectiveDryRun = applyDryRunPolicy(md, args);
 
         // 反射执行
-        Object[] params = bindArgs(md, args);
+        Object[] params = ToolArgBinder.bind(md, args);
         Object out = md.method().invoke(md.bean(), params);
         String resultJson = out == null ? "null" : objectMapper.writeValueAsString(out);
         return new ExecutionOutcome(resultJson, effectiveDryRun);
@@ -74,36 +73,5 @@ public class ToolExecutor {
         }
         Object passed = args.get("dryRun");
         return Boolean.TRUE.equals(passed);
-    }
-
-    private Object[] bindArgs(ToolMetadata md, Map<String, Object> args) {
-        var params = md.method().getParameters();
-        Object[] out = new Object[params.length];
-        for (int i = 0; i < params.length; i++) {
-            out[i] = coerce(args.get(params[i].getName()), params[i].getType());
-        }
-        return out;
-    }
-
-    private static Object coerce(Object value, Class<?> targetType) {
-        if (value == null) return null;
-        if (targetType.isInstance(value)) return value;
-        if (targetType == Long.class || targetType == long.class) {
-            if (value instanceof Number n) return n.longValue();
-            try { return Long.parseLong(value.toString()); } catch (NumberFormatException ignored) {}
-        }
-        if (targetType == Integer.class || targetType == int.class) {
-            if (value instanceof Number n) return n.intValue();
-        }
-        if (targetType == Double.class || targetType == double.class) {
-            if (value instanceof Number n) return n.doubleValue();
-        }
-        if (targetType == BigDecimal.class && value instanceof Number n) {
-            return new BigDecimal(n.toString());
-        }
-        if (targetType == Boolean.class || targetType == boolean.class) {
-            if (value instanceof String s) return Boolean.parseBoolean(s);
-        }
-        return value;
     }
 }

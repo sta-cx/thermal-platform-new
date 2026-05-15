@@ -12,7 +12,6 @@ import org.sdkj.ai.tools.store.ConfirmationStore;
 import org.sdkj.ai.tools.store.PendingToolCall;
 import org.sdkj.ai.tools.store.PendingToolCallStatus;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.*;
 
@@ -81,8 +80,12 @@ public class ToolCallDispatcher {
             writeCalls.add(call);
         }
 
-        // 第二遍：处理写操作（取第一个需要确认的，暂存 + 抛异常）
+        // 第二遍：处理写操作（逐个确认，当前架构每次只处理第一个）
         if (!writeCalls.isEmpty()) {
+            if (writeCalls.size() > 1) {
+                log.warn("[Dispatcher] {} write tool calls in single turn, only first will be confirmed this round (remaining: {})",
+                    writeCalls.size(), writeCalls.subList(1, writeCalls.size()).stream().map(ToolCallRequest::toolName).toList());
+            }
             ToolCallRequest first = writeCalls.get(0);
             ToolMetadata md = registry.resolve(first.toolName());
             String callId = UUID.randomUUID().toString();
@@ -115,7 +118,7 @@ public class ToolCallDispatcher {
     /** LOW Tool 立即执行 — 异常吃掉转 error JSON,不让单个 Tool 失败 break 整条对话 */
     private String executeSafely(ToolMetadata md, Map<String, Object> args) {
         try {
-            Object[] params = bindArgs(md, args);
+            Object[] params = ToolArgBinder.bind(md, args);
             Object out = md.method().invoke(md.bean(), params);
             return out == null ? "null" : objectMapper.writeValueAsString(out);
         } catch (Exception e) {
@@ -126,40 +129,5 @@ public class ToolCallDispatcher {
                 return "{\"error\":\"unexpected\"}";
             }
         }
-    }
-
-    /**
-     * 把 LLM 的 args Map 按方法参数顺序绑定为 Object[]。
-     * LLM JSON 反序列化后 Number 类型可能不匹配(Long 参数收到 Integer),需要类型转换。
-     */
-    private Object[] bindArgs(ToolMetadata md, Map<String, Object> args) {
-        var params = md.method().getParameters();
-        Object[] out = new Object[params.length];
-        for (int i = 0; i < params.length; i++) {
-            out[i] = coerce(args.get(params[i].getName()), params[i].getType());
-        }
-        return out;
-    }
-
-    private static Object coerce(Object value, Class<?> targetType) {
-        if (value == null) return null;
-        if (targetType.isInstance(value)) return value;
-        if (targetType == Long.class || targetType == long.class) {
-            if (value instanceof Number n) return n.longValue();
-            try { return Long.parseLong(value.toString()); } catch (NumberFormatException ignored) {}
-        }
-        if (targetType == Integer.class || targetType == int.class) {
-            if (value instanceof Number n) return n.intValue();
-        }
-        if (targetType == Double.class || targetType == double.class) {
-            if (value instanceof Number n) return n.doubleValue();
-        }
-        if (targetType == BigDecimal.class && value instanceof Number n) {
-            return new BigDecimal(n.toString());
-        }
-        if (targetType == Boolean.class || targetType == boolean.class) {
-            if (value instanceof String s) return Boolean.parseBoolean(s);
-        }
-        return value;
     }
 }
