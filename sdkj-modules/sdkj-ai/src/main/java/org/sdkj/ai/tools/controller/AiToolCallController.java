@@ -9,6 +9,8 @@ import org.sdkj.ai.assistant.AssistantChunk;
 import org.sdkj.ai.assistant.AssistantResumeService;
 import org.sdkj.ai.safety.AiTenantGate;
 import org.sdkj.ai.tools.dispatcher.ToolExecutor;
+import org.sdkj.ai.mapper.AiToolInvocationMapper;
+import org.sdkj.ai.domain.vo.AiToolInvocationVo;
 import org.sdkj.ai.tools.invocation.ToolInvocationRecorder;
 import org.sdkj.ai.tools.store.ConfirmationStore;
 import org.sdkj.ai.tools.store.PendingToolCall;
@@ -34,6 +36,19 @@ public class AiToolCallController {
     private final AssistantResumeService resumeService;
     private final AiTenantGate tenantGate;
     private final ObjectMapper objectMapper;
+    private final AiToolInvocationMapper invocationMapper;
+
+    /** 按 messageId 查 Tool 调用详情 — 前端 TOOL 角色消息点击展开 */
+    @SaCheckLogin
+    @GetMapping("/by-message/{messageId}")
+    public R<AiToolInvocationVo> getByMessageId(@PathVariable Long messageId) {
+        tenantGate.requireEnabled(LoginHelper.getTenantId());
+        var vo = invocationMapper.selectVoOne(
+            new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<org.sdkj.ai.domain.AiToolInvocation>()
+                .eq(org.sdkj.ai.domain.AiToolInvocation::getMessageId, messageId)
+        );
+        return vo != null ? R.ok(vo) : R.fail("invocation not found");
+    }
 
     /** 查待确认状态 — 前端轮询(SSE 已关流后) */
     @SaCheckLogin
