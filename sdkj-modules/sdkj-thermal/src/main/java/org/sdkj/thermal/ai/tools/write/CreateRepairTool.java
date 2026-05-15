@@ -45,6 +45,7 @@ public class CreateRepairTool {
         repair.setRepairInfo(repairInfo);
         repair.setUserName(userName);
         repair.setUserPhone(userPhone);
+        repair.setRepairType(0); // 默认:供暖问题
         repair.setRepairStatus(0); // 待处理
         repairService.save(repair);
         return new CreatedRepair(repair.getId(), houseId, repairInfo, "PENDING");

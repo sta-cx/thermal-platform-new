@@ -1,5 +1,6 @@
 package org.sdkj.ai.tools.invocation;
 
+import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.assistant.SessionService;
@@ -24,23 +25,29 @@ public class DefaultToolInvocationRecorder implements ToolInvocationRecorder {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void record(PendingToolCall call, String resultJson, String status, int latencyMs, String errorMessage) {
-        String summary = buildSummary(call, status, errorMessage);
-        Long messageId = sessionService.appendToolMessage(call.getSessionId(), summary);
+        // TenantFilter 把 HTTP 线程切到租户库;本方法写 master 表,强制切回
+        DynamicDataSourceContextHolder.push("master");
+        try {
+            String summary = buildSummary(call, status, errorMessage);
+            Long messageId = sessionService.appendToolMessage(call.getSessionId(), summary);
 
-        AiToolInvocation row = new AiToolInvocation();
-        row.setMessageId(messageId);
-        row.setPendingCallId(call.getCallId());
-        row.setTenantId(call.getTenantId());
-        row.setUserId(call.getUserId());
-        row.setToolName(call.getToolName());
-        row.setRiskLevel(call.getRisk().name());
-        row.setArguments(toJsonSafe(call.getEffectiveArgs()));
-        row.setResult(resultJson);
-        row.setStatus(status);
-        row.setLatencyMs(latencyMs);
-        row.setErrorMessage(errorMessage);
-        row.setCreatedTime(new Date());
-        invocationMapper.insert(row);
+            AiToolInvocation row = new AiToolInvocation();
+            row.setMessageId(messageId);
+            row.setPendingCallId(call.getCallId());
+            row.setTenantId(call.getTenantId());
+            row.setUserId(call.getUserId());
+            row.setToolName(call.getToolName());
+            row.setRiskLevel(call.getRisk().name());
+            row.setArguments(toJsonSafe(call.getEffectiveArgs()));
+            row.setResult(resultJson);
+            row.setStatus(status);
+            row.setLatencyMs(latencyMs);
+            row.setErrorMessage(errorMessage);
+            row.setCreatedTime(new Date());
+            invocationMapper.insert(row);
+        } finally {
+            DynamicDataSourceContextHolder.clear();
+        }
     }
 
     private String buildSummary(PendingToolCall call, String status, String err) {
