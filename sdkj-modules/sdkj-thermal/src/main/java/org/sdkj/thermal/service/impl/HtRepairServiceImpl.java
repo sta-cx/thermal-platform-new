@@ -14,6 +14,7 @@ import org.sdkj.thermal.domain.vo.HtRepairVo;
 import org.sdkj.thermal.mapper.HtRepairMapper;
 import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrHouseMapper;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.service.IHtRepairService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,6 +127,7 @@ public class HtRepairServiceImpl extends ServiceImpl<HtRepairMapper, HtRepair> i
         // 8. 审计字段显式设置
         repair.setCreateBy(operatorId);
         repair.setUpdateBy(operatorId);
+        repair.setCreateDept(LoginHelper.getDeptId());
 
         // 9. 保存
         save(repair);

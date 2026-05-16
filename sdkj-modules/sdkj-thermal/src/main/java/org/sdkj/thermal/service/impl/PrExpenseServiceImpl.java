@@ -846,6 +846,17 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
         baseMapper.updateById(expense);
 
+        // 更新房屋缴费状态：如果该房屋所有费用条目均已缴费，则标记房屋为已缴费
+        Long houseId = expense.getHouseId();
+        if (houseId != null) {
+            LambdaQueryWrapper<PrExpense> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(PrExpense::getHouseId, houseId);
+            long unpaid = baseMapper.selectCount(lqw.eq(PrExpense::getIsCharged, 0));
+            if (unpaid == 0) {
+                baseMapper.updateHousePayStatus(List.of(houseId));
+            }
+        }
+
         String summary = String.format("费用条目 %s 已标记为缴费，金额 %s",
             expenseId,
             expense.getFinalMoney() != null ? expense.getFinalMoney().toPlainString() + " 元" : "未知");

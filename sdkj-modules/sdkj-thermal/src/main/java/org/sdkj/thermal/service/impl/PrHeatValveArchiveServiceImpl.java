@@ -751,6 +751,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         PrHeatValveArchive valve = baseMapper.selectOne(
             new LambdaQueryWrapper<PrHeatValveArchive>()
                 .eq(PrHeatValveArchive::getHouseId, houseId)
+                .eq(PrHeatValveArchive::getIsChanged, 0)
                 .last("LIMIT 1")
         );
         if (valve == null) {
