@@ -39,11 +39,11 @@ public class CreateRepairTool {
         @ToolParam(description = "报修描述,用户原话或概括")
         String repairInfo,
 
-        @ToolParam(description = "联系人姓名,可选。不传时取房屋户主姓名;户主姓名也缺失时不填",
+        @ToolParam(description = "联系人姓名,可选。不传时该字段为空,请尽量向用户收集",
                    required = false)
         String userName,
 
-        @ToolParam(description = "联系电话,可选。格式 1[3-9]xxxxxxxxx;不传时取户主电话",
+        @ToolParam(description = "联系电话,可选。格式 1[3-9]xxxxxxxxx;不传时该字段为空,请尽量向用户收集",
                    required = false)
         String userPhone
     ) {

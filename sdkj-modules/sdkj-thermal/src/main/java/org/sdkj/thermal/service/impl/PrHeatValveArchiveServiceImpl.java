@@ -727,6 +727,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     private static final Set<String> VALID_ACTIONS = Set.of("OPEN", "CLOSE", "SET_OPENNESS");
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ValveCommandResultDto dispatchFromAi(Long houseId, String action, Integer openness,
                                                   Boolean dryRun, Long operatorId) {
         // 1. 参数校验
@@ -769,6 +770,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
 
         // 4. 真实下发（Phase 3 占位）
         // TODO Phase 3: 真实 IoT 下发 — 调用 MBus/AG 平台 API，失败写指令记录表
+        // TODO Phase 3: 写 ht_control_record 表时需用 operatorId 设置 createBy/updateBy
         String summary = String.format("指令已下发：房屋 %s 阀门 %s %s",
             houseId, normalizedAction,
             "SET_OPENNESS".equals(normalizedAction) ? "开度 " + openness : "");

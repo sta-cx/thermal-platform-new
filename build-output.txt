@@ -1,0 +1,51 @@
+[INFO] Scanning for projects...
+[INFO] Reactor Build Order:
+[INFO] SDKJ Thermal Platform                                              [pom]
+[INFO] sdkj-common                                                        [pom]
+[INFO] sdkj-common-core                                                   [jar]
+[INFO] sdkj-common-doc                                                    [jar]
+[INFO] sdkj-common-json                                                   [jar]
+[INFO] sdkj-common-redis                                                  [jar]
+[INFO] sdkj-common-ratelimiter                                            [jar]
+[INFO] sdkj-common-satoken                                                [jar]
+[INFO] sdkj-common-mybatis                                                [jar]
+[INFO] sdkj-common-translation                                            [jar]
+[INFO] sdkj-common-oss                                                    [jar]
+[INFO] sdkj-common-log                                                    [jar]
+[INFO] sdkj-common-excel                                                  [jar]
+[INFO] sdkj-common-sms                                                    [jar]
+[INFO] sdkj-common-tenant                                                 [jar]
+[INFO] sdkj-common-security                                               [jar]
+[INFO] sdkj-common-web                                                    [jar]
+[INFO] sdkj-common-idempotent                                             [jar]
+[INFO] sdkj-common-sensitive                                              [jar]
+[INFO] sdkj-common-encrypt                                                [jar]
+[INFO] sdkj-common-websocket                                              [jar]
+[INFO] sdkj-common-sse                                                    [jar]
+[INFO] sdkj-modules                                                       [pom]
+[INFO] sdkj-ai                                                            [jar]
+[INFO] sdkj-system                                                        [jar]
+[INFO] sdkj-thermal                                                       [jar]
+[INFO] Deleting D:\chonggou\thermal-platform-new\.flattened-pom.xml
+[INFO] Generating flattened POM of project org.sdkj:sdkj-thermal-platform:pom:5.6.0...
+[INFO] Deleting D:\chonggou\thermal-platform-new\sdkj-common\.flattened-pom.xml
+[INFO] Generating flattened POM of project org.sdkj:sdkj-common:pom:5.6.0...
+[INFO] Deleting D:\chonggou\thermal-platform-new\sdkj-common\sdkj-common-core\target
+[INFO] Deleting D:\chonggou\thermal-platform-new\sdkj-common\sdkj-common-core\.flattened-pom.xml
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Copying 0 resource
+[INFO] Generating flattened POM of project org.sdkj:sdkj-common-core:jar:5.6.0...
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 96 source files with javac [debug parameters release 17] to target\classes
+[INFO] Deleting D:\chonggou\thermal-platform-new\sdkj-common\sdkj-common-doc\target
+[INFO] Deleting D:\chonggou\thermal-platform-new\sdkj-common\sdkj-common-doc\.flattened-pom.xml
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 1 resource
+[INFO] Copying 0 resource
+[INFO] Generating flattened POM of project org.sdkj:sdkj-common-doc:jar:5.6.0...
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 7 source files with javac [debug parameters release 17] to target\classes
+[INFO] Deleting D:\chonggou\thermal-platform-new\sdkj-common\sdkj-common-json\target
+[INFO] Deleting D:\chonggou\thermal-platform-new\sdkj-common\sdkj-common-json\.flattened-pom.xml
+... (202 lines truncated)

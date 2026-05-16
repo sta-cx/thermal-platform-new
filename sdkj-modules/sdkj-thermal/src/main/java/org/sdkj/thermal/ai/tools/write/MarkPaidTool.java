@@ -36,7 +36,7 @@ public class MarkPaidTool {
         @ToolParam(description = "费用条目 ID,必填。如果用户不知道 ID,请先调用 QueryArrearsTool 查询")
         Long expenseId,
 
-        @ToolParam(description = "备注,可选。填写收款渠道或特殊情况说明",
+        @ToolParam(description = "备注,可选。仅用于本次操作说明,不会持久化到费用记录中",
                    required = false)
         String note
     ) {
