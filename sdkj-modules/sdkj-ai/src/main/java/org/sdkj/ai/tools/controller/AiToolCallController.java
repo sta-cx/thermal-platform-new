@@ -13,6 +13,7 @@ import org.sdkj.ai.domain.vo.AiToolInvocationVo;
 import org.sdkj.ai.mapper.AiToolInvocationMapper;
 import org.sdkj.ai.safety.AiTenantGate;
 import org.sdkj.ai.tools.dispatcher.ToolExecutor;
+import org.sdkj.ai.AiConstants;
 import org.sdkj.ai.tools.invocation.DefaultToolInvocationRecorder;
 import org.sdkj.ai.tools.invocation.ToolInvocationRecorder;
 import org.sdkj.ai.tools.store.ConfirmationStore;
@@ -85,7 +86,7 @@ public class AiToolCallController {
             throw new IllegalStateException("not your tool call: " + callId);
         }
 
-        SseEmitter emitter = new SseEmitter(60_000L);
+        SseEmitter emitter = new SseEmitter(AiConstants.SSE_TIMEOUT_MS);
         Disposable disp = resumeService.resumeAfterRejection(
             call.getTenantId(), call.getUserId(), call.getSessionId(), call.getToolName()
         ).doOnNext(chunk -> {
@@ -123,12 +124,14 @@ public class AiToolCallController {
             throw new IllegalStateException("not your tool call: " + callId);
         }
 
-        SseEmitter emitter = new SseEmitter(60_000L);
+        SseEmitter emitter = new SseEmitter(AiConstants.SSE_TIMEOUT_MS);
         long t0 = System.currentTimeMillis();
         try {
             var outcome = executor.execute(call);
             int latency = (int) (System.currentTimeMillis() - t0);
-            String execStatus = outcome.dryRun() ? "DRY_RUN" : "SUCCESS";
+            String execStatus = outcome.dryRun()
+                ? AiConstants.ToolExecStatus.DRY_RUN.name()
+                : AiConstants.ToolExecStatus.SUCCESS.name();
 
             store.transition(callId,
                 PendingToolCallStatus.APPROVED, PendingToolCallStatus.EXECUTED,
@@ -174,7 +177,7 @@ public class AiToolCallController {
                 PendingToolCallStatus.APPROVED, PendingToolCallStatus.REJECTED,
                 c -> { c.setResult("permission denied"); c.setDecidedAt(Instant.now()); }
             );
-            Long failMsgId = recorder.record(call, null, "FAILED", latency, "permission denied: " + se.getMessage());
+            Long failMsgId = recorder.record(call, null, AiConstants.ToolExecStatus.FAILED.name(), latency, "permission denied: " + se.getMessage());
             sendFailureChunk(emitter, call, failMsgId, "权限不足:" + se.getMessage());
 
         } catch (Exception e) {
@@ -186,7 +189,7 @@ public class AiToolCallController {
                 PendingToolCallStatus.APPROVED, PendingToolCallStatus.FAILED,
                 c -> { c.setResult(errMsg); c.setExecutedAt(Instant.now()); }
             );
-            Long failMsgId = recorder.record(call, null, "FAILED", latency, errMsg);
+            Long failMsgId = recorder.record(call, null, AiConstants.ToolExecStatus.FAILED.name(), latency, errMsg);
             sendFailureChunk(emitter, call, failMsgId, "tool execution failed: " + errMsg);
         }
         return emitter;
@@ -199,13 +202,13 @@ public class AiToolCallController {
     private void sendFailureChunk(SseEmitter emitter, PendingToolCall call,
                                    Long messageId, String error) {
         try {
-            String summary = DefaultToolInvocationRecorder.buildSummary(call.getToolName(), "FAILED", error);
+            String summary = DefaultToolInvocationRecorder.buildSummary(call.getToolName(), AiConstants.ToolExecStatus.FAILED, error);
             emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
                 AssistantChunk.builder().toolCallResult(
                     AssistantChunk.ToolResultView.builder()
                         .messageId(messageId)
                         .toolName(call.getToolName())
-                        .status("FAILED")
+                        .status(AiConstants.ToolExecStatus.FAILED.name())
                         .summary(summary)
                         .build()
                 ).error(error).finish(true).build()

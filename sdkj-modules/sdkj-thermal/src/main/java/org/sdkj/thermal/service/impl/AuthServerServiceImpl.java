@@ -39,7 +39,7 @@ public class AuthServerServiceImpl implements IAuthServerService {
         }
 
         // 检查用户是否启用（不泄露账号状态，统一返回相同错误）
-        if (user.getIsEnabled() != null && user.getIsEnabled() == 0) {
+        if (user.getIsEnabled() != null && Integer.valueOf(0).equals(user.getIsEnabled())) {
             log.info("登录用户：{} 已被停用.", username);
             throw new ServiceException("用户名或密码错误");
         }

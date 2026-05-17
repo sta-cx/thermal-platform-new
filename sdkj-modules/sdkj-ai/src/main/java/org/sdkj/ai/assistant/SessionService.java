@@ -1,6 +1,7 @@
 package org.sdkj.ai.assistant;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.sdkj.ai.AiConstants;
 import lombok.RequiredArgsConstructor;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import org.sdkj.ai.domain.AiChatMessage;
@@ -38,7 +39,7 @@ public class SessionService {
                 .eq(AiChatSession::getTenantId, tenantId)
                 .eq(AiChatSession::getUserId, userId)
                 .orderByDesc(AiChatSession::getLastActiveAt)
-                .last("limit 50")
+                .last("limit " + AiConstants.MAX_SESSIONS_PER_USER)
         );
     }
 
@@ -87,7 +88,7 @@ public class SessionService {
     public Long appendToolMessage(Long sessionId, String summaryContent) {
         AiChatMessage row = new AiChatMessage();
         row.setSessionId(sessionId);
-        row.setRole("TOOL");
+        row.setRole(AiConstants.ChatRole.TOOL.name());
         row.setContent(summaryContent);
         row.setCreateTime(new Date());
         messageMapper.insert(row);

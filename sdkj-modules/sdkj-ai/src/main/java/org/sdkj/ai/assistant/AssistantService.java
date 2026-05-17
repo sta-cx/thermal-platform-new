@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.ai.AiConstants;
 import org.sdkj.ai.advisor.TenantContextAdvisor;
 import org.sdkj.ai.domain.AiChatSession;
 import org.sdkj.ai.safety.AiCircuitBreaker;
@@ -38,6 +39,7 @@ public class AssistantService {
     private final ObjectMapper objectMapper;
 
     private static final String FEATURE = "assistant";
+    private static final int AUDIT_SUMMARY_MAX_LENGTH = 2000;
 
     public AssistantResponse chat(AssistantRequest req) {
         String tenantId = LoginHelper.getTenantId();
@@ -50,12 +52,12 @@ public class AssistantService {
             sessionService.requireOwned(req.getSessionId(), tenantId, userId);
             sessionId = req.getSessionId();
         } else {
-            String title = truncate(req.getMessage(), 30);
+            String title = truncate(req.getMessage(), AiConstants.SESSION_TITLE_MAX_LENGTH);
             AiChatSession s = sessionService.create(tenantId, userId, title);
             sessionId = s.getId();
         }
 
-        sessionService.appendMessage(sessionId, "USER", req.getMessage(), null);
+        sessionService.appendMessage(sessionId, AiConstants.ChatRole.USER.name(), req.getMessage(), null);
 
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         String reply;
@@ -95,12 +97,12 @@ public class AssistantService {
             sessionService.requireOwned(req.getSessionId(), tenantId, userId);
             sessionId = req.getSessionId();
         } else {
-            String title = truncate(req.getMessage(), 30);
+            String title = truncate(req.getMessage(), AiConstants.SESSION_TITLE_MAX_LENGTH);
             AiChatSession s = sessionService.create(tenantId, userId, title);
             sessionId = s.getId();
         }
 
-        sessionService.appendMessage(sessionId, "USER", req.getMessage(), null);
+        sessionService.appendMessage(sessionId, AiConstants.ChatRole.USER.name(), req.getMessage(), null);
 
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         return streamRound(req.getMessage(), tenantId, userId, sessionId, conversationId, 0);
@@ -118,7 +120,7 @@ public class AssistantService {
     Flux<AssistantChunk> streamRound(String userMessage, String tenantId, Long userId,
                                       Long sessionId, String conversationId, int round,
                                       boolean enableTools) {
-        if (round >= 5) {
+        if (round >= AiConstants.MAX_TOOL_CALL_ROUNDS) {
             return Flux.just(AssistantChunk.builder().error("tool loop too deep").finish(true).build());
         }
 
@@ -166,7 +168,7 @@ public class AssistantService {
                 // 4) 没有 Tool 调用 → 存消息 + 结束
                 if (toolCalls == null || toolCalls.isEmpty()) {
                     if (!fullText.isEmpty()) {
-                        sessionService.appendMessage(sessionId, "ASSISTANT", fullText, null);
+                        sessionService.appendMessage(sessionId, AiConstants.ChatRole.ASSISTANT.name(), fullText, null);
                     }
                     circuitBreaker.recordSuccess(FEATURE, tenantId);
                     var messages = sessionService.listMessages(sessionId);
@@ -191,7 +193,7 @@ public class AssistantService {
                     ToolCallResult tcr = dispatcher.dispatch(reqs);
                     // 全 LOW:存储 assistant 文本 + 递归下一轮
                     if (!fullText.isEmpty()) {
-                        sessionService.appendMessage(sessionId, "ASSISTANT", fullText, null);
+                        sessionService.appendMessage(sessionId, AiConstants.ChatRole.ASSISTANT.name(), fullText, null);
                     }
                     // 构建 Tool 结果摘要作为下一轮 prompt,让 LLM 能看到结果
                     String toolSummary = buildToolSummary(tcr.getToolResults());
@@ -201,14 +203,14 @@ public class AssistantService {
                 } catch (PendingConfirmationException pe) {
                     // 暂停 — 存已有文本 + 发 pending 帧 + 结束流
                     if (!fullText.isEmpty()) {
-                        sessionService.appendMessage(sessionId, "ASSISTANT", fullText, null);
+                        sessionService.appendMessage(sessionId, AiConstants.ChatRole.ASSISTANT.name(), fullText, null);
                     }
                     var firstCall = toolCalls.get(0);
                     var md = toolRegistry.resolve(firstCall.name());
                     var view = AssistantChunk.PendingToolCallView.builder()
                         .callId(pe.getCallId())
                         .toolName(firstCall.name())
-                        .risk(md == null ? "MEDIUM" : md.risk().name())
+                        .risk(md == null ? RiskLevel.MEDIUM.name() : md.risk().name())
                         .arguments(parseArgs(firstCall.arguments()))
                         .description(md == null ? firstCall.name() : md.description())
                         .countdownSeconds(md != null && md.risk() == RiskLevel.HIGH ? 3 : 0)
@@ -222,7 +224,7 @@ public class AssistantService {
                 } catch (CriticalToolRejectedException ce) {
                     // CRITICAL 拒绝
                     if (!fullText.isEmpty()) {
-                        sessionService.appendMessage(sessionId, "ASSISTANT", fullText, null);
+                        sessionService.appendMessage(sessionId, AiConstants.ChatRole.ASSISTANT.name(), fullText, null);
                     }
                     var view = AssistantChunk.RejectedToolView.builder()
                         .toolName(ce.getToolName())
@@ -251,6 +253,7 @@ public class AssistantService {
         try {
             return objectMapper.readValue(json, new TypeReference<>() {});
         } catch (Exception e) {
+            log.debug("Failed to parse tool call arguments JSON: {}", e.getMessage());
             return Map.of();
         }
     }
@@ -266,8 +269,8 @@ public class AssistantService {
         for (ToolCallResult.ToolExecResult r : results) {
             sb.append("- ").append(r.getToolName()).append(": ");
             String json = r.getResultJson();
-            if (json != null && json.length() > 800) {
-                json = json.substring(0, 800) + "...(truncated)";
+            if (json != null && json.length() > AiConstants.TOOL_SUMMARY_MAX_LENGTH) {
+                json = json.substring(0, AiConstants.TOOL_SUMMARY_MAX_LENGTH) + "...(truncated)";
             }
             sb.append(json).append("\n");
         }

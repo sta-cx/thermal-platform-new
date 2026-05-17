@@ -31,6 +31,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany> implements IAgCompanyService {
 
+    private static final String DEFAULT_PASSWORD = "123456";
+
     private final AgRoleMapper roleMapper;
     private final AgUserMapper userMapper;
     private final PrCompanyMapper prCompanyMapper;
@@ -117,7 +119,7 @@ public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany
         adminUser.setIsRealname(1);
         adminUser.setDelFlag("0");
         adminUser.setIsEnabled(1);
-        adminUser.setUserPwd(BCrypt.hashpw("123456"));
+        adminUser.setUserPwd(BCrypt.hashpw(DEFAULT_PASSWORD));
         userMapper.insert(adminUser);
 
         // 关联用户与角色
@@ -179,7 +181,7 @@ public class AgCompanyServiceImpl extends ServiceImpl<AgCompanyMapper, AgCompany
         adminUser.setUserName(companyBo.getTele());
         adminUser.setRealName(companyBo.getPrincipal());
         adminUser.setPhone(companyBo.getTele());
-        adminUser.setUserPwd(BCrypt.hashpw("123456"));
+        adminUser.setUserPwd(BCrypt.hashpw(DEFAULT_PASSWORD));
         adminUser.setCompanyId(company.getId());
         adminUser.setIsSuper(1);
         adminUser.setIsEnabled(1);

@@ -1,5 +1,6 @@
 package org.sdkj.ai.tools.invocation;
 
+import org.sdkj.ai.AiConstants;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class DefaultToolInvocationRecorder implements ToolInvocationRecorder {
     public Long record(PendingToolCall call, String resultJson, String status, int latencyMs, String errorMessage) {
         // TenantFilter 把 HTTP 线程切到租户库;本方法写 master 表,强制切回
         // 注意:不能用 @Transactional,否则事务在 push 之前就绑定了租户数据源
-        DynamicDataSourceContextHolder.push("master");
+        DynamicDataSourceContextHolder.push(AiConstants.DS_MASTER);
         try {
             String summary = buildSummary(call.getToolName(), status, errorMessage);
             Long messageId = sessionService.appendToolMessage(call.getSessionId(), summary);
@@ -60,11 +61,16 @@ public class DefaultToolInvocationRecorder implements ToolInvocationRecorder {
         };
     }
 
+    public static String buildSummary(String toolName, AiConstants.ToolExecStatus status, String err) {
+        return buildSummary(toolName, status.name(), err);
+    }
+
     private static String toJsonSafe(Map<String, Object> args) {
         if (args == null) return "{}";
         try {
             return JsonUtils.toJsonString(args);
         } catch (Exception e) {
+            log.warn("Failed to serialize tool arguments: {}", e.getMessage());
             return "{}";
         }
     }
