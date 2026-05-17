@@ -1,5 +1,6 @@
 package org.sdkj.ai.tools.store;
 
+import org.sdkj.ai.AiConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class MysqlConfirmationStoreSidecar {
 
     @Async
     public void upsert(PendingToolCall call) {
-        DynamicDataSourceContextHolder.push("master");
+        DynamicDataSourceContextHolder.push(AiConstants.DS_MASTER);
         try {
             AiPendingToolCall row = toRow(call);
             AiPendingToolCall existing = mapper.selectOne(

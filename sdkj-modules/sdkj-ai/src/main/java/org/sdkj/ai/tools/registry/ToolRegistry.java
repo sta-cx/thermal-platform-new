@@ -100,6 +100,6 @@ public class ToolRegistry {
         return byFullName.values().stream()
             .map(ToolMetadata::bean)
             .distinct()
-            .toArray();
+            .toArray(Object[]::new);
     }
 }

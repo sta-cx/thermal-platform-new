@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.ai.AiConstants;
 import org.springframework.stereotype.Component;
 import org.sdkj.ai.tools.annotation.RiskLevel;
 import org.sdkj.ai.tools.registry.ToolMetadata;
@@ -103,7 +104,7 @@ public class ToolCallDispatcher {
                 .effectiveArgs(first.arguments())
                 .status(PendingToolCallStatus.PENDING)
                 .createdAt(Instant.now())
-                .expireAt(Instant.now().plusSeconds(1800))
+                .expireAt(Instant.now().plusSeconds(AiConstants.PENDING_TTL_SECONDS))
                 .build();
             store.save(ptc);
             log.info("[Dispatcher] pending tool call persisted: callId={} tool={} risk={}",
@@ -123,7 +124,7 @@ public class ToolCallDispatcher {
             // Tool 在 reactive 线程执行,TenantFilter 不会切数据源;
             // 业务 Tool 需要访问租户库,强制切到 tenant_{tenantId}
             if (tenantId != null && !tenantId.isBlank()) {
-                DynamicDataSourceContextHolder.push("tenant_" + tenantId);
+                DynamicDataSourceContextHolder.push(AiConstants.DS_TENANT_PREFIX + tenantId);
             }
             try {
                 Object[] params = ToolArgBinder.bind(md, args);

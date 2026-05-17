@@ -24,6 +24,10 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class IoTDataServiceImpl implements IIoTDataService {
 
+    private static final int IS_CHANGED_NO = 0;
+    private static final String METER_ARC_VALVE = "04310401";
+    private static final String METER_ARC_HEAT = "04030301";
+
     private final PrHeatValveArchiveMapper valveArchiveMapper;
     private final PrHeatHotArchiveMapper hotArchiveMapper;
     private final PrHouseMapper houseMapper;
@@ -36,7 +40,7 @@ public class IoTDataServiceImpl implements IIoTDataService {
         PrHeatValveArchive archive = valveArchiveMapper.selectOne(
             new LambdaQueryWrapper<PrHeatValveArchive>()
                 .eq(PrHeatValveArchive::getMeterNum, payload.getMeterNum())
-                .eq(PrHeatValveArchive::getIsChanged, 0)
+                .eq(PrHeatValveArchive::getIsChanged, IS_CHANGED_NO)
         );
 
         if (archive == null) {
@@ -78,10 +82,10 @@ public class IoTDataServiceImpl implements IIoTDataService {
                                     BigDecimal supplyTemp, BigDecimal returnTemp,
                                     String meterArcCode, String dtuNum, String concentratorCode,
                                     String chanNum, String imei, String deviceId) {
-        if ("04310401".equals(meterArcCode)) {
+        if (METER_ARC_VALVE.equals(meterArcCode)) {
             // 阀门类型 — 更新 pr_heat_valve_archive
             return updateMbusValveArchive(meterNum, valveStatus, valveOpening, supplyTemp, returnTemp);
-        } else if ("04030301".equals(meterArcCode)) {
+        } else if (METER_ARC_HEAT.equals(meterArcCode)) {
             // 热表类型 — 更新 pr_heat_hot_archive
             return updateMbusHotArchive(meterNum, supplyTemp, returnTemp);
         } else {
@@ -105,7 +109,7 @@ public class IoTDataServiceImpl implements IIoTDataService {
         PrHeatValveArchive archive = valveArchiveMapper.selectOne(
             new LambdaQueryWrapper<PrHeatValveArchive>()
                 .eq(PrHeatValveArchive::getMeterNum, meterNum)
-                .eq(PrHeatValveArchive::getIsChanged, 0)
+                .eq(PrHeatValveArchive::getIsChanged, IS_CHANGED_NO)
         );
 
         if (archive == null) {
@@ -121,7 +125,7 @@ public class IoTDataServiceImpl implements IIoTDataService {
                 archive.setSettingStatus(parsedOpening);
                 archive.setActualStatus(parsedOpening);
             } catch (NumberFormatException e) {
-                log.warn("Mbus阀门数据: 阀门开度解析失败 valveOpening={}", valveOpening);
+                log.warn("Mbus阀门数据: 阀门开度解析失败 valveOpening={}, meterNum={}", valveOpening, meterNum, e);
             }
         }
         archive.setInTemperature(supplyTemp);
@@ -143,7 +147,7 @@ public class IoTDataServiceImpl implements IIoTDataService {
         PrHeatHotArchive archive = hotArchiveMapper.selectOne(
             new LambdaQueryWrapper<PrHeatHotArchive>()
                 .eq(PrHeatHotArchive::getMeterNum, meterNum)
-                .eq(PrHeatHotArchive::getIsChanged, 0)
+                .eq(PrHeatHotArchive::getIsChanged, IS_CHANGED_NO)
         );
 
         if (archive == null) {

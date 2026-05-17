@@ -2,6 +2,7 @@ package org.sdkj.ai.tools.store;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.sdkj.ai.AiConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBucket;
@@ -27,7 +28,7 @@ public class RedisConfirmationStore implements ConfirmationStore {
 
     private static final String KEY_PREFIX = "ai:ptc:";
     private static final String LOCK_PREFIX = "ai:ptc:lock:";
-    private static final long TTL_SECONDS = 1800L;
+    private static final long TTL_SECONDS = AiConstants.PENDING_TTL_SECONDS;
 
     private final RedissonClient redisson;
     private final ObjectMapper objectMapper;
@@ -65,7 +66,7 @@ public class RedisConfirmationStore implements ConfirmationStore {
         RLock lock = redisson.getLock(LOCK_PREFIX + callId);
         boolean locked = false;
         try {
-            locked = lock.tryLock(2, 10, TimeUnit.SECONDS);
+            locked = lock.tryLock(AiConstants.LOCK_WAIT_SECONDS, AiConstants.LOCK_LEASE_SECONDS, TimeUnit.SECONDS);
             if (!locked) {
                 log.warn("[Redis ConfirmationStore] transition lock timeout for {}", callId);
                 return Optional.empty();

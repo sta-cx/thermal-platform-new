@@ -26,6 +26,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AgRoleServiceImpl extends ServiceImpl<AgRoleMapper, AgRole> implements IAgRoleService {
 
+    private static final String ROLE_PREFIX = "ROLE_";
+
     private final AgRoleMapper roleMapper;
 
     @Override
@@ -43,7 +45,7 @@ public class AgRoleServiceImpl extends ServiceImpl<AgRoleMapper, AgRole> impleme
         BeanUtils.copyProperties(roleBo, role);
         role.setIsSuper(0);
         if (StrUtil.isBlank(role.getIdentifying())) {
-            role.setIdentifying("ROLE_" + role.getName());
+            role.setIdentifying(ROLE_PREFIX + role.getName());
         }
         return save(role);
     }
@@ -53,7 +55,7 @@ public class AgRoleServiceImpl extends ServiceImpl<AgRoleMapper, AgRole> impleme
         AgRole role = new AgRole();
         BeanUtils.copyProperties(roleBo, role);
         if (StrUtil.isBlank(role.getIdentifying())) {
-            role.setIdentifying("ROLE_" + role.getName());
+            role.setIdentifying(ROLE_PREFIX + role.getName());
         }
         return updateById(role);
     }
