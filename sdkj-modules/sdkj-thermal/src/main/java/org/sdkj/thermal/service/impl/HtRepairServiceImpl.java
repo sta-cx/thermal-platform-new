@@ -91,6 +91,9 @@ public class HtRepairServiceImpl extends ServiceImpl<HtRepairMapper, HtRepair> i
         if (house == null) {
             throw new IllegalArgumentException("房屋 ID " + houseId + " 不存在，请核实后重试");
         }
+        if (house.getOrgId() == null || house.getOrgId().isBlank()) {
+            throw new IllegalArgumentException("房屋 ID " + houseId + " 缺少所属组织信息，无法创建报修工单");
+        }
 
         // 3. 构建完整实体
         HtRepair repair = new HtRepair();

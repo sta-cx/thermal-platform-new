@@ -23,12 +23,12 @@ public class DefaultToolInvocationRecorder implements ToolInvocationRecorder {
     private final AiToolInvocationMapper invocationMapper;
 
     @Override
-    public void record(PendingToolCall call, String resultJson, String status, int latencyMs, String errorMessage) {
+    public Long record(PendingToolCall call, String resultJson, String status, int latencyMs, String errorMessage) {
         // TenantFilter 把 HTTP 线程切到租户库;本方法写 master 表,强制切回
         // 注意:不能用 @Transactional,否则事务在 push 之前就绑定了租户数据源
         DynamicDataSourceContextHolder.push("master");
         try {
-            String summary = buildSummary(call, status, errorMessage);
+            String summary = buildSummary(call.getToolName(), status, errorMessage);
             Long messageId = sessionService.appendToolMessage(call.getSessionId(), summary);
 
             AiToolInvocation row = new AiToolInvocation();
@@ -45,17 +45,18 @@ public class DefaultToolInvocationRecorder implements ToolInvocationRecorder {
             row.setErrorMessage(errorMessage);
             row.setCreatedTime(new Date());
             invocationMapper.insert(row);
+            return messageId;
         } finally {
             DynamicDataSourceContextHolder.clear();
         }
     }
 
-    private String buildSummary(PendingToolCall call, String status, String err) {
+    public static String buildSummary(String toolName, String status, String err) {
         return switch (status) {
-            case "SUCCESS" -> "已执行 " + call.getToolName();
-            case "FAILED"  -> call.getToolName() + " 执行失败:" + (err == null ? "未知错误" : err);
-            case "DRY_RUN" -> "已生成 " + call.getToolName() + " 指令清单(dryRun,未实发)";
-            default        -> call.getToolName() + " → " + status;
+            case "SUCCESS" -> "已执行 " + toolName;
+            case "FAILED"  -> toolName + " 执行失败:" + (err == null ? "未知错误" : err);
+            case "DRY_RUN" -> "已生成 " + toolName + " 指令清单(dryRun,未实发)";
+            default        -> toolName + " → " + status;
         };
     }
 

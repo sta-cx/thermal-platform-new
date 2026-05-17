@@ -10,6 +10,7 @@ import org.sdkj.ai.tools.registry.ToolRegistry;
 import org.sdkj.ai.tools.store.PendingToolCall;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +51,15 @@ public class ToolExecutor {
 
         // 反射执行
         Object[] params = ToolArgBinder.bind(md, args);
-        Object out = md.method().invoke(md.bean(), params);
+        Object out;
+        try {
+            out = md.method().invoke(md.bean(), params);
+        } catch (InvocationTargetException ite) {
+            Throwable cause = ite.getCause();
+            if (cause instanceof Exception e) throw e;
+            if (cause instanceof Error e) throw e;
+            throw ite;
+        }
         String resultJson = out == null ? "null" : objectMapper.writeValueAsString(out);
         return new ExecutionOutcome(resultJson, effectiveDryRun);
     }

@@ -13,6 +13,7 @@ import org.sdkj.ai.domain.vo.AiToolInvocationVo;
 import org.sdkj.ai.mapper.AiToolInvocationMapper;
 import org.sdkj.ai.safety.AiTenantGate;
 import org.sdkj.ai.tools.dispatcher.ToolExecutor;
+import org.sdkj.ai.tools.invocation.DefaultToolInvocationRecorder;
 import org.sdkj.ai.tools.invocation.ToolInvocationRecorder;
 import org.sdkj.ai.tools.store.ConfirmationStore;
 import org.sdkj.ai.tools.store.PendingToolCall;
@@ -23,6 +24,7 @@ import org.sdkj.common.satoken.utils.LoginHelper;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
+import reactor.core.Disposable;
 
 import java.time.Instant;
 
@@ -63,21 +65,41 @@ public class AiToolCallController {
             .orElseGet(() -> R.fail("call expired or not found"));
     }
 
-    /** 用户拒绝 */
+    /**
+     * 用户拒绝 — 更新状态 + 启动第二阶段 SSE 让 LLM 告知用户操作已取消。
+     */
     @SaCheckLogin
     @RateLimiter(time = 60, count = 30, key = "#{T(org.sdkj.common.satoken.utils.LoginHelper).getUserId()}")
-    @PostMapping("/{callId}/reject")
-    public R<Void> reject(@PathVariable @NotBlank String callId) {
+    @PostMapping(value = "/{callId}/reject", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter reject(@PathVariable @NotBlank String callId) {
         tenantGate.requireEnabled(LoginHelper.getTenantId());
-        var opt = store.findByCallId(callId);
-        if (opt.isEmpty() || !requireOwner(opt.get())) {
-            return R.fail("call expired or not found");
-        }
-        boolean ok = store.transition(callId,
+        var transitioned = store.transition(callId,
             PendingToolCallStatus.PENDING, PendingToolCallStatus.REJECTED,
             c -> c.setDecidedAt(Instant.now())
-        ).isPresent();
-        return ok ? R.ok() : R.fail("state mismatch");
+        );
+        if (transitioned.isEmpty()) {
+            throw new IllegalStateException("call state mismatch or expired: " + callId);
+        }
+        PendingToolCall call = transitioned.get();
+        if (!requireOwner(call)) {
+            throw new IllegalStateException("not your tool call: " + callId);
+        }
+
+        SseEmitter emitter = new SseEmitter(60_000L);
+        Disposable disp = resumeService.resumeAfterRejection(
+            call.getTenantId(), call.getUserId(), call.getSessionId(), call.getToolName()
+        ).doOnNext(chunk -> {
+            try {
+                emitter.send(SseEmitter.event()
+                    .data(objectMapper.writeValueAsString(chunk), MediaType.APPLICATION_JSON));
+            } catch (Exception e) { emitter.completeWithError(e); }
+        }).doOnComplete(emitter::complete)
+          .doOnError(emitter::completeWithError)
+          .subscribe();
+        emitter.onCompletion(disp::dispose);
+        emitter.onTimeout(disp::dispose);
+        emitter.onError(e -> disp.dispose());
+        return emitter;
     }
 
     /**
@@ -115,10 +137,23 @@ public class AiToolCallController {
                     c.setExecutedAt(Instant.now());
                 }
             );
-            recorder.record(call, outcome.resultJson(), execStatus, latency, null);
+            Long toolMessageId = recorder.record(call, outcome.resultJson(), execStatus, latency, null);
+
+            // 立即通知前端 Tool 执行结果（TOOL 角色消息卡片）
+            String summary = DefaultToolInvocationRecorder.buildSummary(call.getToolName(), execStatus, null);
+            emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
+                AssistantChunk.builder().toolCallResult(
+                    AssistantChunk.ToolResultView.builder()
+                        .messageId(toolMessageId)
+                        .toolName(call.getToolName())
+                        .status(execStatus)
+                        .summary(summary)
+                        .build()
+                ).build()
+            ), MediaType.APPLICATION_JSON));
 
             // 拉起 LLM 继续生成（传入工具执行结果作为上下文）
-            resumeService.resumeAfterToolCall(
+            Disposable disp = resumeService.resumeAfterToolCall(
                 call.getTenantId(), call.getUserId(), call.getSessionId(), outcome.resultJson()
             ).doOnNext(chunk -> {
                 try {
@@ -128,6 +163,9 @@ public class AiToolCallController {
             }).doOnComplete(emitter::complete)
               .doOnError(emitter::completeWithError)
               .subscribe();
+            emitter.onCompletion(disp::dispose);
+            emitter.onTimeout(disp::dispose);
+            emitter.onError(e -> disp.dispose());
 
         } catch (SecurityException se) {
             int latency = (int) (System.currentTimeMillis() - t0);
@@ -136,37 +174,46 @@ public class AiToolCallController {
                 PendingToolCallStatus.APPROVED, PendingToolCallStatus.REJECTED,
                 c -> { c.setResult("permission denied"); c.setDecidedAt(Instant.now()); }
             );
-            recorder.record(call, null, "FAILED", latency, "permission denied: " + se.getMessage());
-            try {
-                emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
-                    AssistantChunk.builder().error("权限不足:" + se.getMessage()).finish(true).build()
-                ), MediaType.APPLICATION_JSON));
-                emitter.complete();
-            } catch (Exception ignored) { emitter.completeWithError(se); }
+            Long failMsgId = recorder.record(call, null, "FAILED", latency, "permission denied: " + se.getMessage());
+            sendFailureChunk(emitter, call, failMsgId, "权限不足:" + se.getMessage());
 
         } catch (Exception e) {
+            // ToolExecutor 已解包 InvocationTargetException，此处 e 是原始业务异常
+            String errMsg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
             int latency = (int) (System.currentTimeMillis() - t0);
-            log.error("[AiToolCall] confirm execution failed for {}: {}", callId, e.getMessage(), e);
+            log.error("[AiToolCall] confirm execution failed for {}: {}", callId, errMsg, e);
             store.transition(callId,
                 PendingToolCallStatus.APPROVED, PendingToolCallStatus.FAILED,
-                c -> { c.setResult(e.getMessage()); c.setExecutedAt(Instant.now()); }
+                c -> { c.setResult(errMsg); c.setExecutedAt(Instant.now()); }
             );
-            recorder.record(call, null, "FAILED", latency, e.getMessage());
-            try {
-                emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
-                    AssistantChunk.builder()
-                        .error("tool execution failed: " + e.getMessage())
-                        .finish(true).build()
-                ), MediaType.APPLICATION_JSON));
-                emitter.complete();
-            } catch (Exception ignored) {
-                emitter.completeWithError(e);
-            }
+            Long failMsgId = recorder.record(call, null, "FAILED", latency, errMsg);
+            sendFailureChunk(emitter, call, failMsgId, "tool execution failed: " + errMsg);
         }
         return emitter;
     }
 
     private boolean requireOwner(PendingToolCall call) {
         return call.getUserId() != null && call.getUserId().equals(LoginHelper.getUserId());
+    }
+
+    private void sendFailureChunk(SseEmitter emitter, PendingToolCall call,
+                                   Long messageId, String error) {
+        try {
+            String summary = DefaultToolInvocationRecorder.buildSummary(call.getToolName(), "FAILED", error);
+            emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
+                AssistantChunk.builder().toolCallResult(
+                    AssistantChunk.ToolResultView.builder()
+                        .messageId(messageId)
+                        .toolName(call.getToolName())
+                        .status("FAILED")
+                        .summary(summary)
+                        .build()
+                ).error(error).finish(true).build()
+            ), MediaType.APPLICATION_JSON));
+            emitter.complete();
+        } catch (Exception ignored) {
+            log.debug("[AiToolCall] sendFailureChunk failed: {}", ignored.getMessage());
+            emitter.completeWithError(new RuntimeException(error));
+        }
     }
 }

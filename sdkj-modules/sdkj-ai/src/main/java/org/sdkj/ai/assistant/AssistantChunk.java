@@ -28,6 +28,9 @@ public class AssistantChunk {
     /** CRITICAL Tool 拒绝 — 前端提示用户不可执行 */
     private RejectedToolView toolCallRejected;
 
+    /** Tool 执行结果摘要 — 前端实时渲染 TOOL 角色消息卡片 */
+    private ToolResultView toolCallResult;
+
     @Data
     @Builder
     @NoArgsConstructor
@@ -48,5 +51,16 @@ public class AssistantChunk {
     public static class RejectedToolView {
         private String toolName;
         private String reason;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ToolResultView {
+        private Long messageId;
+        private String toolName;
+        private String status;    // SUCCESS / FAILED / DRY_RUN
+        private String summary;
     }
 }

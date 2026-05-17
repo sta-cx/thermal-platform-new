@@ -15,19 +15,30 @@ public class AssistantResumeService {
     private final AssistantService assistantService;
     private final SessionService sessionService;
 
-    /**
-     * @param toolResultJson 工具执行结果 JSON（非空时写入 ChatMemory 作为 ASSISTANT 上下文）
-     */
     public Flux<AssistantChunk> resumeAfterToolCall(
         String tenantId, Long userId, Long sessionId, String toolResultJson) {
-        // 将工具结果写入 session message（ChatMemory 通过 JDBC 已有之前的对话）
+        // 写入 ai_chat_message 仅供历史审计（前端过滤 SYSTEM+[Tool 不渲染）。
+        // LLM 通过下方 streamRound() 的 prompt 参数获取工具结果上下文。
         if (toolResultJson != null && !toolResultJson.isBlank()) {
-            sessionService.appendMessage(sessionId, "ASSISTANT",
+            sessionService.appendMessage(sessionId, "SYSTEM",
                 "[Tool 执行完成] 结果: " + toolResultJson, null);
         }
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         return assistantService.streamRound(
             "请基于刚才工具执行的结果继续回复。", tenantId, userId, sessionId, conversationId, 0,
             false);
+    }
+
+    /**
+     * 用户拒绝 Tool 调用后，拉起第二阶段 SSE 让 LLM 告知用户操作已取消。
+     */
+    public Flux<AssistantChunk> resumeAfterRejection(
+        String tenantId, Long userId, Long sessionId, String toolName) {
+        sessionService.appendMessage(sessionId, "SYSTEM",
+            "[Tool 调用被拒绝] 用户拒绝了 " + toolName + " 的执行。", null);
+        String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
+        return assistantService.streamRound(
+            "用户刚才拒绝了你请求执行的 Tool 操作，请告知用户操作已取消，并询问是否需要其他帮助。不要重试该操作。",
+            tenantId, userId, sessionId, conversationId, 0, false);
     }
 }
