@@ -25,10 +25,12 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JsonUtils {
 
-    private static final ObjectMapper OBJECT_MAPPER = SpringUtils.getBean(ObjectMapper.class);
+    private static class Holder {
+        private static final ObjectMapper INSTANCE = SpringUtils.getBean(ObjectMapper.class);
+    }
 
     public static ObjectMapper getObjectMapper() {
-        return OBJECT_MAPPER;
+        return Holder.INSTANCE;
     }
 
     /**
@@ -43,7 +45,7 @@ public class JsonUtils {
             return null;
         }
         try {
-            return OBJECT_MAPPER.writeValueAsString(object);
+            return Holder.INSTANCE.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -63,7 +65,7 @@ public class JsonUtils {
             return null;
         }
         try {
-            return OBJECT_MAPPER.readValue(text, clazz);
+            return Holder.INSTANCE.readValue(text, clazz);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -83,7 +85,7 @@ public class JsonUtils {
             return null;
         }
         try {
-            return OBJECT_MAPPER.readValue(bytes, clazz);
+            return Holder.INSTANCE.readValue(bytes, clazz);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -103,7 +105,7 @@ public class JsonUtils {
             return null;
         }
         try {
-            return OBJECT_MAPPER.readValue(text, typeReference);
+            return Holder.INSTANCE.readValue(text, typeReference);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -121,7 +123,8 @@ public class JsonUtils {
             return null;
         }
         try {
-            return OBJECT_MAPPER.readValue(text, OBJECT_MAPPER.getTypeFactory().constructType(Dict.class));
+            ObjectMapper om = Holder.INSTANCE;
+            return om.readValue(text, om.getTypeFactory().constructType(Dict.class));
         } catch (MismatchedInputException e) {
             // 类型不匹配说明不是json
             return null;
@@ -142,7 +145,8 @@ public class JsonUtils {
             return null;
         }
         try {
-            return OBJECT_MAPPER.readValue(text, OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, Dict.class));
+            ObjectMapper om = Holder.INSTANCE;
+            return om.readValue(text, om.getTypeFactory().constructCollectionType(List.class, Dict.class));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -162,7 +166,8 @@ public class JsonUtils {
             return new ArrayList<>();
         }
         try {
-            return OBJECT_MAPPER.readValue(text, OBJECT_MAPPER.getTypeFactory().constructCollectionType(List.class, clazz));
+            ObjectMapper om = Holder.INSTANCE;
+            return om.readValue(text, om.getTypeFactory().constructCollectionType(List.class, clazz));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -179,7 +184,7 @@ public class JsonUtils {
             return false;
         }
         try {
-            OBJECT_MAPPER.readTree(str);
+            Holder.INSTANCE.readTree(str);
             return true;
         } catch (Exception e) {
             return false;
@@ -197,7 +202,7 @@ public class JsonUtils {
             return false;
         }
         try {
-            JsonNode node = OBJECT_MAPPER.readTree(str);
+            JsonNode node = Holder.INSTANCE.readTree(str);
             return node.isObject();
         } catch (Exception e) {
             return false;
@@ -215,7 +220,7 @@ public class JsonUtils {
             return false;
         }
         try {
-            JsonNode node = OBJECT_MAPPER.readTree(str);
+            JsonNode node = Holder.INSTANCE.readTree(str);
             return node.isArray();
         } catch (Exception e) {
             return false;

@@ -32,8 +32,13 @@ public class BigNumberSerializer extends NumberSerializer {
 
     @Override
     public void serialize(Number value, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        if (value == null) {
+            gen.writeNull();
+            return;
+        }
         // 超出范围 序列化为字符串
-        if (value.longValue() > MIN_SAFE_INTEGER && value.longValue() < MAX_SAFE_INTEGER) {
+        long lv = value.longValue();
+        if (lv > MIN_SAFE_INTEGER && lv < MAX_SAFE_INTEGER) {
             super.serialize(value, gen, provider);
         } else {
             gen.writeString(value.toString());

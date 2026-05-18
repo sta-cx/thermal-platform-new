@@ -20,7 +20,9 @@ import java.util.Map;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MapstructUtils {
 
-    private final static Converter CONVERTER = SpringUtils.getBean(Converter.class);
+    private static class Holder {
+        private static final Converter INSTANCE = SpringUtils.getBean(Converter.class);
+    }
 
     /**
      * 将 T 类型对象，转换为 desc 类型的对象并返回
@@ -36,7 +38,7 @@ public class MapstructUtils {
         if (ObjectUtil.isNull(desc)) {
             return null;
         }
-        return CONVERTER.convert(source, desc);
+        return Holder.INSTANCE.convert(source, desc);
     }
 
     /**
@@ -53,7 +55,7 @@ public class MapstructUtils {
         if (ObjectUtil.isNull(desc)) {
             return null;
         }
-        return CONVERTER.convert(source, desc);
+        return Holder.INSTANCE.convert(source, desc);
     }
 
     /**
@@ -70,7 +72,7 @@ public class MapstructUtils {
         if (CollUtil.isEmpty(sourceList)) {
             return CollUtil.newArrayList();
         }
-        return CONVERTER.convert(sourceList, desc);
+        return Holder.INSTANCE.convert(sourceList, desc);
     }
 
     /**
@@ -87,7 +89,7 @@ public class MapstructUtils {
         if (ObjectUtil.isNull(beanClass)) {
             return null;
         }
-        return CONVERTER.convert(map, beanClass);
+        return Holder.INSTANCE.convert(map, beanClass);
     }
 
 }

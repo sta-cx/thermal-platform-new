@@ -20,6 +20,7 @@ import org.sdkj.common.web.core.BaseController;
 import org.sdkj.system.domain.bo.CreateDatabaseBo;
 import org.sdkj.system.domain.bo.DbConnectionBo;
 import org.sdkj.system.domain.bo.SysTenantBo;
+import org.sdkj.system.domain.bo.TenantUserBindBo;
 import org.sdkj.system.domain.vo.SysTenantVo;
 import org.sdkj.system.domain.vo.SysUserVo;
 import org.sdkj.system.service.ISysTenantService;
@@ -27,7 +28,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @Validated
 @RequiredArgsConstructor
@@ -140,18 +140,14 @@ public class SysTenantController extends BaseController {
     @SaCheckRole(TenantConstants.SUPER_ADMIN_ROLE_KEY)
     @SaCheckPermission("system:tenant:edit")
     @PostMapping("/bindUser")
-    public R<Void> bindUser(@RequestBody Map<String, Object> params) {
-        Long userId = Long.valueOf(params.get("userId").toString());
-        String tenantId = params.get("tenantId").toString();
-        return toAjax(tenantService.bindUser(userId, tenantId));
+    public R<Void> bindUser(@Validated @RequestBody TenantUserBindBo bo) {
+        return toAjax(tenantService.bindUser(bo.getUserId(), bo.getTenantId()));
     }
 
     @SaCheckRole(TenantConstants.SUPER_ADMIN_ROLE_KEY)
     @SaCheckPermission("system:tenant:edit")
     @DeleteMapping("/unbindUser")
-    public R<Void> unbindUser(@RequestBody Map<String, Object> params) {
-        Long userId = Long.valueOf(params.get("userId").toString());
-        String tenantId = params.get("tenantId").toString();
-        return toAjax(tenantService.unbindUser(userId, tenantId));
+    public R<Void> unbindUser(@Validated @RequestBody TenantUserBindBo bo) {
+        return toAjax(tenantService.unbindUser(bo.getUserId(), bo.getTenantId()));
     }
 }

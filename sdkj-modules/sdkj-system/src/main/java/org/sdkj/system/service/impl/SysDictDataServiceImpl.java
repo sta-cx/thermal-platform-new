@@ -77,11 +77,11 @@ public class SysDictDataServiceImpl implements ISysDictDataService {
      */
     @Override
     public String selectDictLabel(String dictType, String dictValue) {
-        return baseMapper.selectOne(new LambdaQueryWrapper<SysDictData>()
+        SysDictData data = baseMapper.selectOne(new LambdaQueryWrapper<SysDictData>()
                 .select(SysDictData::getDictLabel)
                 .eq(SysDictData::getDictType, dictType)
-                .eq(SysDictData::getDictValue, dictValue))
-            .getDictLabel();
+                .eq(SysDictData::getDictValue, dictValue));
+        return data != null ? data.getDictLabel() : null;
     }
 
     /**

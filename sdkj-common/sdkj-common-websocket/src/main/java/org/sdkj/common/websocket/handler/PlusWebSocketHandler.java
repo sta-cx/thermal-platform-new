@@ -47,10 +47,11 @@ public class PlusWebSocketHandler extends AbstractWebSocketHandler {
      */
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        // 从WebSocket会话中获取登录用户信息
         LoginUser loginUser = (LoginUser) session.getAttributes().get(LOGIN_USER_KEY);
-
-        // 创建WebSocket消息DTO对象
+        if (ObjectUtil.isNull(loginUser)) {
+            session.close(CloseStatus.BAD_DATA);
+            return;
+        }
         WebSocketMessageDto webSocketMessageDto = new WebSocketMessageDto();
         webSocketMessageDto.setSessionKeys(List.of(loginUser.getUserId()));
         webSocketMessageDto.setMessage(message.getPayload());

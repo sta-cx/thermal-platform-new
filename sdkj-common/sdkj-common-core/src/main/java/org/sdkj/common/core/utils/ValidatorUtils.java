@@ -16,7 +16,9 @@ import java.util.Set;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ValidatorUtils {
 
-    private static final Validator VALID = SpringUtils.getBean(Validator.class);
+    private static class Holder {
+        private static final Validator INSTANCE = SpringUtils.getBean(Validator.class);
+    }
 
     /**
      * 对给定对象进行参数校验，并根据指定的校验组进行校验
@@ -26,7 +28,7 @@ public class ValidatorUtils {
      * @throws ConstraintViolationException 如果校验不通过，则抛出参数校验异常
      */
     public static <T> void validate(T object, Class<?>... groups) {
-        Set<ConstraintViolation<T>> validate = VALID.validate(object, groups);
+        Set<ConstraintViolation<T>> validate = Holder.INSTANCE.validate(object, groups);
         if (!validate.isEmpty()) {
             throw new ConstraintViolationException("参数校验异常", validate);
         }

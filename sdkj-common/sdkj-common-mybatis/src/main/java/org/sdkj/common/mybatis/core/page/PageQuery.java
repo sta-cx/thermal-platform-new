@@ -116,7 +116,9 @@ public class PageQuery implements Serializable {
 
     @JsonIgnore
     public Integer getFirstNum() {
-        return (pageNum - 1) * pageSize;
+        int pn = ObjectUtil.defaultIfNull(pageNum, DEFAULT_PAGE_NUM);
+        int ps = ObjectUtil.defaultIfNull(pageSize, DEFAULT_PAGE_SIZE);
+        return Math.toIntExact((long) (pn - 1) * ps);
     }
 
     public PageQuery(Integer pageSize, Integer pageNum) {
