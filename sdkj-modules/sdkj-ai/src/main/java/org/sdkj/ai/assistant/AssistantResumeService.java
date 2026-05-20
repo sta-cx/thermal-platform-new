@@ -27,7 +27,7 @@ public class AssistantResumeService {
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         return assistantService.streamRound(
             AiConstants.PROMPT_RESUME_AFTER_TOOL, tenantId, userId, sessionId, conversationId, 0,
-            false);
+            false, null);
     }
 
     /**
@@ -40,6 +40,6 @@ public class AssistantResumeService {
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         return assistantService.streamRound(
             AiConstants.PROMPT_RESUME_AFTER_REJECTION,
-            tenantId, userId, sessionId, conversationId, 0, false);
+            tenantId, userId, sessionId, conversationId, 0, false, null);
     }
 }

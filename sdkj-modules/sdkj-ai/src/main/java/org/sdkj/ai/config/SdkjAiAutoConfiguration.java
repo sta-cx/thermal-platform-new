@@ -4,14 +4,11 @@ import org.sdkj.ai.advisor.SafetyAuditAdvisor;
 import org.sdkj.ai.advisor.TenantContextAdvisor;
 import org.sdkj.ai.advisor.UsageMetricsAdvisor;
 import org.sdkj.ai.core.ContextualPromptRegistry;
-import org.sdkj.ai.kb.KbAdvisor;
-import org.sdkj.ai.kb.KbRetrievalService;
 import org.sdkj.ai.mapper.AiCallRecordMapper;
 import org.sdkj.ai.mapper.AiUsageLogMapper;
 import org.sdkj.ai.safety.PiiMasker;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -69,16 +66,9 @@ public class SdkjAiAutoConfiguration {
             .build();
     }
 
-    @Bean
-    @ConditionalOnProperty(prefix = "thermal.ai.rag", name = "enabled", havingValue = "true", matchIfMissing = true)
-    public KbAdvisor kbAdvisor(KbRetrievalService retrievalService) {
-        return new KbAdvisor(retrievalService);
-    }
-
     @Bean("assistantChatClient")
     public ChatClient assistantChatClient(ChatClient.Builder builder,
                                            TenantContextAdvisor tenantAdvisor,
-                                           @Autowired(required = false) KbAdvisor kbAdvisor,
                                            SafetyAuditAdvisor auditAdvisor,
                                            MessageChatMemoryAdvisor memoryAdvisor,
                                            UsageMetricsAdvisor usageAdvisor) {
@@ -110,8 +100,6 @@ public class SdkjAiAutoConfiguration {
                 auditAdvisor,     // 3. PII 脱敏 + 落审计
                 usageAdvisor      // 4. token 用量统计
             )
-            .defaultAdvisors(kbAdvisor != null
-                ? List.of(kbAdvisor) : List.of())
             .build();
     }
 }

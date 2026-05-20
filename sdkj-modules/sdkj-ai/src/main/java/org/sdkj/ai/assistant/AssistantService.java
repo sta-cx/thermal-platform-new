@@ -8,6 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.AiConstants;
 import org.sdkj.ai.advisor.TenantContextAdvisor;
 import org.sdkj.ai.domain.AiChatSession;
+import org.sdkj.ai.kb.Citation;
+import org.sdkj.ai.kb.KbRetrievalService;
+import org.sdkj.ai.kb.RetrievalResult;
+import org.sdkj.ai.config.AiProperties;
 import org.sdkj.ai.safety.AiCircuitBreaker;
 import org.sdkj.ai.tools.annotation.RiskLevel;
 import org.sdkj.ai.tools.dispatcher.*;
@@ -37,9 +41,10 @@ public class AssistantService {
     private final ToolRegistry toolRegistry;
     private final ToolCallDispatcher dispatcher;
     private final ObjectMapper objectMapper;
+    private final KbRetrievalService retrievalService;
+    private final AiProperties aiProperties;
 
     private static final String FEATURE = "assistant";
-    private static final int AUDIT_SUMMARY_MAX_LENGTH = 2000;
 
     public AssistantResponse chat(AssistantRequest req) {
         String tenantId = LoginHelper.getTenantId();
@@ -59,11 +64,15 @@ public class AssistantService {
 
         sessionService.appendMessage(sessionId, AiConstants.ChatRole.USER.name(), req.getMessage(), null);
 
+        // RAG retrieval
+        RetrievalResult rag = retrieveRag(tenantId, req.getMessage());
+        String promptText = rag.isEmpty() ? req.getMessage() : buildRagPrompt(req.getMessage(), rag);
+
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         String reply;
         try {
             reply = chatClient.prompt()
-                .user(req.getMessage())
+                .user(promptText)
                 .advisors(spec -> spec
                     .param(TenantContextAdvisor.CTX_TENANT_ID, tenantId)
                     .param(TenantContextAdvisor.CTX_USER_ID, userId)
@@ -83,7 +92,8 @@ public class AssistantService {
         List<org.sdkj.ai.domain.AiChatMessage> messages = sessionService.listMessages(sessionId);
         Long messageId = messages.isEmpty() ? null : messages.get(messages.size() - 1).getId();
 
-        return new AssistantResponse(sessionId, messageId, reply);
+        List<Citation> citations = rag.isEmpty() ? null : rag.citations();
+        return new AssistantResponse(sessionId, messageId, reply, citations);
     }
 
     public Flux<AssistantChunk> streamChat(AssistantRequest req) {
@@ -104,8 +114,13 @@ public class AssistantService {
 
         sessionService.appendMessage(sessionId, AiConstants.ChatRole.USER.name(), req.getMessage(), null);
 
+        // RAG retrieval — done before streaming so citations are available immediately
+        RetrievalResult rag = retrieveRag(tenantId, req.getMessage());
+        String promptText = rag.isEmpty() ? req.getMessage() : buildRagPrompt(req.getMessage(), rag);
+        List<Citation> citations = rag.isEmpty() ? null : rag.citations();
+
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
-        return streamRound(req.getMessage(), tenantId, userId, sessionId, conversationId, 0);
+        return streamRound(promptText, tenantId, userId, sessionId, conversationId, 0, true, citations);
     }
 
     /**
@@ -113,13 +128,8 @@ public class AssistantService {
      * package-private 以便 AssistantResumeService 复用。
      */
     Flux<AssistantChunk> streamRound(String userMessage, String tenantId, Long userId,
-                                      Long sessionId, String conversationId, int round) {
-        return streamRound(userMessage, tenantId, userId, sessionId, conversationId, round, true);
-    }
-
-    Flux<AssistantChunk> streamRound(String userMessage, String tenantId, Long userId,
                                       Long sessionId, String conversationId, int round,
-                                      boolean enableTools) {
+                                      boolean enableTools, List<Citation> citations) {
         if (round >= AiConstants.MAX_TOOL_CALL_ROUNDS) {
             return Flux.just(AssistantChunk.builder().error("tool loop too deep").finish(true).build());
         }
@@ -165,7 +175,7 @@ public class AssistantService {
                     : Flux.just(AssistantChunk.builder()
                         .delta(fullText).sessionId(sessionId).finish(false).build());
 
-                // 4) 没有 Tool 调用 → 存消息 + 结束
+                // 4) 没有 Tool 调用 → 存消息 + 结束（携带 citations）
                 if (toolCalls == null || toolCalls.isEmpty()) {
                     if (!fullText.isEmpty()) {
                         sessionService.appendMessage(sessionId, AiConstants.ChatRole.ASSISTANT.name(), fullText, null);
@@ -174,7 +184,7 @@ public class AssistantService {
                     var messages = sessionService.listMessages(sessionId);
                     Long messageId = messages.isEmpty() ? null : messages.get(messages.size() - 1).getId();
                     return deltaFlux.concatWith(Flux.just(AssistantChunk.builder()
-                        .sessionId(sessionId).messageId(messageId).finish(true).build()));
+                        .sessionId(sessionId).messageId(messageId).citations(citations).finish(true).build()));
                 }
 
                 // 5) 构建 ToolCallRequest 列表
@@ -195,13 +205,11 @@ public class AssistantService {
                     if (!fullText.isEmpty()) {
                         sessionService.appendMessage(sessionId, AiConstants.ChatRole.ASSISTANT.name(), fullText, null);
                     }
-                    // 构建 Tool 结果摘要作为下一轮 prompt,让 LLM 能看到结果
                     String toolSummary = buildToolSummary(tcr.getToolResults());
                     return deltaFlux.concatWith(
-                        streamRound(toolSummary, tenantId, userId, sessionId, conversationId, round + 1));
+                        streamRound(toolSummary, tenantId, userId, sessionId, conversationId, round + 1, true, citations));
 
                 } catch (PendingConfirmationException pe) {
-                    // 暂停 — 存已有文本 + 发 pending 帧 + 结束流
                     if (!fullText.isEmpty()) {
                         sessionService.appendMessage(sessionId, AiConstants.ChatRole.ASSISTANT.name(), fullText, null);
                     }
@@ -218,11 +226,11 @@ public class AssistantService {
                     return deltaFlux.concatWith(Flux.just(AssistantChunk.builder()
                         .sessionId(sessionId)
                         .toolCallPending(view)
+                        .citations(citations)
                         .finish(true)
                         .build()));
 
                 } catch (CriticalToolRejectedException ce) {
-                    // CRITICAL 拒绝
                     if (!fullText.isEmpty()) {
                         sessionService.appendMessage(sessionId, AiConstants.ChatRole.ASSISTANT.name(), fullText, null);
                     }
@@ -233,13 +241,14 @@ public class AssistantService {
                     return deltaFlux.concatWith(Flux.just(AssistantChunk.builder()
                         .sessionId(sessionId)
                         .toolCallRejected(view)
+                        .citations(citations)
                         .finish(true)
                         .build()));
                 }
             })
             .onErrorResume(e -> {
                 if (e instanceof PendingConfirmationException || e instanceof CriticalToolRejectedException) {
-                    return Flux.error(e); // 让控制流异常透传
+                    return Flux.error(e);
                 }
                 circuitBreaker.recordFailure(FEATURE, tenantId);
                 log.error("Stream chat failed", e);
@@ -247,6 +256,31 @@ public class AssistantService {
                     .sessionId(sessionId).finish(true).error(e.getMessage()).build());
             });
     }
+
+    // ===== RAG helpers =====
+
+    private RetrievalResult retrieveRag(String tenantId, String message) {
+        if (!aiProperties.getRag().isEnabled()) {
+            return new RetrievalResult(List.of(), List.of());
+        }
+        try {
+            return retrievalService.retrieveWithCitations(tenantId, message);
+        } catch (Exception e) {
+            log.warn("[Assistant] RAG retrieval failed, proceeding without context: {}", e.getMessage());
+            return new RetrievalResult(List.of(), List.of());
+        }
+    }
+
+    private String buildRagPrompt(String userMessage, RetrievalResult rag) {
+        StringBuilder sb = new StringBuilder("### 参考资料(请优先依据以下内容回答):\n");
+        for (int i = 0; i < rag.fragments().size(); i++) {
+            sb.append("[").append(i + 1).append("] ").append(rag.fragments().get(i)).append("\n\n");
+        }
+        sb.append("### 用户问题:\n").append(userMessage);
+        return sb.toString();
+    }
+
+    // ===== Utility =====
 
     private Map<String, Object> parseArgs(String json) {
         if (json == null || json.isBlank()) return Map.of();

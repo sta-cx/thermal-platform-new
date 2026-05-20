@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import org.sdkj.ai.kb.Citation;
+
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -19,6 +22,9 @@ public class AssistantChunk {
     private Long messageId;
     private Boolean finish;
     private String error;
+
+    /** RAG 引用来源 — 在终止帧（finish / pending / rejected）中携带 */
+    private List<Citation> citations;
 
     // === Phase 2B: Tool Calling ===
 

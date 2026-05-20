@@ -9,7 +9,9 @@ import io.qdrant.client.grpc.Points.SearchPoints;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.domain.AiKnowledgeChunk;
+import org.sdkj.ai.domain.AiKnowledgeDoc;
 import org.sdkj.ai.mapper.AiKnowledgeChunkMapper;
+import org.sdkj.ai.mapper.AiKnowledgeDocMapper;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,7 +19,9 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Tenant-aware RAG retrieval service.
@@ -36,6 +40,7 @@ public class KbRetrievalService {
     private final QdrantClient qdrantClient;
     private final QdrantCollectionManager collectionManager;
     private final AiKnowledgeChunkMapper chunkMapper;
+    private final AiKnowledgeDocMapper docMapper;
 
     @Value("${thermal.ai.kb.retrieval.top-k:4}")
     private int topK;
@@ -43,16 +48,15 @@ public class KbRetrievalService {
     @Value("${thermal.ai.kb.retrieval.score-threshold:0.7}")
     private float scoreThreshold;
 
+    private static final int SNIPPET_MAX_LENGTH = 120;
+
     /**
-     * Retrieve relevant text fragments for the given query in the tenant's collection.
-     *
-     * @param tenantId tenant identifier (used to derive Qdrant collection name)
-     * @param query    user query text
-     * @return list of chunk texts ordered by similarity (highest first), empty if no results
+     * Retrieve fragments and citation metadata.
+     * Returns empty result (not null) when tenantId/query missing or retrieval fails.
      */
-    public List<String> retrieve(String tenantId, String query) {
+    public RetrievalResult retrieveWithCitations(String tenantId, String query) {
         if (query == null || query.isBlank()) {
-            return List.of();
+            return new RetrievalResult(List.of(), List.of());
         }
 
         // 1. Embed the query
@@ -79,14 +83,14 @@ public class KbRetrievalService {
             ).get(5, TimeUnit.SECONDS);
         } catch (Exception e) {
             log.warn("Qdrant search failed for collection {}: {}", collection, e.getMessage());
-            return List.of();
+            return new RetrievalResult(List.of(), List.of());
         }
 
         if (results.isEmpty()) {
-            return List.of();
+            return new RetrievalResult(List.of(), List.of());
         }
 
-        // 3. Resolve full text from MySQL via point IDs
+        // 3. Resolve chunks from MySQL via point IDs
         List<String> pointIds = results.stream()
             .map(p -> p.getId().getUuid())
             .toList();
@@ -96,14 +100,47 @@ public class KbRetrievalService {
                 .in(AiKnowledgeChunk::getQdrantPointId, pointIds)
         );
 
-        // 4. Preserve Qdrant ordering (by similarity) when mapping back to text
-        return pointIds.stream()
-            .map(pid -> chunks.stream()
-                .filter(c -> pid.equals(c.getQdrantPointId()))
-                .findFirst()
-                .map(AiKnowledgeChunk::getText)
-                .orElse(""))
-            .filter(s -> !s.isEmpty())
+        // 4. Resolve doc titles
+        Map<Long, String> docTitleMap = resolveDocTitles(chunks);
+
+        // 5. Build pointId → chunk lookup for O(1) matching
+        Map<String, AiKnowledgeChunk> chunkByPointId = chunks.stream()
+            .collect(Collectors.toMap(AiKnowledgeChunk::getQdrantPointId, c -> c, (a, b) -> a));
+
+        // 6. Preserve Qdrant ordering (by similarity)
+        List<String> fragments = new ArrayList<>();
+        List<Citation> citations = new ArrayList<>();
+
+        for (ScoredPoint sp : results) {
+            AiKnowledgeChunk chunk = chunkByPointId.get(sp.getId().getUuid());
+            if (chunk == null || chunk.getText() == null || chunk.getText().isBlank()) {
+                continue;
+            }
+            fragments.add(chunk.getText());
+            String title = docTitleMap.getOrDefault(chunk.getDocId(), "未知文档");
+            String snippet = truncate(chunk.getText(), SNIPPET_MAX_LENGTH);
+            citations.add(Citation.builder()
+                .docTitle(title)
+                .snippet(snippet)
+                .score(sp.getScore())
+                .build());
+        }
+
+        return new RetrievalResult(fragments, citations);
+    }
+
+    private Map<Long, String> resolveDocTitles(List<AiKnowledgeChunk> chunks) {
+        List<Long> docIds = chunks.stream()
+            .map(AiKnowledgeChunk::getDocId)
+            .distinct()
             .toList();
+        if (docIds.isEmpty()) return Map.of();
+        return docMapper.selectBatchIds(docIds).stream()
+            .collect(Collectors.toMap(AiKnowledgeDoc::getId, d -> d.getTitle() != null ? d.getTitle() : "未命名"));
+    }
+
+    private String truncate(String s, int max) {
+        if (s == null) return "";
+        return s.length() <= max ? s : s.substring(0, max) + "…";
     }
 }
