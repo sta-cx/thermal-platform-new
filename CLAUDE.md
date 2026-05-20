@@ -145,16 +145,18 @@ Sa-Token JWT 简单模式：`Authorization: Bearer <token>`，允许并发登录
 | IoT | `/thermal/iot/*` |
 | 认证 | `/auth/*` |
 | 小程序 | `/thermal/wxma/*` |
-| AI 集成 | `/ai/*`（`/ai/contextual-view`、`/ai/health`、`/ai/admin/*`） |
+| AI 集成 | `/ai/*`（`/ai/contextual-view`、`/ai/health`、`/ai/admin/*`、`/ai/assistant/*`、`/ai/tool-calls/*`） |
 
 ## AI 模块（sdkj-ai）
 
 基于 Spring AI 1.0.7 + OpenAI 兼容协议（可对接 DeepSeek / Qwen 等）。配置位于 `application-thermal.yml` 的 `spring.ai.openai.*` 与 `sdkj.ai.*`。
 
-- **核心包**: `core/`（ContextualPrompt 注册表 + 视图模型）、`advisor/`（TenantContextAdvisor / SafetyAuditAdvisor / UsageMetricsAdvisor 三个 Spring AI Advisor）、`safety/`（PiiMasker / ApiKeyLogMasker / AiCircuitBreaker）、`cache/`（AiViewCache + 命中率指标）、`job/`（AiLogCleanupJob，每日清理 90 天前的 `ai_call_record`）
-- **Controller**: `AiContextualController`（POST `/ai/contextual-view`，限流 30/min，503 ExceptionHandler 统一兜底）、`AiHealthController`、`AiAdminController`
+- **核心包**: `core/`（ContextualPrompt 注册表 + 视图模型）、`advisor/`（TenantContextAdvisor / SafetyAuditAdvisor / UsageMetricsAdvisor 三个 Spring AI Advisor）、`safety/`（PiiMasker / ApiKeyLogMasker / AiCircuitBreaker）、`cache/`（AiViewCache + 命中率指标）、`job/`（AiLogCleanupJob，每日清理 90 天前的 `ai_call_record`）、`tools/`（@WriteTool 注解 / RiskLevel / ToolRegistry / ToolCallDispatcher / ToolExecutor / ConfirmationStore）、`assistant/`（AssistantService / SessionService / SSE 流）、`kb/`（KbRetrievalService / RAG Citations）
+- **Controller**: `AiContextualController`（POST `/ai/contextual-view`，限流 30/min）、`AiHealthController`、`AiAdminController`、`AiAssistantController`（chat/stream/session CRUD）、`AiToolCallController`（confirm/reject/status）、`AiToolsAdminController`（Tool 注册表看板）、`AiKbController`（知识库管理）
 - **可观测性**: Micrometer counter+timer + 缓存命中/未命中指标；`ApiKeyLogMasker` 作为 Logback conversion rule 自动注册
-- **数据表**: `ai_call_record`、`ai_usage_log`、`ai_pending_tool_call`（**位于 master 库 `ry-vue`**,通过 Mapper 上 `@DS("master")` 强制路由；TenantFilter 把 `/ai/*` 推到租户 DS 后,这些 Mapper 仍会切回 master）
+- **数据表**: `ai_call_record`、`ai_usage_log`、`ai_pending_tool_call`、`ai_tool_invocation`、`ai_chat_session`、`ai_chat_message`（**位于 master 库 `ry-vue`**,通过 Mapper 上 `@DS("master")` 强制路由；TenantFilter 把 `/ai/*` 推到租户 DS 后,这些 Mapper 仍会切回 master）
+- **Tool 实现**: 7 个 Tool 在 `sdkj-thermal` 模块（`ai/tools/readonly/` 4 个 + `ai/tools/write/` 3 个），基础设施在 `sdkj-ai`
+- **关闭开关**: `sys_tenant.ai_enabled = 0`（沿用 Phase 2A 总闸）；`ai.tools.disabled` 黑名单可禁用特定 Tool
 
 ## 数据库
 
