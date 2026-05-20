@@ -1,0 +1,7 @@
+{"case":"C01","finish":true,"hasPending":false}
+{"case":"C02","finish":true,"hasPending":false}
+{"case":"C03", "callId":"76fb00b5-d09e-4085-ab67-5f7bee5803ce", "risk":"MEDIUM"}
+{"case":"C04", "callId":"f7e8565c-ebbe-4391-a76f-a838f9c8c676"}
+{"case":"C05", "callId":"6f1f1356-8455-4f21-a914-5b551c55ea92"}
+{"case":"C07", "callId":"f105b9d1-0e65-40eb-baef-799257c02dfb", "risk":"HIGH", "countdown":"3"}
+{"case":"C09","rejected":false,"finish":true}
