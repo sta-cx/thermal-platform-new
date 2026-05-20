@@ -277,7 +277,7 @@ CREATE TABLE `ht_scope` (
   `imei` varchar(30) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `device_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `status` tinyint DEFAULT NULL,
-  `is_special` tinyint(1) DEFAULT '0',
+  `is_special` tinyint unsigned DEFAULT '0',
   `dtu_num` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `chan_num` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `create_dept` bigint DEFAULT NULL,
