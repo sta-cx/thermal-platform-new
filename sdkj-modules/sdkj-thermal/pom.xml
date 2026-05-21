@@ -102,25 +102,11 @@
             <artifactId>spring-security-crypto</artifactId>
         </dependency>
 
-        <!-- Apache HttpClient (微信支付 WXPay SDK) -->
+        <!-- Apache HttpClient (MBus 阀控中间件通信) -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.14</version>
-        </dependency>
-
-        <!-- XStream (微信消息 XML 序列化) -->
-        <dependency>
-            <groupId>com.thoughtworks.xstream</groupId>
-            <artifactId>xstream</artifactId>
-            <version>1.4.20</version>
-        </dependency>
-
-        <!-- dom4j (微信消息 XML 解析) -->
-        <dependency>
-            <groupId>org.dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>2.1.4</version>
         </dependency>
 
         <!-- Jackcess (Access .mdb 文件读取 - 授权码导入) -->

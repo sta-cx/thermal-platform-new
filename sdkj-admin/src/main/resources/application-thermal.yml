@@ -75,7 +75,7 @@ spring:
           model: deepseek-chat
           temperature: 0.3
       # embedding 由 EmbeddingConfig.java 手动创建 bean，不复用 chat base-url
-      # DeepSeek 不提供 embedding API，使用 Silicon Flow
+      # DeepSeek 不提供 embedding API，使用 Jina AI
     chat:
       memory:
         repository:
@@ -104,9 +104,9 @@ thermal:
       window-seconds: 60
       open-duration-seconds: 60
     embedding:
-      base-url: https://api.siliconflow.cn
-      api-key: ${SDKJ_AI_SILICONFLOW_KEY:sk-nmaivhfaojupkrwqfrdhegxuigdudsjgwpeymxmcaoljicas}
-      model: BAAI/bge-large-zh-v1.5
+      base-url: https://api.jina.ai/v1
+      api-key: ${SDKJ_AI_JINA_KEY:[REMOVED]}
+      model: jina-embeddings-v3
     rate-limit:
       contextual-per-user-per-minute: 30
       contextual-per-tenant-per-minute: 200

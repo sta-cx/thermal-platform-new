@@ -11,20 +11,20 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 /**
- * 使用 Silicon Flow 创建 EmbeddingModel bean。
+ * 使用 Jina AI 创建 EmbeddingModel bean。
  * <p>
  * Spring AI 自动配置的 OpenAiEmbeddingModel 复用 chat 的 base-url（DeepSeek），
- * 但 DeepSeek 不提供 embedding API。这里手动指向 Silicon Flow 端点。
+ * 但 DeepSeek 不提供 embedding API。这里手动指向 Jina AI 端点。
  */
 @Configuration
 public class EmbeddingConfig {
 
     @Bean
     @Primary
-    public OpenAiEmbeddingModel siliconFlowEmbeddingModel(
-        @Value("${thermal.ai.embedding.base-url:https://api.siliconflow.cn/v1}") String baseUrl,
+    public OpenAiEmbeddingModel jinaEmbeddingModel(
+        @Value("${thermal.ai.embedding.base-url:https://api.jina.ai/v1}") String baseUrl,
         @Value("${thermal.ai.embedding.api-key:}") String apiKey,
-        @Value("${thermal.ai.embedding.model:BAAI/bge-large-zh-v1.5}") String model
+        @Value("${thermal.ai.embedding.model:jina-embeddings-v3}") String model
     ) {
         OpenAiApi api = OpenAiApi.builder()
             .baseUrl(baseUrl)

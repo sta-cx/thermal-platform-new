@@ -411,19 +411,4 @@
           AND a.del_flag = '0'
     </update>
 
-    <update id="updateExpenseByWechat">
-        UPDATE pr_expense
-        SET paid_in = #{paidIn},
-            final_money = #{paidIn},
-            is_charged = 1,
-            charged_time = NOW(),
-            record_id = #{recordId},
-            update_by = #{openId},
-            update_time = NOW()
-        WHERE house_id = #{houseId}
-          AND year = #{year}
-          AND is_charged = 0
-          AND del_flag = '0'
-    </update>
-
 </mapper>
