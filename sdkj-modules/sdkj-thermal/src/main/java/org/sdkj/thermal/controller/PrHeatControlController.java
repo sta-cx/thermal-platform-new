@@ -35,6 +35,9 @@ public class PrHeatControlController extends BaseController {
     private static final String CMD_CLOSE_VALVE = "2002";
     private static final String CMD_SET_ANGLE = "2003";
     private static final String CMD_QUERY_STATUS = "2004";
+    private static final String CMD_BRAKE = "2005";
+    private static final String CMD_SET_CYCLE = "2006";
+    private static final String CMD_UNLOCK = "2007";
 
     private final HeatMeterControl heatMeterControl;
     private final IPrHeatValveArchiveService valveArchiveService;
@@ -145,8 +148,9 @@ public class PrHeatControlController extends BaseController {
     public TableDataInfo<PrHeatValveArchiveVo> valveList(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
             PageQuery pageQuery) {
-        return valveArchiveService.selectPageList(orgId, null, null, null, search, pageQuery);
+        return valveArchiveService.selectPageList(orgId, buildingId, null, null, search, pageQuery);
     }
 
     @SaCheckLogin
@@ -156,5 +160,88 @@ public class PrHeatControlController extends BaseController {
             @RequestParam(required = false) String orgId,
             PageQuery pageQuery) {
         return valveArchiveService.selectPageList(orgId, null, null, null, search, pageQuery);
+    }
+
+    /**
+     * 批量开阀
+     */
+    @SaCheckPermission("thermal:ht:control:edit")
+    @SaCheckLogin
+    @PostMapping("/batchOpen")
+    public R<Void> batchOpen(@RequestBody List<String> meterNums) {
+        return executeBatch(meterNums, CMD_OPEN_VALVE, "100");
+    }
+
+    /**
+     * 批量关阀
+     */
+    @SaCheckPermission("thermal:ht:control:edit")
+    @SaCheckLogin
+    @PostMapping("/batchClose")
+    public R<Void> batchClose(@RequestBody List<String> meterNums) {
+        return executeBatch(meterNums, CMD_CLOSE_VALVE, "0");
+    }
+
+    /**
+     * 批量开度调整
+     */
+    @SaCheckPermission("thermal:ht:control:edit")
+    @SaCheckLogin
+    @PostMapping("/batchSetAngle")
+    public R<Void> batchSetAngle(@RequestBody List<String> meterNums,
+                                  @RequestParam String angle) {
+        return executeBatch(meterNums, CMD_SET_ANGLE, angle);
+    }
+
+    /**
+     * 批量采集（查询状态）
+     */
+    @SaCheckPermission("thermal:ht:control:query")
+    @SaCheckLogin
+    @PostMapping("/batchQuery")
+    public R<Void> batchQuery(@RequestBody List<String> meterNums) {
+        return executeBatch(meterNums, CMD_QUERY_STATUS, "");
+    }
+
+    /**
+     * 批量制动
+     */
+    @SaCheckPermission("thermal:ht:control:edit")
+    @SaCheckLogin
+    @PostMapping("/batchBrake")
+    public R<Void> batchBrake(@RequestBody List<String> meterNums) {
+        return executeBatch(meterNums, CMD_BRAKE, "");
+    }
+
+    /**
+     * 批量周期设定
+     */
+    @SaCheckPermission("thermal:ht:control:edit")
+    @SaCheckLogin
+    @PostMapping("/batchSetCycle")
+    public R<Void> batchSetCycle(@RequestBody List<String> meterNums,
+                                  @RequestParam Integer cycle) {
+        return executeBatch(meterNums, CMD_SET_CYCLE, String.valueOf(cycle));
+    }
+
+    /**
+     * 批量自由控制（解锁）
+     */
+    @SaCheckPermission("thermal:ht:control:edit")
+    @SaCheckLogin
+    @PostMapping("/batchUnlock")
+    public R<Void> batchUnlock(@RequestBody List<String> meterNums) {
+        return executeBatch(meterNums, CMD_UNLOCK, "");
+    }
+
+    private R<Void> executeBatch(List<String> meterNums, String cmd, String param) {
+        if (meterNums == null || meterNums.isEmpty()) {
+            return R.fail("阀门列表不能为空");
+        }
+        String[] commands = meterNums.stream()
+            .map(m -> heatMeterControl.mbusControl(m, cmd, param, now()))
+            .toArray(String[]::new);
+        boolean success = heatMeterControl.postData(commands);
+        return success ? R.ok() : R.fail("批量指令发送失败");
     }
 }
