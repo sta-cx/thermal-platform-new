@@ -9,11 +9,9 @@ import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
-import org.sdkj.meter.domain.*;
-import org.sdkj.meter.domain.vo.*;
-import org.sdkj.meter.mapper.MtMeterMatchMapper;
+import org.sdkj.meter.domain.MtHeatArchive;
 import org.sdkj.meter.service.IMtMeterMatchService;
-import org.sdkj.meter.service.*;
+import org.sdkj.meter.service.IMtHeatArchiveService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +23,7 @@ import java.util.List;
 /**
  * 仪表分配管理
  * 迁移自旧系统 AgentMeterController
+ * 注：电表/水表/燃气表档案已废弃（老前端已去掉），仅保留热力表
  */
 @Validated
 @RequiredArgsConstructor
@@ -32,10 +31,7 @@ import java.util.List;
 @RequestMapping("/thermal/meter/agent")
 public class AgentMeterController extends BaseController {
 
-    private final IMtElectricArchiveService electricService;
-    private final IMtWaterArchiveService waterService;
     private final IMtHeatArchiveService heatService;
-    private final IMtGasArchiveService gasService;
     private final IMtMeterMatchService meterMatchService;
 
     /**
@@ -51,25 +47,11 @@ public class AgentMeterController extends BaseController {
         if (meterType == null || meterType.isBlank()) {
             return TableDataInfo.build();
         }
-        return switch (meterType) {
-            case "01" -> {
-                LambdaQueryWrapper<MtElectricArchive> lqw = archiveSearch(MtElectricArchive::getCode, MtElectricArchive::getName, search);
-                yield electricService.selectPageList(lqw, pageQuery);
-            }
-            case "02" -> {
-                LambdaQueryWrapper<MtWaterArchive> lqw = archiveSearch(MtWaterArchive::getCode, MtWaterArchive::getName, search);
-                yield waterService.selectPageList(lqw, pageQuery);
-            }
-            case "03" -> {
-                LambdaQueryWrapper<MtHeatArchive> lqw = archiveSearch(MtHeatArchive::getCode, MtHeatArchive::getName, search);
-                yield heatService.selectPageList(lqw, pageQuery);
-            }
-            case "04" -> {
-                LambdaQueryWrapper<MtGasArchive> lqw = archiveSearch(MtGasArchive::getCode, MtGasArchive::getName, search);
-                yield gasService.selectPageList(lqw, pageQuery);
-            }
-            default -> TableDataInfo.build();
-        };
+        if ("03".equals(meterType)) {
+            LambdaQueryWrapper<MtHeatArchive> lqw = archiveSearch(MtHeatArchive::getCode, MtHeatArchive::getName, search);
+            return heatService.selectPageList(lqw, pageQuery);
+        }
+        return TableDataInfo.build();
     }
 
     /**
@@ -84,13 +66,10 @@ public class AgentMeterController extends BaseController {
         if (meterType == null || meterType.isBlank()) {
             return R.ok(List.of());
         }
-        return switch (meterType) {
-            case "01" -> R.ok(electricService.list(archiveSearch(MtElectricArchive::getCode, MtElectricArchive::getName, search)));
-            case "02" -> R.ok(waterService.list(archiveSearch(MtWaterArchive::getCode, MtWaterArchive::getName, search)));
-            case "03" -> R.ok(heatService.list(archiveSearch(MtHeatArchive::getCode, MtHeatArchive::getName, search)));
-            case "04" -> R.ok(gasService.list(archiveSearch(MtGasArchive::getCode, MtGasArchive::getName, search)));
-            default -> R.ok(List.of());
-        };
+        if ("03".equals(meterType)) {
+            return R.ok(heatService.list(archiveSearch(MtHeatArchive::getCode, MtHeatArchive::getName, search)));
+        }
+        return R.ok(List.of());
     }
 
     /**

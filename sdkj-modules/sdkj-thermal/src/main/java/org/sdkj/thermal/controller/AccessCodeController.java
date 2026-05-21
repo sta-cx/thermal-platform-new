@@ -2,6 +2,7 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.validation.annotation.Validated;
@@ -14,16 +15,14 @@ import java.util.Map;
  * 迁移自旧系统 AccessCodeController
  * 为自助机提供仪表厂商/分类/设备的最新编码
  */
+@Slf4j
 @Validated
 @RestController
 @RequestMapping("/thermal/agent/access-code")
 public class AccessCodeController {
 
     private static final Map<String, String> METER_TABLE_MAP = Map.of(
-        "01", "mt_electric_archive",
-        "02", "mt_water_archive",
         "03", "mt_heat_archive",
-        "04", "mt_gas_archive",
         "11", "mt_centrator_archive",
         "21", "mt_tc_archive",
         "31", "mt_tc_valve"
@@ -77,6 +76,7 @@ public class AccessCodeController {
             String result = sortCode + String.format("%04d", (max != null ? max : 0) + 1);
             return R.ok("操作成功", result);
         } catch (Exception e) {
+            log.warn("accessMeterCode failed for sortCode={}, meterType={}: {}", sortCode, meterType, e.getMessage());
             String result = sortCode + "0001";
             return R.ok("操作成功", result);
         }
