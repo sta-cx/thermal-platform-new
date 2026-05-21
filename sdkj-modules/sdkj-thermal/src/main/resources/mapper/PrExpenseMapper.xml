@@ -307,26 +307,6 @@
         ORDER BY a.create_time DESC
     </select>
 
-    <select id="selectWechatOrderList" resultType="java.util.LinkedHashMap">
-        SELECT a.*, b.org_id, b.org_name, b.building_id, b.building_name, b.unit_code, b.room_num,
-               c.user_name, c.phone
-        FROM pr_wechat_order a
-        LEFT JOIN pr_house b ON b.id = a.house_id
-        LEFT JOIN pr_user_house uh ON uh.house_id = b.id AND uh.del_flag = '0'
-        LEFT JOIN pr_user c ON uh.user_id = c.id
-        LEFT JOIN sys_organization e ON e.id = b.org_id
-        WHERE 1=1
-        <if test="orgId != null and orgId != ''">AND b.org_id = #{orgId}</if>
-        <if test="buildingId != null and buildingId != ''">AND b.building_id = #{buildingId}</if>
-        <if test="unitCode != null and unitCode != ''">AND b.unit_code = #{unitCode}</if>
-        <if test="parentId != null and parentId != ''">AND e.parent_id = #{parentId}</if>
-        <if test="type != null and type != ''">AND a.order_status = #{type}</if>
-        <if test="startTime != null and startTime != ''">AND a.create_time &gt;= #{startTime}</if>
-        <if test="endTime != null and endTime != ''">AND a.create_time &lt;= #{endTime}</if>
-        <if test="search != null and search != ''">AND (b.room_num LIKE CONCAT('%', #{search}, '%') OR b.other_code LIKE CONCAT('%', #{search}, '%') OR c.phone LIKE CONCAT('%', #{search}, '%'))</if>
-        ORDER BY a.create_time DESC
-    </select>
-
     <!-- 滞纳金计算 - 起收日期 -->
     <update id="updateLatefeeQs">
         UPDATE pr_expense a

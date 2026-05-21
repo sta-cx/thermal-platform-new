@@ -758,16 +758,6 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
         return TableDataInfo.build(page);
     }
 
-    @Override
-    public TableDataInfo<Map<String, Object>> wechatOrderList(String orgId, String buildingId,
-            String unitCode, String parentId, String type, String startTime, String endTime, String search,
-            PageQuery pageQuery) {
-        Page<Map<String, Object>> page = pageQuery.build();
-        baseMapper.selectWechatOrderList(page, orgId, buildingId,
-            unitCode, parentId, type, startTime, endTime, search);
-        return TableDataInfo.build(page);
-    }
-
     // ========== 滞纳金计算方法实现 ==========
 
     @Override

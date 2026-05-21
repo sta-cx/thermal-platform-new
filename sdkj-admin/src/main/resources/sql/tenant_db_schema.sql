@@ -103,8 +103,6 @@ CREATE TABLE `ag_user` (
   `is_enabled` int DEFAULT '1' COMMENT '是否启用',
   `address` varchar(255) DEFAULT NULL COMMENT '地址',
   `avatar` varchar(255) DEFAULT NULL COMMENT '头像',
-  `wx_openid` varchar(64) DEFAULT NULL COMMENT '微信openid',
-  `wx_number` varchar(64) DEFAULT NULL COMMENT '微信号',
   `qq_number` varchar(64) DEFAULT NULL COMMENT 'QQ号',
   `email` varchar(64) DEFAULT NULL COMMENT '邮箱',
   `nation` varchar(20) DEFAULT NULL COMMENT '民族',
@@ -2490,31 +2488,6 @@ CREATE TABLE `pr_print_template` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='打印模板';
 
-CREATE TABLE `pr_reconciliation_diff` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `bill_id` bigint DEFAULT NULL,
-  `bill_date` varchar(20) DEFAULT NULL COMMENT '账单日期',
-  `out_trade_no` varchar(64) DEFAULT NULL COMMENT '商户订单号',
-  `transaction_id` varchar(64) DEFAULT NULL COMMENT '微信支付流水号',
-  `diff_type` varchar(20) DEFAULT NULL COMMENT '差异类型: MISS-漏单 AMOUNT-金额不一致 STATUS-状态不一致',
-  `local_amount` varchar(32) DEFAULT NULL COMMENT '本地金额',
-  `wechat_amount` varchar(32) DEFAULT NULL COMMENT '微信金额',
-  `local_status` varchar(10) DEFAULT NULL COMMENT '本地状态',
-  `wechat_status` varchar(10) DEFAULT NULL COMMENT '微信状态',
-  `handle_status` varchar(10) DEFAULT '0' COMMENT '处理状态: 0-未处理 1-已处理',
-  `handle_remark` varchar(500) DEFAULT NULL COMMENT '处理备注',
-  `handler` varchar(40) DEFAULT NULL COMMENT '处理人',
-  `handle_time` datetime DEFAULT NULL COMMENT '处理时间',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_bill_id` (`bill_id`),
-  KEY `idx_out_trade_no` (`out_trade_no`),
-  KEY `idx_diff_type` (`diff_type`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='微信对账差异记录';
 
 CREATE TABLE `pr_repair_person` (
   `id` bigint NOT NULL COMMENT '主键',
@@ -2891,137 +2864,6 @@ CREATE TABLE `pr_user_house` (
   KEY `idx_user_id` (`user_id`),
   KEY `idx_house_id` (`house_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户-房屋关联表';
-
-CREATE TABLE `pr_wechat_bill` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `bill_date` varchar(20) DEFAULT NULL COMMENT '账单日期',
-  `bill_type` varchar(20) DEFAULT NULL COMMENT '账单类型',
-  `bill_url` varchar(500) DEFAULT NULL COMMENT '账单下载地址',
-  `file_md5` varchar(64) DEFAULT NULL COMMENT '文件MD5',
-  `file_size` bigint DEFAULT NULL COMMENT '文件大小(字节)',
-  `download_status` tinyint DEFAULT NULL COMMENT '下载状态: 0=未下载 1=已下载',
-  `download_time` datetime DEFAULT NULL COMMENT '下载时间',
-  `check_status` tinyint DEFAULT NULL COMMENT '对账状态: 0=未对账 1=已对账',
-  `check_time` datetime DEFAULT NULL COMMENT '对账时间',
-  `total_count` int DEFAULT NULL COMMENT '总笔数',
-  `success_count` int DEFAULT NULL COMMENT '成功笔数',
-  `diff_count` int DEFAULT NULL COMMENT '差异笔数',
-  `operator` varchar(40) DEFAULT NULL COMMENT '操作人',
-  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-  KEY `idx_bill_date` (`bill_date`),
-  KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='微信对账单';
-
-CREATE TABLE `pr_wechat_bind_record` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `house_id` bigint DEFAULT NULL,
-  `heat_pay_code` varchar(64) DEFAULT NULL COMMENT '供热缴费编码',
-  `wx_open_id` varchar(64) DEFAULT NULL COMMENT '微信openId',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_wx_open_id` (`wx_open_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='微信绑定记录';
-
-CREATE TABLE `pr_wechat_order` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `house_id` bigint DEFAULT NULL,
-  `order_no` varchar(64) DEFAULT NULL COMMENT '订单编号',
-  `transaction_id` varchar(64) DEFAULT NULL COMMENT '微信交易号',
-  `order_status` tinyint DEFAULT NULL COMMENT '订单状态',
-  `total_amount` decimal(18,4) DEFAULT NULL COMMENT '订单金额',
-  `pay_time` datetime DEFAULT NULL COMMENT '支付时间',
-  `pay_type` varchar(32) DEFAULT NULL COMMENT '支付类型',
-  `item_group` varchar(32) DEFAULT NULL COMMENT '费项分组',
-  `item_code` varchar(32) DEFAULT NULL COMMENT '费项编码',
-  `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  `out_trade_no` varchar(255) DEFAULT NULL,
-  `open_id` varchar(255) DEFAULT NULL,
-  `other_code` varchar(255) DEFAULT NULL,
-  `house_address` varchar(255) DEFAULT NULL,
-  `total_fee` decimal(12,4) DEFAULT NULL,
-  `body` varchar(255) DEFAULT NULL,
-  `sp_bill_create_ip` varchar(255) DEFAULT NULL,
-  `expire_time` datetime DEFAULT NULL,
-  `notify_url` varchar(255) DEFAULT NULL,
-  `return_url` varchar(255) DEFAULT NULL,
-  `trade_type` varchar(255) DEFAULT NULL,
-  `bank_type` varchar(255) DEFAULT NULL,
-  `attach` varchar(255) DEFAULT NULL,
-  `operator` varchar(255) DEFAULT NULL,
-  KEY `idx_org_id` (`org_id`),
-  PRIMARY KEY (`id`)
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_order_no` (`order_no`),
-  KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='微信订单表';
-
-CREATE TABLE `pr_wechat_refund` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `out_trade_no` varchar(64) DEFAULT NULL COMMENT '商户订单号',
-  `transaction_id` varchar(64) DEFAULT NULL COMMENT '微信支付订单号',
-  `out_refund_no` varchar(64) DEFAULT NULL COMMENT '商户退款单号',
-  `refund_id` varchar(64) DEFAULT NULL COMMENT '微信退款单号',
-  `total_fee` decimal(18,2) DEFAULT NULL COMMENT '订单金额',
-  `refund_fee` decimal(18,2) DEFAULT NULL COMMENT '退款金额',
-  `refund_reason` varchar(255) DEFAULT NULL COMMENT '退款原因',
-  `refund_status` tinyint DEFAULT NULL COMMENT '退款状态: 0=处理中 1=成功 2=失败',
-  `refund_channel` varchar(32) DEFAULT NULL COMMENT '退款渠道',
-  `refund_time` datetime DEFAULT NULL COMMENT '退款时间',
-  `open_id` varchar(64) DEFAULT NULL COMMENT '用户标识openId',
-  `house_id` bigint DEFAULT NULL,
-  `operator` varchar(40) DEFAULT NULL COMMENT '操作人',
-  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_out_trade_no` (`out_trade_no`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='微信退款记录';
-
-CREATE TABLE `pr_wechat_user` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `open_id` varchar(64) DEFAULT NULL COMMENT '微信openId',
-  `other_code` varchar(64) DEFAULT NULL COMMENT '其他编码',
-  `house_id` bigint DEFAULT NULL,
-  `user_name` varchar(64) DEFAULT NULL COMMENT '用户名',
-  `phone` varchar(32) DEFAULT NULL COMMENT '手机号',
-  `bind_status` tinyint DEFAULT NULL COMMENT '绑定状态: 0=未绑定 1=已绑定',
-  `session_key` varchar(255) DEFAULT NULL COMMENT '会话密钥',
-  `union_id` varchar(64) DEFAULT NULL COMMENT '微信unionId',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`),
-  KEY `idx_open_id` (`open_id`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_phone` (`phone`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='微信用户';
 
 CREATE TABLE `sys_area` (
   `id` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '主键ID',

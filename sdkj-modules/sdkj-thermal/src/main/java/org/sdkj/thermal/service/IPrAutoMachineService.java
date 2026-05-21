@@ -18,7 +18,7 @@ public interface IPrAutoMachineService {
     /**
      * 生成支付二维码URL
      *
-     * @param type      支付类型: wechat / alipay / wechatH5
+     * @param type      支付类型: alipay
      * @param serialNum 流水号
      * @return 二维码URL
      */

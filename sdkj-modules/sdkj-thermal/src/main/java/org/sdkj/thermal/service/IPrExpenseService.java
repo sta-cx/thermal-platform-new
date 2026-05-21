@@ -151,11 +151,6 @@ public interface IPrExpenseService extends IService<PrExpense> {
         String unitCode, String parentId, String type, String startTime, String endTime, String search,
         PageQuery pageQuery);
 
-    /** 微信费用订单 */
-    TableDataInfo<Map<String, Object>> wechatOrderList(String orgId, String buildingId,
-        String unitCode, String parentId, String type, String startTime, String endTime, String search,
-        PageQuery pageQuery);
-
     // ========== 滞纳金计算方法 ==========
 
     /**

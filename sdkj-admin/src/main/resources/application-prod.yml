@@ -216,19 +216,6 @@ justauth:
       client-secret: 1f7d08**********5b7**********29e
       redirect-uri: ${justauth.address}/social-callback?source=alipay_wallet
       alipay-public-key: MIIB**************DAQAB
-    wechat_open:
-      client-id: 10**********6
-      client-secret: 1f7d08**********5b7**********29e
-      redirect-uri: ${justauth.address}/social-callback?source=wechat_open
-    wechat_mp:
-      client-id: 10**********6
-      client-secret: 1f7d08**********5b7**********29e
-      redirect-uri: ${justauth.address}/social-callback?source=wechat_mp
-    wechat_enterprise:
-      client-id: 10**********6
-      client-secret: 1f7d08**********5b7**********29e
-      redirect-uri: ${justauth.address}/social-callback?source=wechat_enterprise
-      agent-id: 1000002
     gitlab:
       client-id: 10**********6
       client-secret: 1f7d08**********5b7**********29e

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @Validated
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/thermal/wechat/iot")
+@RequestMapping("/thermal/ht/iot-log")
 public class IoTLogController extends BaseController {
 
     private final IIoTDataService ioTDataService;

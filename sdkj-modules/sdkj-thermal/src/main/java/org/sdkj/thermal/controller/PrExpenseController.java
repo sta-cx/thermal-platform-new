@@ -401,25 +401,4 @@ public class PrExpenseController extends BaseController {
         return expenseService.expenseLog(orgId, buildingId, unitCode,
             parentId, type, startTime, endTime, search, pageQuery);
     }
-
-    /**
-     * 微信费用订单查询
-     * 旧端点: POST /property/expense/pageListWechat
-     * 新端点: GET /thermal/property/expense/wechat
-     */
-    @SaCheckPermission("thermal:property:expense:list")
-    @SaCheckLogin
-    @GetMapping("/wechat")
-    public TableDataInfo<Map<String, Object>> wechatOrderList(@RequestParam(required = false) String orgId,
-            @RequestParam(required = false) String buildingId,
-            @RequestParam(required = false) String unitCode,
-            @RequestParam(required = false) String parentId,
-            @RequestParam(required = false) String type,
-            @RequestParam(required = false) String startTime,
-            @RequestParam(required = false) String endTime,
-            @RequestParam(required = false) String search,
-            PageQuery pageQuery) {
-        return expenseService.wechatOrderList(orgId, buildingId, unitCode,
-            parentId, type, startTime, endTime, search, pageQuery);
-    }
 }

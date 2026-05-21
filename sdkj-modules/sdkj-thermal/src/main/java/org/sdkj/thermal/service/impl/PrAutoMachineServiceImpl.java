@@ -91,9 +91,7 @@ public class PrAutoMachineServiceImpl implements IPrAutoMachineService {
         // TODO: 第三方支付SDK集成后替换为真实支付链接
         // 目前返回模拟的二维码URL，供前端调试
         return switch (type) {
-            case "wechat" -> "weixin://wxpay/bizpayurl?pr=" + serialNum + "&type=native";
             case "alipay" -> "https://openapi.alipay.com/gateway.do?method=alipay.trade.precreate&out_trade_no=" + serialNum;
-            case "wechatH5" -> "https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id=" + serialNum;
             default -> throw new ServiceException("不支持的支付类型: " + type);
         };
     }

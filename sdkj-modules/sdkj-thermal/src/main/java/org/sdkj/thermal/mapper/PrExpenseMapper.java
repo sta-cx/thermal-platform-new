@@ -113,15 +113,6 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
         @Param("startTime") String startTime, @Param("endTime") String endTime,
         @Param("search") String search);
 
-    /** 微信费用订单 */
-    List<Map<String, Object>> selectWechatOrderList(
-        Page<Map<String, Object>> page,
-        @Param("orgId") String orgId,
-        @Param("buildingId") String buildingId, @Param("unitCode") String unitCode,
-        @Param("parentId") String parentId, @Param("type") String type,
-        @Param("startTime") String startTime, @Param("endTime") String endTime,
-        @Param("search") String search);
-
     /**
      * 微信支付成功后更新费用明细
      * 将指定房屋指定年份的未缴费明细标记为已缴费
