@@ -9,6 +9,7 @@ import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 热力阀门档案 Mapper
@@ -29,4 +30,11 @@ public interface PrHeatValveArchiveMapper extends BaseMapperPlus<PrHeatValveArch
                      @Param("inTemperature") BigDecimal inTemperature,
                      @Param("outTemperature") BigDecimal outTemperature,
                      @Param("actualOpen") Integer actualOpen);
+
+    /**
+     * 集中器监控聚合查询
+     */
+    List<Map<String, Object>> selectCentratorMonitor(
+            @Param("search") String search,
+            @Param("onlineThresholdMinutes") long onlineThresholdMinutes);
 }
