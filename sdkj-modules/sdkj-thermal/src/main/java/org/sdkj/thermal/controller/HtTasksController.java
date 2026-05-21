@@ -104,7 +104,9 @@ public class HtTasksController extends BaseController {
     public R<Void> save(@Validated @RequestBody HtTasksBo bo,
                         @RequestParam(required = false) List<Long> scopeIds) {
         HtTasks task = MapstructUtils.convert(bo, HtTasks.class);
-        task.setBeanClass("org.sdkj.thermal.quartz.ThermalJob");
+        if (task.getBeanClass() == null || task.getBeanClass().isEmpty()) {
+            task.setBeanClass("org.sdkj.thermal.quartz.ThermalJob");
+        }
         if (task.getNumber() == null) task.setNumber(0);
         if (task.getStatus() == null) task.setStatus(0);
         if (task.getIsUseReportRate() == null) task.setIsUseReportRate(0);
