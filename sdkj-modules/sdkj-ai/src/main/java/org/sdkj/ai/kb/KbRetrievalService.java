@@ -71,16 +71,28 @@ public class KbRetrievalService {
 
         List<ScoredPoint> results;
         try {
-            results = qdrantClient.searchAsync(
+            // First search WITHOUT threshold to diagnose scores
+            List<ScoredPoint> rawResults = qdrantClient.searchAsync(
                 SearchPoints.newBuilder()
                     .setCollectionName(collection)
                     .addAllVector(vecList)
                     .setLimit(topK)
-                    .setScoreThreshold(scoreThreshold)
                     .setWithPayload(WithPayloadSelectorFactory.enable(true))
                     .build(),
                 Duration.ofSeconds(5)
             ).get(5, TimeUnit.SECONDS);
+
+            log.info("[KB-Retrieval] collection={}, query='{}', rawResults={}, scores={}",
+                collection,
+                query.length() > 40 ? query.substring(0, 40) + "..." : query,
+                rawResults.size(),
+                rawResults.stream().map(p -> String.format("%.4f", p.getScore())).toList());
+
+            // Apply threshold manually
+            results = rawResults.stream()
+                .filter(p -> p.getScore() >= scoreThreshold)
+                .toList();
+            log.info("[KB-Retrieval] after threshold({}): {} results", scoreThreshold, results.size());
         } catch (Exception e) {
             log.warn("Qdrant search failed for collection {}: {}", collection, e.getMessage());
             return new RetrievalResult(List.of(), List.of());

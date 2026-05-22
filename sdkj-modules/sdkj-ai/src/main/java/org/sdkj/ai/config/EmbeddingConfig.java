@@ -22,7 +22,7 @@ public class EmbeddingConfig {
     @Bean
     @Primary
     public OpenAiEmbeddingModel jinaEmbeddingModel(
-        @Value("${thermal.ai.embedding.base-url:https://api.jina.ai/v1}") String baseUrl,
+        @Value("${thermal.ai.embedding.base-url:https://api.jina.ai}") String baseUrl,
         @Value("${thermal.ai.embedding.api-key:}") String apiKey,
         @Value("${thermal.ai.embedding.model:jina-embeddings-v3}") String model
     ) {

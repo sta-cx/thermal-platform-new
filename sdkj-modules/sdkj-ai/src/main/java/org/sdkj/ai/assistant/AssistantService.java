@@ -260,11 +260,16 @@ public class AssistantService {
     // ===== RAG helpers =====
 
     private RetrievalResult retrieveRag(String tenantId, String message) {
+        log.info("[Assistant] RAG check: enabled={}, tenant={}", aiProperties.getRag().isEnabled(), tenantId);
         if (!aiProperties.getRag().isEnabled()) {
             return new RetrievalResult(List.of(), List.of());
         }
         try {
-            return retrievalService.retrieveWithCitations(tenantId, message);
+            RetrievalResult result = retrievalService.retrieveWithCitations(tenantId, message);
+            log.info("[Assistant] RAG result: {} fragments, {} citations for query='{}'",
+                result.fragments().size(), result.citations().size(),
+                message.length() > 50 ? message.substring(0, 50) + "..." : message);
+            return result;
         } catch (Exception e) {
             log.warn("[Assistant] RAG retrieval failed, proceeding without context: {}", e.getMessage());
             return new RetrievalResult(List.of(), List.of());
