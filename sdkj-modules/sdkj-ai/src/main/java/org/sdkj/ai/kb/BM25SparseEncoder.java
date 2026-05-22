@@ -16,17 +16,17 @@ import java.util.Map;
 @Component
 public class BM25SparseEncoder {
 
-    public record SparseVec(List<Long> indices, List<Float> values) {}
+    public record SparseVec(List<Integer> indices, List<Float> values) {}
 
     public SparseVec encode(String text) {
         if (text == null || text.isBlank()) {
             return new SparseVec(List.of(), List.of());
         }
         Map<String, Integer> tf = tokenize(text);
-        List<Long> indices = new ArrayList<>(tf.size());
+        List<Integer> indices = new ArrayList<>(tf.size());
         List<Float> values = new ArrayList<>(tf.size());
         for (Map.Entry<String, Integer> e : tf.entrySet()) {
-            long idx = stableHash(e.getKey());
+            int idx = stableHash(e.getKey());
             float val = (float) Math.log1p(e.getValue());
             indices.add(idx);
             values.add(val);
@@ -61,7 +61,7 @@ public class BM25SparseEncoder {
         return c >= 0x4E00 && c <= 0x9FFF;
     }
 
-    private long stableHash(String term) {
-        return term.hashCode() & 0x7FFFFFFFL;
+    private int stableHash(String term) {
+        return term.hashCode() & 0x7FFFFFFF;
     }
 }
