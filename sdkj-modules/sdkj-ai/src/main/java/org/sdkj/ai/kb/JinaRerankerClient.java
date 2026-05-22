@@ -8,14 +8,15 @@ import org.sdkj.ai.config.AiProperties;
 import org.sdkj.ai.domain.AiKnowledgeChunk;
 import org.sdkj.ai.mapper.AiKnowledgeChunkMapper;
 import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
-@Component
+@Service
 @DS("master")
 @RequiredArgsConstructor
 public class JinaRerankerClient {
@@ -24,16 +25,34 @@ public class JinaRerankerClient {
     private final AiProperties aiProperties;
     private final AiKnowledgeChunkMapper chunkMapper;
 
-    public record RerankResult(int index, double relevanceScore) {}
+    public record ScoredPointWithContext(io.qdrant.client.grpc.Points.ScoredPoint point,
+                                         AiKnowledgeChunk chunk, double score) {}
 
-    public List<ScoredPointWithContext> rerank(String query, List<ScoredPointWithContext> candidates, int topN) {
+    public List<ScoredPointWithContext> resolveAndRerank(String query,
+            List<io.qdrant.client.grpc.Points.ScoredPoint> candidates, int topN) {
+        // 1. Resolve chunk texts from MySQL
+        List<String> pointIds = candidates.stream()
+            .map(p -> p.getId().getUuid())
+            .toList();
+
+        Map<String, AiKnowledgeChunk> chunkMap = chunkMapper.selectList(
+            new LambdaQueryWrapper<AiKnowledgeChunk>()
+                .in(AiKnowledgeChunk::getQdrantPointId, pointIds)
+        ).stream()
+            .collect(Collectors.toMap(AiKnowledgeChunk::getQdrantPointId, c -> c, (a, b) -> a));
+
+        List<ScoredPointWithContext> withChunks = candidates.stream()
+            .map(p -> new ScoredPointWithContext(p, chunkMap.get(p.getId().getUuid()), p.getScore()))
+            .toList();
+
+        // 2. Rerank if enabled
         var cfg = aiProperties.getRag().getRerank();
-        if (!cfg.isEnabled() || candidates.isEmpty()) {
-            return candidates.size() <= topN ? candidates : candidates.subList(0, topN);
+        if (!cfg.isEnabled() || withChunks.isEmpty()) {
+            return withChunks.size() <= topN ? withChunks : new ArrayList<>(withChunks.subList(0, topN));
         }
 
-        List<String> texts = candidates.stream()
-            .map(c -> c.chunkText() != null ? c.chunkText() : "")
+        List<String> texts = withChunks.stream()
+            .map(c -> c.chunk() != null && c.chunk().getText() != null ? c.chunk().getText() : "")
             .toList();
 
         Map<String, Object> body = Map.of(
@@ -57,13 +76,13 @@ public class JinaRerankerClient {
 
             if (resp == null) {
                 log.warn("Reranker returned null, fallback to RRF top-{}", topN);
-                return fallback(candidates, topN, cfg);
+                return fallback(withChunks, topN);
             }
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> results = (List<Map<String, Object>>) resp.get("results");
             if (results == null) {
-                return fallback(candidates, topN, cfg);
+                return fallback(withChunks, topN);
             }
 
             return results.stream()
@@ -73,45 +92,16 @@ public class JinaRerankerClient {
                     return new AbstractMap.SimpleEntry<>(idx, score);
                 })
                 .filter(e -> e.getValue() >= cfg.getScoreThreshold())
-                .map(e -> candidates.get(e.getKey()))
-                .toList();
+                .map(e -> withChunks.get(e.getKey()))
+                .collect(Collectors.toList());
         } catch (Exception e) {
             log.warn("Reranker failed, fallback to RRF top-{}", topN, e);
             if (!cfg.isFallbackOnError()) throw new RuntimeException(e);
-            return fallback(candidates, topN, cfg);
+            return fallback(withChunks, topN);
         }
     }
 
-    private List<ScoredPointWithContext> fallback(List<ScoredPointWithContext> candidates, int topN, AiProperties.Rag.Rerank cfg) {
-        return candidates.size() <= topN ? candidates : candidates.subList(0, topN);
-    }
-
-    /**
-     * Wraps a ScoredPoint with its chunk text resolved from MySQL.
-     */
-    public record ScoredPointWithContext(io.qdrant.client.grpc.Points.ScoredPoint point,
-                                         String chunkText, double score) {}
-
-    /**
-     * Resolve chunk texts from MySQL for reranking, returning wrapped results.
-     */
-    public List<ScoredPointWithContext> resolveChunkTexts(List<io.qdrant.client.grpc.Points.ScoredPoint> candidates) {
-        List<String> pointIds = candidates.stream()
-            .map(p -> p.getId().getUuid())
-            .toList();
-
-        Map<String, AiKnowledgeChunk> chunkMap = chunkMapper.selectList(
-            new LambdaQueryWrapper<AiKnowledgeChunk>()
-                .in(AiKnowledgeChunk::getQdrantPointId, pointIds)
-        ).stream()
-            .collect(java.util.stream.Collectors.toMap(AiKnowledgeChunk::getQdrantPointId, c -> c, (a, b) -> a));
-
-        return candidates.stream()
-            .map(p -> {
-                AiKnowledgeChunk chunk = chunkMap.get(p.getId().getUuid());
-                String text = chunk != null ? chunk.getText() : null;
-                return new ScoredPointWithContext(p, text, p.getScore());
-            })
-            .toList();
+    private List<ScoredPointWithContext> fallback(List<ScoredPointWithContext> candidates, int topN) {
+        return candidates.size() <= topN ? candidates : new ArrayList<>(candidates.subList(0, topN));
     }
 }
