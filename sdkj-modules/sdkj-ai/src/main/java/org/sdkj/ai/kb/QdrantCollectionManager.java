@@ -6,39 +6,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Per-tenant Qdrant collection lifecycle manager.
- * <p>
- * Collection naming convention: {@code sdkj_kb_${tenantId}} (e.g. {@code sdkj_kb_000000}).
- * Each tenant gets an isolated collection; creation is idempotent and cached in-process.
- */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class QdrantCollectionManager {
 
+    private static final int DENSE_VECTOR_SIZE = 1024;
+
     private final QdrantClient qdrantClient;
     private final ConcurrentHashMap<String, Boolean> existsCache = new ConcurrentHashMap<>();
 
-    /**
-     * Derive collection name from tenant id.
-     */
     public String collectionFor(String tenantId) {
         return "sdkj_kb_" + tenantId;
     }
 
-    /**
-     * Ensure the collection for the given tenant exists.
-     * Creates it with Cosine distance and the specified vector dimension if absent.
-     * Idempotent — concurrent calls for the same tenant are safe.
-     *
-     * @param tenantId  the tenant identifier
-     * @param vectorSize embedding output dimension (e.g. 1024 for DeepSeek text-embedding-v1)
-     */
-    public void ensureCollection(String tenantId, int vectorSize) {
+    public void ensureCollection(String tenantId) {
         String name = collectionFor(tenantId);
         if (existsCache.containsKey(name)) {
             return;
@@ -52,25 +38,38 @@ public class QdrantCollectionManager {
                 return;
             }
 
-            qdrantClient.createCollectionAsync(
-                name,
-                VectorParams.newBuilder()
-                    .setSize(vectorSize)
-                    .setDistance(Distance.Cosine)
-                    .build()
-            ).get(10, TimeUnit.SECONDS);
+            CreateCollection createCollection = CreateCollection.newBuilder()
+                .setCollectionName(name)
+                .setVectorsConfig(VectorsConfig.newBuilder()
+                    .setParamsMap(VectorParamsMap.newBuilder()
+                        .putMap("dense", VectorParams.newBuilder()
+                            .setSize(DENSE_VECTOR_SIZE)
+                            .setDistance(Distance.Cosine)
+                            .build())
+                        .build())
+                    .build())
+                .setSparseVectorsConfig(SparseVectorConfig.newBuilder()
+                    .putMap("sparse", SparseVectorParams.newBuilder().build())
+                    .build())
+                .build();
+
+            qdrantClient.createCollectionAsync(createCollection).get(10, TimeUnit.SECONDS);
             existsCache.put(name, true);
-            log.info("Qdrant collection created: {} (dim={})", name, vectorSize);
+            log.info("Qdrant collection created: {} (dense={}, sparse)", name, DENSE_VECTOR_SIZE);
         } catch (Exception e) {
-            // Another concurrent worker may have created it — treat as benign
             log.warn("Qdrant collection ensure failed (may be benign race): {}", e.getMessage());
             existsCache.put(name, true);
         }
     }
 
     /**
-     * Delete the collection for the given tenant (used during knowledge-base reset).
+     * @deprecated Use {@link #ensureCollection(String)} instead — vector size is now fixed.
      */
+    @Deprecated
+    public void ensureCollection(String tenantId, int vectorSize) {
+        ensureCollection(tenantId);
+    }
+
     public void deleteCollection(String tenantId) {
         String name = collectionFor(tenantId);
         try {
@@ -80,5 +79,9 @@ public class QdrantCollectionManager {
         } catch (Exception e) {
             log.warn("Qdrant deleteCollection failed for {}: {}", name, e.getMessage());
         }
+    }
+
+    public void invalidateCache(String tenantId) {
+        existsCache.remove(collectionFor(tenantId));
     }
 }
