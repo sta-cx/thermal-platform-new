@@ -49,7 +49,9 @@ public class QdrantCollectionManager {
                         .build())
                     .build())
                 .setSparseVectorsConfig(SparseVectorConfig.newBuilder()
-                    .putMap("sparse", SparseVectorParams.newBuilder().build())
+                    .putMap("sparse", SparseVectorParams.newBuilder()
+                        .setModifier(Modifier.Idf)
+                        .build())
                     .build())
                 .build();
 

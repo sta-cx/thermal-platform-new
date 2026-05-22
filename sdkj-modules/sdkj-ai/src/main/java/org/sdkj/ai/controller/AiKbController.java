@@ -66,8 +66,8 @@ public class AiKbController {
                         "不支持的格式: " + ext));
                     continue;
                 }
-                Long docId = pipeline.ingestFile(tenantId, filename, DocFormat.AUTO, file);
-                results.add(KbUploadResult.success(filename, docId, 0));
+                IngestResult ir = pipeline.ingestFile(tenantId, filename, DocFormat.AUTO, file);
+                results.add(KbUploadResult.success(filename, ir.docId(), ir.chunkCount()));
             } catch (KbIngestException e) {
                 if (e.getMessage() != null && e.getMessage().contains("已存在")) {
                     results.add(KbUploadResult.duplicate(filename, null));

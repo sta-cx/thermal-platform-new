@@ -44,7 +44,7 @@ public class KbIngestPipeline {
     /**
      * Ingest a file via Tika (supports 23+ formats).
      */
-    public Long ingestFile(String tenantId, String title, DocFormat format, MultipartFile file) throws IOException {
+    public IngestResult ingestFile(String tenantId, String title, DocFormat format, MultipartFile file) throws IOException {
         // 1. Parse with Tika
         List<Document> docs = tikaReaderFactory.read(file);
         String fullText = docs.stream()
@@ -61,11 +61,11 @@ public class KbIngestPipeline {
     /**
      * Ingest raw text (legacy entry point).
      */
-    public Long ingest(String tenantId, String title, DocFormat format, String text) {
+    public IngestResult ingest(String tenantId, String title, DocFormat format, String text) {
         return ingestText(tenantId, title, format, text);
     }
 
-    private Long ingestText(String tenantId, String title, DocFormat format, String text) {
+    private IngestResult ingestText(String tenantId, String title, DocFormat format, String text) {
         // 1. Validate
         byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
         if (bytes.length > maxDocBytes) {
@@ -77,7 +77,7 @@ public class KbIngestPipeline {
         AiKnowledgeDoc existing = docService.findByTenantAndHash(tenantId, hash);
         if (existing != null) {
             log.info("Doc with hash {} already exists for tenant {}, skip ingest", hash, tenantId);
-            return existing.getId();
+            return new IngestResult(existing.getId(), 0);
         }
 
         // 3. Chinese preprocess + split
@@ -112,7 +112,7 @@ public class KbIngestPipeline {
             throw new KbIngestException("知识库索引失败:" + e.getMessage(), docId, e);
         }
 
-        return docId;
+        return new IngestResult(docId, chunks.size());
     }
 
     private void updateChunkQdrantIds(Long docId, Map<Integer, String> idMap) {
