@@ -39,6 +39,9 @@ public class AiProperties {
     /** RAG 配置 */
     private Rag rag = new Rag();
 
+    /** KB 知识库参数 */
+    private Kb kb = new Kb();
+
     @Data
     public static class Contextual {
         private Duration cacheDefaultTtl = Duration.ofMinutes(5);
@@ -120,6 +123,22 @@ public class AiProperties {
         public static class EmbeddingTask {
             private String query = "retrieval.query";
             private String passage = "retrieval.passage";
+        }
+    }
+
+    @Data
+    public static class Kb {
+        private int chunkSizeTokens = 500;
+        private int chunkOverlapTokens = 50;
+        private int minChunkChars = 150;
+        private long maxDocBytes = 5242880;
+        private int maxChunksPerDoc = 2000;
+        private Retrieval retrieval = new Retrieval();
+
+        @Data
+        public static class Retrieval {
+            private int topK = 4;
+            private double scoreThreshold = 0.5;
         }
     }
 
