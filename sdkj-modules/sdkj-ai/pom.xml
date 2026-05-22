@@ -85,5 +85,12 @@
             <groupId>org.sdkj</groupId>
             <artifactId>sdkj-common-log</artifactId>
         </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
