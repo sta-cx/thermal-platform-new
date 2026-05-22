@@ -66,15 +66,15 @@ public class AiKbController {
                         "不支持的格式: " + ext));
                     continue;
                 }
-                IngestResult ir = pipeline.ingestFile(tenantId, filename, DocFormat.AUTO, file);
-                results.add(KbUploadResult.success(filename, ir.docId(), ir.chunkCount()));
-            } catch (KbIngestException e) {
-                if (e.getMessage() != null && e.getMessage().contains("已存在")) {
-                    results.add(KbUploadResult.duplicate(filename, null));
+                IngestResult ir = pipeline.ingestFile(tenantId, filename, detectFormat(ext), file);
+                if (ir.duplicate()) {
+                    results.add(KbUploadResult.duplicate(filename, ir.docId()));
                 } else {
-                    log.error("KB ingest failed for {}", filename, e);
-                    results.add(KbUploadResult.failed(filename, e.getMessage()));
+                    results.add(KbUploadResult.success(filename, ir.docId(), ir.chunkCount()));
                 }
+            } catch (KbIngestException e) {
+                log.error("KB ingest failed for {}", filename, e);
+                results.add(KbUploadResult.failed(filename, e.getMessage()));
             } catch (Exception e) {
                 log.error("KB ingest failed for {}", filename, e);
                 results.add(KbUploadResult.failed(filename, e.getMessage()));
@@ -87,6 +87,15 @@ public class AiKbController {
         if (filename == null) return "";
         int dot = filename.lastIndexOf('.');
         return dot < 0 ? "" : filename.substring(dot).toLowerCase();
+    }
+
+    private DocFormat detectFormat(String ext) {
+        return switch (ext) {
+            case ".md", ".markdown" -> DocFormat.MARKDOWN;
+            case ".pdf" -> DocFormat.PDF;
+            case ".txt", ".text" -> DocFormat.PLAIN_TEXT;
+            default -> DocFormat.AUTO;
+        };
     }
 
     @SaCheckPermission("ai:kb:manage")

@@ -73,11 +73,30 @@ public class KbIngestPipeline {
         }
         String hash = sha256(bytes);
 
-        // 2. Dedup
+        // 2. Dedup — only EMBEDDED docs block retry; stale FAILED/CHUNKED/UPLOADED docs
+        //    are removed to allow re-ingest (typical: jina rate-limit caused embed failure)
         AiKnowledgeDoc existing = docService.findByTenantAndHash(tenantId, hash);
         if (existing != null) {
-            log.info("Doc with hash {} already exists for tenant {}, skip ingest", hash, tenantId);
-            return new IngestResult(existing.getId(), 0);
+            if (DocStatus.EMBEDDED.name().equals(existing.getStatus())) {
+                log.info("Doc {} already embedded for tenant {}, skip ingest", existing.getId(), tenantId);
+                return IngestResult.duplicate(existing.getId());
+            }
+            log.info("Removing stale {} doc {} for hash {} before retry",
+                existing.getStatus(), existing.getId(), hash);
+            List<String> stalePointIds = chunkMapper.selectList(
+                new LambdaQueryWrapper<AiKnowledgeChunk>().eq(AiKnowledgeChunk::getDocId, existing.getId()))
+                .stream()
+                .map(AiKnowledgeChunk::getQdrantPointId)
+                .filter(s -> s != null && !s.isEmpty())
+                .toList();
+            if (!stalePointIds.isEmpty()) {
+                try {
+                    embeddingService.deletePoints(tenantId, stalePointIds);
+                } catch (Exception e) {
+                    log.warn("Failed to delete Qdrant points for stale doc {}, continuing", existing.getId(), e);
+                }
+            }
+            docService.deleteDocAndChunks(existing.getId());
         }
 
         // 3. Chinese preprocess + split
@@ -112,7 +131,7 @@ public class KbIngestPipeline {
             throw new KbIngestException("知识库索引失败:" + e.getMessage(), docId, e);
         }
 
-        return new IngestResult(docId, chunks.size());
+        return IngestResult.ingested(docId, chunks.size());
     }
 
     private void updateChunkQdrantIds(Long docId, Map<Integer, String> idMap) {

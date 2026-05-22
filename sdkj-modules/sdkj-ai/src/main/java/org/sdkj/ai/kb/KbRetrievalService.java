@@ -103,7 +103,7 @@ public class KbRetrievalService {
             }
             fragments.add(chunk.getText());
             String title = docTitleMap.getOrDefault(chunk.getDocId(), "未知文档");
-            String snippet = truncate(chunk.getText(), SNIPPET_MAX_LENGTH);
+            String snippet = buildSnippet(chunk.getText(), SNIPPET_MAX_LENGTH);
             citations.add(Citation.builder()
                 .docTitle(title)
                 .snippet(snippet)
@@ -158,5 +158,46 @@ public class KbRetrievalService {
     private String truncate(String s, int max) {
         if (s == null) return "";
         return s.length() <= max ? s : s.substring(0, max) + "…";
+    }
+
+    private static final java.util.regex.Pattern MD_IMAGE =
+        java.util.regex.Pattern.compile("!\\[[^\\]]*\\]\\([^)]*\\)");
+    /** chunk 末尾被切断的图片残头: ![alt](url 后面被截掉 */
+    private static final java.util.regex.Pattern MD_IMAGE_TAIL_FRAGMENT =
+        java.util.regex.Pattern.compile("!\\[[^\\]]*\\]\\([^)]*$");
+    /** chunk 开头被切断的 URL 残尾: 形如 xxx) 或 =/api/...) 在第一个中文/空白前 */
+    private static final java.util.regex.Pattern URL_HEAD_FRAGMENT =
+        java.util.regex.Pattern.compile("^[\\p{ASCII}&&[^\\s]]*\\)\\s*");
+    /** 任何裸 URL */
+    private static final java.util.regex.Pattern PLAIN_URL =
+        java.util.regex.Pattern.compile("https?://\\S+");
+    private static final java.util.regex.Pattern HTML_TAG =
+        java.util.regex.Pattern.compile("</?[a-zA-Z][^>]*>");
+    private static final java.util.regex.Pattern MD_LINK =
+        java.util.regex.Pattern.compile("\\[([^\\]]+)\\]\\([^)]*\\)");
+    private static final java.util.regex.Pattern MD_EMPHASIS =
+        java.util.regex.Pattern.compile("(\\*{1,3}|_{1,3})([^*_\\n]+)\\1");
+    private static final java.util.regex.Pattern MD_INLINE_CODE =
+        java.util.regex.Pattern.compile("`([^`\\n]+)`");
+    private static final java.util.regex.Pattern MD_HEADING =
+        java.util.regex.Pattern.compile("(?m)^#{1,6}\\s+");
+    private static final java.util.regex.Pattern WHITESPACE =
+        java.util.regex.Pattern.compile("\\s+");
+
+    /** 生成 citation 用的预览文本:剥除 markdown/HTML 噪音 + chunk 边界残片,折叠空白,截断 */
+    private String buildSnippet(String text, int maxLen) {
+        if (text == null) return "";
+        String s = text;
+        s = MD_IMAGE.matcher(s).replaceAll(" ");                  // 完整 ![](url)
+        s = MD_IMAGE_TAIL_FRAGMENT.matcher(s).replaceAll(" ");    // 末尾残头 ![](http://...
+        s = URL_HEAD_FRAGMENT.matcher(s).replaceAll("");          // 开头残尾 xxx) 或 =/api/...)
+        s = PLAIN_URL.matcher(s).replaceAll(" ");                 // 兜底删裸 URL
+        s = HTML_TAG.matcher(s).replaceAll(" ");                  // <center> 等
+        s = MD_LINK.matcher(s).replaceAll("$1");
+        s = MD_HEADING.matcher(s).replaceAll("");
+        s = MD_EMPHASIS.matcher(s).replaceAll("$2");
+        s = MD_INLINE_CODE.matcher(s).replaceAll("$1");
+        s = WHITESPACE.matcher(s).replaceAll(" ").trim();
+        return truncate(s, maxLen);
     }
 }

@@ -51,6 +51,18 @@ public class KnowledgeDocService {
     }
 
     /**
+     * Delete doc row + all chunk rows in one transaction.
+     * Used by ingest pipeline to clean up stale FAILED/CHUNKED docs before retry.
+     * Caller is responsible for deleting Qdrant points (chunk qdrant_point_id may be empty for FAILED docs).
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteDocAndChunks(Long docId) {
+        chunkMapper.delete(new LambdaQueryWrapper<AiKnowledgeChunk>()
+            .eq(AiKnowledgeChunk::getDocId, docId));
+        docMapper.deleteById(docId);
+    }
+
+    /**
      * Atomically insert the doc row + all chunk rows in one transaction.
      * <p>
      * Moved out of {@link KbIngestPipeline} so that {@code @Transactional} actually applies —

@@ -277,7 +277,11 @@ public class AssistantService {
     }
 
     private String buildRagPrompt(String userMessage, RetrievalResult rag) {
-        StringBuilder sb = new StringBuilder("### 参考资料(请优先依据以下内容回答):\n");
+        StringBuilder sb = new StringBuilder();
+        sb.append("### 参考资料(请优先依据以下内容回答):\n\n");
+        sb.append("**图片渲染说明**:参考资料中的 Markdown 图片语法 `![](URL)` 是知识库内的真实操作截图。")
+          .append("回答涉及对应操作步骤时,请在该步骤紧邻位置**原样保留**相关图片的 `![](URL)` 引用,")
+          .append("不要省略,不要改写 URL,让用户能直接看到截图说明;若同一步骤有多张相关截图按出现顺序保留。\n\n");
         for (int i = 0; i < rag.fragments().size(); i++) {
             sb.append("[").append(i + 1).append("] ").append(rag.fragments().get(i)).append("\n\n");
         }

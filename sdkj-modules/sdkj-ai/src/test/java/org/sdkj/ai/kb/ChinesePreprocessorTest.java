@@ -18,10 +18,12 @@ class ChinesePreprocessorTest {
 
     @Test
     void shouldHandleMixedPunctuation() {
-        String input = "需要确认:阀门开度?是的!继续操作。";
+        String input = "需要确认：阀门开度?是的!继续操作。";
         String out = preprocessor.process(input);
-        assertTrue(out.contains(":\n") && out.contains("?\n")
-                && out.contains("!\n") && out.contains("。\n"));
+        // 全角 ：?! 应换行; 中文 ! ? 在 markdown/技术文档里实际多用半角, 不应被切
+        assertTrue(out.contains("：\n") && out.contains("。\n"));
+        assertFalse(out.contains("?\n"), "半角问号不应被切分");
+        assertFalse(out.contains("!\n"), "半角感叹号不应被切分");
     }
 
     @Test
@@ -36,5 +38,13 @@ class ChinesePreprocessorTest {
         String input = "OK. Done.";
         String out = preprocessor.process(input);
         assertEquals("OK. Done.", out);
+    }
+
+    @Test
+    void shouldNotBreakUrlsAndMarkdownImageSyntax() {
+        String input = "操作步骤：\n![](http://192.168.2.206:4999/server/index.php?s=/api/x)";
+        String out = preprocessor.process(input);
+        assertTrue(out.contains("http://192.168.2.206:4999"), "URL 中半角冒号不应被换行");
+        assertTrue(out.contains("![](http://"), "Markdown 图片语法不应被破坏");
     }
 }
