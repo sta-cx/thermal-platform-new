@@ -105,7 +105,14 @@ public class AiProperties {
             private int maxFilesPerBatch = 50;
             private int maxSizeMb = 200;
             private int jinaEmbedBatchSize = 128;
-            private List<String> allowedExtensions = List.of();
+            private List<String> allowedExtensions = List.of(
+                ".txt", ".md", ".markdown", ".text", ".rtf",
+                ".doc", ".docx", ".ppt", ".pptx", ".xls", ".xlsx",
+                ".odt", ".ods", ".odp",
+                ".pdf", ".html", ".htm", ".xml",
+                ".csv", ".tsv", ".json",
+                ".eml", ".msg"
+            );
         }
     }
 
