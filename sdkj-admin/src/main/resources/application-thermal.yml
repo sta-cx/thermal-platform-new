@@ -104,9 +104,12 @@ thermal:
       window-seconds: 60
       open-duration-seconds: 60
     embedding:
-      base-url: https://api.jina.ai/v1
+      base-url: https://api.jina.ai
       api-key: ${SDKJ_AI_JINA_KEY:[REMOVED]}
       model: jina-embeddings-v3
+      task:
+        query: retrieval.query
+        passage: retrieval.passage
     rate-limit:
       contextual-per-user-per-minute: 30
       contextual-per-tenant-per-minute: 200
@@ -125,11 +128,52 @@ thermal:
       max-chunks-per-doc: 2000
       retrieval:
         top-k: 4
-        score-threshold: 0.7
+        score-threshold: 0.5
     tools:
       disabled: []                              # 例: [valveControlTool]
       write-rate-limit-per-minute: 10
       valve:
         dry-run: true                           # IoT 就绪后改 false
     rag:
-      enabled: false                            # Embedding API 实名认证前临时关闭
+      enabled: true
+      hybrid:
+        enabled: true
+        dense-prefetch-limit: 20
+        sparse-prefetch-limit: 20
+        fusion-limit: 10
+      rerank:
+        enabled: true
+        model: jina-reranker-v2-base-multilingual
+        base-url: https://api.jina.ai
+        api-key: ${SDKJ_AI_JINA_KEY:[REMOVED]}
+        timeout-ms: 5000
+        score-threshold: 0.3
+        fallback-on-error: true
+      upload:
+        max-files-per-batch: 50
+        max-size-mb: 200
+        jina-embed-batch-size: 128
+        allowed-extensions:
+          - .txt
+          - .md
+          - .markdown
+          - .text
+          - .rtf
+          - .doc
+          - .docx
+          - .ppt
+          - .pptx
+          - .xls
+          - .xlsx
+          - .odt
+          - .ods
+          - .odp
+          - .pdf
+          - .html
+          - .htm
+          - .xml
+          - .csv
+          - .tsv
+          - .json
+          - .eml
+          - .msg
