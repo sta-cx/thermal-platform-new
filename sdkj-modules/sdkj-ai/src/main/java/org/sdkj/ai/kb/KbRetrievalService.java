@@ -4,16 +4,19 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import io.qdrant.client.QdrantClient;
 import io.qdrant.client.WithPayloadSelectorFactory;
+import io.qdrant.client.grpc.Points.Fusion;
+import io.qdrant.client.grpc.Points.PrefetchQuery;
+import io.qdrant.client.grpc.Points.Query;
+import io.qdrant.client.grpc.Points.QueryPoints;
 import io.qdrant.client.grpc.Points.ScoredPoint;
-import io.qdrant.client.grpc.Points.SearchPoints;
+import io.qdrant.client.VectorInputFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.ai.config.AiProperties;
 import org.sdkj.ai.domain.AiKnowledgeChunk;
 import org.sdkj.ai.domain.AiKnowledgeDoc;
 import org.sdkj.ai.mapper.AiKnowledgeChunkMapper;
 import org.sdkj.ai.mapper.AiKnowledgeDocMapper;
-import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -23,86 +26,103 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-/**
- * Tenant-aware RAG retrieval service.
- * <p>
- * Embeds the user query via {@link EmbeddingModel}, searches the per-tenant
- * Qdrant collection for top-k similar chunks, then resolves full text from
- * the MySQL {@code ai_knowledge_chunk} table.
- */
 @Slf4j
 @Service
 @DS("master")
 @RequiredArgsConstructor
 public class KbRetrievalService {
 
-    private final EmbeddingModel embeddingModel;
+    private final EmbeddingService embeddingService;
+    private final BM25SparseEncoder sparseEncoder;
     private final QdrantClient qdrantClient;
     private final QdrantCollectionManager collectionManager;
     private final AiKnowledgeChunkMapper chunkMapper;
     private final AiKnowledgeDocMapper docMapper;
-
-    @Value("${thermal.ai.kb.retrieval.top-k:4}")
-    private int topK;
-
-    @Value("${thermal.ai.kb.retrieval.score-threshold:0.7}")
-    private float scoreThreshold;
+    private final AiProperties aiProperties;
 
     private static final int SNIPPET_MAX_LENGTH = 120;
 
-    /**
-     * Retrieve fragments and citation metadata.
-     * Returns empty result (not null) when tenantId/query missing or retrieval fails.
-     */
     public RetrievalResult retrieveWithCitations(String tenantId, String query) {
         if (query == null || query.isBlank()) {
             return new RetrievalResult(List.of(), List.of());
         }
+        if (!aiProperties.getRag().isEnabled()) {
+            return new RetrievalResult(List.of(), List.of());
+        }
 
-        // 1. Embed the query
-        float[] vec = embeddingModel.embed(query);
-
-        // 2. Build Qdrant search request
+        var hybridCfg = aiProperties.getRag().getHybrid();
         String collection = collectionManager.collectionFor(tenantId);
-        List<Float> vecList = new ArrayList<>(vec.length);
-        for (float f : vec) {
-            vecList.add(f);
-        }
 
-        List<ScoredPoint> results;
+        // 1. Dual-path embed
+        float[] denseVec;
         try {
-            // First search WITHOUT threshold to diagnose scores
-            List<ScoredPoint> rawResults = qdrantClient.searchAsync(
-                SearchPoints.newBuilder()
-                    .setCollectionName(collection)
-                    .addAllVector(vecList)
-                    .setLimit(topK)
-                    .setWithPayload(WithPayloadSelectorFactory.enable(true))
-                    .build(),
-                Duration.ofSeconds(5)
-            ).get(5, TimeUnit.SECONDS);
-
-            log.info("[KB-Retrieval] collection={}, query='{}', rawResults={}, scores={}",
-                collection,
-                query.length() > 40 ? query.substring(0, 40) + "..." : query,
-                rawResults.size(),
-                rawResults.stream().map(p -> String.format("%.4f", p.getScore())).toList());
-
-            // Apply threshold manually
-            results = rawResults.stream()
-                .filter(p -> p.getScore() >= scoreThreshold)
-                .toList();
-            log.info("[KB-Retrieval] after threshold({}): {} results", scoreThreshold, results.size());
+            denseVec = embeddingService.embedQuery(query);
         } catch (Exception e) {
-            log.warn("Qdrant search failed for collection {}: {}", collection, e.getMessage());
+            log.warn("Dense embed failed, fallback to sparse-only", e);
+            denseVec = null;
+        }
+        BM25SparseEncoder.SparseVec sparseVec = sparseEncoder.encode(query);
+
+        // 2. Qdrant hybrid query (dense+sparse prefetch + RRF fusion)
+        List<ScoredPoint> candidates;
+        try {
+            candidates = qdrantHybridQuery(collection, denseVec, sparseVec, hybridCfg);
+        } catch (Exception e) {
+            log.error("Qdrant hybrid query failed, return empty RAG", e);
+            return new RetrievalResult(List.of(), List.of());
+        }
+        if (candidates.isEmpty()) {
             return new RetrievalResult(List.of(), List.of());
         }
 
-        if (results.isEmpty()) {
-            return new RetrievalResult(List.of(), List.of());
-        }
+        log.info("[KB-Retrieval] collection={}, query='{}', candidates={}",
+            collection,
+            query.length() > 40 ? query.substring(0, 40) + "..." : query,
+            candidates.size());
 
-        // 3. Resolve chunks from MySQL via point IDs
+        // 3. Reranker (Task 4.1 will inject rerankerClient here)
+        //    For now, truncate to topK directly from RRF results
+        int topK = aiProperties.getKb().getRetrieval().getTopK();
+        List<ScoredPoint> topResults = candidates.size() <= topK
+            ? candidates
+            : candidates.subList(0, topK);
+
+        // 4. Resolve chunks + citations
+        return resolveResult(topResults);
+    }
+
+    private List<ScoredPoint> qdrantHybridQuery(String collection, float[] dense,
+            BM25SparseEncoder.SparseVec sparse, AiProperties.Rag.Hybrid cfg) throws Exception {
+        QueryPoints.Builder qb = QueryPoints.newBuilder()
+            .setCollectionName(collection)
+            .setLimit(cfg.getFusionLimit())
+            .setWithPayload(WithPayloadSelectorFactory.enable(true));
+
+        if (dense != null) {
+            qb.addPrefetch(PrefetchQuery.newBuilder()
+                .setQuery(Query.newBuilder()
+                    .setNearest(VectorInputFactory.vectorInput(dense))
+                    .build())
+                .setUsing("dense")
+                .setLimit(cfg.getDensePrefetchLimit())
+                .build());
+        }
+        if (!sparse.indices().isEmpty()) {
+            qb.addPrefetch(PrefetchQuery.newBuilder()
+                .setQuery(Query.newBuilder()
+                    .setNearest(VectorInputFactory.vectorInput(sparse.values(), sparse.indices()))
+                    .build())
+                .setUsing("sparse")
+                .setLimit(cfg.getSparsePrefetchLimit())
+                .build());
+        }
+        qb.setQuery(Query.newBuilder().setFusion(Fusion.RRF).build());
+
+        return qdrantClient.queryAsync(qb.build(), Duration.ofSeconds(5))
+            .get(5, TimeUnit.SECONDS);
+    }
+
+    private RetrievalResult resolveResult(List<ScoredPoint> results) {
         List<String> pointIds = results.stream()
             .map(p -> p.getId().getUuid())
             .toList();
@@ -112,14 +132,11 @@ public class KbRetrievalService {
                 .in(AiKnowledgeChunk::getQdrantPointId, pointIds)
         );
 
-        // 4. Resolve doc titles
         Map<Long, String> docTitleMap = resolveDocTitles(chunks);
 
-        // 5. Build pointId → chunk lookup for O(1) matching
         Map<String, AiKnowledgeChunk> chunkByPointId = chunks.stream()
             .collect(Collectors.toMap(AiKnowledgeChunk::getQdrantPointId, c -> c, (a, b) -> a));
 
-        // 6. Preserve Qdrant ordering (by similarity)
         List<String> fragments = new ArrayList<>();
         List<Citation> citations = new ArrayList<>();
 
@@ -155,4 +172,5 @@ public class KbRetrievalService {
         if (s == null) return "";
         return s.length() <= max ? s : s.substring(0, max) + "…";
     }
+
 }
