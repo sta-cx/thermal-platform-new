@@ -73,6 +73,54 @@ public class AiProperties {
     public static class Rag {
         /** 是否启用 RAG 知识库检索 */
         private boolean enabled = true;
+
+        private Hybrid hybrid = new Hybrid();
+        private Rerank rerank = new Rerank();
+        private Upload upload = new Upload();
+
+        @Data
+        public static class Hybrid {
+            private boolean enabled = true;
+            private int densePrefetchLimit = 20;
+            private int sparsePrefetchLimit = 20;
+            private int fusionLimit = 10;
+        }
+
+        @Data
+        public static class Rerank {
+            private boolean enabled = true;
+            private String model = "jina-reranker-v2-base-multilingual";
+            private String baseUrl = "https://api.jina.ai";
+            private String apiKey;
+            private int timeoutMs = 5000;
+            private double scoreThreshold = 0.3;
+            private boolean fallbackOnError = true;
+        }
+
+        @Data
+        public static class Upload {
+            private int maxFilesPerBatch = 50;
+            private int maxSizeMb = 200;
+            private int jinaEmbedBatchSize = 128;
+            private List<String> allowedExtensions = List.of();
+        }
+    }
+
+    /** Embedding 配置（含 Jina v3 task 参数） */
+    private Embedding embedding = new Embedding();
+
+    @Data
+    public static class Embedding {
+        private String baseUrl = "https://api.jina.ai";
+        private String apiKey;
+        private String model = "jina-embeddings-v3";
+        private EmbeddingTask task = new EmbeddingTask();
+
+        @Data
+        public static class EmbeddingTask {
+            private String query = "retrieval.query";
+            private String passage = "retrieval.passage";
+        }
     }
 
     @Data
