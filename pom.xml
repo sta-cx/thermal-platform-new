@@ -51,6 +51,7 @@
         <!-- 打包默认跳过测试 -->
         <skipTests>true</skipTests>
         <spring-ai.version>1.0.7</spring-ai.version>
+        <lucene.version>9.11.1</lucene.version>
     </properties>
 
     <profiles>
