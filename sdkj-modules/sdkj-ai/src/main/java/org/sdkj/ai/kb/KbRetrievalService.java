@@ -39,6 +39,7 @@ public class KbRetrievalService {
     private final AiKnowledgeChunkMapper chunkMapper;
     private final AiKnowledgeDocMapper docMapper;
     private final AiProperties aiProperties;
+    private final JinaRerankerClient rerankerClient;
 
     private static final int SNIPPET_MAX_LENGTH = 120;
 
@@ -80,12 +81,15 @@ public class KbRetrievalService {
             query.length() > 40 ? query.substring(0, 40) + "..." : query,
             candidates.size());
 
-        // 3. Reranker (Task 4.1 will inject rerankerClient here)
-        //    For now, truncate to topK directly from RRF results
+        // 3. Rerank: resolve chunk texts from MySQL, then rerank via Jina
         int topK = aiProperties.getKb().getRetrieval().getTopK();
-        List<ScoredPoint> topResults = candidates.size() <= topK
-            ? candidates
-            : candidates.subList(0, topK);
+        List<JinaRerankerClient.ScoredPointWithContext> withTexts =
+            rerankerClient.resolveChunkTexts(candidates);
+        List<JinaRerankerClient.ScoredPointWithContext> reranked =
+            rerankerClient.rerank(query, withTexts, topK);
+        List<ScoredPoint> topResults = reranked.stream()
+            .map(JinaRerankerClient.ScoredPointWithContext::point)
+            .toList();
 
         // 4. Resolve chunks + citations
         return resolveResult(topResults);
