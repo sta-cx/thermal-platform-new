@@ -13,6 +13,12 @@ public interface IPrCompanyService extends IService<PrCompany> {
 
     List<SysOrganization> getOrganizationsByCompanyId(String companyId);
 
+    /**
+     * 返回当前用户可授权的组织树(剪枝后)
+     * 超管/租户管理员返回全量,普通用户返回 pr_data_grant 命中节点 + 必要祖先
+     */
+    List<SysOrganization> getGrantableOrganizationTree(String companyId, Long currentUserId);
+
     List<SysOrganization> getAllOrganizations();
 
     /**

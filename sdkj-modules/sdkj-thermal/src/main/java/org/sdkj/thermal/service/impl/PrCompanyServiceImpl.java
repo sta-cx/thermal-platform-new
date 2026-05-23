@@ -46,6 +46,48 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
     }
 
     @Override
+    public List<SysOrganization> getGrantableOrganizationTree(String companyId, Long currentUserId) {
+        List<SysOrganization> allOrgs = prCompanyMapper.selectOrganizationsByCompanyId(companyId);
+        Set<String> grantableIds = getGrantableOrgIdsForUser(companyId, currentUserId);
+
+        if (grantableIds == null) {
+            return buildOrgTreeFlat(allOrgs, "-1");
+        }
+        if (grantableIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Set<String> keepIds = new java.util.HashSet<>(grantableIds);
+        java.util.Map<String, SysOrganization> byId = new java.util.HashMap<>();
+        for (SysOrganization o : allOrgs) {
+            byId.put(o.getId(), o);
+        }
+        for (String orgId : grantableIds) {
+            String cursor = orgId;
+            while (cursor != null) {
+                SysOrganization node = byId.get(cursor);
+                if (node == null) break;
+                keepIds.add(cursor);
+                cursor = node.getParentId();
+                if (cursor == null || "-1".equals(cursor) || "0".equals(cursor)) break;
+            }
+        }
+
+        List<SysOrganization> filtered = allOrgs.stream()
+            .filter(o -> keepIds.contains(o.getId()))
+            .collect(Collectors.toList());
+
+        return buildOrgTreeFlat(filtered, "-1");
+    }
+
+    private List<SysOrganization> buildOrgTreeFlat(List<SysOrganization> all, String parentId) {
+        return all.stream()
+            .filter(o -> parentId.equals(o.getParentId()))
+            .peek(o -> o.setChildren(buildOrgTreeFlat(all, o.getId())))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<SysOrganization> getAllOrganizations() {
         return prCompanyMapper.selectAllOrganizations();
     }
