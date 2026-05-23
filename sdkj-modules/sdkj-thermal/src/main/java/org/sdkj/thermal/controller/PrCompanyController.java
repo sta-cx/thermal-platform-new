@@ -83,6 +83,17 @@ public class PrCompanyController extends BaseController {
         return R.ok(buildOrgTree(orgs, "-1"));
     }
 
+    /**
+     * 返回当前登录用户可授权的组织树(剪枝后)
+     */
+    @SaCheckPermission("thermal:property:userOrg:query")
+    @SaCheckLogin
+    @GetMapping("/grantableOrganizationTree")
+    public R<List<SysOrganization>> grantableOrganizationTree(@RequestParam String companyId) {
+        Long currentUserId = LoginHelper.getUserId();
+        return R.ok(companyService.getGrantableOrganizationTree(companyId, currentUserId));
+    }
+
     private List<SysOrganization> buildOrgTree(List<SysOrganization> all, String parentId) {
         return all.stream()
                 .filter(o -> parentId.equals(o.getParentId()))
