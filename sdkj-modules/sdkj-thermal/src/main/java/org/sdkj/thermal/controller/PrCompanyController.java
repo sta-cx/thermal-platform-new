@@ -138,7 +138,7 @@ public class PrCompanyController extends BaseController {
     /**
      * 获取当前用户可访问的小区列表
      */
-    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckPermission("thermal:property:userOrg:query")
     @SaCheckLogin
     @GetMapping("/userOrg")
     public R<List<SysOrganization>> getUserOrg() {
@@ -149,7 +149,7 @@ public class PrCompanyController extends BaseController {
     /**
      * 获取用户所属分公司列表
      */
-    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckPermission("thermal:property:userOrg:query")
     @SaCheckLogin
     @GetMapping("/userOrgBranch")
     public R<List<SysOrganization>> getUserOrgBranch() {
@@ -173,7 +173,7 @@ public class PrCompanyController extends BaseController {
         }
     }
 
-    @SaCheckPermission("thermal:property:company:edit")
+    @SaCheckPermission("thermal:property:userOrg:query")
     @SaCheckLogin
     @GetMapping("/userOrgIds/{userId}")
     public R<List<String>> getUserOrgIds(@PathVariable Long userId,
@@ -181,7 +181,7 @@ public class PrCompanyController extends BaseController {
         return R.ok(companyService.getUserOrgIds(userId, companyId));
     }
 
-    @SaCheckPermission("thermal:property:company:query")
+    @SaCheckPermission("thermal:property:userOrg:query")
     @SaCheckLogin
     @GetMapping("/userCompanyId/{userId}")
     public R<String> getUserCompanyId(@PathVariable Long userId) {
@@ -224,7 +224,7 @@ public class PrCompanyController extends BaseController {
         return R.ok();
     }
 
-    @SaCheckPermission("thermal:property:company:edit")
+    @SaCheckPermission("thermal:property:userOrg:assign")
     @SaCheckLogin
     @Log(title = "用户组织权限", businessType = BusinessType.INSERT)
     @PostMapping("/userOrg")
@@ -233,7 +233,7 @@ public class PrCompanyController extends BaseController {
         return R.ok();
     }
 
-    @SaCheckPermission("thermal:property:company:edit")
+    @SaCheckPermission("thermal:property:userOrg:assign")
     @SaCheckLogin
     @Log(title = "用户组织权限", businessType = BusinessType.DELETE)
     @DeleteMapping("/userOrg/{userId}")
