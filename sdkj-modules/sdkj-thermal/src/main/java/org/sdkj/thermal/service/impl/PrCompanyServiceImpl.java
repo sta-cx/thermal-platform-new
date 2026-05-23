@@ -240,10 +240,32 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveUserOrg(Long userId, String companyId, List<String> orgIds) {
-        prDataGrantMapper.delete(
-            new LambdaQueryWrapper<PrDataGrant>().eq(PrDataGrant::getUserId, userId)
-        );
-        if (!orgIds.isEmpty()) {
+        Long currentUserId = LoginHelper.getUserId();
+        boolean isPrivileged = LoginHelper.isSuperAdmin() || LoginHelper.isTenantAdmin();
+
+        // 服务端校验:普通用户只能授予自己拥有的 org
+        if (!isPrivileged && orgIds != null && !orgIds.isEmpty()) {
+            Set<String> grantable = getGrantableOrgIdsForUser(companyId, currentUserId);
+            for (String orgId : orgIds) {
+                if (grantable == null || !grantable.contains(orgId)) {
+                    throw new ServiceException("无权授予组织: " + orgId);
+                }
+            }
+        }
+
+        // 双条件 DELETE:
+        //   始终按 company_id 过滤(不影响该用户在其他公司的授权)
+        //   普通用户额外按 create_by 过滤(只撤自己创建的,不动他人授权)
+        LambdaQueryWrapper<PrDataGrant> deleteWrapper = new LambdaQueryWrapper<PrDataGrant>()
+            .eq(PrDataGrant::getUserId, userId)
+            .eq(PrDataGrant::getCompanyId, companyId);
+        if (!isPrivileged) {
+            deleteWrapper.eq(PrDataGrant::getCreateBy, currentUserId);
+        }
+        prDataGrantMapper.delete(deleteWrapper);
+
+        // 重新插入新选中的 orgIds
+        if (orgIds != null && !orgIds.isEmpty()) {
             List<PrDataGrant> grants = orgIds.stream().map(orgId -> {
                 PrDataGrant g = new PrDataGrant();
                 g.setUserId(userId);
