@@ -177,3 +177,12 @@ thermal:
           - .json
           - .eml
           - .msg
+
+# ============== pr_data_grant 墓碑清理 ==============
+sdkj:
+  data-grant-cleanup:
+    enabled: true                  # 总开关,false 则完全不跑(应急止血用)
+    retention-days: 30             # 多少天前的墓碑算可删
+    batch-size: 500                # 单批 DELETE 行数上限
+    max-delete-per-run: 5000       # 全租户合计待删上限,超过整个 Job 跳过 + WARN
+    cron: "0 30 3 * * ?"           # 每天 3:30(错开 AiLogCleanupJob 的 3:00)
