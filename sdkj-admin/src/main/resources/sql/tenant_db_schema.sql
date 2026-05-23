@@ -4,34 +4,6 @@ CREATE TABLE `ag_auto_version` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商自动版本表';
 
-CREATE TABLE `ag_company_property` (
-  `id` varchar(64) NOT NULL COMMENT '主键',
-  `agent_company_id` varchar(64) DEFAULT NULL COMMENT '代理商公司ID',
-  `property_company_id` varchar(64) DEFAULT NULL COMMENT '物业公司ID',
-  `is_audited` tinyint DEFAULT '0' COMMENT '是否审核 0未审核 1已审核',
-  `is_enabled` tinyint DEFAULT '1' COMMENT '是否启用 0未启用 1启用',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商关联物业表';
-
-CREATE TABLE `ag_property_menu` (
-  `id` varchar(64) NOT NULL COMMENT '主键',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
-  `menu_id` varchar(64) DEFAULT NULL COMMENT '菜单ID',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL COMMENT '更新者',
-  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商物业菜单关联表';
-
 CREATE TABLE `ag_reader_param` (
   `id` varchar(64) NOT NULL COMMENT '主键',
   `code` varchar(64) DEFAULT NULL COMMENT '编码',
@@ -63,79 +35,6 @@ CREATE TABLE `ag_reader_param` (
   `is_auto_restart` tinyint DEFAULT '0' COMMENT '是否自动重启',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商抄表参数表';
-
-CREATE TABLE `ag_role` (
-  `id` varchar(32) NOT NULL COMMENT '主键',
-  `name` varchar(32) NOT NULL COMMENT '角色名称',
-  `identifying` varchar(32) NOT NULL COMMENT '角色标识',
-  `nature` tinyint DEFAULT NULL COMMENT '角色性质',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `role_desc` varchar(255) DEFAULT NULL COMMENT '角色描述',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
-  `is_super` tinyint DEFAULT '0' COMMENT '是否超级管理员',
-  `create_dept` bigint DEFAULT NULL,
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL,
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL,
-  `remark` varchar(500) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商/物业角色表';
-
-CREATE TABLE `ag_role_menu` (
-  `id` varchar(32) NOT NULL COMMENT '主键',
-  `role_id` varchar(32) NOT NULL COMMENT '角色ID',
-  `menu_id` bigint NOT NULL COMMENT '菜单ID',
-  PRIMARY KEY (`id`),
-  KEY `idx_role_id` (`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商角色菜单关联表';
-
-CREATE TABLE `ag_user` (
-  `id` varchar(32) NOT NULL COMMENT '主键',
-  `user_name` varchar(64) DEFAULT NULL COMMENT '用户名',
-  `user_pwd` varchar(128) DEFAULT NULL COMMENT '密码',
-  `idcard` varchar(20) DEFAULT NULL COMMENT '身份证号',
-  `nick_name` varchar(64) DEFAULT NULL COMMENT '昵称',
-  `real_name` varchar(64) DEFAULT NULL COMMENT '真实姓名',
-  `sex` int DEFAULT NULL COMMENT '性别',
-  `phone` varchar(20) DEFAULT NULL COMMENT '手机号',
-  `is_enabled` int DEFAULT '1' COMMENT '是否启用',
-  `address` varchar(255) DEFAULT NULL COMMENT '地址',
-  `avatar` varchar(255) DEFAULT NULL COMMENT '头像',
-  `qq_number` varchar(64) DEFAULT NULL COMMENT 'QQ号',
-  `email` varchar(64) DEFAULT NULL COMMENT '邮箱',
-  `nation` varchar(20) DEFAULT NULL COMMENT '民族',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
-  `native_place` varchar(64) DEFAULT NULL COMMENT '籍贯',
-  `nationality` varchar(20) DEFAULT NULL COMMENT '国籍',
-  `birthday` datetime DEFAULT NULL COMMENT '生日',
-  `is_realname` int DEFAULT '0' COMMENT '是否实名',
-  `id_startdate` datetime DEFAULT NULL COMMENT '证件有效期开始',
-  `id_enddate` datetime DEFAULT NULL COMMENT '证件有效期结束',
-  `id_department` varchar(64) DEFAULT NULL COMMENT '签发机关',
-  `is_super` int DEFAULT '0' COMMENT '是否超级管理员',
-  `dept_id` varchar(32) DEFAULT NULL COMMENT '部门ID',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `create_dept` bigint DEFAULT NULL,
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL,
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL,
-  `remark` varchar(500) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_company_id` (`company_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商用户表';
-
-CREATE TABLE `ag_user_role` (
-  `id` varchar(32) NOT NULL COMMENT '主键',
-  `user_id` varchar(32) NOT NULL COMMENT '用户ID',
-  `role_id` varchar(32) NOT NULL COMMENT '角色ID',
-  `company_id` varchar(32) DEFAULT NULL COMMENT '公司ID',
-  PRIMARY KEY (`id`),
-  KEY `idx_user_id` (`user_id`),
-  KEY `idx_role_id` (`role_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='代理商用户角色关联表';
 
 CREATE TABLE `ht_alert` (
   `id` bigint NOT NULL COMMENT '主键',
@@ -2488,7 +2387,6 @@ CREATE TABLE `pr_print_template` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='打印模板';
 
-
 CREATE TABLE `pr_repair_person` (
   `id` bigint NOT NULL COMMENT '主键',
   `name` varchar(64) DEFAULT NULL COMMENT '维修人姓名',
@@ -2930,7 +2828,6 @@ CREATE TABLE `sys_company` (
   `del_flag` char(1) DEFAULT '0' COMMENT '删除标志（0存在 1删除）',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='物业公司';
-
 
 CREATE TABLE `sys_organization` (
   `id` varchar(32) NOT NULL COMMENT '主键',
