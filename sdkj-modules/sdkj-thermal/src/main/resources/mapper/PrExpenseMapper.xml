@@ -13,7 +13,7 @@
                a.parking_space_id,
                b.room_num,
                c.user_name,
-               d.building_name,
+               d.name AS building_name,
                e.parking_code,
                e.parkinglot_name
         FROM pr_expense a
@@ -233,7 +233,7 @@
                a.start_date, a.expire_date, a.money, a.standard_price, a.is_free,
                a.preferential, a.deduction, a.receivable, a.paid_in, a.final_money,
                a.is_charged, a.charged_time, a.parking_space_id, a.qty, a.year, a.month,
-               b.room_num, c.user_name, d.building_name,
+               b.room_num, c.user_name, d.name AS building_name,
                e.parking_code, e.parkinglot_name
         FROM pr_expense a
         LEFT JOIN pr_house b ON a.house_id = b.id
