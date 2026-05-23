@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -279,5 +280,23 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
             prCompanyMapper.deleteOrgById(org.getId());
         }
         return removeById(id);
+    }
+
+    /**
+     * 返回当前用户在指定公司可授权的 org_id 集合
+     * 超管/租户管理员返回 null 表示"不受限"
+     */
+    private Set<String> getGrantableOrgIdsForUser(String companyId, Long currentUserId) {
+        if (LoginHelper.isSuperAdmin() || LoginHelper.isTenantAdmin()) {
+            return null;
+        }
+        List<PrDataGrant> grants = prDataGrantMapper.selectList(
+            new LambdaQueryWrapper<PrDataGrant>()
+                .eq(PrDataGrant::getUserId, currentUserId)
+                .eq(PrDataGrant::getCompanyId, companyId)
+        );
+        return grants.stream()
+            .map(PrDataGrant::getOrgId)
+            .collect(Collectors.toSet());
     }
 }
