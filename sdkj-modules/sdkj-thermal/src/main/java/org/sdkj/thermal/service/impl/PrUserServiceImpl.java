@@ -40,7 +40,6 @@ public class PrUserServiceImpl extends ServiceImpl<PrUserMapper, PrUser> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean insertData(PrUserVo vo) {
-        // TODO: OSS 头像上传（Phase 6）- 旧系统将 Base64 头像上传到 OSS
         PrUser user = new PrUser();
         org.springframework.beans.BeanUtils.copyProperties(vo, user);
         return save(user);
@@ -49,7 +48,6 @@ public class PrUserServiceImpl extends ServiceImpl<PrUserMapper, PrUser> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateData(PrUserVo vo) {
-        // TODO: OSS 头像上传（Phase 6）
         PrUser user = new PrUser();
         org.springframework.beans.BeanUtils.copyProperties(vo, user);
         return updateById(user);
@@ -58,7 +56,6 @@ public class PrUserServiceImpl extends ServiceImpl<PrUserMapper, PrUser> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteData(String id, String idNo) {
-        // TODO: 清理 OSS 头像（Phase 6）- 旧系统删除 pi/{idNo}.jpg
         return removeById(id);
     }
 

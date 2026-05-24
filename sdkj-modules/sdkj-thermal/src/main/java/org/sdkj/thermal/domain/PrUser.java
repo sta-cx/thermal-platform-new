@@ -101,15 +101,6 @@ public class PrUser extends BaseEntity {
     /** 密码 */
     private String password;
 
-    /** 人物头像 */
-    private String headPhoto;
-
-    /** 身份证正面 */
-    private String frontPhoto;
-
-    /** 身份证反面 */
-    private String backPhoto;
-
     // ========== 非数据库字段 ==========
 
     /** 房屋ID（查询用） */

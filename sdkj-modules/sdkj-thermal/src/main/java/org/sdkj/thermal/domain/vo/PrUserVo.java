@@ -48,9 +48,6 @@ public class PrUserVo implements Serializable {
     private String emerPhone;
     private String orgId;
     private String seq;
-    private String headPhoto;
-    private String frontPhoto;
-    private String backPhoto;
     private Date createTime;
     private Date updateTime;
 }
