@@ -105,8 +105,16 @@ public class HtTasksPerformController extends BaseController {
         return R.ok(tasksPerformService.selectGlobalStatusSummary());
     }
 
+    @SaCheckPermission("thermal:ht:tasksPerform:list")
+    @SaCheckLogin
     @GetMapping("/list")
-    public R<?> list() {
-        return R.ok(tasksPerformService.list());
+    public TableDataInfo<HtTasksPerformVo> list(PageQuery pageQuery,
+                                                 @RequestParam(required = false) String meterId,
+                                                 @RequestParam(required = false) Long tasksId) {
+        LambdaQueryWrapper<HtTasksPerform> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(meterId != null && !meterId.isEmpty(), HtTasksPerform::getMeterId, meterId);
+        lqw.eq(tasksId != null, HtTasksPerform::getTasksId, tasksId);
+        lqw.orderByDesc(HtTasksPerform::getCreateTime);
+        return tasksPerformService.selectPageList(lqw, pageQuery);
     }
 }
