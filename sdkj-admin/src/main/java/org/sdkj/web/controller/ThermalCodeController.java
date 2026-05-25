@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * 仪表编码生成器
- * 迁移自旧系统 AccessCodeController
+ * 仪表编码生成
  */
 @Validated
 @RequiredArgsConstructor
