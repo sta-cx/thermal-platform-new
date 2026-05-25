@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * 户间阀门配表 Service 实现
@@ -711,7 +712,11 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         if (StringUtils.isBlank(orgId)) {
             return List.of();
         }
-        return baseMapper.queryPaidClosedValves(orgId);
+        List<PrHeatValveArchive> valves = baseMapper.queryValvesByStatus(orgId, "2");
+        Set<Long> paidHouseIds = queryPaidHouseIds(orgId);
+        return valves.stream()
+            .filter(v -> paidHouseIds.contains(v.getHouseId()))
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -719,7 +724,31 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         if (StringUtils.isBlank(orgId)) {
             return List.of();
         }
-        return baseMapper.queryUnpaidOpenValves(orgId);
+        List<PrHeatValveArchive> valves = baseMapper.queryValvesByStatus(orgId, "1");
+        Set<Long> unpaidHouseIds = queryUnpaidHouseIds(orgId);
+        return valves.stream()
+            .filter(v -> unpaidHouseIds.contains(v.getHouseId()))
+            .collect(Collectors.toList());
+    }
+
+    private Set<Long> queryPaidHouseIds(String orgId) {
+        return houseMapper.selectList(
+            new LambdaQueryWrapper<PrHouse>()
+                .eq(PrHouse::getOrgId, orgId)
+                .eq(PrHouse::getPayStatus, "1")
+                .isNotNull(PrHouse::getOtherCode)
+                .ne(PrHouse::getOtherCode, "")
+        ).stream().map(PrHouse::getId).collect(Collectors.toSet());
+    }
+
+    private Set<Long> queryUnpaidHouseIds(String orgId) {
+        return houseMapper.selectList(
+            new LambdaQueryWrapper<PrHouse>()
+                .eq(PrHouse::getOrgId, orgId)
+                .in(PrHouse::getPayStatus, "0", "2", "3")
+                .isNotNull(PrHouse::getOtherCode)
+                .ne(PrHouse::getOtherCode, "")
+        ).stream().map(PrHouse::getId).collect(Collectors.toSet());
     }
 
     // ========== AI Tool 阀门指令下发 ==========

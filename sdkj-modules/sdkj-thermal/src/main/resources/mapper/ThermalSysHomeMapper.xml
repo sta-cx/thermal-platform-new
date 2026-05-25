@@ -2,6 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="org.sdkj.thermal.mapper.ThermalSysHomeMapper">
 
+    <!-- 直迁旧系统 SQL，含大量 LEFT JOIN，待按新规范逐条重构为多 Mapper + Stream 组装 -->
+
     <select id="queryOrgNum" resultType="string">
         SELECT ifnull(COUNT(*), '0') as 'orgNum'
         from sys_organization a

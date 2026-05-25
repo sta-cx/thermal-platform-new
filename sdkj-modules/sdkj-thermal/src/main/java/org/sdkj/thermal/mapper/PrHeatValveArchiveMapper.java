@@ -32,14 +32,10 @@ public interface PrHeatValveArchiveMapper extends BaseMapperPlus<PrHeatValveArch
                      @Param("actualOpen") Integer actualOpen);
 
     /**
-     * 查询已缴费但阀门仍关闭的户阀。
+     * 按阀门状态查询单表（无 JOIN），由 Service 层与 pr_house 交集。
      */
-    List<PrHeatValveArchive> queryPaidClosedValves(@Param("orgId") String orgId);
-
-    /**
-     * 查询未缴费但阀门仍开启的户阀。
-     */
-    List<PrHeatValveArchive> queryUnpaidOpenValves(@Param("orgId") String orgId);
+    List<PrHeatValveArchive> queryValvesByStatus(@Param("orgId") String orgId,
+                                                  @Param("valveStatus") String valveStatus);
 
     /**
      * 集中器监控聚合查询
