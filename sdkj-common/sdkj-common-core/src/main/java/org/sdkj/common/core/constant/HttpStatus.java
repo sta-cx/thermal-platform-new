@@ -87,6 +87,11 @@ public interface HttpStatus {
     int NOT_IMPLEMENTED = 501;
 
     /**
+     * 服务不可用
+     */
+    int SERVICE_UNAVAILABLE = 503;
+
+    /**
      * 系统警告消息
      */
     int WARN = 601;

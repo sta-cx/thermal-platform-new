@@ -10,15 +10,6 @@ thermal:
   mbus:
     url: http://127.0.0.1/middle/property/heatreading/operation
 
-  # 旧系统数据库配置（用于数据迁移时的数据读取）
-  legacy:
-    enabled: true
-    datasource:
-      driverClassName: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/rltk_pro?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
-      username: root
-      password: root
-
   # IoT 配置（中国电信 AG SDK）
   iot:
     enabled: false  # 迁移到第四阶段时启用
@@ -47,21 +38,6 @@ thermal:
     legacy-token-name: satoken
     # JWT 密钥（与旧系统保持一致，迁移期兼容）
     jwt-secret-key: sdkj2024
-
---- # 动态数据源 — 旧系统读取（数据迁移用）
-# 注意：此数据源仅用于数据迁移阶段，生产环境应禁用
-spring:
-  datasource:
-    dynamic:
-      datasource:
-        # 旧系统数据源 - 用于读取 rltk_pro 库数据
-        legacy:
-          lazy: true
-          type: com.zaxxer.hikari.HikariDataSource
-          driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/rltk_pro?useUnicode=true&characterEncoding=utf8&serverTimezone=GMT%2B8
-          username: root
-          password: root
 
 --- # ============== Spring AI ==============
 # 模型 API key 必须通过环境变量 SDKJ_AI_DEEPSEEK_KEY 注入,不要硬编码

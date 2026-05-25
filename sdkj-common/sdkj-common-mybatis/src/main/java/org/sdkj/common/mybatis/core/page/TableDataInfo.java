@@ -1,7 +1,7 @@
 package org.sdkj.common.mybatis.core.page;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.http.HttpStatus;
+import org.sdkj.common.core.constant.HttpStatus;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -51,7 +51,7 @@ public class TableDataInfo<T> implements Serializable {
     public TableDataInfo(List<T> list, long total) {
         this.rows = list;
         this.total = total;
-        this.code = HttpStatus.HTTP_OK;
+        this.code = HttpStatus.SUCCESS;
         this.msg = "查询成功";
     }
 
@@ -60,7 +60,7 @@ public class TableDataInfo<T> implements Serializable {
      */
     public static <T> TableDataInfo<T> build(IPage<T> page) {
         TableDataInfo<T> rspData = new TableDataInfo<>();
-        rspData.setCode(HttpStatus.HTTP_OK);
+        rspData.setCode(HttpStatus.SUCCESS);
         rspData.setMsg("查询成功");
         rspData.setRows(page.getRecords());
         rspData.setTotal(page.getTotal());
@@ -72,7 +72,7 @@ public class TableDataInfo<T> implements Serializable {
      */
     public static <T> TableDataInfo<T> build(List<T> list) {
         TableDataInfo<T> rspData = new TableDataInfo<>();
-        rspData.setCode(HttpStatus.HTTP_OK);
+        rspData.setCode(HttpStatus.SUCCESS);
         rspData.setMsg("查询成功");
         rspData.setRows(list);
         rspData.setTotal(list.size());
@@ -84,7 +84,7 @@ public class TableDataInfo<T> implements Serializable {
      */
     public static <T> TableDataInfo<T> build() {
         TableDataInfo<T> rspData = new TableDataInfo<>();
-        rspData.setCode(HttpStatus.HTTP_OK);
+        rspData.setCode(HttpStatus.SUCCESS);
         rspData.setMsg("查询成功");
         return rspData;
     }

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.satoken.utils.LoginHelper;
@@ -33,6 +34,7 @@ import java.util.regex.Pattern;
  * 费用明细 Service 实现
  * 迁移自旧系统 PrExpenseServiceImpl
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense> implements IPrExpenseService {
@@ -463,6 +465,58 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
             expenses.add(e);
         }
         return saveBatch(expenses, 500);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean insertAllDatall(List<PrHouseExpense> list) {
+        if (list == null || list.isEmpty()) return false;
+
+        // 按 itemGroup 拆分：2=固定费, 3=临时费, 6=取暖费
+        List<PrHouseExpense> fixedList = new ArrayList<>();
+        List<PrHouseExpense> tempList = new ArrayList<>();
+        List<PrHouseExpense> heatList = new ArrayList<>();
+        for (PrHouseExpense item : list) {
+            if ("2".equals(item.getItemGroup())) {
+                fixedList.add(item);
+            } else if ("3".equals(item.getItemGroup())) {
+                tempList.add(item);
+            } else if ("6".equals(item.getItemGroup())) {
+                heatList.add(item);
+            } else {
+                log.warn("综合费用生成: 跳过未知 itemGroup='{}' 的记录 (houseId={})", item.getItemGroup(), item.getHouseId());
+            }
+        }
+
+        boolean result = false;
+        if (!fixedList.isEmpty()) {
+            result |= insertDatall(fixedList);
+        }
+        if (!tempList.isEmpty()) {
+            result |= insertDataLs(tempList);
+        }
+        if (!heatList.isEmpty()) {
+            result |= insertData(heatList);
+        }
+
+        // 计算明细金额 — 从已处理的子列表取 orgId
+        if (result) {
+            String orgId = null;
+            if (!fixedList.isEmpty()) {
+                orgId = fixedList.get(0).getOrgId();
+            } else if (!tempList.isEmpty()) {
+                orgId = tempList.get(0).getOrgId();
+            } else if (!heatList.isEmpty()) {
+                orgId = heatList.get(0).getOrgId();
+            }
+            if (orgId != null) {
+                updateStepPrice(orgId);
+                updatePrice(orgId);
+                updateFormula(orgId);
+            }
+        }
+
+        return result;
     }
 
     @Override

@@ -2,6 +2,7 @@ package org.sdkj.thermal.domain.bo;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
@@ -23,6 +24,7 @@ public class PrHouseChangeOwnerBo {
     @Size(max = 500)
     private String reason;
 
-    /** 默认 "1" 业主 */
+    /** 1=业主, 2=租户, 3=家属 */
+    @Pattern(regexp = "[123]", message = "relationType 只能是 1(业主)、2(租户)、3(家属)")
     private String relationType;
 }

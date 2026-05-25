@@ -55,6 +55,12 @@ public interface IPrExpenseService extends IService<PrExpense> {
     boolean insertDataLs(List<PrHouseExpense> list);
 
     /**
+     * 综合费用生成：一次性生成固定费+临时费+取暖费
+     * 旧端点: POST /property/expense/insertAllDatall
+     */
+    boolean insertAllDatall(List<PrHouseExpense> list);
+
+    /**
      * 批量生成车位费用明细
      */
     boolean insertDatallCw(List<PmParkingSpace> list);

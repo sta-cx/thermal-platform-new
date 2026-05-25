@@ -1,7 +1,7 @@
 package org.sdkj.common.mybatis.handler;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.http.HttpStatus;
+import org.sdkj.common.core.constant.HttpStatus;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.reflection.MetaObject;
@@ -63,7 +63,7 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
                 this.strictInsertFill(metaObject, "updateTime", Date.class, date);
             }
         } catch (Exception e) {
-            throw new ServiceException("自动注入异常 => " + e.getMessage(), HttpStatus.HTTP_UNAUTHORIZED);
+            throw new ServiceException("自动注入异常 => " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -91,7 +91,7 @@ public class InjectionMetaObjectHandler implements MetaObjectHandler {
                 this.strictUpdateFill(metaObject, "updateTime", Date.class, new Date());
             }
         } catch (Exception e) {
-            throw new ServiceException("自动注入异常 => " + e.getMessage(), HttpStatus.HTTP_UNAUTHORIZED);
+            throw new ServiceException("自动注入异常 => " + e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
 

@@ -130,6 +130,20 @@ public class PrExpenseController extends BaseController {
     }
 
     /**
+     * 综合费用生成：一次性生成固定费+临时费+取暖费
+     * 旧端点: POST /property/expense/insertAllDatall
+     * 新端点: POST /thermal/property/expense/all
+     */
+    @SaCheckPermission("thermal:property:expense:add")
+    @SaCheckLogin
+    @Log(title = "综合费用生成", businessType = BusinessType.INSERT)
+    @PostMapping("/all")
+    public R<Void> insertAll(@RequestBody List<PrHouseExpenseBo> boList) {
+        List<PrHouseExpense> list = MapstructUtils.convert(boList, PrHouseExpense.class);
+        return toAjax(expenseService.insertAllDatall(list));
+    }
+
+    /**
      * 生成临时费用明细
      * 旧端点: POST /property/expense/insertDataLs
      * 新端点: POST /thermal/property/expense/temporary

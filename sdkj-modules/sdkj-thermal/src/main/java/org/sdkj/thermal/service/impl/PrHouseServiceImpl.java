@@ -466,7 +466,7 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         newRecord.setUserName(bo.getUserName());
         newRecord.setPhone(bo.getPhone());
         newRecord.setHouseId(bo.getHouseId());
-        newRecord.setRelationType("1");  // 端点语义聚焦"换业主",硬编码 1
+        newRecord.setRelationType(StringUtils.defaultIfBlank(bo.getRelationType(), "1"));
         newRecord.setOrgId(house.getOrgId());
         newRecord.setRecordSource("1");
         newRecord.setRemark("迁入: " + bo.getReason());

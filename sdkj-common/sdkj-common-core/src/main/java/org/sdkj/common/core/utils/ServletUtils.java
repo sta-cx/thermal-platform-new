@@ -2,7 +2,7 @@ package org.sdkj.common.core.utils;
 
 import cn.hutool.core.convert.Convert;
 import cn.hutool.extra.servlet.JakartaServletUtil;
-import cn.hutool.http.HttpStatus;
+import org.sdkj.common.core.constant.HttpStatus;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -217,7 +217,7 @@ public class ServletUtils extends JakartaServletUtil {
      */
     public static void renderString(HttpServletResponse response, String string) {
         try {
-            response.setStatus(HttpStatus.HTTP_OK);
+            response.setStatus(HttpStatus.SUCCESS);
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
             response.getWriter().print(string);
