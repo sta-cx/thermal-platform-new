@@ -1,25 +1,35 @@
 package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.common.core.exception.ServiceException;
 import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHouse;
+import org.sdkj.thermal.domain.PrUserHouse;
 import org.sdkj.thermal.domain.bo.PrHouseBo;
+import org.sdkj.thermal.domain.bo.PrHouseChangeOwnerBo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
+import org.sdkj.thermal.domain.vo.PrUserHouseVo;
 import org.sdkj.thermal.mapper.PrHouseMapper;
+import org.sdkj.thermal.mapper.PrUserHouseMapper;
 import org.sdkj.thermal.service.IPrHouseService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,6 +43,7 @@ import java.util.regex.Pattern;
 public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> implements IPrHouseService {
 
     private final PrHouseMapper baseMapper;
+    private final PrUserHouseMapper userHouseMapper;
 
     @Override
     public PrHouseVo selectById(java.io.Serializable id) {
@@ -428,5 +439,87 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         }
         lqw.orderByAsc(PrHouse::getSeq, PrHouse::getRoomNum);
         return baseMapper.selectVoList(lqw);
+    }
+
+    // ========== B-01 D-05 新增 4 个高价值端点实现 ==========
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean changeOwner(PrHouseChangeOwnerBo bo) {
+        PrHouse house = baseMapper.selectById(bo.getHouseId());
+        if (house == null) {
+            throw new ServiceException("房屋不存在");
+        }
+
+        // 1. 软删旧 pr_user_house —— 仅业主(relation_type='1'),保留租户/家属关联
+        LambdaUpdateWrapper<PrUserHouse> updWrapper = new LambdaUpdateWrapper<PrUserHouse>()
+            .eq(PrUserHouse::getHouseId, bo.getHouseId())
+            .eq(PrUserHouse::getRelationType, "1")
+            .eq(PrUserHouse::getDelFlag, "0")
+            .set(PrUserHouse::getDelFlag, "1")
+            .set(PrUserHouse::getRemark, "迁出: " + bo.getReason());
+        userHouseMapper.update(null, updWrapper);
+
+        // 2. 新建 pr_user_house（新业主）
+        PrUserHouse newRecord = new PrUserHouse();
+        newRecord.setUserId(bo.getUserId());
+        newRecord.setUserName(bo.getUserName());
+        newRecord.setPhone(bo.getPhone());
+        newRecord.setHouseId(bo.getHouseId());
+        newRecord.setRelationType("1");  // 端点语义聚焦"换业主",硬编码 1
+        newRecord.setOrgId(house.getOrgId());
+        newRecord.setRecordSource("1");
+        newRecord.setRemark("迁入: " + bo.getReason());
+        userHouseMapper.insert(newRecord);
+
+        // 3. 同步 pr_house 冗余字段 user_name/phone（用字符串列名绕过 @TableField(exist=false)）
+        baseMapper.update(null, new UpdateWrapper<PrHouse>()
+            .eq("id", bo.getHouseId())
+            .set("user_name", bo.getUserName())
+            .set("phone", bo.getPhone()));
+
+        return true;
+    }
+
+    @Override
+    public List<PrUserHouseVo> changeList(Long houseId, String startDate, String endDate) {
+        return userHouseMapper.selectChangeHistory(houseId, startDate, endDate);
+    }
+
+    @Override
+    public Map<String, Object> selectByTypeAndValve(String orgId, String buildingId,
+                                                     String unitCode, String stationId,
+                                                     List<String> types, String treeTypeValve) {
+        // 复用 selectByType 的 SQL 层过滤
+        List<PrHouseVo> houses = selectByType(orgId, buildingId, unitCode, stationId, types);
+
+        // D5 降级: PrHouseVo 无 heatValveArchiveList 字段，无法做内存层阀门过滤
+        // controllableList 始终为空，后续补齐阀门档案字段后可完整实现
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", houses);
+        result.put("controllableList", List.of());
+        return result;
+    }
+
+    @Override
+    public BigDecimal calcOccupancy(String orgId) {
+        // @OrgPermission 在 Mapper 类级注解自动注入子查询
+        LambdaQueryWrapper<PrHouse> totalLqw = new LambdaQueryWrapper<PrHouse>()
+            .eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId);
+        long total = baseMapper.selectCount(totalLqw);
+        if (total == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        // status='8' 表示入住（老系统约定，验收前 ping 业务确认）
+        LambdaQueryWrapper<PrHouse> checkInLqw = new LambdaQueryWrapper<PrHouse>()
+            .eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId)
+            .eq(PrHouse::getStatus, "8");
+        long checkIn = baseMapper.selectCount(checkInLqw);
+
+        return BigDecimal.valueOf(checkIn)
+            .divide(BigDecimal.valueOf(total), 4, RoundingMode.HALF_UP)
+            .multiply(BigDecimal.valueOf(100))
+            .setScale(2, RoundingMode.HALF_UP);
     }
 }

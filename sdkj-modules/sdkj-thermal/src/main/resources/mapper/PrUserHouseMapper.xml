@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sdkj.thermal.mapper.PrUserHouseMapper">
+
+    <select id="selectChangeHistory" resultType="org.sdkj.thermal.domain.vo.PrUserHouseVo">
+        SELECT id, user_id, user_name, phone, house_id, relation_type,
+               remark, org_id, record_source, del_flag,
+               create_dept, create_by, create_time, update_by, update_time
+        FROM pr_user_house
+        WHERE house_id = #{houseId}
+        <if test="startDate != null and startDate != ''">
+            AND create_time &gt;= #{startDate}
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND create_time &lt;= #{endDate}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

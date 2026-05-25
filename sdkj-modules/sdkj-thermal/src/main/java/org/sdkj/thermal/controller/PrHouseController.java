@@ -14,7 +14,9 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.bo.PrHouseBo;
+import org.sdkj.thermal.domain.bo.PrHouseChangeOwnerBo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
+import org.sdkj.thermal.domain.vo.PrUserHouseVo;
 import org.sdkj.thermal.service.IPrHouseService;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
@@ -26,6 +28,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 房屋信息管理
@@ -374,5 +377,65 @@ public class PrHouseController extends BaseController {
             @RequestParam String orgId,
             @RequestParam(required = false) String buildingId) {
         return toAjax(houseService.setIsolatedHouses(houseList, orgId, buildingId));
+    }
+
+    // ========== B-01 D-05 新增 4 个高价值端点 ==========
+
+    /**
+     * 变更房屋业主
+     * 旧端点: POST /property/prHouse/updateUserByHouse
+     * 新端点: POST /thermal/property/house/changeOwner
+     */
+    @SaCheckPermission("thermal:property:house:edit")
+    @SaCheckLogin
+    @Log(title = "房屋管理-变更业主", businessType = BusinessType.UPDATE)
+    @PostMapping("/changeOwner")
+    public R<Void> changeOwner(@Validated @RequestBody PrHouseChangeOwnerBo bo) {
+        return toAjax(houseService.changeOwner(bo));
+    }
+
+    /**
+     * 查询房屋变更记录
+     * 旧端点: GET /property/prHouse/getHouseChangeList
+     * 新端点: GET /thermal/property/house/changeList
+     */
+    @SaCheckPermission("thermal:property:house:list")
+    @SaCheckLogin
+    @GetMapping("/changeList")
+    public R<List<PrUserHouseVo>> changeList(
+            @RequestParam Long houseId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        return R.ok(houseService.changeList(houseId, startDate, endDate));
+    }
+
+    /**
+     * 按单元+类型+阀门可控性筛选房屋
+     * 旧端点: GET /property/prHouse/getHouseListByUnitAndTypeAndCon
+     * 新端点: GET /thermal/property/house/byTypeAndValve
+     */
+    @SaCheckPermission("thermal:property:house:list")
+    @SaCheckLogin
+    @GetMapping("/byTypeAndValve")
+    public R<Map<String, Object>> listByTypeAndValve(
+            @RequestParam(required = false) String orgId,
+            @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unitCode,
+            @RequestParam(required = false) String stationId,
+            @RequestParam(required = false) List<String> types,
+            @RequestParam(required = false) String treeTypeValve) {
+        return R.ok(houseService.selectByTypeAndValve(orgId, buildingId, unitCode, stationId, types, treeTypeValve));
+    }
+
+    /**
+     * 入住率统计
+     * 旧端点: GET /property/prHouse/getOccupancy
+     * 新端点: GET /thermal/property/house/occupancy
+     */
+    @SaCheckPermission("thermal:property:house:list")
+    @SaCheckLogin
+    @GetMapping("/occupancy")
+    public R<BigDecimal> occupancy(@RequestParam(required = false) String orgId) {
+        return R.ok(houseService.calcOccupancy(orgId));
     }
 }

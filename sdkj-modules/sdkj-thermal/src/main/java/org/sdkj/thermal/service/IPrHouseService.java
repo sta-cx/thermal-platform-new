@@ -5,11 +5,14 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.bo.PrHouseBo;
+import org.sdkj.thermal.domain.bo.PrHouseChangeOwnerBo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
+import org.sdkj.thermal.domain.vo.PrUserHouseVo;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 房屋信息 Service 接口
@@ -187,10 +190,18 @@ public interface IPrHouseService extends IService<PrHouse> {
 
     /**
      * 查询可用于策略绑定的房屋列表
-     * @param orgId 小区ID
-     * @param buildingId 楼宇ID
-     * @param search 搜索关键字（房间号）
-     * @return 房屋列表
      */
     List<PrHouseVo> selectForStrategyBinding(String orgId, String buildingId, String search);
+
+    // ========== B-01 D-05 新增 4 个高价值端点 ==========
+
+    boolean changeOwner(PrHouseChangeOwnerBo bo);
+
+    List<PrUserHouseVo> changeList(Long houseId, String startDate, String endDate);
+
+    Map<String, Object> selectByTypeAndValve(String orgId, String buildingId,
+                                              String unitCode, String stationId,
+                                              List<String> types, String treeTypeValve);
+
+    BigDecimal calcOccupancy(String orgId);
 }
