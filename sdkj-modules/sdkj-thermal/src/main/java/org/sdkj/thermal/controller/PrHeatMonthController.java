@@ -73,10 +73,10 @@ public class PrHeatMonthController extends BaseController {
     @SaCheckLogin
     @Log(title = "热表月表-生成", businessType = BusinessType.UPDATE)
     @PostMapping("/setHeat")
-    public R<Void> setHeat(@RequestParam String orgId,
-                           @RequestParam(required = false, defaultValue = "false") Boolean force) {
-        heatMonthService.setHeat(orgId, force);
-        return R.ok();
+    public R<String> setHeat(@RequestParam String orgId,
+                             @RequestParam(required = false, defaultValue = "false") Boolean force) {
+        String message = heatMonthService.setHeat(orgId, force);
+        return R.ok(message);
     }
 
     /**

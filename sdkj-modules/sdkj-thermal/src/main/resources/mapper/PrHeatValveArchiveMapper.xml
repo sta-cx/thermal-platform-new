@@ -42,6 +42,32 @@
         WHERE id = #{houseId}
     </update>
 
+    <!-- 已缴费但阀门仍关闭：移植旧 queryValveStatusGetByPayK，用于缴费自动开阀/状态查询 -->
+    <select id="queryPaidClosedValves" resultType="org.sdkj.thermal.domain.PrHeatValveArchive">
+        SELECT a.*
+        FROM pr_heat_valve_archive a
+                 INNER JOIN pr_house b ON b.id = a.house_id
+        WHERE a.org_id = #{orgId}
+          AND b.org_id = #{orgId}
+          AND a.is_changed = 0
+          AND a.valve_status = '2'
+          AND b.pay_status = '1'
+          AND IFNULL(b.other_code, '') != ''
+    </select>
+
+    <!-- 未缴费但阀门仍开启：移植旧 queryValveStatusGetByPayG，用于阀门状态查询 -->
+    <select id="queryUnpaidOpenValves" resultType="org.sdkj.thermal.domain.PrHeatValveArchive">
+        SELECT a.*
+        FROM pr_heat_valve_archive a
+                 INNER JOIN pr_house b ON b.id = a.house_id
+        WHERE a.org_id = #{orgId}
+          AND b.org_id = #{orgId}
+          AND a.is_changed = 0
+          AND a.valve_status = '1'
+          AND b.pay_status IN ('0', '2', '3')
+          AND IFNULL(b.other_code, '') != ''
+    </select>
+
     <!-- 集中器监控聚合查询 -->
     <select id="selectCentratorMonitor" resultType="java.util.LinkedHashMap">
         SELECT

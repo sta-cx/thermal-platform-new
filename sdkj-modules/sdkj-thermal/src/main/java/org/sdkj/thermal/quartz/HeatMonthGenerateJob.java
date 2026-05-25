@@ -8,15 +8,8 @@ import org.sdkj.thermal.service.IPrHeatMonthService;
 import org.springframework.context.ApplicationContext;
 
 /**
- * 热表月表生成 Job
- * 移植自旧系统 JieXiuHeatMonthJob
- *
- * 每月定时执行，对指定小区的热表数据执行5步月表生成流程：
- * 1. insertPrHeatMonth - 插入月表记录
- * 2. updateStartReading - 更新起始读数
- * 3. updateQty - 更新用量
- * 4. setFee - 计算费用
- * 5. updateArrearage - 更新欠费状态
+ * 热表月表生成 Job。
+ * 当前定时入口复用手动生成的日表聚合口径，默认生成上月数据。
  *
  * @author sdkj
  */

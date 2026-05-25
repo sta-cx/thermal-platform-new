@@ -57,8 +57,10 @@ public class PrHeatTempArchiveServiceImpl extends ServiceImpl<PrHeatTempArchiveM
         // parentId maps to houseId for this entity
         lqw.eq(StringUtils.isNotBlank(parentId), PrHeatTempArchive::getHouseId, parentId);
         if (StringUtils.isNotBlank(search)) {
-            lqw.and(w -> w.like(PrHeatTempArchive::getMeterNum, search.trim())
-                .or().like(PrHeatTempArchive::getMeterArcName, search.trim()));
+            String keyword = search.trim();
+            lqw.and(w -> w.like(PrHeatTempArchive::getMeterNum, keyword)
+                .or().like(PrHeatTempArchive::getMeterArcCode, keyword)
+                .or().like(PrHeatTempArchive::getMeterArcName, keyword));
         }
         lqw.eq(PrHeatTempArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatTempArchive::getCreateTime);

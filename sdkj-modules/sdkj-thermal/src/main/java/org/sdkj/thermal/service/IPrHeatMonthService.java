@@ -35,12 +35,8 @@ public interface IPrHeatMonthService extends IService<PrHeatMonth> {
                                                  String startTime, String endTime, PageQuery pageQuery);
 
     /**
-     * 生成热表月表数据（5步流程）
-     * 1. insertPrHeatMonth - 插入月表记录
-     * 2. updateStartReading - 更新起始读数
-     * 3. updateQty - 更新用量
-     * 4. setFee - 计算费用
-     * 5. updateArrearage - 更新欠费状态
+     * 定时任务生成热表月表数据。
+     * 当前实现复用日表聚合口径，默认生成上月数据。
      * @param orgId 小区ID
      * @return 是否成功
      */

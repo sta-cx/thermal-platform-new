@@ -708,18 +708,18 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
 
     @Override
     public List<PrHeatValveArchive> queryPaidClosedValves(String orgId) {
-        // TODO: Implement - query valves where house is paid but valve is closed (from old queryValveStatusGetByPayK)
-        // SQL logic: JOIN pr_house on houseId WHERE pr_house.payStatus='1' AND pr_heat_valve_archive.valveStatus != '1'
-        log.warn("queryPaidClosedValves not yet implemented for orgId={}", orgId);
-        return List.of();
+        if (StringUtils.isBlank(orgId)) {
+            return List.of();
+        }
+        return baseMapper.queryPaidClosedValves(orgId);
     }
 
     @Override
     public List<PrHeatValveArchive> queryUnpaidOpenValves(String orgId) {
-        // TODO: Implement - query valves where house is unpaid but valve is open (from old queryValveStatusGetByPayG)
-        // SQL logic: JOIN pr_house on houseId WHERE pr_house.payStatus!='1' AND pr_heat_valve_archive.valveStatus == '1'
-        log.warn("queryUnpaidOpenValves not yet implemented for orgId={}", orgId);
-        return List.of();
+        if (StringUtils.isBlank(orgId)) {
+            return List.of();
+        }
+        return baseMapper.queryUnpaidOpenValves(orgId);
     }
 
     // ========== AI Tool 阀门指令下发 ==========
