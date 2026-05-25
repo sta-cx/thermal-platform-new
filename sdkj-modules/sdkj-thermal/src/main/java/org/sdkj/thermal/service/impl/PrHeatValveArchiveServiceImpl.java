@@ -770,8 +770,8 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         }
 
         // 4. 真实下发（Phase 3 占位）
-        // TODO Phase 3: 真实 IoT 下发 — 调用 MBus/AG 平台 API，失败写指令记录表
-        // TODO Phase 3: 写 ht_control_record 表时需用 operatorId 设置 createBy/updateBy
+        // 等外部 IoT 平台(MBus/AG)API 就绪后接入:失败写 ht_control_record(operatorId 设置 createBy/updateBy)。
+        // 当前为占位实现,只回写阀门档案,不真实下发硬件指令。
         String summary = String.format("指令已下发：房屋 %s 阀门 %s %s",
             houseId, normalizedAction,
             "SET_OPENNESS".equals(normalizedAction) ? "开度 " + openness : "");

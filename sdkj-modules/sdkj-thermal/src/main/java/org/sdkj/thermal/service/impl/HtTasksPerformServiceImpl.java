@@ -294,7 +294,7 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
 
     @Override
     public void executePendingCommands(String orgId) {
-        // TODO: Implement pending command execution (from old system getNonExecutionNew)
+        // 等外部 IoT 平台(DTU/NB/MBus)API 就绪后从旧 getNonExecutionNew 移植:
         // 1. Query all pending (status=1, instructionStatus=0) HtTasksPerform records
         // 2. Group by concentrator/device
         // 3. Send via DTU/NB/MBus depending on device type

@@ -2,24 +2,37 @@ package org.sdkj.web.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.thermal.mapper.ThermalSysHomeMapper;
+import org.sdkj.thermal.service.IHtAlertService;
+import org.sdkj.thermal.service.IHtStrategyService;
+import org.sdkj.thermal.service.IHtTasksService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * 首页统计数据
  * 迁移自旧系统 SysHomeController
- * Phase 2: 返回模拟数据骨架，Phase 3-5 业务模块迁移后补充真实查询
+ * 6 项统计:设备/收费/告警/策略/任务/用户。
+ * 行级权限:ThermalSysHomeMapper 的 SQL 内已 JOIN pr_data_grant 按 userId 过滤。
  */
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/thermal/home")
 public class ThermalHomeController {
+
+    private final ThermalSysHomeMapper sysHomeMapper;
+    private final IHtAlertService htAlertService;
+    private final IHtStrategyService htStrategyService;
+    private final IHtTasksService htTasksService;
 
     /**
      * 首页统计数据
@@ -35,22 +48,56 @@ public class ThermalHomeController {
         Long userId = LoginHelper.getUserId();
 
         Map<String, Object> result = new HashMap<>();
-        // TODO: Phase 3-5 迁移业务模块后，替换为真实查询
-        // 旧系统通过 6 个异步 Future 查询:
-        //   querHomeData1: 设备统计（热力表、电表、水表、燃气表数量）
-        //   querHomeData2: 收费统计（应收、实收、欠费）
-        //   querHomeData3: 告警统计（各类告警数量）
-        //   querHomeData4: 策略统计（控制策略数量、执行状态）
-        //   querHomeData6: 任务统计（定时任务、执行记录）
-        //   querHomeData7: 用户统计（业主数量、绑定率）
-        result.put("deviceCount", 0);
-        result.put("chargeTotal", 0);
-        result.put("alertCount", 0);
-        result.put("strategyCount", 0);
-        result.put("taskCount", 0);
-        result.put("userCount", 0);
-        result.put("userId", userId);
 
+        // 1. 设备数(6 类仪表总和:户阀/户表/单元阀/单元表/温采器/DTU)
+        long deviceCount = parseLongSafe(sysHomeMapper.queryValveNum(userId, stationId, stationPartitionId))
+                + parseLongSafe(sysHomeMapper.queryHotArchiveNum(userId, stationId, stationPartitionId))
+                + parseLongSafe(sysHomeMapper.queryUnitValveNum(userId, stationId, stationPartitionId))
+                + parseLongSafe(sysHomeMapper.queryUnitHotArchiveNum(userId, stationId, stationPartitionId))
+                + parseLongSafe(sysHomeMapper.queryTempArchiveNum(userId, stationId, stationPartitionId))
+                + parseLongSafe(sysHomeMapper.queryDtuNum(userId, stationId, stationPartitionId));
+        result.put("deviceCount", deviceCount);
+
+        // 2. 收费金额(户表累计热量,旧系统以热量近似收费金额)
+        result.put("chargeTotal", parseDecimalSafe(sysHomeMapper.queryHotArchiveTotalAll(userId, stationId, stationPartitionId)));
+
+        // 3. 告警数(ht_alert 全表 count;后续可加 status 过滤)
+        result.put("alertCount", htAlertService.count());
+
+        // 4. 策略数(ht_strategy 全表 count)
+        result.put("strategyCount", htStrategyService.count());
+
+        // 5. 任务数(ht_tasks 全表 count)
+        result.put("taskCount", htTasksService.count());
+
+        // 6. 用户数(房屋业主数,行级权限按 userId 过滤)
+        result.put("userCount", parseLongSafe(sysHomeMapper.queryPrUserNum(userId, stationId, stationPartitionId)));
+
+        result.put("userId", userId);
         return R.ok(result);
+    }
+
+    private long parseLongSafe(String s) {
+        if (s == null || s.isBlank()) {
+            return 0L;
+        }
+        try {
+            return Long.parseLong(s.trim());
+        } catch (NumberFormatException e) {
+            log.warn("parseLongSafe failed for value='{}', fallback to 0", s);
+            return 0L;
+        }
+    }
+
+    private BigDecimal parseDecimalSafe(String s) {
+        if (s == null || s.isBlank()) {
+            return BigDecimal.ZERO;
+        }
+        try {
+            return new BigDecimal(s.trim());
+        } catch (NumberFormatException e) {
+            log.warn("parseDecimalSafe failed for value='{}', fallback to 0", s);
+            return BigDecimal.ZERO;
+        }
     }
 }

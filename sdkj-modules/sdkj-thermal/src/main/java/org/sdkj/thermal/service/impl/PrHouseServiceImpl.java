@@ -302,9 +302,9 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         // 获取所有房屋ID
         List<Long> houseIds = allHouses.stream().map(PrHouse::getId).toList();
 
-        // TODO: 获取阀门状态，暂时跳过
-        // 这里需要注入 PrHeatValveArchiveMapper 来查询
-        // 暂时跳过，后续可通过注入 Mapper 来实现
+        // 等业务确认:相邻房屋"开阀"判定值未定(valve_status 是 varchar(10),
+        // 旧库分布为 NULL/空/02/03/04...,需业务领域定义哪些值算"开阀")。
+        // 当前简化:不关联 pr_heat_valve_archive,仅按相邻房号存在判定非孤岛。
 
         // 房号格式: XX-XX-XXXX (楼栋-单元-房号)
         Pattern roomPattern = Pattern.compile("^(\\d+)-(\\d+)-(\\d+)$");
@@ -361,8 +361,7 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         for (String roomNum : neighborRoomNums) {
             for (PrHouse house : allHouses) {
                 if (roomNum.equals(house.getRoomNum())) {
-                    // TODO: 后续需要关联阀门档案表检查阀门状态
-                    // 暂时认为存在相邻房号即非孤岛
+                    // 等业务确认 valve_status 开阀判定值,当前简化为"存在相邻房号即非孤岛"
                     return true;
                 }
             }
