@@ -4,7 +4,6 @@ import org.apache.ibatis.annotations.Param;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.thermal.domain.PrHeatDaily;
-import org.sdkj.thermal.domain.PrHeatMonth;
 import org.sdkj.thermal.domain.vo.PrHeatDailyVo;
 
 import java.util.Date;
@@ -48,10 +47,4 @@ public interface PrHeatDailyMapper extends BaseMapperPlus<PrHeatDaily, PrHeatDai
      */
     boolean setCurrentReading(@Param("date") Date date, @Param("orgId") String orgId);
 
-    /**
-     * 月表生成: 从日表按房屋/仪表分组聚合数据
-     * 按月汇总每个房屋每个仪表的用量和金额
-     */
-    List<PrHeatMonth> aggregateToMonth(@Param("year") int year, @Param("month") int month,
-                                       @Param("orgId") String orgId);
 }

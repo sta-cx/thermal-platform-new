@@ -26,7 +26,7 @@ public class ValveData {
     /** 仪表档案编码 */
     private String meterArcName;
 
-    /** 阀门状态 1 开 2 关 3 异常 */
+    /** 阀门状态 — 详见 {@link org.sdkj.thermal.constant.ValveStatusConstants} */
     private String valveStatus;
 
     /** 设定开度 */

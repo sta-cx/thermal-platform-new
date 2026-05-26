@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.mybatis.utils.IdGeneratorUtil;
+import org.sdkj.thermal.constant.ValveStatusConstants;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.PrOptionsHeat;
 import org.sdkj.thermal.mapper.HtTasksPerformMapper;
@@ -80,19 +81,19 @@ public class ControlReturnApiController {
                 int channelNum = json.getInt("channelNum", 0);
 
                 switch (type) {
-                    case 1: // 阀门
+                    case ValveStatusConstants.DEVICE_VALVE:
                         handleValveControl(code, guid, meterNum, command, valveStatus, message, channelNum, meterInfo);
                         break;
-                    case 2: // 热表
+                    case ValveStatusConstants.DEVICE_HEAT_METER:
                         handleHeatMeterControl(code, guid, meterNum, command, valveStatus, message);
                         break;
-                    case 3: // 温控器
+                    case ValveStatusConstants.DEVICE_THERMOSTAT:
                         handleThermostatControl(code, guid, meterNum, command, valveStatus, message);
                         break;
-                    case 4: // 无线跳转阀
+                    case ValveStatusConstants.DEVICE_RADIO_BYPASS:
                         handleRadioBypassValveControl(code, guid, meterNum, command, valveStatus, message);
                         break;
-                    case 5: // 采集器
+                    case ValveStatusConstants.DEVICE_COLLECTOR:
                         handleCollectorControl(code, guid, meterNum, dtuNum, command, valveStatus, channelNum, message);
                         break;
                     default:
@@ -298,7 +299,7 @@ public class ControlReturnApiController {
                 htTasksPerformMapper.updateByreturnControlByRadio(guid, meterNum, command, valveStatus);
                 htTasksPerformMapper.updateHeatValveScopeStatus(meterNum, meterInfo, valveStatus);
             }
-            if (command == 27 || command == 28 || command == 18) {
+            if (command == ValveStatusConstants.CMD_OPEN_VALVE || command == ValveStatusConstants.CMD_CLOSE_VALVE || command == ValveStatusConstants.CMD_ADJUST_OPENING) {
                 htTasksPerformMapper.updataHeatValve(meterNum, channelNum, meterInfo, valveStatus);
                 htTasksPerformMapper.updataUnitValve(meterNum, channelNum, meterInfo, valveStatus);
             }
@@ -316,7 +317,7 @@ public class ControlReturnApiController {
             // 更新控制范围表
             htTasksPerformMapper.updateHtScope(guid, meterNum, valveStatus);
             // 插入异常信息
-            if (valveStatus == 2 || valveStatus == 3) {
+            if (valveStatus == ValveStatusConstants.VALVE_CLOSED || valveStatus == ValveStatusConstants.VALVE_ERROR) {
                 htTasksPerformMapper.inserHtAlert(meterNum, valveStatus);
             }
         }
@@ -334,12 +335,12 @@ public class ControlReturnApiController {
             }
             log.info("热表控制成功: meterNum={}, message={}", meterNum, message);
         } else {
-            if (valveStatus == 2) {
-                if ("DTU掉线".equals(message)) {
-                    valveStatus = 15;
+            if (valveStatus == ValveStatusConstants.VALVE_CLOSED) {
+                if (ValveStatusConstants.MSG_DTU_OFFLINE.equals(message)) {
+                    valveStatus = ValveStatusConstants.VALVE_DTU_OFFLINE;
                 }
-                if ("采集平台无此阀门信息".equals(message)) {
-                    valveStatus = 14;
+                if (ValveStatusConstants.MSG_VALVE_NOT_FOUND.equals(message)) {
+                    valveStatus = ValveStatusConstants.VALVE_NOT_FOUND;
                 }
             }
             if (StrUtil.isNotBlank(guid)) {
@@ -391,7 +392,7 @@ public class ControlReturnApiController {
             htTasksPerformMapper.updataHeatValveS(meterNum, valveStatus);
             htTasksPerformMapper.updataUnitValveS(meterNum, valveStatus);
             htTasksPerformMapper.updateHtScope(guid, meterNum, valveStatus);
-            if (valveStatus == 2 || valveStatus == 3) {
+            if (valveStatus == ValveStatusConstants.VALVE_CLOSED || valveStatus == ValveStatusConstants.VALVE_ERROR) {
                 htTasksPerformMapper.inserHtAlert(meterNum, valveStatus);
             }
             log.info("无线跳转阀控制失败: meterNum={}, message={}", meterNum, message);
@@ -408,7 +409,7 @@ public class ControlReturnApiController {
                 htTasksPerformMapper.updateByreturnControl(guid, meterNum, command, valveStatus);
                 htTasksPerformMapper.updateByreturnControlByRadio(guid, meterNum, command, valveStatus);
             }
-            if (command == 27 || command == 28) {
+            if (command == ValveStatusConstants.CMD_OPEN_VALVE || command == ValveStatusConstants.CMD_CLOSE_VALVE) {
                 htTasksPerformMapper.updataHeatDtu(dtuNum, channelNum, valveStatus);
             }
             log.info("采集器控制成功: meterNum={}, message={}", meterNum, message);
@@ -517,8 +518,8 @@ public class ControlReturnApiController {
 
         // 更新查询指令状态为已完成(9)
         if (StrUtil.isNotBlank(guid)) {
-            htTasksPerformMapper.updateByreturnControl(guid, meterNum, 4, 9);
-            htTasksPerformMapper.updateByreturnControlByRadio(guid, meterNum, 4, 9);
+            htTasksPerformMapper.updateByreturnControl(guid, meterNum, ValveStatusConstants.CMD_QUERY, ValveStatusConstants.QUERY_COMPLETED);
+            htTasksPerformMapper.updateByreturnControlByRadio(guid, meterNum, ValveStatusConstants.CMD_QUERY, ValveStatusConstants.QUERY_COMPLETED);
         }
 
         // 异常检测
@@ -550,21 +551,21 @@ public class ControlReturnApiController {
 
             // 缴费未开阀
             if ("1".equals(payStatus) && !"1".equals(valveStatus)) {
-                htTasksPerformMapper.inserHtAlert(meterNum, 11);
+                htTasksPerformMapper.inserHtAlert(meterNum, ValveStatusConstants.ALERT_PAID_BUT_CLOSED);
             }
             // 未缴费开阀
             if (!"1".equals(payStatus) && "1".equals(valveStatus)) {
-                htTasksPerformMapper.inserHtAlert(meterNum, 12);
+                htTasksPerformMapper.inserHtAlert(meterNum, ValveStatusConstants.ALERT_UNPAID_BUT_OPEN);
             }
             // 未缴费回水温度异常
             if (!"1".equals(payStatus) && optionsHeat.getWjfhswd() != null
                 && outTemp != null && outTemp.compareTo(optionsHeat.getWjfhswd()) > 0) {
-                htTasksPerformMapper.inserHtAlert(meterNum, 7);
+                htTasksPerformMapper.inserHtAlert(meterNum, ValveStatusConstants.ALERT_UNPAID_TEMP_ABNORMAL);
             }
             // 回水温度超出正常范围
             if (outTemp != null && optionsHeat.getWdbjd() != null && optionsHeat.getWdbjx() != null) {
                 if (outTemp.compareTo(optionsHeat.getWdbjd()) > 0 || outTemp.compareTo(optionsHeat.getWdbjx()) < 0) {
-                    htTasksPerformMapper.inserHtAlert(meterNum, 5);
+                    htTasksPerformMapper.inserHtAlert(meterNum, ValveStatusConstants.ALERT_TEMP_OUT_OF_RANGE);
                 }
             }
         } catch (Exception e) {
@@ -614,8 +615,8 @@ public class ControlReturnApiController {
 
         // 更新查询指令状态
         if (StrUtil.isNotBlank(guid)) {
-            htTasksPerformMapper.updateByreturnControl(guid, meterNum, 4, 9);
-            htTasksPerformMapper.updateByreturnControlByRadio(guid, meterNum, 4, 9);
+            htTasksPerformMapper.updateByreturnControl(guid, meterNum, ValveStatusConstants.CMD_QUERY, ValveStatusConstants.QUERY_COMPLETED);
+            htTasksPerformMapper.updateByreturnControlByRadio(guid, meterNum, ValveStatusConstants.CMD_QUERY, ValveStatusConstants.QUERY_COMPLETED);
         }
     }
 
@@ -668,8 +669,8 @@ public class ControlReturnApiController {
 
         // 更新查询指令状态
         if (StrUtil.isNotBlank(guid)) {
-            htTasksPerformMapper.updateByreturnControl(guid, meterNum, 4, 9);
-            htTasksPerformMapper.updateByreturnControlByRadio(guid, meterNum, 4, 9);
+            htTasksPerformMapper.updateByreturnControl(guid, meterNum, ValveStatusConstants.CMD_QUERY, ValveStatusConstants.QUERY_COMPLETED);
+            htTasksPerformMapper.updateByreturnControlByRadio(guid, meterNum, ValveStatusConstants.CMD_QUERY, ValveStatusConstants.QUERY_COMPLETED);
         }
     }
 
@@ -682,20 +683,20 @@ public class ControlReturnApiController {
      * - valveStatus==3 时: timeout->2
      */
     private int adjustValveStatusByMessage(int valveStatus, String message) {
-        if (valveStatus == 2) {
-            if ("DTU掉线".equals(message)) {
-                return 15;
+        if (valveStatus == ValveStatusConstants.VALVE_CLOSED) {
+            if (ValveStatusConstants.MSG_DTU_OFFLINE.equals(message)) {
+                return ValveStatusConstants.VALVE_DTU_OFFLINE;
             }
-            if ("采集平台无此阀门信息".equals(message)) {
-                return 14;
+            if (ValveStatusConstants.MSG_VALVE_NOT_FOUND.equals(message)) {
+                return ValveStatusConstants.VALVE_NOT_FOUND;
             }
-            if ("error".equals(message)) {
-                return 3;
+            if (ValveStatusConstants.MSG_ERROR.equals(message)) {
+                return ValveStatusConstants.VALVE_ERROR;
             }
         }
-        if (valveStatus == 3) {
-            if ("timeout".equals(message)) {
-                return 2;
+        if (valveStatus == ValveStatusConstants.VALVE_ERROR) {
+            if (ValveStatusConstants.MSG_TIMEOUT.equals(message)) {
+                return ValveStatusConstants.VALVE_CLOSED;
             }
         }
         return valveStatus;

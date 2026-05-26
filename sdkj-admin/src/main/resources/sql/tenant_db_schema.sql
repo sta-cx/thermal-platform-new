@@ -1305,42 +1305,6 @@ CREATE TABLE `pr_heat_hot_archive` (
   KEY `idx_archive_id` (`archive_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='房屋热量表配表';
 
-CREATE TABLE `pr_heat_month` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `meter_num` varchar(36) DEFAULT NULL COMMENT '表号',
-  `card_num` varchar(36) DEFAULT NULL COMMENT '卡号',
-  `meter_id` bigint DEFAULT NULL,
-  `meter_arc_code` varchar(36) DEFAULT NULL COMMENT '热表档案编号',
-  `start_time` datetime DEFAULT NULL COMMENT '上次抄表时间',
-  `read_time` datetime DEFAULT NULL COMMENT '本次抄表时间',
-  `start_reading` decimal(12,2) DEFAULT '0.00' COMMENT '上次读数',
-  `current_reading` decimal(12,2) DEFAULT '0.00' COMMENT '本次读数',
-  `qty` decimal(12,2) DEFAULT '0.00' COMMENT '当月用量',
-  `record_ym` varchar(10) DEFAULT NULL COMMENT '结算月份/年份(如202008)',
-  `statistics_type` varchar(20) DEFAULT NULL COMMENT '统计方式',
-  `standard_id` bigint DEFAULT NULL,
-  `total_money` decimal(12,2) DEFAULT '0.00' COMMENT '总金额',
-  `is_audit` int DEFAULT NULL COMMENT '是否审批',
-  `is_hiscalc` int DEFAULT NULL COMMENT '是否参与历史累计',
-  `current_balance` decimal(12,2) DEFAULT '0.00' COMMENT '当前余额',
-  `recharge_money` decimal(12,2) DEFAULT '0.00' COMMENT '当月充值金额',
-  `pay_degrees` decimal(12,2) DEFAULT '0.00' COMMENT '缴至读数',
-  `current_arrearage` decimal(12,2) DEFAULT '0.00' COMMENT '本月欠费',
-  `add_arrearage` decimal(12,2) DEFAULT '0.00' COMMENT '累计欠费',
-  `add_advances` decimal(12,2) DEFAULT '0.00' COMMENT '累计预收',
-  `house_id` bigint DEFAULT NULL,
-  `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  KEY `idx_org_id` (`org_id`),
-  PRIMARY KEY (`id`)
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_meter_num` (`meter_num`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='热表月记录表';
-
 CREATE TABLE `pr_heat_reading` (
   `id` bigint NOT NULL COMMENT '主键',
   `manu_id` varchar(36) DEFAULT NULL COMMENT '厂家反馈的产品代码',
