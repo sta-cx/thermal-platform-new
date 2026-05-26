@@ -19,7 +19,7 @@ mvn spring-boot:run -pl sdkj-admin         # 开发运行（端口 8080）
 - 主类: `org.sdkj.SdkjApplication`
 - Spring profiles 硬编码为 `dev,thermal`（`application.yml` → `spring.profiles.active`）
 - Maven profiles (`local`/`dev`/`prod`) 仅控制 `@logging.level@` 变量
-- **无测试代码**
+- `sdkj-ai` 已有 2 个 JUnit 单测（BM25/中文预处理）；其他模块基本无测试，常规验证仍以编译、启动和接口手测为主
 
 ## 模块结构
 
@@ -29,7 +29,7 @@ sdkj-common/          # 24个公共模块（core/mybatis/redis/security/satoken/
 sdkj-modules/
   sdkj-system/        # 系统管理（用户/角色/菜单/部门/字典/租户/OSS）
   sdkj-meter/         # 仪表管理（热力表/水表/电表/燃气表/集中器/温控器/阀门）
-  sdkj-thermal/       # 热力调控 + 物业收费（核心业务，约90个Controller）
+  sdkj-thermal/       # 热力调控 + 物业收费（核心业务，当前工作树 70 个 Controller）
   sdkj-ai/            # AI 集成（Spring AI 1.0.7，Alt+A 旁注 + Alt+K 助手 + Tool Calling 基建，OpenAI 兼容协议）
 ```
 
@@ -152,10 +152,10 @@ Sa-Token JWT 简单模式：`Authorization: Bearer <token>`，允许并发登录
 基于 Spring AI 1.0.7 + OpenAI 兼容协议（可对接 DeepSeek / Qwen 等）。配置位于 `application-thermal.yml` 的 `spring.ai.openai.*` 与 `sdkj.ai.*`。
 
 - **核心包**: `core/`（ContextualPrompt 注册表 + 视图模型）、`advisor/`（TenantContextAdvisor / SafetyAuditAdvisor / UsageMetricsAdvisor 三个 Spring AI Advisor）、`safety/`（PiiMasker / ApiKeyLogMasker / AiCircuitBreaker）、`cache/`（AiViewCache + 命中率指标）、`job/`（AiLogCleanupJob，每日清理 90 天前的 `ai_call_record`）、`tools/`（@WriteTool 注解 / RiskLevel / ToolRegistry / ToolCallDispatcher / ToolExecutor / ConfirmationStore）、`assistant/`（AssistantService / SessionService / SSE 流）、`kb/`（KbRetrievalService / RAG Citations）
-- **Controller**: `AiContextualController`（POST `/ai/contextual-view`，限流 30/min）、`AiHealthController`、`AiAdminController`、`AiAssistantController`（chat/stream/session CRUD）、`AiToolCallController`（confirm/reject/status）、`AiToolsAdminController`（Tool 注册表看板）、`AiKbController`（知识库管理）
+- **Controller**: `AiContextualController`（POST `/ai/contextual-view`，限流 30/min）、`AiHealthController`、`AiAdminController`、`AiAssistantController`（chat/stream/session CRUD）、`AiToolCallController`（confirm/reject/status）、`AiToolsAdminController`（Tool 注册表看板）、`AiKbController`（知识库上传/检索）、`KbAdminController`（知识库管理操作）
 - **可观测性**: Micrometer counter+timer + 缓存命中/未命中指标；`ApiKeyLogMasker` 作为 Logback conversion rule 自动注册
 - **数据表**: `ai_call_record`、`ai_usage_log`、`ai_pending_tool_call`、`ai_tool_invocation`、`ai_chat_session`、`ai_chat_message`（**位于 master 库 `ry-vue`**,通过 Mapper 上 `@DS("master")` 强制路由；TenantFilter 把 `/ai/*` 推到租户 DS 后,这些 Mapper 仍会切回 master）
-- **Tool 实现**: 7 个 Tool 在 `sdkj-thermal` 模块（`ai/tools/readonly/` 4 个 + `ai/tools/write/` 3 个），基础设施在 `sdkj-ai`
+- **Tool 实现**: 8 个 Tool 在 `sdkj-thermal` 模块（`ai/tools/readonly/` 4 个 + `ai/tools/write/` 4 个），基础设施在 `sdkj-ai`
 - **关闭开关**: `sys_tenant.ai_enabled = 0`（沿用 Phase 2A 总闸）；`ai.tools.disabled` 黑名单可禁用特定 Tool
 
 ## 数据库
