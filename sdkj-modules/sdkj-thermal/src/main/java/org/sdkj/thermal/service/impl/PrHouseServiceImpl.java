@@ -11,6 +11,7 @@ import org.sdkj.common.core.exception.ServiceException;
 import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.PrUserHouse;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -446,18 +448,26 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean changeOwner(PrHouseChangeOwnerBo bo) {
-        PrHouse house = baseMapper.selectById(bo.getHouseId());
+        // 悲观锁查询 pr_house — 持有行锁直到事务结束,并发 changeOwner 串行化
+        PrHouse house = baseMapper.selectOne(
+            new LambdaQueryWrapper<PrHouse>()
+                .eq(PrHouse::getId, bo.getHouseId())
+                .last("FOR UPDATE"));
         if (house == null) {
             throw new ServiceException("房屋不存在");
         }
 
         // 1. 软删旧 pr_user_house —— 仅业主(relation_type='1'),保留租户/家属关联
+        Long currentUserId = LoginHelper.getUserId();
+        Date now = new Date();
         LambdaUpdateWrapper<PrUserHouse> updWrapper = new LambdaUpdateWrapper<PrUserHouse>()
             .eq(PrUserHouse::getHouseId, bo.getHouseId())
             .eq(PrUserHouse::getRelationType, "1")
             .eq(PrUserHouse::getDelFlag, "0")
             .set(PrUserHouse::getDelFlag, "1")
-            .set(PrUserHouse::getRemark, "迁出: " + bo.getReason());
+            .set(PrUserHouse::getRemark, "迁出: " + bo.getReason())
+            .set(PrUserHouse::getUpdateBy, currentUserId)
+            .set(PrUserHouse::getUpdateTime, now);
         userHouseMapper.update(null, updWrapper);
 
         // 2. 新建 pr_user_house（新业主）
@@ -466,7 +476,7 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         newRecord.setUserName(bo.getUserName());
         newRecord.setPhone(bo.getPhone());
         newRecord.setHouseId(bo.getHouseId());
-        newRecord.setRelationType(StringUtils.defaultIfBlank(bo.getRelationType(), "1"));
+        newRecord.setRelationType("1");
         newRecord.setOrgId(house.getOrgId());
         newRecord.setRecordSource("1");
         newRecord.setRemark("迁入: " + bo.getReason());
@@ -476,7 +486,9 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
         baseMapper.update(null, new UpdateWrapper<PrHouse>()
             .eq("id", bo.getHouseId())
             .set("user_name", bo.getUserName())
-            .set("phone", bo.getPhone()));
+            .set("phone", bo.getPhone())
+            .set("update_by", currentUserId)
+            .set("update_time", now));
 
         return true;
     }
@@ -495,9 +507,13 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
 
         // D5 降级: PrHouseVo 无 heatValveArchiveList 字段，无法做内存层阀门过滤
         // controllableList 始终为空，后续补齐阀门档案字段后可完整实现
+        if (StringUtils.isNotBlank(treeTypeValve)) {
+            log.warn("byTypeAndValve 降级: treeTypeValve={} 被忽略, PrHouseVo 缺阀门档案字段", treeTypeValve);
+        }
         Map<String, Object> result = new HashMap<>();
         result.put("list", houses);
         result.put("controllableList", List.of());
+        result.put("degraded", true);
         return result;
     }
 
@@ -511,10 +527,11 @@ public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> impl
             return BigDecimal.ZERO;
         }
 
-        // status='8' 表示入住（老系统约定，验收前 ping 业务确认）
+        // 老系统约定: status='8' 表示入住
+        final String HOUSE_STATUS_CHECKED_IN = "8";
         LambdaQueryWrapper<PrHouse> checkInLqw = new LambdaQueryWrapper<PrHouse>()
             .eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId)
-            .eq(PrHouse::getStatus, "8");
+            .eq(PrHouse::getStatus, HOUSE_STATUS_CHECKED_IN);
         long checkIn = baseMapper.selectCount(checkInLqw);
 
         return BigDecimal.valueOf(checkIn)
