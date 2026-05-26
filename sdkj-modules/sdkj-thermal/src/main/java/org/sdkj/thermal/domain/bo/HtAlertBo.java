@@ -60,6 +60,6 @@ public class HtAlertBo extends BaseEntity {
     private String orgId;
 
 
-    /** 是否在维修中 */
-    private Integer inMaintenance;
+    /** 维修中标记：关联的 pr_repair_record.id，NULL 表示未在维修 */
+    private String inMaintenance;
 }

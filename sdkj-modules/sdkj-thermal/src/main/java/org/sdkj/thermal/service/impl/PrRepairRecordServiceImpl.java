@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.domain.PrExpense;
 import org.sdkj.thermal.domain.PrRepairRecord;
+import org.sdkj.thermal.mapper.HtAlertMapper;
 import org.sdkj.thermal.mapper.PrRepairRecordMapper;
 import org.sdkj.thermal.service.IPrExpenseService;
 import org.sdkj.thermal.service.IPrRepairRecordService;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +28,27 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
 
     private final PrRepairRecordMapper baseMapper;
     private final IPrExpenseService expenseService;
+    private final HtAlertMapper htAlertMapper;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean save(PrRepairRecord record) {
+        boolean ok = super.save(record);
+        if (ok && record.getAlertIds() != null && !record.getAlertIds().isEmpty()) {
+            htAlertMapper.markInMaintenance(
+                record.getAlertIds(),
+                record.getId().toString(),
+                LoginHelper.getUserId());
+        }
+        return ok;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean removeById(Serializable id) {
+        htAlertMapper.clearInMaintenance(id.toString(), LoginHelper.getUserId());
+        return super.removeById(id);
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -93,6 +117,7 @@ public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper,
         return prefix + String.format("%04d", nextSeq);
     }
 
+    // known limitation: saveBatch 不经过重写的 save()，不触发 HtAlert 维修中联动；批量导入场景不带 alertIds，无实际影响
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean insertRepairItems(List<PrRepairRecord> records) {

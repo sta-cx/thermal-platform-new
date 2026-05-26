@@ -1,5 +1,6 @@
 package org.sdkj.thermal.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -8,6 +9,7 @@ import org.sdkj.common.mybatis.core.domain.BaseEntity;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -53,4 +55,8 @@ public class PrRepairRecord extends BaseEntity {
     private String whyFailure;
     private String alertStatus;
     private String orgId;
+
+    /** 前端勾选的告警 ID 列表，从告警发起报修时使用；不持久化 */
+    @TableField(exist = false)
+    private List<Long> alertIds;
 }
