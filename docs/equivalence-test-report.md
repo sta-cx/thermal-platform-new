@@ -102,7 +102,7 @@
 | **PrExpenseController** `/property/expense/queryParkinglotExpenseList` | 新系统无 | ⚠️ | 车位费用查询缺失 |
 | **PrExpenseController** `/property/expense/queryHouseExpenseAllList` | 新系统无 | ⚠️ | 全部房屋费用查询缺失 |
 | **PrExpenseController** `/property/expense/insertDatallCw` | `/thermal/property/expense/parking` | ⚠️ | 已迁移为 parking 端点 |
-| **PrExpenseController** `/property/expense/insertAllDatall` | 新系统无 | ⚠️ | 批量全部生成缺失 |
+| **PrExpenseController** `/property/expense/insertAllDatall` | `/thermal/property/expense/all` | ✅ | 已补齐综合费用生成；待接口/落库回归 |
 | **PrExpenseController** `/property/expense/pageListLog` | 新系统无 | ⚠️ | 费用日志查询缺失 |
 | **PrExpenseController** `/property/expense/pageListWechat` | 新系统无 | ⚠️ | 微信费用查询缺失 |
 | **PrTransactionRecordController** `/property/prTransactionRecord/refund` | 新系统无 | ⚠️ | 退费功能缺失 |

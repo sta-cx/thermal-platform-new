@@ -145,63 +145,87 @@
           AND a.del_flag = '0'
     </update>
 
+    <select id="selectDistinctPriceFormula" resultType="java.lang.String">
+        SELECT DISTINCT price_formula FROM pr_expense
+        WHERE org_id = #{orgId}
+          AND is_calc = '0'
+          AND del_flag = '0'
+          AND price_formula IS NOT NULL AND price_formula != ''
+          AND standard_id IS NOT NULL AND standard_id != ''
+    </select>
+
+    <select id="selectDistinctMoneyFormula" resultType="java.lang.String">
+        SELECT DISTINCT money_formula FROM pr_expense
+        WHERE org_id = #{orgId}
+          AND is_calc = '0'
+          AND del_flag = '0'
+          AND money_formula IS NOT NULL AND money_formula != ''
+          AND standard_id IS NOT NULL AND standard_id != ''
+    </select>
+
+    <!-- 公式来自数据库列值，通过 ${} 做字符串替换拼入 SQL（老系统设计） -->
     <update id="updateMoney">
-        UPDATE pr_expense a
-        LEFT JOIN pr_house b ON b.id = a.house_id
-        LEFT JOIN pr_standard c ON c.id = a.standard_id
-        LEFT JOIN pr_standard_price d ON d.standard_id = a.standard_id
-        LEFT JOIN pr_expense_item e ON e.item_code = c.item_code
-            AND e.item_group = c.item_group
-            AND e.org_id = c.org_id
-        SET a.standard_price = IF(a.max_price = 0,
-            ROUND(${a.price_formula}, e.price_precision),
-            IF(ROUND(${a.price_formula}, e.price_precision) >= a.max_price,
-                a.max_price,
-                ROUND(${a.price_formula}, e.price_precision)))
-        WHERE a.org_id = #{orgId}
-          AND a.is_calc = '0'
-          AND a.del_flag = '0'
+        UPDATE pr_expense
+            LEFT JOIN pr_house ON pr_house.id = pr_expense.house_id
+            LEFT JOIN pr_standard ON pr_standard.id = pr_expense.standard_id
+            LEFT JOIN pr_standard_price ON pr_standard_price.standard_id = pr_expense.standard_id
+            LEFT JOIN pr_expense_item ON pr_expense_item.item_code = pr_standard.item_code
+                AND pr_expense_item.item_group = pr_standard.item_group
+                AND pr_expense_item.org_id = pr_standard.org_id
+        SET pr_expense.standard_price = IF(pr_expense.max_price = 0,
+            ROUND(${priceFormula}, pr_expense_item.price_precision),
+            IF(ROUND(${priceFormula}, pr_expense_item.price_precision) >= pr_expense.max_price,
+                pr_expense.max_price,
+                ROUND(${priceFormula}, pr_expense_item.price_precision)))
+        WHERE pr_expense.org_id = #{orgId}
+          AND pr_expense.is_calc = '0'
+          AND pr_expense.price_formula = #{priceFormula}
+          AND pr_expense.del_flag = '0'
     </update>
 
+    <!-- 公式来自数据库列值，通过 ${} 做字符串替换拼入 SQL（老系统设计） -->
     <update id="updateFormula">
-        UPDATE pr_expense a
-        LEFT JOIN pr_house b ON b.id = a.house_id
-        LEFT JOIN pr_standard c ON c.id = a.standard_id
-        LEFT JOIN pr_standard_price d ON d.standard_id = a.standard_id
-        LEFT JOIN pr_expense_item e ON e.item_group = c.item_group
-            AND e.item_code = c.item_code
-            AND e.org_id = c.org_id
-        SET a.is_calc = '1',
-            a.receivable = IF(a.max_money > '0' AND ROUND(${a.money_formula}, e.money_precision) >= a.max_money,
-                a.max_money,
-                ROUND(${a.money_formula}, e.money_precision)),
-            a.final_money = ROUND(
-                IF(a.max_money > '0' AND ROUND(${a.money_formula}, e.money_precision) >= a.max_money,
-                    a.max_money,
-                    ROUND(${a.money_formula}, e.money_precision))
-                - a.preferential - a.deduction + a.latefee,
-                e.money_precision)
-        WHERE a.org_id = #{orgId}
-          AND a.is_calc = '0'
-          AND a.del_flag = '0'
+        UPDATE pr_expense
+            LEFT JOIN pr_house ON pr_house.id = pr_expense.house_id
+            LEFT JOIN pr_standard ON pr_standard.id = pr_expense.standard_id
+            LEFT JOIN pr_standard_price ON pr_standard_price.standard_id = pr_expense.standard_id
+            LEFT JOIN pr_expense_item ON pr_expense_item.item_group = pr_standard.item_group
+                AND pr_expense_item.item_code = pr_standard.item_code
+                AND pr_expense_item.org_id = pr_standard.org_id
+        SET pr_expense.is_calc = '1',
+            pr_expense.receivable = IF(pr_expense.max_money > '0' AND ROUND(${moneyFormula}, pr_expense_item.money_precision) >= pr_expense.max_money,
+                pr_expense.max_money,
+                ROUND(${moneyFormula}, pr_expense_item.money_precision)),
+            pr_expense.final_money = ROUND(
+                IF(pr_expense.max_money > '0' AND ROUND(${moneyFormula}, pr_expense_item.money_precision) >= pr_expense.max_money,
+                    pr_expense.max_money,
+                    ROUND(${moneyFormula}, pr_expense_item.money_precision))
+                - pr_expense.preferential - pr_expense.deduction + pr_expense.latefee,
+                pr_expense_item.money_precision)
+        WHERE pr_expense.org_id = #{orgId}
+          AND pr_expense.is_calc = '0'
+          AND pr_expense.money_formula = #{moneyFormula}
+          AND pr_expense.del_flag = '0'
     </update>
 
+    <!-- 公式来自数据库列值，通过 ${} 做字符串替换拼入 SQL（老系统设计） -->
     <update id="updateFormulaCw">
-        UPDATE pr_expense a
-        LEFT JOIN pr_house b ON b.id = a.house_id
-        LEFT JOIN pm_standard c ON c.id = a.standard_id
-        SET a.is_calc = '1',
-            a.receivable = IF(a.max_money > '0' AND ROUND(${a.money_formula}, '2') >= a.max_money,
-                a.max_money,
-                ROUND(${a.money_formula}, '2')),
-            a.final_money = ROUND(
-                IF(a.max_money > '0' AND ROUND(${a.money_formula}, '2') >= a.max_money,
-                    a.max_money,
-                    ROUND(${a.money_formula}, '2'))
-                - a.preferential - a.deduction + a.latefee, '2')
-        WHERE a.org_id = #{orgId}
-          AND a.is_calc = '0'
-          AND a.del_flag = '0'
+        UPDATE pr_expense
+            LEFT JOIN pr_house ON pr_house.id = pr_expense.house_id
+            LEFT JOIN pm_standard ON pm_standard.id = pr_expense.standard_id
+        SET pr_expense.is_calc = '1',
+            pr_expense.receivable = IF(pr_expense.max_money > '0' AND ROUND(${moneyFormula}, '2') >= pr_expense.max_money,
+                pr_expense.max_money,
+                ROUND(${moneyFormula}, '2')),
+            pr_expense.final_money = ROUND(
+                IF(pr_expense.max_money > '0' AND ROUND(${moneyFormula}, '2') >= pr_expense.max_money,
+                    pr_expense.max_money,
+                    ROUND(${moneyFormula}, '2'))
+            - pr_expense.preferential - pr_expense.deduction + pr_expense.latefee, '2')
+        WHERE pr_expense.org_id = #{orgId}
+          AND pr_expense.is_calc = '0'
+          AND pr_expense.money_formula = #{moneyFormula}
+          AND pr_expense.del_flag = '0'
     </update>
 
     <update id="updateHousePayStatus">

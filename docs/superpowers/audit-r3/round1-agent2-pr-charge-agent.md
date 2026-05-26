@@ -33,7 +33,7 @@
 | /property/expense/insertData | POST | /thermal/property/expense/heat | POST | MATCH | 取暖费生成 |
 | /property/expense/insertDatallCw | POST | /thermal/property/expense/parking | POST | MATCH | 车位费用生成 |
 | /property/expense/insertDatall | POST | /thermal/property/expense/batch | POST | MATCH | 批量生成费用 |
-| /property/expense/insertAllDatall | POST | - | - | MISSING | 混合费用生成（固定+临时+取暖） |
+| /property/expense/insertAllDatall | POST | /thermal/property/expense/all | POST | MATCH | 混合费用生成（固定+临时+取暖），2026-05-25 已补齐 |
 | /property/expense/insertDataLs | POST | /thermal/property/expense/temporary | POST | MATCH | 临时费用生成 |
 | /property/expense/setPreferential | POST | /thermal/property/expense/preferential | PUT | MATCH | 设置优惠 |
 | /property/expense/setIsFree | POST | /thermal/property/expense/free | PUT | MATCH | 设置免收 |

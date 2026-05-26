@@ -52,20 +52,26 @@ public interface PrExpenseMapper extends BaseMapperPlus<PrExpense, PrExpenseVo> 
      */
     int updateStepPrice(@Param("orgId") String orgId);
 
-    /**
-     * 批量更新金额
-     */
-    int updateMoney(@Param("orgId") String orgId);
+    /** 查询不同的价格公式 */
+    List<String> selectDistinctPriceFormula(@Param("orgId") String orgId);
+
+    /** 查询不同的金额公式 */
+    List<String> selectDistinctMoneyFormula(@Param("orgId") String orgId);
 
     /**
-     * 批量计算公式
+     * 按公式批量更新单价
      */
-    int updateFormula(@Param("orgId") String orgId);
+    int updateMoney(@Param("orgId") String orgId, @Param("priceFormula") String priceFormula);
 
     /**
-     * 批量计算公式（车位）
+     * 按公式批量计算应收
      */
-    int updateFormulaCw(@Param("orgId") String orgId);
+    int updateFormula(@Param("orgId") String orgId, @Param("moneyFormula") String moneyFormula);
+
+    /**
+     * 按公式批量计算应收（车位）
+     */
+    int updateFormulaCw(@Param("orgId") String orgId, @Param("moneyFormula") String moneyFormula);
 
     /**
      * 设置房屋缴费状态

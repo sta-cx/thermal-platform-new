@@ -708,14 +708,14 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Override
     public boolean recalculate(String orgId) {
         boolean a = baseMapper.updateStepPrice(orgId) > 0;
-        a &= baseMapper.updateMoney(orgId) > 0;
-        a &= baseMapper.updateFormula(orgId) > 0;
+        a &= updatePrice(orgId);
+        a &= updateFormula(orgId);
         return a;
     }
 
     @Override
     public boolean recalculateCw(String orgId) {
-        return baseMapper.updateFormulaCw(orgId) > 0;
+        return updateFormulaCw(orgId);
     }
 
     @Override
@@ -767,17 +767,35 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean updatePrice(String orgId) {
-        return baseMapper.updateMoney(orgId) > 0;
+        List<String> formulas = baseMapper.selectDistinctPriceFormula(orgId);
+        if (formulas == null || formulas.isEmpty()) return false;
+        boolean result = false;
+        for (String formula : formulas) {
+            result |= baseMapper.updateMoney(orgId, formula) > 0;
+        }
+        return result;
     }
 
     @Override
     public boolean updateFormula(String orgId) {
-        return baseMapper.updateFormula(orgId) > 0;
+        List<String> formulas = baseMapper.selectDistinctMoneyFormula(orgId);
+        if (formulas == null || formulas.isEmpty()) return false;
+        boolean result = false;
+        for (String formula : formulas) {
+            result |= baseMapper.updateFormula(orgId, formula) > 0;
+        }
+        return result;
     }
 
     @Override
     public boolean updateFormulaCw(String orgId) {
-        return baseMapper.updateFormulaCw(orgId) > 0;
+        List<String> formulas = baseMapper.selectDistinctMoneyFormula(orgId);
+        if (formulas == null || formulas.isEmpty()) return false;
+        boolean result = false;
+        for (String formula : formulas) {
+            result |= baseMapper.updateFormulaCw(orgId, formula) > 0;
+        }
+        return result;
     }
 
     @Override

@@ -28,7 +28,7 @@
 | /property/expense/insertData | POST | /thermal/property/expense/heat | POST | MATCH | 生成取暖费明细 |
 | /property/expense/insertDatallCw | POST | /thermal/property/expense/parking | POST | MATCH | 批量生成车位费用 |
 | /property/expense/insertDatall | POST | /thermal/property/expense/batch | POST | MATCH | 批量生成费用明细 |
-| /property/expense/insertAllDatall | POST | - | - | MISSING | 单个生成费用明细(混合类型) |
+| /property/expense/insertAllDatall | POST | /thermal/property/expense/all | POST | MATCH | 单个生成费用明细(混合类型)，2026-05-25 已补齐 |
 | /property/expense/insertDataLs | POST | /thermal/property/expense/temporary | POST | MATCH | 生成临时费用明细 |
 | /property/expense/setPreferential | POST | /thermal/property/expense/preferential | PUT | MATCH | 设置优惠 |
 | /property/expense/setIsFree | POST | /thermal/property/expense/free | PUT | MATCH | 设置免收 |
@@ -46,7 +46,7 @@
 | /property/expense/pageListWechat | POST | /thermal/property/expense/wechat | GET | MATCH | 微信费用订单查询 |
 
 #### 业务逻辑差异
-- **缺失功能**: `insertAllDatall` (混合类型费用生成：固定+临时+取暖费)
+- **已补齐功能**: `insertAllDatall` (混合类型费用生成：固定+临时+取暖费)，对应新端点 `POST /thermal/property/expense/all`
 - **新系统优势**:
   - 增加了 `@SaCheckPermission` 权限校验
   - 增加了 `@Log` 操作日志记录

@@ -83,7 +83,7 @@
 | insertData | insertHeat | ✅ 完全匹配 | 语义更清晰 |
 | insertDatallCw | insertParking | ✅ 完全匹配 | 语义更清晰 |
 | insertDatall | insertBatch | ✅ 完全匹配 | 语义更清晰 |
-| insertAllDatall | - | ❌ 缺失 | 单个生成费用端点缺失 |
+| insertAllDatall | insertAll | ✅ 已补齐 | 新端点 `/thermal/property/expense/all` |
 | insertDataLs | insertTemporary | ✅ 完全匹配 | 语义更清晰 |
 | setPreferential | setPreferential | ✅ 完全匹配 | HTTP 方法优化 (POST→PUT) |
 | setIsFree | setIsFree | ✅ 完全匹配 | HTTP 方法优化 |
@@ -101,7 +101,7 @@
 | pageListWechat | wechatOrderList | ✅ 完全匹配 | HTTP 方法优化 |
 
 ### 关键发现
-- **业务逻辑完整度**: 95% - insertAllDatall 端点缺失，但功能可由其他端点组合实现
+- **业务逻辑完整度**: 约 96% - insertAllDatall 已补齐，仍需接口/落库回归验证
 - **Service 层实现**: 新系统 Service 实现了核心费用计算逻辑，包括阶梯计价、公式计算等
 - **数据精度处理**: 新系统保留了金额精度处理逻辑（四舍五入、进位、截位）
 
@@ -577,7 +577,7 @@
 ## 关键发现汇总
 
 ### 1. 完全缺失的端点（7个）
-1. **PrExpenseController.insertAllDatall** - 单个生成费用（可由 insertDatall + insertDataLs 组合实现）
+1. ~~**PrExpenseController.insertAllDatall**~~ - 已补齐为 `POST /thermal/property/expense/all`，剩余接口/落库回归验证
 2. **PrTransactionRecordController.getProperty** - 物业费报表（独立统计功能）
 3. **PrTransactionRecordController.findMeterNotChargedRecord** - 水电表未写卡记录查询
 4. **PrTransactionRecordController.findMeterLastRecord** - 电卡最后一条记录查询
