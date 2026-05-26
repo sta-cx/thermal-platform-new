@@ -3,6 +3,7 @@ package org.sdkj.thermal.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
@@ -28,7 +29,7 @@ public class PrStrategyController extends BaseController {
     @SaCheckPermission("thermal:property:strategy:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<Page<PrStrategyVo>> list(
+    public R<IPage<PrStrategyVo>> list(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String orgId,
             @RequestParam(defaultValue = "1") Integer pageNum,
@@ -45,7 +46,7 @@ public class PrStrategyController extends BaseController {
     @SaCheckLogin
     @GetMapping("/{id}")
     public R<PrStrategyVo> getById(@PathVariable Long id) {
-        return R.ok(strategyService.selectVoById(id));
+        return R.ok(MapstructUtils.convert(strategyService.getById(id), PrStrategyVo.class));
     }
 
     @SaCheckPermission("thermal:property:strategy:add")
