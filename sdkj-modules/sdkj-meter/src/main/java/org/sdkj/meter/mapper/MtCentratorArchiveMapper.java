@@ -11,25 +11,10 @@ import org.sdkj.meter.domain.vo.MtCentratorArchiveVo;
  */
 public interface MtCentratorArchiveMapper extends BaseMapperPlus<MtCentratorArchive, MtCentratorArchiveVo> {
 
-    /**
-     * 统计已分配给其他公司的仪表数量
-     * @param archiveId 档案ID
-     * @return 分配数量
-     */
-    int countAllocatedToOtherCompany(@Param("archiveId") Long archiveId);
-
-    /**
-     * 删除仪表匹配记录
-     * @param archiveId 档案ID
-     * @return 删除数量
-     */
+    /** 删除仪表匹配记录 */
     int deleteMeterMatch(@Param("archiveId") Long archiveId);
 
-    /**
-     * 将仪表分配给代理商公司
-     * @param entity 档案实体（包含createBy）
-     * @return 插入数量
-     */
+    /** 新增档案时写入 mt_meter_match */
     int insertMeterToAgent(@Param("entity") MtCentratorArchive entity);
 
 }

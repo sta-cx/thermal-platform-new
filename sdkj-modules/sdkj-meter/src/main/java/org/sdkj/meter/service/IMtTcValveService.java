@@ -24,10 +24,10 @@ public interface IMtTcValveService extends IService<MtTcValve> {
     TableDataInfo<MtTcValveVo> selectPageList(LambdaQueryWrapper<MtTcValve> lqw, PageQuery pageQuery);
 
     /**
-     * 根据当前用户所属公司查询阀门列表
+     * 查询所有已建立 mt_meter_match 关联的阀门
      * @return 阀门列表
      */
-    List<MtTcValveVo> selectValvesByUserCompany();
+    List<MtTcValveVo> selectAllMatchedValves();
 
     /**
      * 条件查询阀门列表

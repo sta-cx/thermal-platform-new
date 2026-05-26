@@ -57,15 +57,15 @@ public class MtTcValveController extends BaseController {
     }
 
     /**
-     * 查询当前用户所属公司的阀门列表
+     * 查询所有已建立 mt_meter_match 关联的阀门
      * 旧端点: GET /tcValve/list
      * 新端点: GET /thermal/meter/valve/list
      */
     @SaCheckPermission("thermal:meter:valve:list")
     @SaCheckLogin
     @GetMapping("/list")
-    public R<List<MtTcValveVo>> listByUserCompany() {
-        return R.ok(valveService.selectValvesByUserCompany());
+    public R<List<MtTcValveVo>> listAllMatched() {
+        return R.ok(valveService.selectAllMatchedValves());
     }
 
     /**
