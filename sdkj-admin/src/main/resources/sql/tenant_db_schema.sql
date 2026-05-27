@@ -702,28 +702,6 @@ CREATE TABLE `pm_parking_space` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='车位';
 
-CREATE TABLE `pr_abnormal_record` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `house_id` bigint DEFAULT NULL,
-  `meter_id` bigint DEFAULT NULL,
-  `abnormal_type` varchar(32) DEFAULT NULL COMMENT '异常类型',
-  `description` text COMMENT '异常描述',
-  `handle_status` varchar(10) DEFAULT '0' COMMENT '处理状态(0待处理/1已处理)',
-  `handle_result` varchar(255) DEFAULT NULL COMMENT '处理结果',
-  `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  KEY `idx_org_id` (`org_id`),
-  PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`),
-  KEY `idx_meter_id` (`meter_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='异常记录表';
-
 CREATE TABLE `pr_account_balance` (
   `id` bigint NOT NULL COMMENT '主键',
   `user_id` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
@@ -2063,94 +2041,6 @@ CREATE TABLE `pr_import_valve` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-CREATE TABLE `pr_inspection_equipment` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `equipment_name` varchar(128) DEFAULT NULL COMMENT '设备名称',
-  `equipment_code` varchar(64) DEFAULT NULL COMMENT '设备编码',
-  `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-  KEY `idx_org_id` (`org_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='巡检设备';
-
-CREATE TABLE `pr_inspection_person` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `name` varchar(64) DEFAULT NULL COMMENT '巡检人姓名',
-  `phone` varchar(32) DEFAULT NULL COMMENT '巡检人手机号',
-  `type` varchar(32) DEFAULT NULL COMMENT '工种',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='巡检人员表';
-
-CREATE TABLE `pr_inspection_plan` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `name` varchar(128) DEFAULT NULL COMMENT '计划名称',
-  `start_time` datetime DEFAULT NULL COMMENT '开始时间',
-  `end_time` datetime DEFAULT NULL COMMENT '结束时间',
-  `equipment_id` text COMMENT '设备ID集合',
-  `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  KEY `idx_org_id` (`org_id`),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='巡检计划表';
-
-CREATE TABLE `pr_inspection_record` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `plan_id` bigint DEFAULT NULL,
-  `person_id` bigint DEFAULT NULL,
-  `person_name` varchar(64) DEFAULT NULL COMMENT '巡检人员姓名',
-  `equipment_id` bigint DEFAULT NULL,
-  `equipment_name` varchar(128) DEFAULT NULL COMMENT '设备名称',
-  `result` varchar(32) DEFAULT NULL COMMENT '巡检结果',
-  `content` text COMMENT '巡检内容',
-  `images` text COMMENT '巡检图片',
-  `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  KEY `idx_org_id` (`org_id`),
-  PRIMARY KEY (`id`)
-  KEY `idx_plan_id` (`plan_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='巡检记录表';
-
-CREATE TABLE `pr_notice` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `title` varchar(255) DEFAULT NULL COMMENT '标题',
-  `content` text COMMENT '内容',
-  `type` varchar(32) DEFAULT NULL COMMENT '类型',
-  `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  KEY `idx_org_id` (`org_id`),
-  PRIMARY KEY (`id`)
-  KEY `idx_create_time` (`create_time`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='通知公告表';
-
 CREATE TABLE `pr_operate_card_log` (
   `id` bigint NOT NULL COMMENT '主键',
   `meter_id` bigint DEFAULT NULL,
@@ -2274,27 +2164,6 @@ CREATE TABLE `pr_options_heat` (
   KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='供热选项';
-
-CREATE TABLE `pr_pet` (
-  `id` bigint NOT NULL COMMENT '主键',
-  `house_id` bigint DEFAULT NULL,
-  `pet_name` varchar(64) DEFAULT NULL COMMENT '宠物名称',
-  `pet_type` varchar(32) DEFAULT NULL COMMENT '宠物类型',
-  `breed` varchar(64) DEFAULT NULL COMMENT '品种',
-  `color` varchar(32) DEFAULT NULL COMMENT '颜色',
-  `vaccine_status` varchar(10) DEFAULT NULL COMMENT '疫苗状态(0未接种/1已接种)',
-  `org_id` varchar(32) DEFAULT NULL COMMENT '小区ID',
-  `create_dept` bigint DEFAULT NULL COMMENT '创建部门',
-  `create_by` bigint DEFAULT NULL COMMENT '创建者',
-  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
-  `update_by` bigint DEFAULT NULL,
-  `update_time` datetime DEFAULT NULL COMMENT '修改时间',
-  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志',
-  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
-  KEY `idx_org_id` (`org_id`),
-  PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='宠物管理表';
 
 CREATE TABLE `pr_print_template` (
   `id` bigint NOT NULL COMMENT '主键',
