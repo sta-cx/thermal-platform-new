@@ -2,6 +2,7 @@ package org.sdkj.thermal.service.impl;
 
 import org.sdkj.common.core.exception.ServiceException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.domain.PrAccountBalance;
 import org.sdkj.thermal.domain.PrTransactionRecord;
@@ -26,6 +27,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
  * 迁移自旧系统 PrAccountServiceImpl
  */
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PrAccountServiceImpl implements IPrAccountService {
 
@@ -412,6 +414,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
             }
             return Map.of("msg", "成功导入 " + count + " 条记录", "count", count);
         } catch (Exception e) {
+            log.error("PrAccountServiceImpl importExcelData failed", e);
             return Map.of("msg", "导入失败: " + e.getMessage());
         }
     }

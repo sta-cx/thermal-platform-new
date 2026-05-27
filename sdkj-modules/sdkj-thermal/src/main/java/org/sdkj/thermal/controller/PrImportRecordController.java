@@ -3,6 +3,7 @@ package org.sdkj.thermal.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.idev.excel.EasyExcel;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -21,6 +22,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -61,6 +63,7 @@ public class PrImportRecordController extends BaseController {
             objects = (List<PrImportRecord>) (List<?>) EasyExcel.read(file.getInputStream()).head(PrImportRecord.class)
                 .sheet(0).headRowNumber(2).doReadSync();
         } catch (Exception e) {
+            log.error("PrImportRecordController failed", e);
             return R.fail("文件解析失败: " + e.getMessage());
         }
         try {
@@ -69,6 +72,7 @@ public class PrImportRecordController extends BaseController {
             String result = service.check(r);
             return R.ok(result);
         } catch (Exception e) {
+            log.error("PrImportRecordController failed", e);
             return R.fail("导入失败: " + e.getMessage());
         }
     }

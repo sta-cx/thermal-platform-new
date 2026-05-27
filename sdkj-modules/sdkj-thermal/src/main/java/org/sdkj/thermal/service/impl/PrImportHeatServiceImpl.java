@@ -3,6 +3,7 @@ package org.sdkj.thermal.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.PrImportHeat;
 import org.sdkj.thermal.mapper.PrImportHeatMapper;
 import org.sdkj.thermal.service.IPrImportHeatService;
@@ -32,7 +33,7 @@ public class PrImportHeatServiceImpl extends ServiceImpl<PrImportHeatMapper, PrI
             for (PrImportHeat heat : objects) {
                 heat.setCreateBy(create);
                 heat.setCreateTime(date);
-                heat.setType(0);
+                heat.setType(ThermalTaskConstants.IMPORT_TYPE_DEFAULT);
 
                 Integer dtuType = heat.getDtuType();
                 if (dtuType == null || dtuType < 0 || dtuType > 2) {

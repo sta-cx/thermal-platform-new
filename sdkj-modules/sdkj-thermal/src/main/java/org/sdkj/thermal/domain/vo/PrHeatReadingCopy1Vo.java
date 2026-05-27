@@ -1,6 +1,8 @@
 package org.sdkj.thermal.domain.vo;
 
 import lombok.Data;
+import org.sdkj.common.sensitive.annotation.Sensitive;
+import org.sdkj.common.sensitive.core.SensitiveStrategy;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -102,6 +104,7 @@ public class PrHeatReadingCopy1Vo implements Serializable {
     private Date createTime;
 
     /** 手机号 */
+    @Sensitive(strategy = SensitiveStrategy.PHONE)
     private String phone;
 
     /** 用户名 */

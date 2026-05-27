@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.PrOptionsHeat;
@@ -135,8 +136,8 @@ public class ValveStatusQueryJob implements Job {
             task.setMeterArcCode(archive.getMeterArcCode());
             task.setMeterId(archive.getId());
             task.setMeterNum(archive.getMeterNum());
-            task.setStatus(1);
-            task.setInstructionStatus(0);
+            task.setStatus(ThermalTaskConstants.PERFORM_SENT);
+            task.setInstructionStatus(ThermalTaskConstants.PERFORM_PENDING);
             task.setImei(archive.getImeiNum());
             task.setDtuNum(archive.getDtuNum());
             task.setConcentratorCode(archive.getConcentratorCode());

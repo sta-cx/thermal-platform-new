@@ -208,7 +208,7 @@
     </select>
 
     <!-- 更新任务执行次数 -->
-    <update id="updateHtasks">
+    <update id="updateHtTasks">
         UPDATE ht_tasks SET number = number + 1, last_time = NOW() WHERE id = CAST(#{taskId} AS UNSIGNED)
     </update>
 
@@ -601,7 +601,7 @@
     <!-- ==================== Step 4: updateInstructionGeneration ==================== -->
 
     <!-- 更新异常记录（继续执行）：失败记录重试次数+1 -->
-    <update id="updateInstructionGenerationyC">
+    <update id="updateInstructionGenerationYC">
         UPDATE ht_tasks_perform_ls
         SET number = IF(number &lt; 127, number + 1, number)
         WHERE id = #{tasksId}
@@ -902,7 +902,7 @@
     </delete>
 
     <!-- 插入执行记录（平均回水/单一策略模式） -->
-    <insert id="inserHtTasksPerformPj">
+    <insert id="insertHtTasksPerformPj">
         INSERT INTO ht_tasks_perform (
             id, instruction_id, instruction_type, instruction,
             number, intervall, unit, duration, org_id,
@@ -949,7 +949,7 @@
     </insert>
 
     <!-- 插入执行记录（普通模式） -->
-    <insert id="inserHtTasksPerform">
+    <insert id="insertHtTasksPerform">
         INSERT INTO ht_tasks_perform (
             id, instruction_id, instruction_type, instruction,
             number, intervall, unit, duration, org_id,
@@ -996,7 +996,7 @@
     </insert>
 
     <!-- 插入已完成的执行记录 -->
-    <insert id="inserHtTasksPerformW">
+    <insert id="insertHtTasksPerformW">
         INSERT INTO ht_tasks_perform (
             id, instruction_id, instruction_type, instruction,
             number, intervall, unit, duration, org_id,
@@ -1074,7 +1074,7 @@
     </delete>
 
     <!-- 备份执行记录到last表 -->
-    <insert id="inserHtTasksPerformLast">
+    <insert id="insertHtTasksPerformLast">
         INSERT INTO ht_tasks_perform_last (
             id, instruction_id, instruction_type, instruction,
             number, intervall, unit, duration, org_id,
@@ -1127,7 +1127,7 @@
     </insert>
 
     <!-- 清空临时表 -->
-    <delete id="deleteTtTasksPerformTemp">
+    <delete id="deleteHtTasksPerformTemp">
         DELETE FROM ht_tasks_perform_ls WHERE tasks_id = #{tasksId}
     </delete>
 

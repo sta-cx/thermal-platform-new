@@ -8,6 +8,7 @@ import org.sdkj.thermal.mapper.HtStrategyMapper;
 import org.sdkj.thermal.mapper.HtTasksMapper;
 import org.sdkj.thermal.service.IHtTasksService;
 import org.sdkj.thermal.quartz.ThermalJobManager;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,7 +68,7 @@ public class ThermalRegulationEngine {
         }
         if (scopeType == null) {
             log.warn("Task {} has no scopeType, defaulting to 1", taskId);
-            scopeType = 1;
+            scopeType = ThermalTaskConstants.SCOPE_HOUSE_VALVE;
         }
 
         // 2. Load strategy
@@ -93,12 +94,10 @@ public class ThermalRegulationEngine {
         double average = 0.0;
         if (task.getAdjustBasis() != null) {
             int adjustBasis = task.getAdjustBasis();
-            if (adjustBasis == 0 || adjustBasis == 1 || adjustBasis == 3 || adjustBasis == 4) {
-                if (scopeType == 1 || scopeType == 3) {
-                    // House valve average return water temperature
+            if (adjustBasis == ThermalTaskConstants.ADJUST_SINGLE_STRATEGY || adjustBasis == ThermalTaskConstants.ADJUST_RETURN_WATER || adjustBasis == ThermalTaskConstants.ADJUST_AVG_RETURN_WATER || adjustBasis == ThermalTaskConstants.ADJUST_RETURN_WATER_COEFF) {
+                if (scopeType == ThermalTaskConstants.SCOPE_HOUSE_VALVE || scopeType == ThermalTaskConstants.SCOPE_DTU_BROADCAST) {
                     average = tasksMapper.queryHtTasksPJHS(taskId);
-                } else if (scopeType == 2) {
-                    // Unit valve average return water temperature
+                } else if (scopeType == ThermalTaskConstants.SCOPE_UNIT_VALVE) {
                     average = tasksMapper.queryHtTasksPJHSD(taskId);
                 }
             }
@@ -115,9 +114,9 @@ public class ThermalRegulationEngine {
 
         // 7. Check balance rate
         int currentBalanceRate = 0;
-        if (scopeType == 1 || scopeType == 2) {
+        if (scopeType == ThermalTaskConstants.SCOPE_HOUSE_VALVE || scopeType == ThermalTaskConstants.SCOPE_UNIT_VALVE) {
             currentBalanceRate = tasksMapper.queryStandard(taskId);
-        } else if (scopeType == 3) {
+        } else if (scopeType == ThermalTaskConstants.SCOPE_DTU_BROADCAST) {
             tasksMapper.updateDtuScopeStatus(taskId);
             currentBalanceRate = tasksMapper.queryDtuStandard(taskId);
         }
@@ -126,9 +125,9 @@ public class ThermalRegulationEngine {
         boolean shouldRegulate = false;
         if (task.getStandard() != null && task.getStandard() > 0) {
             // Balance rate not reached, or adjustBasis is 0 (single strategy), or first control
-            boolean isUseFirstControl = task.getIsUseFirstControl() != null && task.getIsUseFirstControl() == 1;
+            boolean isUseFirstControl = task.getIsUseFirstControl() != null && task.getIsUseFirstControl() == ThermalTaskConstants.FLAG_ON;
             boolean isFirstRun = task.getNumber() == null || task.getNumber() == 0;
-            if (task.getStandard() >= currentBalanceRate || task.getAdjustBasis() == null || task.getAdjustBasis() == 0
+            if (task.getStandard() >= currentBalanceRate || task.getAdjustBasis() == null || task.getAdjustBasis() == ThermalTaskConstants.ADJUST_SINGLE_STRATEGY
                 || (isUseFirstControl && isFirstRun)) {
                 shouldRegulate = true;
             }
@@ -147,7 +146,7 @@ public class ThermalRegulationEngine {
         int maxNumbers = task.getNums() != null ? task.getNums() : Integer.MAX_VALUE;
 
         // 9. Execute regulation based on scopeType
-        if (scopeType == 1 || scopeType == 2 || scopeType == 4) {
+        if (scopeType == ThermalTaskConstants.SCOPE_HOUSE_VALVE || scopeType == ThermalTaskConstants.SCOPE_UNIT_VALVE || scopeType == ThermalTaskConstants.SCOPE_MIXED) {
             // Single valve regulation: 5-step process
             if (currentNumber <= maxNumbers) {
                 executeSingleValveRegulation(taskId, task, strategy, average);
@@ -155,7 +154,7 @@ public class ThermalRegulationEngine {
                 log.info("Task {} regulation count reached limit ({}/{}), skipping instruction generation",
                     taskId, currentNumber, maxNumbers);
             }
-        } else if (scopeType == 3) {
+        } else if (scopeType == ThermalTaskConstants.SCOPE_DTU_BROADCAST) {
             // DTU broadcast regulation
             if (currentNumber < maxNumbers) {
                 executeDtuRegulation(task);
@@ -183,21 +182,19 @@ public class ThermalRegulationEngine {
         log.debug("Step 1 complete: cleared temp table for task {}", tasksId);
 
         // Step 2: Populate temp table (branch by adjustBasis)
-        int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : 0;
-        int scopeType = task.getScopeType() != null ? task.getScopeType() : 1;
+        int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : ThermalTaskConstants.ADJUST_SINGLE_STRATEGY;
+        int scopeType = task.getScopeType() != null ? task.getScopeType() : ThermalTaskConstants.SCOPE_HOUSE_VALVE;
 
-        if (adjustBasis == 3 || adjustBasis == 4) {
-            // Average return water temperature regulation
-            if (scopeType == 1 || scopeType == 4) {
+        if (adjustBasis == ThermalTaskConstants.ADJUST_AVG_RETURN_WATER || adjustBasis == ThermalTaskConstants.ADJUST_RETURN_WATER_COEFF) {
+            if (scopeType == ThermalTaskConstants.SCOPE_HOUSE_VALVE || scopeType == ThermalTaskConstants.SCOPE_MIXED) {
                 tasksMapper.insertHtTasksPerformLsHfPj(tasksId);
-            } else if (scopeType == 2) {
+            } else if (scopeType == ThermalTaskConstants.SCOPE_UNIT_VALVE) {
                 tasksMapper.insertHtTasksPerformLsDyPj(tasksId);
             }
         } else {
-            // adjustBasis 0 (single strategy) or 1 (return water temp) or others
-            if (scopeType == 1 || scopeType == 4) {
+            if (scopeType == ThermalTaskConstants.SCOPE_HOUSE_VALVE || scopeType == ThermalTaskConstants.SCOPE_MIXED) {
                 tasksMapper.insertHtTasksPerformLsHfPj(tasksId);
-            } else if (scopeType == 2) {
+            } else if (scopeType == ThermalTaskConstants.SCOPE_UNIT_VALVE) {
                 tasksMapper.insertHtTasksPerformLsDyPj(tasksId);
             }
         }
@@ -228,31 +225,28 @@ public class ThermalRegulationEngine {
      *   9 = regulation complete (temperature in range)
      */
     private void executeInstructionGeneration(Long tasksId, HtTasks task, HtStrategy strategy, double average) {
-        int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : 0;
+        int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : ThermalTaskConstants.ADJUST_SINGLE_STRATEGY;
 
         switch (adjustBasis) {
-            case 0:
+            case ThermalTaskConstants.ADJUST_SINGLE_STRATEGY:
                 // Single strategy: mark as complete when count exceeded
                 tasksMapper.setNumber(tasksId);
                 break;
 
-            case 1:
-                // Return water temperature regulation
+            case ThermalTaskConstants.ADJUST_RETURN_WATER:
                 tasksMapper.setOutTempNumberX(tasksId);
                 tasksMapper.setOutTempNumberD(tasksId);
                 tasksMapper.setOutTempW(tasksId);
                 break;
 
-            case 2:
-                // Room temperature regulation (legacy, no average)
+            case ThermalTaskConstants.ADJUST_ROOM_TEMP:
                 tasksMapper.setRoomTempNumberX(tasksId);
                 tasksMapper.setRoomTempNumberD(tasksId);
                 tasksMapper.setRoomTempW(tasksId);
                 break;
 
-            case 3:
-            case 4:
-                // Average return water temperature regulation
+            case ThermalTaskConstants.ADJUST_AVG_RETURN_WATER:
+            case ThermalTaskConstants.ADJUST_RETURN_WATER_COEFF:
                 tasksMapper.setRoomTempNumberXPJ(tasksId, average);
                 tasksMapper.setRoomTempNumberDPJ(tasksId, average);
                 tasksMapper.setRoomTempWPJ(tasksId, average);
@@ -274,9 +268,9 @@ public class ThermalRegulationEngine {
      */
     private void executeUpdateInstructionGeneration(Long tasksId, HtTasks task, HtStrategy strategy, double average) {
         // Update exception records (retry failed executions)
-        tasksMapper.updateInstructionGenerationyC(tasksId);
+        tasksMapper.updateInstructionGenerationYC(tasksId);
 
-        int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : 0;
+        int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : ThermalTaskConstants.ADJUST_SINGLE_STRATEGY;
         int currentNumber = task.getNumber() != null ? task.getNumber() : 0;
 
         if (task.getStrategyId() == null) {
@@ -287,8 +281,7 @@ public class ThermalRegulationEngine {
         }
 
         switch (adjustBasis) {
-            case 0:
-                // Single strategy: cycle through strategy_sub
+            case ThermalTaskConstants.ADJUST_SINGLE_STRATEGY:
                 if (currentNumber > 0) {
                     tasksMapper.updateInstructionGeneration(tasksId);
                 } else {
@@ -296,8 +289,7 @@ public class ThermalRegulationEngine {
                 }
                 break;
 
-            case 3:
-                // Average return water temperature regulation
+            case ThermalTaskConstants.ADJUST_AVG_RETURN_WATER:
                 if (currentNumber > 0) {
                     tasksMapper.updateInstructionGenerationDPJ(tasksId, average);
                     tasksMapper.updateInstructionGenerationXPJ(tasksId, average);
@@ -307,8 +299,7 @@ public class ThermalRegulationEngine {
                 }
                 break;
 
-            case 4:
-                // Return water temp with heating coefficient
+            case ThermalTaskConstants.ADJUST_RETURN_WATER_COEFF:
                 if (currentNumber > 0) {
                     tasksMapper.updateInstructionGenerationDPJ(tasksId, average);
                     tasksMapper.updateInstructionGenerationXPJ(tasksId, average);
@@ -339,7 +330,7 @@ public class ThermalRegulationEngine {
      * - Cleaning up temp table
      */
     private void executeInsertHtTasksPerform(Long tasksId, HtTasks task, HtStrategy strategy, double average) {
-        int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : 0;
+        int adjustBasis = task.getAdjustBasis() != null ? task.getAdjustBasis() : ThermalTaskConstants.ADJUST_SINGLE_STRATEGY;
 
         // Boundary checks for valve angle limits
         if (task.getStrategyId() == null) {
@@ -348,13 +339,13 @@ public class ThermalRegulationEngine {
             tasksMapper.updateInstructionGenerationHPEQUJ(tasksId);
         } else {
             switch (adjustBasis) {
-                case 0:
-                case 3:
+                case ThermalTaskConstants.ADJUST_SINGLE_STRATEGY:
+                case ThermalTaskConstants.ADJUST_AVG_RETURN_WATER:
                     tasksMapper.updateInstructionGenerationDPJMax(tasksId, average);
                     tasksMapper.updateInstructionGenerationHPEQUJ(tasksId);
                     break;
 
-                case 4:
+                case ThermalTaskConstants.ADJUST_RETURN_WATER_COEFF:
                     tasksMapper.updateInstructionGenerationDPJMax(tasksId, average);
                     tasksMapper.updateInstructionGenerationHPEQUJ(tasksId);
                     break;
@@ -371,26 +362,26 @@ public class ThermalRegulationEngine {
         tasksMapper.deleteHtTasksPerform0(tasksId);
 
         // Insert finalized records into perform table
-        if (adjustBasis == 3 || adjustBasis == 0 || adjustBasis == 4) {
-            tasksMapper.inserHtTasksPerformPj(tasksId);
+        if (adjustBasis == ThermalTaskConstants.ADJUST_AVG_RETURN_WATER || adjustBasis == ThermalTaskConstants.ADJUST_SINGLE_STRATEGY || adjustBasis == ThermalTaskConstants.ADJUST_RETURN_WATER_COEFF) {
+            tasksMapper.insertHtTasksPerformPj(tasksId);
         } else {
-            tasksMapper.inserHtTasksPerform(tasksId);
-            tasksMapper.inserHtTasksPerformW(tasksId);
+            tasksMapper.insertHtTasksPerform(tasksId);
+            tasksMapper.insertHtTasksPerformW(tasksId);
         }
 
         // Insert alert records for anomalous entries
         tasksMapper.insertHtAlert(tasksId);
 
         // Update execution count on task
-        tasksMapper.updateHtasks(tasksId);
+        tasksMapper.updateHtTasks(tasksId);
 
         // Update scope status from temp table alert_type
         tasksMapper.updateHtScope(tasksId);
 
         // Backup to last table and clean up
         tasksMapper.deleteHtTasksPerformLast(tasksId);
-        tasksMapper.inserHtTasksPerformLast(tasksId);
-        tasksMapper.deleteTtTasksPerformTemp(tasksId);
+        tasksMapper.insertHtTasksPerformLast(tasksId);
+        tasksMapper.deleteHtTasksPerformTemp(tasksId);
     }
 
     /**
@@ -408,7 +399,7 @@ public class ThermalRegulationEngine {
         if (!success) {
             log.error("DTU regulation failed for task {}, terminating task", task.getId());
             try {
-                tasksService.changeStatus(task.getId(), 0);
+                tasksService.changeStatus(task.getId(), ThermalTaskConstants.TASK_STOPPED);
             } catch (Exception e) {
                 log.error("Failed to stop task {} after DTU regulation failure", task.getId(), e);
             }
@@ -424,7 +415,7 @@ public class ThermalRegulationEngine {
         // Update status and end time
         tasksService.lambdaUpdate()
             .eq(HtTasks::getId, taskId)
-            .set(HtTasks::getStatus, 0)
+            .set(HtTasks::getStatus, ThermalTaskConstants.TASK_STOPPED)
             .set(HtTasks::getEndTime, new java.util.Date())
             .update();
 

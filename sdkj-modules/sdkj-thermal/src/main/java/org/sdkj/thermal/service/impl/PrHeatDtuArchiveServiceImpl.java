@@ -121,6 +121,7 @@ public class PrHeatDtuArchiveServiceImpl extends ServiceImpl<PrHeatDtuArchiveMap
                 .headRowNumber(1)
                 .doReadSync();
         } catch (Exception e) {
+            log.error("PrHeatDtuArchiveServiceImpl operation failed", e);
             return R.fail("文件解析失败: " + e.getMessage());
         }
 

@@ -138,7 +138,7 @@ public interface HtTasksMapper extends BaseMapperPlus<HtTasks, HtTasksVo> {
     /**
      * 更新任务执行次数
      */
-    int updateHtasks(@Param("taskId") Long taskId);
+    int updateHtTasks(@Param("taskId") Long taskId);
 
     /**
      * 插入指令表每个阀门信息（广播方式，不下发，仅作为界面查询展示用）
@@ -230,7 +230,7 @@ public interface HtTasksMapper extends BaseMapperPlus<HtTasks, HtTasksVo> {
     // ---- Step 4: updateInstructionGeneration (next instruction determination) ----
 
     /** 更新异常记录（继续执行） */
-    int updateInstructionGenerationyC(@Param("tasksId") Long tasksId);
+    int updateInstructionGenerationYC(@Param("tasksId") Long tasksId);
 
     /** 无策略 - 调大指令 */
     int updateInstructionGenerationD(@Param("tasksId") Long tasksId);
@@ -280,13 +280,13 @@ public interface HtTasksMapper extends BaseMapperPlus<HtTasks, HtTasksVo> {
     int deleteHtTasksPerform0(@Param("tasksId") Long tasksId);
 
     /** 插入执行记录（平均回水/单一策略模式） */
-    int inserHtTasksPerformPj(@Param("tasksId") Long tasksId);
+    int insertHtTasksPerformPj(@Param("tasksId") Long tasksId);
 
     /** 插入执行记录（普通模式） */
-    int inserHtTasksPerform(@Param("tasksId") Long tasksId);
+    int insertHtTasksPerform(@Param("tasksId") Long tasksId);
 
     /** 插入已完成的执行记录 */
-    int inserHtTasksPerformW(@Param("tasksId") Long tasksId);
+    int insertHtTasksPerformW(@Param("tasksId") Long tasksId);
 
     /** 插入异常报警记录 */
     int insertHtAlert(@Param("tasksId") Long tasksId);
@@ -298,8 +298,8 @@ public interface HtTasksMapper extends BaseMapperPlus<HtTasks, HtTasksVo> {
     int deleteHtTasksPerformLast(@Param("tasksId") Long tasksId);
 
     /** 备份执行记录到last表 */
-    int inserHtTasksPerformLast(@Param("tasksId") Long tasksId);
+    int insertHtTasksPerformLast(@Param("tasksId") Long tasksId);
 
     /** 清空临时表 */
-    int deleteTtTasksPerformTemp(@Param("tasksId") Long tasksId);
+    int deleteHtTasksPerformTemp(@Param("tasksId") Long tasksId);
 }

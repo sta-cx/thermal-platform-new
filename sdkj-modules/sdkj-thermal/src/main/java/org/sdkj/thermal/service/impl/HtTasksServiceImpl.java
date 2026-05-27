@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.*;
 import org.sdkj.thermal.domain.vo.*;
 import org.sdkj.thermal.mapper.*;
@@ -82,7 +83,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     public boolean updateWithScope(HtTasks entity, List<Long> scopeIds) {
         // 在事务内检查状态，防止 TOCTOU 竞争
         HtTasks existing = getById(entity.getId());
-        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+        if (existing != null && existing.getStatus() != null && existing.getStatus() == ThermalTaskConstants.TASK_RUNNING) {
             throw new ServiceException("修改之前请先停止任务！");
         }
         boolean updated = updateById(entity);
@@ -107,7 +108,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     @Transactional(rollbackFor = Exception.class)
     public boolean removeById(java.io.Serializable id) {
         HtTasks existing = getById(id);
-        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+        if (existing != null && existing.getStatus() != null && existing.getStatus() == ThermalTaskConstants.TASK_RUNNING) {
             throw new ServiceException("删除前请先停止任务！");
         }
         removeFromScheduler((Long) id);
@@ -119,7 +120,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     public boolean removeByIds(java.util.Collection<?> idList) {
         for (Object id : idList) {
             HtTasks existing = getById((java.io.Serializable) id);
-            if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+            if (existing != null && existing.getStatus() != null && existing.getStatus() == ThermalTaskConstants.TASK_RUNNING) {
                 throw new ServiceException("任务[ID:" + id + "]正在运行，删除前请先停止！");
             }
         }
@@ -133,7 +134,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
         if (task == null) return false;
 
         try {
-            if (status == 1) {
+            if (status == ThermalTaskConstants.TASK_RUNNING) {
                 jobManager.resumeJob(id);
             } else {
                 jobManager.pauseJob(id);
@@ -150,7 +151,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     public boolean runTask(Long id) {
         HtTasks task = getById(id);
         if (task == null) return false;
-        if (task.getStatus() == null || task.getStatus() != 1) {
+        if (task.getStatus() == null || task.getStatus() != ThermalTaskConstants.TASK_RUNNING) {
             throw new ServiceException("请先启动任务！");
         }
 
@@ -239,8 +240,8 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                 record.setChanNum(row.get("chan_num") != null ? row.get("chan_num").toString() : null);
                 record.setMeterArcCode(row.get("meter_arc_code") != null ? row.get("meter_arc_code").toString() : null);
                 record.setOrgId(row.get("org_id") != null ? row.get("org_id").toString() : null);
-                record.setStatus(0);
-                record.setInstructionStatus(0);
+                record.setStatus(ThermalTaskConstants.PERFORM_PENDING);
+                record.setInstructionStatus(ThermalTaskConstants.PERFORM_PENDING);
                 record.setSendTime(now);
                 record.setCreateTime(now);
                 record.setCreateBy(userId);
@@ -354,10 +355,10 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
         }
 
         // 调控依据平均回水温度
-        if (htTasks.getAdjustBasis() == 3) {
+        if (htTasks.getAdjustBasis() == ThermalTaskConstants.ADJUST_AVG_RETURN_WATER) {
 
             // 检查回报率
-            if (htTasks.getIsUseReportRate() != null && htTasks.getIsUseReportRate() == 1 && htTasks.getNumber() != null && htTasks.getNumber() > 0) {
+            if (htTasks.getIsUseReportRate() != null && htTasks.getIsUseReportRate() == ThermalTaskConstants.FLAG_ON && htTasks.getNumber() != null && htTasks.getNumber() > 0) {
                 Integer reportRate = htTasksPerformMapper.getTaskLastPerformReportRate(htTasks.getId(), htTasks.getCuGroupId());
                 if (reportRate != null && reportRate < htTasks.getReportRate()) {
                     log.info("回报率 {}% 小于设定值 {}% 跳过指令生成！", reportRate, htTasks.getReportRate());
@@ -369,7 +370,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
 
             List<PJHSVo> pjhsVoList = new ArrayList<>();
             // 判断控制范围类型--3 户阀
-            if (htTasks.getScopeType() == 3) {
+            if (htTasks.getScopeType() == ThermalTaskConstants.SCOPE_DTU_BROADCAST) {
                 // 根据组号计算调控范围内的平均回水温度（不包括特殊户）
                 pjhsVoList = baseMapper.queryHtTasksPJHSDTU(htTasks.getId());
                 if (!pjhsVoList.isEmpty()) {
@@ -437,9 +438,9 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                     htTasksPerform.setConcentratorCode(htScopeDtu.getConcentratorCode());
                     htTasksPerform.setMeterNum("AAAAAAAAAAAAAAAA");
                     htTasksPerform.setMeterArcCode(htScopeDtu.getMeterArcCode());
-                    htTasksPerform.setStatus(0);
+                    htTasksPerform.setStatus(ThermalTaskConstants.PERFORM_PENDING);
                     htTasksPerform.setMeterId(null);
-                    htTasksPerform.setInstructionStatus(0);
+                    htTasksPerform.setInstructionStatus(ThermalTaskConstants.PERFORM_PENDING);
                     htTasksPerform.setTasksId(htTasks.getId());
                     htTasksPerform.setOrderr(htStrategyPerform.getOrderr());
                     htTasksPerform.setForeStart(htStrategyPerform.getXunhuan());
@@ -464,7 +465,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
                     // 下发控制指令
                     baseMapper.insertTasksPerformBatch(htTasksPerformList);
                     // 更新执行次数
-                    baseMapper.updateHtasks(htTasks.getId());
+                    baseMapper.updateHtTasks(htTasks.getId());
                     // 插入指令表每个阀门信息（不下发，仅作为界面查询展示用）
                     baseMapper.insertHtTasksPerformByRadio(htTasks.getId(), commandIndex);
                 } else {
@@ -531,7 +532,7 @@ public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> impl
     private void stopTask(Long taskId, String reason) {
         // 更新状态为停止
         lambdaUpdate().eq(HtTasks::getId, taskId)
-            .set(HtTasks::getStatus, 0)
+            .set(HtTasks::getStatus, ThermalTaskConstants.TASK_STOPPED)
             .set(HtTasks::getEndTime, new Date())
             .update();
 

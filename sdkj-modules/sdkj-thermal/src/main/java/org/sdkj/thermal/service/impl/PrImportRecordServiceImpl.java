@@ -3,6 +3,7 @@ package org.sdkj.thermal.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.PrImportRecord;
 import org.sdkj.thermal.mapper.PrImportRecordMapper;
 import org.sdkj.thermal.service.IPrImportRecordService;
@@ -28,7 +29,7 @@ public class PrImportRecordServiceImpl extends ServiceImpl<PrImportRecordMapper,
         for (PrImportRecord item : objects) {
             item.setCreateBy(create);
             item.setCreateTime(new Date());
-            item.setType(0);
+            item.setType(ThermalTaskConstants.IMPORT_TYPE_DEFAULT);
             lists.add(item);
         }
         if (!lists.isEmpty()) {

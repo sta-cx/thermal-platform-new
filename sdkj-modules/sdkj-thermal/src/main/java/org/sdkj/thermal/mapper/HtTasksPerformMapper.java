@@ -354,12 +354,12 @@ public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtT
     /**
      * 插入热力告警
      */
-    void inserHtAlert(@Param("meterNum") String meterNum, @Param("valveStatus") int valveStatus);
+    void insertHtAlert(@Param("meterNum") String meterNum, @Param("valveStatus") int valveStatus);
 
     /**
      * 插入单元热力告警
      */
-    void inserHtAlertUnit(@Param("meterNum") String meterNum, @Param("valveStatus") int valveStatus);
+    void insertHtAlertUnit(@Param("meterNum") String meterNum, @Param("valveStatus") int valveStatus);
 
     /**
      * 通过DTU状态更新阀门

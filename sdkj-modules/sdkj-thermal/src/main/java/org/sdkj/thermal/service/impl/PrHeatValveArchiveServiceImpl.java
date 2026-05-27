@@ -12,6 +12,7 @@ import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrFamily;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
@@ -249,6 +250,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
                 .headRowNumber(1)
                 .doReadSync();
         } catch (Exception e) {
+            log.error("PrHeatValveArchiveServiceImpl operation failed", e);
             return R.fail("文件解析失败: " + e.getMessage());
         }
 
@@ -316,8 +318,8 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
             task.setMeterArcCode(info.meterArcCode());
             task.setMeterId(info.meterId());
             task.setMeterNum(info.meterNum());
-            task.setStatus(0);
-            task.setInstructionStatus(0);
+            task.setStatus(ThermalTaskConstants.PERFORM_PENDING);
+            task.setInstructionStatus(ThermalTaskConstants.PERFORM_PENDING);
             task.setImei(info.imei());
             task.setConcentratorCode(info.concentratorCode());
             task.setDtuNum(info.dtuNum());
@@ -344,8 +346,8 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
             task.setMeterArcCode(info.meterArcCode());
             task.setMeterId(info.meterId());
             task.setMeterNum(info.meterNum());
-            task.setStatus(0);
-            task.setInstructionStatus(0);
+            task.setStatus(ThermalTaskConstants.PERFORM_PENDING);
+            task.setInstructionStatus(ThermalTaskConstants.PERFORM_PENDING);
             task.setImei(info.imei());
             task.setConcentratorCode(info.concentratorCode());
             task.setDtuNum(info.dtuNum());

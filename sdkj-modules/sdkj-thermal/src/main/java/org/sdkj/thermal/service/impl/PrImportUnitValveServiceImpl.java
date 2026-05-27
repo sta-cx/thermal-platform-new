@@ -3,6 +3,7 @@ package org.sdkj.thermal.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.PrImportUnitValve;
 import org.sdkj.thermal.mapper.PrImportUnitValveMapper;
 import org.sdkj.thermal.service.IPrImportUnitValveService;
@@ -35,7 +36,7 @@ public class PrImportUnitValveServiceImpl extends ServiceImpl<PrImportUnitValveM
             for (PrImportUnitValve prImportUnitValve : objects) {
                 prImportUnitValve.setCreateBy(create);
                 prImportUnitValve.setCreateTime(date);
-                prImportUnitValve.setType(0);
+                prImportUnitValve.setType(ThermalTaskConstants.IMPORT_TYPE_DEFAULT);
 
                 Integer dtuType = prImportUnitValve.getDtuType();
                 if (dtuType == null || dtuType < 0 || dtuType > 2) {

@@ -171,6 +171,7 @@ public class PrHeatTempArchiveServiceImpl extends ServiceImpl<PrHeatTempArchiveM
                 .headRowNumber(1)
                 .doReadSync();
         } catch (Exception e) {
+            log.error("PrHeatTempArchiveServiceImpl operation failed", e);
             return R.fail("文件解析失败: " + e.getMessage());
         }
 

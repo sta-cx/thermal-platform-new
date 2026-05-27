@@ -318,7 +318,7 @@ public class ControlReturnApiController {
             htTasksPerformMapper.updateHtScope(guid, meterNum, valveStatus);
             // 插入异常信息
             if (valveStatus == ValveStatusConstants.VALVE_CLOSED || valveStatus == ValveStatusConstants.VALVE_ERROR) {
-                htTasksPerformMapper.inserHtAlert(meterNum, valveStatus);
+                htTasksPerformMapper.insertHtAlert(meterNum, valveStatus);
             }
         }
     }
@@ -393,7 +393,7 @@ public class ControlReturnApiController {
             htTasksPerformMapper.updataUnitValveS(meterNum, valveStatus);
             htTasksPerformMapper.updateHtScope(guid, meterNum, valveStatus);
             if (valveStatus == ValveStatusConstants.VALVE_CLOSED || valveStatus == ValveStatusConstants.VALVE_ERROR) {
-                htTasksPerformMapper.inserHtAlert(meterNum, valveStatus);
+                htTasksPerformMapper.insertHtAlert(meterNum, valveStatus);
             }
             log.info("无线跳转阀控制失败: meterNum={}, message={}", meterNum, message);
         }
@@ -551,21 +551,21 @@ public class ControlReturnApiController {
 
             // 缴费未开阀
             if ("1".equals(payStatus) && !"1".equals(valveStatus)) {
-                htTasksPerformMapper.inserHtAlert(meterNum, ValveStatusConstants.ALERT_PAID_BUT_CLOSED);
+                htTasksPerformMapper.insertHtAlert(meterNum, ValveStatusConstants.ALERT_PAID_BUT_CLOSED);
             }
             // 未缴费开阀
             if (!"1".equals(payStatus) && "1".equals(valveStatus)) {
-                htTasksPerformMapper.inserHtAlert(meterNum, ValveStatusConstants.ALERT_UNPAID_BUT_OPEN);
+                htTasksPerformMapper.insertHtAlert(meterNum, ValveStatusConstants.ALERT_UNPAID_BUT_OPEN);
             }
             // 未缴费回水温度异常
             if (!"1".equals(payStatus) && optionsHeat.getWjfhswd() != null
                 && outTemp != null && outTemp.compareTo(optionsHeat.getWjfhswd()) > 0) {
-                htTasksPerformMapper.inserHtAlert(meterNum, ValveStatusConstants.ALERT_UNPAID_TEMP_ABNORMAL);
+                htTasksPerformMapper.insertHtAlert(meterNum, ValveStatusConstants.ALERT_UNPAID_TEMP_ABNORMAL);
             }
             // 回水温度超出正常范围
             if (outTemp != null && optionsHeat.getWdbjd() != null && optionsHeat.getWdbjx() != null) {
                 if (outTemp.compareTo(optionsHeat.getWdbjd()) > 0 || outTemp.compareTo(optionsHeat.getWdbjx()) < 0) {
-                    htTasksPerformMapper.inserHtAlert(meterNum, ValveStatusConstants.ALERT_TEMP_OUT_OF_RANGE);
+                    htTasksPerformMapper.insertHtAlert(meterNum, ValveStatusConstants.ALERT_TEMP_OUT_OF_RANGE);
                 }
             }
         } catch (Exception e) {

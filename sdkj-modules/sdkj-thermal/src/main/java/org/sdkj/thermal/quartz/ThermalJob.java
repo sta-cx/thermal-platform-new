@@ -3,6 +3,7 @@ package org.sdkj.thermal.quartz;
 import org.sdkj.common.core.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.tenant.core.TenantDataSourceHelper;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.service.impl.ThermalRegulationEngine;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -51,8 +52,8 @@ public class ThermalJob implements Job {
                     ctx.getBean(org.sdkj.thermal.service.IHtTasksService.class);
                 org.sdkj.thermal.domain.HtTasks task = tasksService.getById(taskId);
 
-                if (task != null && task.getStatus() != null && task.getStatus() == 1) {
-                    Integer scopeType = task.getScopeType() != null ? task.getScopeType() : 1;
+                if (task != null && task.getStatus() != null && task.getStatus() == ThermalTaskConstants.TASK_RUNNING) {
+                    Integer scopeType = task.getScopeType() != null ? task.getScopeType() : ThermalTaskConstants.SCOPE_HOUSE_VALVE;
                     engine.executeRegulation(taskId, scopeType);
                     log.info("Thermal regulation task completed: {} (ID: {})", taskName, taskId);
                 } else {

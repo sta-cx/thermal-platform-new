@@ -14,6 +14,7 @@ import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtTasks;
 import org.sdkj.thermal.domain.HtTaskSettingLog;
 import org.sdkj.thermal.domain.PrHouseLog;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.bo.HtTasksBo;
 import org.sdkj.thermal.domain.vo.HtTaskSettingLogItemVo;
 import org.sdkj.thermal.domain.vo.HtTaskSettingLogVo;
@@ -108,10 +109,10 @@ public class HtTasksController extends BaseController {
             task.setBeanClass("org.sdkj.thermal.quartz.ThermalJob");
         }
         if (task.getNumber() == null) task.setNumber(0);
-        if (task.getStatus() == null) task.setStatus(0);
-        if (task.getIsUseReportRate() == null) task.setIsUseReportRate(0);
+        if (task.getStatus() == null) task.setStatus(ThermalTaskConstants.TASK_STOPPED);
+        if (task.getIsUseReportRate() == null) task.setIsUseReportRate(ThermalTaskConstants.FLAG_OFF);
         if (task.getReportRate() == null) task.setReportRate(0);
-        if (task.getIsUseFirstControl() == null) task.setIsUseFirstControl(0);
+        if (task.getIsUseFirstControl() == null) task.setIsUseFirstControl(ThermalTaskConstants.FLAG_OFF);
         return toAjax(tasksService.saveWithScope(task, scopeIds));
     }
 
@@ -126,7 +127,7 @@ public class HtTasksController extends BaseController {
                           @RequestParam(required = false) List<Long> scopeIds) {
         HtTasks task = MapstructUtils.convert(bo, HtTasks.class);
         HtTasks existing = tasksService.getById(task.getId());
-        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+        if (existing != null && existing.getStatus() != null && existing.getStatus() == ThermalTaskConstants.TASK_RUNNING) {
             return R.fail("运行中的任务不允许修改，请先停止任务！");
         }
         return toAjax(tasksService.updateWithScope(task, scopeIds));
@@ -141,7 +142,7 @@ public class HtTasksController extends BaseController {
     @DeleteMapping("/{id}")
     public R<Void> remove(@PathVariable Long id) {
         HtTasks existing = tasksService.getById(id);
-        if (existing != null && existing.getStatus() != null && existing.getStatus() == 1) {
+        if (existing != null && existing.getStatus() != null && existing.getStatus() == ThermalTaskConstants.TASK_RUNNING) {
             return R.fail("运行中的任务不允许删除，请先停止任务！");
         }
         return toAjax(tasksService.removeById(id));
@@ -157,7 +158,7 @@ public class HtTasksController extends BaseController {
     public R<Void> removeBatch(@RequestParam List<Long> ids) {
         List<HtTasks> tasks = tasksService.listByIds(ids);
         for (HtTasks t : tasks) {
-            if (t.getStatus() != null && t.getStatus() == 1) {
+            if (t.getStatus() != null && t.getStatus() == ThermalTaskConstants.TASK_RUNNING) {
                 return R.fail("任务「" + t.getName() + "」正在运行，不允许删除，请先停止任务！");
             }
         }
@@ -201,7 +202,7 @@ public class HtTasksController extends BaseController {
     public R<Void> changeStatus(@PathVariable Long id, @RequestParam Boolean status) {
         HtTasks existing = tasksService.getById(id);
         if (existing == null) return R.fail("任务不存在");
-        return toAjax(tasksService.changeStatus(id, status ? 1 : 0));
+        return toAjax(tasksService.changeStatus(id, status ? ThermalTaskConstants.TASK_RUNNING : ThermalTaskConstants.TASK_STOPPED));
     }
 
     /**
@@ -213,7 +214,7 @@ public class HtTasksController extends BaseController {
     @PostMapping("/run/{id}")
     public R<Void> run(@PathVariable Long id) {
         HtTasks existing = tasksService.getById(id);
-        if (existing != null && existing.getStatus() != null && existing.getStatus() == 0) {
+        if (existing != null && existing.getStatus() != null && existing.getStatus() == ThermalTaskConstants.TASK_STOPPED) {
             return R.fail("请先启动任务！");
         }
         return toAjax(tasksService.runTask(id));

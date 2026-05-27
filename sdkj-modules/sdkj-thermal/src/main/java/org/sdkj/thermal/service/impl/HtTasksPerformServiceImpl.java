@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.vo.HtTasksPerformVo;
@@ -148,8 +149,8 @@ public class HtTasksPerformServiceImpl extends ServiceImpl<HtTasksPerformMapper,
             task.setMeterArcCode(info.meterArcCode());
             task.setMeterId(info.meterId());
             task.setMeterNum(info.meterNum());
-            task.setStatus(0);
-            task.setInstructionStatus(0);
+            task.setStatus(ThermalTaskConstants.PERFORM_PENDING);
+            task.setInstructionStatus(ThermalTaskConstants.PERFORM_PENDING);
             task.setImei(info.imei());
             task.setConcentratorCode(info.concentratorCode());
             task.setDtuNum(info.dtuNum());

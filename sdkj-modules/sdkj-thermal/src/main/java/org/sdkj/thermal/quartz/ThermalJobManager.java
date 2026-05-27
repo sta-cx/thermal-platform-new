@@ -3,6 +3,7 @@ package org.sdkj.thermal.quartz;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.tenant.core.TenantContextHolder;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.HtTasks;
 import org.sdkj.thermal.mapper.HtTasksMapper;
 import org.quartz.*;
@@ -57,7 +58,7 @@ public class ThermalJobManager {
 
         scheduler.scheduleJob(jobDetail, trigger);
 
-        if (task.getStatus() != null && task.getStatus() == 0) {
+        if (task.getStatus() != null && task.getStatus() == ThermalTaskConstants.TASK_STOPPED) {
             scheduler.pauseJob(jobKey);
         }
 

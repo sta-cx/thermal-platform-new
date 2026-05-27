@@ -169,6 +169,7 @@ public class PrHeatUnitHotArchiveServiceImpl extends ServiceImpl<PrHeatUnitHotAr
                 .headRowNumber(1)
                 .doReadSync();
         } catch (Exception e) {
+            log.error("PrHeatUnitHotArchiveServiceImpl operation failed", e);
             return R.fail("文件解析失败: " + e.getMessage());
         }
 

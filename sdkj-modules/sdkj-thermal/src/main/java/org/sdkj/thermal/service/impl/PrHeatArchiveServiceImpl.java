@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.utils.MapstructUtils;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.*;
@@ -616,8 +617,8 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
         task.setCreateBy(create);
         task.setCreateTime(now);
         task.setNumber(0);
-        task.setStatus(1);
-        task.setInstructionStatus(0);
+        task.setStatus(ThermalTaskConstants.PERFORM_SENT);
+        task.setInstructionStatus(ThermalTaskConstants.PERFORM_PENDING);
         return task;
     }
 

@@ -879,7 +879,7 @@
         WHERE dtu_num = #{dtuNum}
     </update>
 
-    <insert id="inserHtAlert">
+    <insert id="insertHtAlert">
         INSERT INTO ht_alert (id, meter_id, is_charged, alert_type, alert_time, org_id,
                              valve, in_temp, out_temp, room_temp, create_time)
         SELECT CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),
@@ -898,7 +898,7 @@
         WHERE a.meter_num = #{meterNum}
     </insert>
 
-    <insert id="inserHtAlertUnit">
+    <insert id="insertHtAlertUnit">
         INSERT INTO ht_alert (id, meter_id, alert_type, alert_time, org_id, valve,
                              in_temp, out_temp, room_temp, create_time)
         SELECT CAST(CONV(SUBSTRING(REPLACE(UUID(), '-', ''), 18, 14), 16, 10) AS SIGNED),

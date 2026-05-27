@@ -4,6 +4,7 @@ import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.idev.excel.EasyExcel;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.core.utils.MapstructUtils;
@@ -35,6 +36,7 @@ import java.util.Map;
  * 迁移自旧系统 PrHouseController
  * 旧端点: /property/prHouse/* -> 新端点: /thermal/property/house/*
  */
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -246,6 +248,7 @@ public class PrHouseController extends BaseController {
             int imported = houseService.importAll(list);
             return R.ok("成功导入 " + imported + " 条房屋数据");
         } catch (Exception e) {
+            log.error("PrHouseController failed", e);
             return R.fail("导入失败: " + e.getMessage());
         }
     }

@@ -3,6 +3,7 @@ package org.sdkj.thermal.controller;
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.idev.excel.EasyExcel;
+import lombok.extern.slf4j.Slf4j;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -25,6 +26,7 @@ import java.util.List;
  * 单元阀门导入控制器
  * 迁移自旧系统 PrImportUnitValveController
  */
+@Slf4j
 @Validated
 @RequiredArgsConstructor
 @RestController
@@ -79,6 +81,7 @@ public class PrImportUnitValveController extends BaseController {
                 .headRowNumber(2)
                 .doReadSync();
         } catch (Exception e) {
+            log.error("PrImportUnitValveController failed", e);
             return R.fail("文件解析失败: " + e.getMessage());
         }
 
@@ -94,6 +97,7 @@ public class PrImportUnitValveController extends BaseController {
             String result = prImportUnitValveService.getNull(r);
             return R.ok(result);
         } catch (Exception e) {
+            log.error("PrImportUnitValveController failed", e);
             return R.fail("导入失败: " + e.getMessage());
         }
     }
