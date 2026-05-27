@@ -1,6 +1,6 @@
 package org.sdkj.thermal.controller;
 
-import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -33,7 +33,7 @@ public class PrImportAuthorizationCodeController extends BaseController {
     private final IPrImportAuthorizationCodeService service;
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    @SaCheckLogin
+    @SaCheckPermission("thermal:property:import:import")
     @Log(title = "授权码导入", businessType = BusinessType.IMPORT)
     @PostMapping("/import")
     public R<Boolean> importData(@RequestParam("file") MultipartFile file,

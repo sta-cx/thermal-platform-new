@@ -1,6 +1,6 @@
 package org.sdkj.thermal.controller;
 
-import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.annotation.SaCheckPermission;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ public class DashboardController {
     // ==================== 综合分析 ====================
 
     /** 统计概览 — 基础统计 + 缴费统计 */
-    @SaCheckLogin
+    @SaCheckPermission("dashboard:list")
     @GetMapping("/analytics/overview")
     public R<Map<String, Object>> analyticsOverview() {
         Long userId = LoginHelper.getUserId();
@@ -65,7 +65,7 @@ public class DashboardController {
     }
 
     /** 聚合统计 — 返回全部 6 个 Block 数据 */
-    @SaCheckLogin
+    @SaCheckPermission("dashboard:list")
     @GetMapping("/analytics/summary")
     public R<Map<String, Object>> analyticsSummary() {
         Long userId = LoginHelper.getUserId();
@@ -75,7 +75,7 @@ public class DashboardController {
     // ==================== 热量平衡 ====================
 
     /** 热量平衡总览 — Block 4 (温度/热量) + Block 6 (换热站) */
-    @SaCheckLogin
+    @SaCheckPermission("dashboard:list")
     @GetMapping("/balance/overview")
     public R<Map<String, Object>> heatBalanceOverview(@RequestParam(required = false) String stationId) {
         Long userId = LoginHelper.getUserId();
@@ -99,7 +99,7 @@ public class DashboardController {
     }
 
     /** 按换热站热量平衡 */
-    @SaCheckLogin
+    @SaCheckPermission("dashboard:list")
     @GetMapping("/balance/station/{stationId}")
     public R<Map<String, Object>> stationHeatBalance(
             @PathVariable String stationId) {
@@ -118,7 +118,7 @@ public class DashboardController {
     // ==================== 能耗分析 ====================
 
     /** 能耗分析 — Block 4 热量数据 */
-    @SaCheckLogin
+    @SaCheckPermission("dashboard:list")
     @GetMapping("/energy/analysis")
     public R<Map<String, Object>> energyAnalysis(@RequestParam(required = false) String buildingId,
             @RequestParam(required = false) String beginDate,
@@ -138,7 +138,7 @@ public class DashboardController {
     }
 
     /** 楼栋能耗 — Block 1 楼栋数据 */
-    @SaCheckLogin
+    @SaCheckPermission("dashboard:list")
     @GetMapping("/energy/buildings")
     public R<Map<String, Object>> buildingEnergyList(@RequestParam(required = false) String beginDate,
             @RequestParam(required = false) String endDate) {
@@ -155,7 +155,7 @@ public class DashboardController {
     // ==================== 实时监控 ====================
 
     /** 实时设备数据 — Block 2 (阀门/户表) + Block 3 (单元表/温采器/DTU) */
-    @SaCheckLogin
+    @SaCheckPermission("dashboard:list")
     @GetMapping("/realtime/devices")
     public R<Map<String, Object>> realtimeDevices(@RequestParam(required = false) String stationId) {
         Long userId = LoginHelper.getUserId();
@@ -188,7 +188,7 @@ public class DashboardController {
     }
 
     /** 实时告警 — 从 HtAlert 表查询最近告警 */
-    @SaCheckLogin
+    @SaCheckPermission("dashboard:list")
     @GetMapping("/realtime/alerts")
     public R<List<Map<String, Object>>> realtimeAlerts() {
         LambdaQueryWrapper<HtAlert> wrapper = new LambdaQueryWrapper<HtAlert>()
