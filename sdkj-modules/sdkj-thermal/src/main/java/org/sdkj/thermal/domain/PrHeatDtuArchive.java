@@ -1,6 +1,5 @@
 package org.sdkj.thermal.domain;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.linpeilie.annotations.AutoMapper;
@@ -54,9 +53,9 @@ public class PrHeatDtuArchive extends BaseEntity {
     private String orgId;
 
 
-    // ========== 非数据库字段 ==========
-
     /** 控制范围 */
-    @TableField(exist = false)
     private String controlRange;
+
+    /** 备注 */
+    private String remark;
 }

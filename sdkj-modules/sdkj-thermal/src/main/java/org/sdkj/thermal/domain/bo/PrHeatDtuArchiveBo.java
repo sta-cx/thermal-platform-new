@@ -51,4 +51,10 @@ public class PrHeatDtuArchiveBo extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
+    /** 控制范围 */
+    private String controlRange;
+
+    /** 备注 */
+    private String remark;
+
 }

@@ -40,4 +40,7 @@ public class PrHeatDtuArchiveVo implements Serializable {
 
     /** 控制范围（非数据库字段） */
     private String controlRange;
+
+    /** 备注 */
+    private String remark;
 }
