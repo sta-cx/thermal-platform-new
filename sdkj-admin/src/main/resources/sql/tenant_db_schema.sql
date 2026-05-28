@@ -744,7 +744,7 @@ CREATE TABLE `pr_approval` (
   `update_time` datetime DEFAULT NULL,
   `del_flag` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT '0',
   KEY `idx_org_id` (`org_id`),
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
   KEY `idx_approval_user` (`approval_user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='审批单表';
 
@@ -909,7 +909,7 @@ CREATE TABLE `pr_expense` (
   `remark` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`)
+  KEY `idx_house_id` (`house_id`),
   KEY `idx_is_charged` (`is_charged`),
   KEY `idx_standard_id` (`standard_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='费用明细';
@@ -1374,7 +1374,7 @@ CREATE TABLE `pr_heat_real_data` (
   `rbin` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
   `rbout` decimal(12,4) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`)
+  KEY `idx_house_id` (`house_id`),
   KEY `idx_meter_num` (`meter_num`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='热力实时数据表';
@@ -1752,7 +1752,7 @@ CREATE TABLE `pr_house_log` (
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_house_id` (`house_id`)
+  KEY `idx_house_id` (`house_id`),
   KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='房屋变更日志表';
 
@@ -2387,7 +2387,7 @@ CREATE TABLE `pr_transaction_detail` (
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
-  KEY `idx_meter_id` (`meter_id`)
+  KEY `idx_meter_id` (`meter_id`),
   KEY `idx_record_time` (`record_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='交易明细表';
 
@@ -2419,7 +2419,7 @@ CREATE TABLE `pr_transaction_record` (
   KEY `idx_org_id` (`org_id`),
   PRIMARY KEY (`id`),
   KEY `idx_serial_num` (`serial_num`),
-  KEY `idx_house_id` (`house_id`)
+  KEY `idx_house_id` (`house_id`),
   KEY `idx_transaction_time` (`transaction_time`),
   KEY `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='交易记录主表';
