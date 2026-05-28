@@ -57,4 +57,7 @@ public class PrHeatDtuArchiveBo extends BaseEntity {
     /** 备注 */
     private String remark;
 
+    /** 信道更新时间 */
+    private Date channelUpdateTime;
+
 }
