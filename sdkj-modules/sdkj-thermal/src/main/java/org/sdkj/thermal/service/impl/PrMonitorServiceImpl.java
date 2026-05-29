@@ -206,6 +206,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         BigDecimal sumRoom = BigDecimal.ZERO;
         int outN = 0;
         int roomN = 0;
+        int onlineN = 0;
         for (PrHeatValveArchive v : valves) {
             if (v.getOutTemperature() != null) {
                 sumOut = sumOut.add(v.getOutTemperature());
@@ -214,6 +215,10 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             if (v.getRoomTemp() != null) {
                 sumRoom = sumRoom.add(v.getRoomTemp());
                 roomN++;
+            }
+            // 通讯状态与列表行口径一致：computeScopeStatus 返回 "1"=正常(在线)
+            if ("1".equals(computeScopeStatus(v.getValveTime()))) {
+                onlineN++;
             }
         }
         if (outN > 0) {
@@ -225,8 +230,8 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         if (roomN > 0) {
             vo.setAvgInTemp(sumRoom.divide(BigDecimal.valueOf(roomN), 2, RoundingMode.HALF_UP));
         }
-        vo.setOnlineCount(0);
-        vo.setOfflineCount(vo.getTotalCount());
+        vo.setOnlineCount(onlineN);
+        vo.setOfflineCount(vo.getTotalCount() - onlineN);
 
         if (StringUtils.isNotBlank(bo.getOrgId())) {
             buildSiteGroups(vo, bo.getOrgId(), valves);
@@ -343,6 +348,11 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         0, "未缴费", 1, "已缴费", 2, "停供", 3, "空置"
     );
 
+    // 通讯状态标签，与 computeScopeStatus 返回值口径一致（"1"=正常，"3"=通讯中断）
+    private static final Map<String, String> SCOPE_STATUS_LABELS = Map.of(
+        "1", "正常", "3", "通讯中断"
+    );
+
     @Override
     public List<MonitorExportVo> exportList(MonitorBo bo) {
         LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
@@ -386,9 +396,15 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         }
 
         List<MonitorExportVo> result = new ArrayList<>(valves.size());
+        // 楼宇/单元筛选生效时，houseMap 已按条件过滤，关联不到房屋的阀门行应被排除
+        boolean houseFilterActive = StringUtils.isNotBlank(bo.getBuildingId())
+            || StringUtils.isNotBlank(bo.getUnit());
         for (PrHeatValveArchive v : valves) {
             MonitorExportVo row = new MonitorExportVo();
             PrHouseVo h = v.getHouseId() != null ? houseMap.get(v.getHouseId()) : null;
+            if (houseFilterActive && h == null) {
+                continue;
+            }
             if (h != null) {
                 row.setOrgName(orgName);
                 row.setBuildingName(h.getBuildingName());
@@ -401,7 +417,8 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             row.setRoomTemp(v.getRoomTemp());
             row.setOutTemperature(v.getOutTemperature());
             row.setCurFlow(v.getInsFlow());
-            row.setScopeStatus(v.getValveStatus());
+            // "通讯状态"列：按 valveTime 计算通讯状态并转中文，与列表行口径一致（非阀门开关状态）
+            row.setScopeStatus(SCOPE_STATUS_LABELS.getOrDefault(computeScopeStatus(v.getValveTime()), ""));
             result.add(row);
         }
         return result;
