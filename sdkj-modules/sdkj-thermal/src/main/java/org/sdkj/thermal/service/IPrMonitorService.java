@@ -4,11 +4,14 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.domain.bo.MonitorBo;
 import org.sdkj.thermal.domain.vo.MonitorAggregateVo;
+import org.sdkj.thermal.domain.vo.MonitorExportVo;
 import org.sdkj.thermal.domain.vo.PrHeatArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHeatTempArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHeatUnitHotArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHeatUnitValveArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
+
+import java.util.List;
 
 /**
  * 运行监控 Service
@@ -32,4 +35,10 @@ public interface IPrMonitorService {
 
     /** 聚合统计 */
     MonitorAggregateVo aggregate(MonitorBo bo);
+
+    /** 生成虚拟温采器（为无设备的房屋创建虚拟记录） */
+    int generateVirtualDevice(String orgId);
+
+    /** 导出户间数据 */
+    List<MonitorExportVo> exportList(MonitorBo bo);
 }
