@@ -99,6 +99,8 @@ public class PrHeatTempArchive extends BaseEntity {
     /** 小区ID */
     private String orgId;
 
+    /** 是否虚拟设备: 0=否, 1=是 */
+    private Integer isVirtual;
 
     /** 集中器编码 */
     private String concentratorCode;

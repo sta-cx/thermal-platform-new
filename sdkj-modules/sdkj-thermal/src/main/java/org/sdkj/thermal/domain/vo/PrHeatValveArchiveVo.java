@@ -75,4 +75,16 @@ public class PrHeatValveArchiveVo implements Serializable {
     private String scopeStatus;
     private String statusName;
     private Integer isCharged;
+
+    // ========== 房屋关联字段（非数据库字段，用于列表展示） ==========
+
+    private String orgName;
+    private String buildingName;
+    private String roomNum;
+    private String houseType;
+    private Integer isSpecial;
+    private BigDecimal heatingArea;
+    private String siteType;
+    private Integer isVirtual;
+    private BigDecimal curFlow;
 }
