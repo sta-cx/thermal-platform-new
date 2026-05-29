@@ -60,4 +60,28 @@
           AND del_flag = 0
     </update>
 
+    <!-- 监控模块：批量更新特殊户标记 -->
+    <update id="updateIsSpecialBatch">
+        UPDATE pr_house
+        SET is_special = #{flag},
+            update_time = NOW()
+        WHERE id IN
+        <foreach collection="houseIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+          AND del_flag = 0
+    </update>
+
+    <!-- 监控模块：批量更新缴费状态（停供/取消停供） -->
+    <update id="updatePayStatusBatch">
+        UPDATE pr_house
+        SET pay_status = #{payStatus},
+            update_time = NOW()
+        WHERE id IN
+        <foreach collection="houseIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+          AND del_flag = 0
+    </update>
+
 </mapper>

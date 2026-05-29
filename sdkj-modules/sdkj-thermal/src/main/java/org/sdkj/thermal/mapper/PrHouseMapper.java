@@ -63,4 +63,22 @@ public interface PrHouseMapper extends BaseMapperPlus<PrHouse, PrHouseVo> {
      * @return 更新行数
      */
     int updateHouseIsCharged(@Param("houseId") Long houseId);
+
+    // ========== 监控模块批量操作 ==========
+
+    /**
+     * 批量更新特殊户标记
+     * @param houseIds 房屋ID列表
+     * @param flag 标记值 (0=取消, 1=设定)
+     * @return 更新行数
+     */
+    int updateIsSpecialBatch(@Param("houseIds") List<Long> houseIds, @Param("flag") Integer flag);
+
+    /**
+     * 批量更新缴费状态（停供/取消停供）
+     * @param houseIds 房屋ID列表
+     * @param payStatus 缴费状态 (1=正常, 2=停供)
+     * @return 更新行数
+     */
+    int updatePayStatusBatch(@Param("houseIds") List<Long> houseIds, @Param("payStatus") Integer payStatus);
 }
