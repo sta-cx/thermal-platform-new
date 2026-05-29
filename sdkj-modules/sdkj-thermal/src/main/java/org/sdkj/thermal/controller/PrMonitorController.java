@@ -2,8 +2,10 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
+import org.sdkj.common.excel.utils.ExcelUtil;
 import org.sdkj.common.log.annotation.Log;
 import org.sdkj.common.log.enums.BusinessType;
 import org.sdkj.common.mybatis.core.page.PageQuery;
@@ -11,6 +13,7 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.bo.MonitorBo;
 import org.sdkj.thermal.domain.vo.MonitorAggregateVo;
+import org.sdkj.thermal.domain.vo.MonitorExportVo;
 import org.sdkj.thermal.domain.vo.PrHeatArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHeatTempArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHeatUnitHotArchiveVo;
@@ -25,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -117,8 +121,19 @@ public class PrMonitorController extends BaseController {
     @SaCheckLogin
     @Log(title = "运行监控-生成虚拟设备", businessType = BusinessType.INSERT)
     @PostMapping("/virtual-device")
-    public R<Void> virtualDevice(@RequestParam String orgId) {
-        return R.ok();
+    public R<Integer> virtualDevice(@RequestParam String orgId) {
+        int count = monitorService.generateVirtualDevice(orgId);
+        return R.ok("已生成 " + count + " 个虚拟温采器", count);
+    }
+
+    /** 导出户间数据 */
+    @SaCheckPermission("thermal:ht:monitor:export")
+    @SaCheckLogin
+    @Log(title = "运行监控-导出户间数据", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    public void export(@RequestBody MonitorBo bo, HttpServletResponse response) {
+        List<MonitorExportVo> list = monitorService.exportList(bo);
+        ExcelUtil.exportExcel(list, "户间数据", MonitorExportVo.class, response);
     }
 
     /** 打开网关（采集器按钮） */
