@@ -629,7 +629,9 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         if (heatVos == null) return R.fail("ids 包含非法数字");
 
         // heatArchiveService.setValveGroupParam 内部做 Integer.valueOf(commandParam)，
-        // 所以 commandParam 必须是纯数字字符串（组号/信道号）
+        // 所以 commandParam 必须是纯数字字符串（组号/信道号）。
+        // 注意：setting 模式的 targetTemp/period/flowRate 暂无对应下发通道（委托方法仅收单个数值），
+        //      当前只下发 opening；完整 5 参数下发待真实 IoT 协议接入（AI Phase 3）后补。
         String commandParam;
         if ("channel".equals(bo.getMode()) && bo.getChannel() != null) {
             commandParam = String.valueOf(bo.getChannel());
@@ -645,9 +647,10 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
 
     @Override
     public Map<String, String> readOtherCode(MonitorOtherCodeReadBo bo) {
-        // 1) 通过 meterNums 查阀门拿 houseId 映射
+        // 1) 通过 meterNums 查阀门拿 houseId 映射（限定 orgId，避免租户内重号跨小区误读）
         LambdaQueryWrapper<PrHeatValveArchive> valveLqw = new LambdaQueryWrapper<>();
         valveLqw.in(PrHeatValveArchive::getMeterNum, bo.getMeterNums())
+                 .eq(StringUtils.isNotBlank(bo.getOrgId()), PrHeatValveArchive::getOrgId, bo.getOrgId())
                  .eq(PrHeatValveArchive::getIsChanged, 0);
         List<PrHeatValveArchiveVo> valves = valveArchiveMapper.selectVoList(valveLqw);
 
@@ -680,9 +683,10 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     @Override
     @Transactional
     public void writeOtherCode(MonitorOtherCodeWriteBo bo) {
-        // 1) 通过 meterNums 查阀门拿 houseId
+        // 1) 通过 meterNums 查阀门拿 houseId（限定 orgId，避免租户内重号跨小区误写）
         LambdaQueryWrapper<PrHeatValveArchive> valveLqw = new LambdaQueryWrapper<>();
         valveLqw.in(PrHeatValveArchive::getMeterNum, bo.getMeterNums())
+                 .eq(StringUtils.isNotBlank(bo.getOrgId()), PrHeatValveArchive::getOrgId, bo.getOrgId())
                  .eq(PrHeatValveArchive::getIsChanged, 0);
         List<PrHeatValveArchiveVo> valves = valveArchiveMapper.selectVoList(valveLqw);
 
@@ -703,14 +707,18 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
 
     @Override
     public List<ChangeHistoryVo> changeHistory(ChangeHistoryQueryBo bo) {
-        // houseId + changeType 场景：走带 LIMIT 的高效查询
+        // houseId 场景：单表查 pr_house_log（@OrgPermission 自动注入 org_id 过滤，单表无 JOIN 列歧义），
+        // 房屋字段（房号/楼宇/单元）由 toChangeHistoryVoList 按 houseId 批量查 pr_house 组装（遵循"跨表不 JOIN"硬规则）
         if (bo.getHouseId() != null) {
-            List<PrHouseLog> logs = houseLogMapper.selectByHouseIdAndType(
-                bo.getHouseId(), bo.getChangeType());
-            return toChangeHistoryVoList(logs);
+            LambdaQueryWrapper<PrHouseLog> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(StringUtils.isNotBlank(bo.getChangeType()), PrHouseLog::getChangeType, bo.getChangeType())
+               .eq(PrHouseLog::getHouseId, bo.getHouseId())
+               .orderByDesc(PrHouseLog::getCreateTime)
+               .last("LIMIT 50");
+            return toChangeHistoryVoList(houseLogMapper.selectList(lqw));
         }
 
-        // 无 houseId：按 scope 走全量查询（保留现有逻辑兼容性）
+        // 无 houseId：按 scope 走全量查询（前端当前总是传 houseId，此路径基本不触发，保留兼容）
         List<PrHouseLog> logs;
         if ("unit".equals(bo.getScope())) {
             logs = houseLogMapper.selectUnitChangeData(bo.getChangeType());
@@ -758,6 +766,21 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             if (org != null) orgNameMap.put(oid, org.getName());
         }
 
+        // 房屋字段补全：houseId 单表查询路径下 log 不含房屋信息，按 houseId 批量查 pr_house 组装（不 JOIN）
+        List<Long> needHouseIds = logs.stream()
+            .filter(l -> l.getRoomNum() == null && l.getHouseId() != null)
+            .map(PrHouseLog::getHouseId)
+            .distinct()
+            .toList();
+        Map<Long, PrHouseVo> houseMap;
+        if (needHouseIds.isEmpty()) {
+            houseMap = Collections.emptyMap();
+        } else {
+            houseMap = houseMapper.selectVoList(
+                new LambdaQueryWrapper<PrHouse>().in(PrHouse::getId, needHouseIds)
+            ).stream().collect(Collectors.toMap(PrHouseVo::getId, h -> h, (a, b) -> a));
+        }
+
         return logs.stream().map(l -> {
             ChangeHistoryVo vo = new ChangeHistoryVo();
             vo.setId(l.getId());
@@ -767,10 +790,11 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             vo.setRemark(l.getRemark());
             vo.setCreateTime(l.getCreateTime());
             vo.setCreateByName(l.getCreateBy() != null ? userNameMap.get(l.getCreateBy()) : null);
-            vo.setRoomNum(l.getRoomNum());
+            PrHouseVo h = l.getHouseId() != null ? houseMap.get(l.getHouseId()) : null;
+            vo.setRoomNum(l.getRoomNum() != null ? l.getRoomNum() : (h != null ? h.getRoomNum() : null));
             vo.setOrgName(l.getOrgId() != null ? orgNameMap.get(l.getOrgId()) : null);
-            vo.setBuildingName(l.getBuildingName());
-            vo.setUnitCode(l.getUnitCode());
+            vo.setBuildingName(l.getBuildingName() != null ? l.getBuildingName() : (h != null ? h.getBuildingName() : null));
+            vo.setUnitCode(l.getUnitCode() != null ? l.getUnitCode() : (h != null ? h.getUnitCode() : null));
             return vo;
         }).toList();
     }

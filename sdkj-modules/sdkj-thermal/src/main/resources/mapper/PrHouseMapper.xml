@@ -72,10 +72,14 @@
           AND del_flag = 0
     </update>
 
-    <!-- 监控模块：批量更新缴费状态（停供/取消停供） -->
+    <!-- 监控模块：批量更新缴费/停供状态。
+         同时写 is_charged（监控列表显示字段，实测为活跃字段）与 pay_status（ControlReturnApiController 阀控判定字段），
+         二者保持一致，避免"停供成功但列表不变"。值: 1=已缴费/取消停供, 2=停供。
+         注意: 取消停供统一写 1(已缴费)，受限于前端"设定/取消"二态，无法还原停供前的原始缴费态。 -->
     <update id="updatePayStatusBatch">
         UPDATE pr_house
         SET pay_status = #{payStatus},
+            is_charged = #{payStatus},
             update_time = NOW()
         WHERE id IN
         <foreach collection="houseIds" item="id" open="(" separator="," close=")">

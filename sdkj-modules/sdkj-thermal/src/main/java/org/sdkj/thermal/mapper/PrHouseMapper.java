@@ -75,9 +75,9 @@ public interface PrHouseMapper extends BaseMapperPlus<PrHouse, PrHouseVo> {
     int updateIsSpecialBatch(@Param("houseIds") List<Long> houseIds, @Param("flag") Integer flag);
 
     /**
-     * 批量更新缴费状态（停供/取消停供）
+     * 批量更新缴费/停供状态（同时写 is_charged 显示字段 + pay_status 阀控判定字段）
      * @param houseIds 房屋ID列表
-     * @param payStatus 缴费状态 (1=正常, 2=停供)
+     * @param payStatus 状态值 (1=已缴费/取消停供, 2=停供)
      * @return 更新行数
      */
     int updatePayStatusBatch(@Param("houseIds") List<Long> houseIds, @Param("payStatus") Integer payStatus);

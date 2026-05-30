@@ -32,27 +32,4 @@
         ORDER BY a.create_time DESC
     </select>
 
-    <!-- 监控模块：按 houseId + changeType 查询变更历史（带 LIMIT）
-         注意：不 JOIN sys_user（master 库表，租户库不可见）和 sys_organization（org_name 不在 pr_house 中），
-         由 Service 层分别批量查询填充 createByName 和 orgName -->
-    <select id="selectByHouseIdAndType" resultType="org.sdkj.thermal.domain.PrHouseLog">
-        SELECT a.id, a.house_id, a.change_type, a.change_val,
-               a.create_by, a.create_time, a.remark,
-               b.room_num AS room_num,
-               b.unit_code AS unit_code,
-               b.building_name AS building_name,
-               b.org_id AS org_id
-        FROM pr_house_log a
-        LEFT JOIN pr_house b ON a.house_id = b.id AND b.del_flag = '0'
-        WHERE a.del_flag = '0'
-        <if test="changeType != null and changeType != ''">
-            AND a.change_type = #{changeType}
-        </if>
-        <if test="houseId != null">
-            AND a.house_id = #{houseId}
-        </if>
-        ORDER BY a.create_time DESC
-        LIMIT 50
-    </select>
-
 </mapper>
