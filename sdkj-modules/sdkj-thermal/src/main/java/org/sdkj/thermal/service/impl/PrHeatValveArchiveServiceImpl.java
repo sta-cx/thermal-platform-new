@@ -60,6 +60,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     private final IHtTasksPerformService htTasksPerformService;
     private final PrHouseMapper houseMapper;
     private final PrFamilyMapper familyMapper;
+    private final org.sdkj.thermal.service.support.HeatValveVoEnricher heatValveVoEnricher;
 
     @Value("${collect.ipPort:}")
     private String ipPort;
@@ -77,9 +78,17 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
     public TableDataInfo<PrHeatValveArchiveVo> selectPageList(String orgId, String buildingId,
                                                                String unit, String search, String parentId,
                                                                PageQuery pageQuery) {
+        // 楼宇/单元筛选：两步无 JOIN —— 先查 pr_house 拿 house_id 集合，再 IN 进档案查询
+        List<Long> houseIds = resolveHouseIds(orgId, buildingId, unit);
+        if (houseIds != null && houseIds.isEmpty()) {
+            // 命中空集 → 直接返回空表（不查档案）
+            return TableDataInfo.build(new ArrayList<>());
+        }
+
         LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
-        // parentId maps to houseId for this entity
+        lqw.in(houseIds != null, PrHeatValveArchive::getHouseId, houseIds);
+        // parentId maps to houseId for this entity（保留旧语义）
         lqw.eq(StringUtils.isNotBlank(parentId), PrHeatValveArchive::getHouseId, parentId);
         if (StringUtils.isNotBlank(search)) {
             lqw.and(w -> w.like(PrHeatValveArchive::getMeterNum, search.trim())
@@ -88,7 +97,24 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         lqw.eq(PrHeatValveArchive::getIsChanged, 0);
         lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
         Page<PrHeatValveArchiveVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
+        heatValveVoEnricher.enrich(result.getRecords());
         return TableDataInfo.build(result);
+    }
+
+    /**
+     * 楼宇/单元侧筛选 → house_id 集合（两步无 JOIN，复用监控同模式）。
+     * @return null = 无楼宇/单元筛选（调用方跳过 IN）；
+     *         非 null = 命中的 house_id（可能为空，空 → 列表应返回空）
+     */
+    private List<Long> resolveHouseIds(String orgId, String buildingId, String unit) {
+        boolean hasFilter = StringUtils.isNotBlank(buildingId) || StringUtils.isNotBlank(unit);
+        if (!hasFilter) return null;
+        LambdaQueryWrapper<PrHouse> hq = new LambdaQueryWrapper<>();
+        hq.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId)
+          .eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId)
+          .eq(StringUtils.isNotBlank(unit), PrHouse::getUnitCode, unit)
+          .select(PrHouse::getId);
+        return houseMapper.selectList(hq).stream().map(PrHouse::getId).toList();
     }
 
     @Override
