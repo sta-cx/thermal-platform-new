@@ -149,8 +149,9 @@ public class PrHeatControlController extends BaseController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String orgId,
             @RequestParam(required = false) String buildingId,
+            @RequestParam(required = false) String unit,
             PageQuery pageQuery) {
-        return valveArchiveService.selectPageList(orgId, buildingId, null, null, search, pageQuery);
+        return valveArchiveService.selectPageList(orgId, buildingId, unit, search, null, pageQuery);
     }
 
     @SaCheckLogin
@@ -159,7 +160,7 @@ public class PrHeatControlController extends BaseController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String orgId,
             PageQuery pageQuery) {
-        return valveArchiveService.selectPageList(orgId, null, null, null, search, pageQuery);
+        return valveArchiveService.selectPageList(orgId, null, null, search, null, pageQuery);
     }
 
     /**
