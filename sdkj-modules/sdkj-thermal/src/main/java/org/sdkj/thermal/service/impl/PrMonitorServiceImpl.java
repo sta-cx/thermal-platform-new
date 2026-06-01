@@ -19,9 +19,12 @@ import org.sdkj.thermal.domain.PrHeatHotArchive;
 import org.sdkj.thermal.domain.PrHeatTempArchive;
 import org.sdkj.thermal.domain.PrHeatUnitHotArchive;
 import org.sdkj.thermal.domain.PrHeatUnitValveArchive;
+import org.sdkj.thermal.domain.PrHeatStation;
+import org.sdkj.thermal.domain.PrHeatStationPartition;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.PrHouseLog;
+import org.sdkj.thermal.domain.PrUnit;
 import org.sdkj.thermal.domain.SysOrganization;
 import org.sdkj.thermal.domain.bo.ChangeHistoryQueryBo;
 import org.sdkj.thermal.domain.bo.MonitorBo;
@@ -55,8 +58,11 @@ import org.sdkj.thermal.mapper.PrHeatTempArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatUnitHotArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatUnitValveArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatValveArchiveMapper;
+import org.sdkj.thermal.mapper.PrHeatStationMapper;
+import org.sdkj.thermal.mapper.PrHeatStationPartitionMapper;
 import org.sdkj.thermal.mapper.PrHouseLogMapper;
 import org.sdkj.thermal.mapper.PrHouseMapper;
+import org.sdkj.thermal.mapper.PrUnitMapper;
 import org.sdkj.thermal.service.IPrHeatArchiveService;
 import org.sdkj.thermal.service.IPrMonitorService;
 import org.sdkj.system.mapper.SysUserMapper;
@@ -72,6 +78,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -92,11 +100,15 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     private final PrHeatCommandValveArchiveMapper commandValveArchiveMapper;
     private final PrHeatHotArchiveMapper hotArchiveMapper;
     private final PrHouseMapper houseMapper;
+    private final PrHeatStationPartitionMapper stationPartitionMapper;
+    private final PrHeatStationMapper stationMapper;
     private final PrCompanyMapper companyMapper;
     private final PrHouseLogMapper houseLogMapper;
+    private final PrUnitMapper unitMapper;
     private final IPrHeatArchiveService heatArchiveService;
     private final SysUserMapper sysUserMapper;
     private final ObjectMapper objectMapper;
+    private final org.sdkj.thermal.service.support.HeatValveVoEnricher heatValveVoEnricher;
 
     @Override
     public TableDataInfo<PrHeatArchiveVo> heatList(MonitorBo bo, PageQuery pageQuery) {
@@ -107,7 +119,15 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             lqw.and(w -> w.like(PrHeatArchive::getMeterNum, kw)
                 .or().like(PrHeatArchive::getMeterArcName, kw));
         }
+        // 档案侧筛选
+        lqw.eq(StringUtils.isNotBlank(bo.getValveStatus()), PrHeatArchive::getValveStatus, bo.getValveStatus());
         lqw.eq(PrHeatArchive::getIsChanged, 0);
+        // 房屋侧筛选 → house_id IN
+        List<Long> houseIds = resolveFilteredHouseIds(bo);
+        if (houseIds != null) {
+            if (houseIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatArchive::getHouseId, houseIds);
+        }
         lqw.orderByDesc(PrHeatArchive::getCreateTime);
         Page<PrHeatArchiveVo> result = heatArchiveMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -122,59 +142,30 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             lqw.and(w -> w.like(PrHeatValveArchive::getMeterNum, kw)
                 .or().like(PrHeatValveArchive::getMeterArcName, kw));
         }
+        // 档案侧筛选
+        lqw.eq(StringUtils.isNotBlank(bo.getValveStatus()), PrHeatValveArchive::getValveStatus, bo.getValveStatus());
+        lqw.eq(StringUtils.isNotBlank(bo.getChanNum()), PrHeatValveArchive::getChanNum, bo.getChanNum());
+        applyVoltageFilter(lqw, bo);
         lqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        // 房屋侧筛选 → house_id IN
+        List<Long> houseIds = resolveFilteredHouseIds(bo);
+        if (houseIds != null) {
+            if (houseIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatValveArchive::getHouseId, houseIds);
+        }
         lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
         Page<PrHeatValveArchiveVo> result = valveArchiveMapper.selectVoPage(pageQuery.build(), lqw);
-        fillHouseFields(result.getRecords());
+        heatValveVoEnricher.enrich(result.getRecords());
         return TableDataInfo.build(result);
     }
 
-    private void fillHouseFields(List<PrHeatValveArchiveVo> rows) {
-        if (rows == null || rows.isEmpty()) return;
-
-        // 批量查关联房屋
-        List<Long> houseIds = rows.stream()
-            .map(PrHeatValveArchiveVo::getHouseId)
-            .filter(id -> id != null)
-            .distinct()
-            .toList();
-        Map<Long, PrHouseVo> houseMap;
-        if (!houseIds.isEmpty()) {
-            houseMap = houseMapper.selectVoList(
-                new LambdaQueryWrapper<PrHouse>().in(PrHouse::getId, houseIds)
-            ).stream().collect(Collectors.toMap(PrHouseVo::getId, h -> h, (a, b) -> a));
-        } else {
-            houseMap = Collections.emptyMap();
-        }
-
-        // 批量查 orgName（orgId → orgName）
-        List<String> orgIds = rows.stream()
-            .map(PrHeatValveArchiveVo::getOrgId)
-            .filter(StringUtils::isNotBlank)
-            .distinct()
-            .toList();
-        Map<String, String> orgNameMap = new java.util.HashMap<>();
-        for (String oid : orgIds) {
-            SysOrganization org = companyMapper.selectOrgById(oid);
-            if (org != null) orgNameMap.put(oid, org.getName());
-        }
-
-        // 回填
-        for (PrHeatValveArchiveVo v : rows) {
-            PrHouseVo h = v.getHouseId() != null ? houseMap.get(v.getHouseId()) : null;
-            if (h != null) {
-                v.setBuildingName(h.getBuildingName());
-                v.setRoomNum(h.getRoomNum());
-                v.setIsCharged(h.getIsCharged());
-                v.setHouseType(h.getStationType());
-                v.setIsSpecial(h.getIsSpecial());
-                v.setHeatingArea(h.getHeatingArea());
-                v.setSiteType(h.getSiteType());
-            }
-            v.setOrgName(orgNameMap.get(v.getOrgId()));
-            v.setCurFlow(v.getInsFlow());
-            v.setIsVirtual(0);
-            v.setScopeStatus(computeScopeStatus(v.getValveTime()));
+    /** varchar 安全转 Long（station_type 存的是分区雪花id字符串） */
+    private static Long parseLongOrNull(String val) {
+        if (StringUtils.isBlank(val)) return null;
+        try {
+            return Long.valueOf(val.trim());
+        } catch (NumberFormatException e) {
+            return null;
         }
     }
 
@@ -183,6 +174,126 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         long hours = (System.currentTimeMillis() - valveTime.getTime()) / (1000 * 60 * 60);
         if (hours > 24) return "3"; // 超过24小时→通讯中断
         return "1"; // 正常
+    }
+
+    /**
+     * 按房屋侧筛选条件解析 house_id 集合。
+     * 两步解析（不 JOIN）：先查 PrHouse 拿 ID 集合，再 IN 进档案查询。
+     * PrHouseMapper @OrgPermission 会自动注入 org_id 过滤。
+     *
+     * @return null = 无房屋侧筛选（调用方跳过 IN）；
+     *         非 null = 命中的 house_id（可能为空，空→列表应返回空）
+     */
+    private List<Long> resolveFilteredHouseIds(MonitorBo bo) {
+        boolean hasHouseFilter = StringUtils.isNotBlank(bo.getBuildingId())
+            || StringUtils.isNotBlank(bo.getUnit())
+            || StringUtils.isNotBlank(bo.getFloor())
+            || StringUtils.isNotBlank(bo.getIsCharged())
+            || StringUtils.isNotBlank(bo.getHouseType())
+            || StringUtils.isNotBlank(bo.getSiteType())
+            || StringUtils.isNotBlank(bo.getSpecialType())
+            || StringUtils.isNotBlank(bo.getStationId())
+            || StringUtils.isNotBlank(bo.getPartitionId());
+        if (!hasHouseFilter) return null;
+
+        LambdaQueryWrapper<PrHouse> hq = new LambdaQueryWrapper<>();
+        hq.eq(StringUtils.isNotBlank(bo.getOrgId()), PrHouse::getOrgId, bo.getOrgId())
+          .eq(StringUtils.isNotBlank(bo.getBuildingId()), PrHouse::getBuildingId, bo.getBuildingId())
+          .eq(StringUtils.isNotBlank(bo.getUnit()), PrHouse::getUnitCode, bo.getUnit());
+
+        // 前端发 String，DB 列为 tinyint/int → 安全转换
+        Integer floorVal = toInteger(bo.getFloor());
+        hq.eq(floorVal != null, PrHouse::getFloor, floorVal);
+        Integer isChargedVal = toInteger(bo.getIsCharged());
+        hq.eq(isChargedVal != null, PrHouse::getIsCharged, isChargedVal);
+        // houseType="分组"=缴费位置属性(1孤岛/2上不供/3下不供/4正常) → pay_sit_type
+        // ⚠️ 不是 station_type！station_type 存的是分区id(见下方分区筛选)
+        Integer paySitTypeVal = toInteger(bo.getHouseType());
+        hq.eq(paySitTypeVal != null, PrHouse::getPaySitType, paySitTypeVal);
+        hq.eq(StringUtils.isNotBlank(bo.getSiteType()), PrHouse::getSiteType, bo.getSiteType());
+        Integer isSpecialVal = toInteger(bo.getSpecialType());
+        hq.eq(isSpecialVal != null, PrHouse::getIsSpecial, isSpecialVal);
+
+        // 分区筛选：pr_house.station_type 存的就是分区id(pr_heat_station_partition.id)
+        hq.eq(StringUtils.isNotBlank(bo.getPartitionId()), PrHouse::getStationType, bo.getPartitionId());
+
+        // 换热站筛选：先查该站下所有分区id，再 station_type IN
+        if (StringUtils.isNotBlank(bo.getStationId())) {
+            List<String> partitionIds = stationPartitionMapper.selectList(
+                new LambdaQueryWrapper<PrHeatStationPartition>()
+                    .eq(PrHeatStationPartition::getStationId, bo.getStationId())
+                    .select(PrHeatStationPartition::getId)
+            ).stream().map(p -> String.valueOf(p.getId())).toList();
+            if (partitionIds.isEmpty()) return Collections.emptyList(); // 该站无分区 → 无房屋
+            hq.in(PrHouse::getStationType, partitionIds);
+        }
+
+        hq.select(PrHouse::getId);
+        return houseMapper.selectList(hq).stream().map(PrHouse::getId).toList();
+    }
+
+    /**
+     * 单元侧筛选 → unit_id 集合（与 resolveFilteredHouseIds 平行）。
+     * pr_unit.station_id 存的是分区id(Long，老系统真实数据已证)，building_id 楼宇id。
+     * 单元仅支持 楼宇/分区/换热站 维度；房屋特有的缴费/分组/特殊户/楼层不适用单元。
+     *
+     * @return null = 无单元侧筛选（跳过 IN）；非 null = 命中的 unit_id（空 → 列表返回空）
+     */
+    private List<Long> resolveFilteredUnitIds(MonitorBo bo) {
+        boolean hasUnitFilter = StringUtils.isNotBlank(bo.getBuildingId())
+            || StringUtils.isNotBlank(bo.getStationId())
+            || StringUtils.isNotBlank(bo.getPartitionId());
+        if (!hasUnitFilter) return null;
+
+        LambdaQueryWrapper<PrUnit> uq = new LambdaQueryWrapper<>();
+        uq.eq(StringUtils.isNotBlank(bo.getOrgId()), PrUnit::getOrgId, bo.getOrgId());
+
+        // 楼宇：pr_unit.building_id 是 bigint，前端发 String → 转 Long
+        Long buildingId = parseLongOrNull(bo.getBuildingId());
+        uq.eq(buildingId != null, PrUnit::getBuildingId, buildingId);
+
+        // 分区筛选：pr_unit.station_id 存的就是分区id（与户级 station_type 同语义，但此处列为 Long）
+        Long partitionId = parseLongOrNull(bo.getPartitionId());
+        uq.eq(partitionId != null, PrUnit::getStationId, partitionId);
+
+        // 换热站筛选：先查该站所有分区id，再 station_id IN
+        if (StringUtils.isNotBlank(bo.getStationId())) {
+            List<Long> partitionIds = stationPartitionMapper.selectList(
+                new LambdaQueryWrapper<PrHeatStationPartition>()
+                    .eq(PrHeatStationPartition::getStationId, bo.getStationId())
+                    .select(PrHeatStationPartition::getId)
+            ).stream().map(PrHeatStationPartition::getId).toList();
+            if (partitionIds.isEmpty()) return Collections.emptyList(); // 该站无分区 → 无单元
+            uq.in(PrUnit::getStationId, partitionIds);
+        }
+
+        uq.select(PrUnit::getId);
+        return unitMapper.selectList(uq).stream().map(PrUnit::getId).toList();
+    }
+
+    /**
+     * 电压区间筛选。
+     * voltage 列在 pr_heat_valve_archive 为 varchar(20)，需 CAST 为 DECIMAL 比较。
+     * 若实际数据非规范数值则本筛选无效（待数据验证后决定是否降级）。
+     */
+    private void applyVoltageFilter(LambdaQueryWrapper<?> lqw, MonitorBo bo) {
+        if (StringUtils.isNotBlank(bo.getVoltageOp()) && bo.getVoltageValue() != null) {
+            BigDecimal val = bo.getVoltageValue();
+            switch (bo.getVoltageOp()) {
+                // voltage 列为 varchar，真实值纯数值且带小数(老系统实测 0~5.81)；
+                // 必须 DECIMAL(10,2)——默认 CAST AS DECIMAL 是 DECIMAL(10,0) 会截断小数致区间比较失真
+                case "1" -> lqw.apply("CAST(voltage AS DECIMAL(10,2)) >= {0}", val);
+                case "2" -> lqw.apply("CAST(voltage AS DECIMAL(10,2)) <= {0}", val);
+                default -> log.debug("未知的电压比较符: {}", bo.getVoltageOp());
+            }
+        }
+    }
+
+    /** 前端 String → Integer 安全转换 */
+    private Integer toInteger(String val) {
+        if (StringUtils.isBlank(val)) return null;
+        try { return Integer.valueOf(val); }
+        catch (NumberFormatException e) { return null; }
     }
 
     @Override
@@ -195,6 +306,12 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
                 .or().like(PrHeatUnitHotArchive::getMeterArcName, kw));
         }
         lqw.eq(PrHeatUnitHotArchive::getIsChanged, 0);
+        // 单元侧筛选 → unit_id IN
+        List<Long> unitIds = resolveFilteredUnitIds(bo);
+        if (unitIds != null) {
+            if (unitIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatUnitHotArchive::getUnitId, unitIds);
+        }
         lqw.orderByDesc(PrHeatUnitHotArchive::getCreateTime);
         Page<PrHeatUnitHotArchiveVo> result = unitHotArchiveMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -210,6 +327,12 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
                 .or().like(PrHeatUnitValveArchive::getMeterArcName, kw));
         }
         lqw.eq(PrHeatUnitValveArchive::getIsChanged, 0);
+        // 单元侧筛选 → unit_id IN
+        List<Long> unitIds = resolveFilteredUnitIds(bo);
+        if (unitIds != null) {
+            if (unitIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatUnitValveArchive::getUnitId, unitIds);
+        }
         lqw.orderByDesc(PrHeatUnitValveArchive::getCreateTime);
         Page<PrHeatUnitValveArchiveVo> result = unitValveArchiveMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -224,7 +347,16 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             lqw.and(w -> w.like(PrHeatTempArchive::getMeterNum, kw)
                 .or().like(PrHeatTempArchive::getMeterArcName, kw));
         }
+        // 档案侧筛选
+        lqw.eq(StringUtils.isNotBlank(bo.getValveStatus()), PrHeatTempArchive::getValveStatus, bo.getValveStatus());
+        applyVoltageFilter(lqw, bo);
         lqw.eq(PrHeatTempArchive::getIsChanged, 0);
+        // 房屋侧筛选 → house_id IN
+        List<Long> houseIds = resolveFilteredHouseIds(bo);
+        if (houseIds != null) {
+            if (houseIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatTempArchive::getHouseId, houseIds);
+        }
         lqw.orderByDesc(PrHeatTempArchive::getCreateTime);
         Page<PrHeatTempArchiveVo> result = tempArchiveMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -234,9 +366,23 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     public MonitorAggregateVo aggregate(MonitorBo bo) {
         MonitorAggregateVo vo = new MonitorAggregateVo();
 
+        // 房屋侧筛选 → house_id IN，与列表口径一致（楼宇/单元/缴费/楼层/分组/位置/特殊户）。
+        // 仅跟随"房屋侧"筛选，不跟随档案侧设备状态(valveStatus/voltage)——
+        // 否则按"开"状态筛选后在线率恒为 100%，会扭曲汇总统计。
+        List<Long> houseIds = resolveFilteredHouseIds(bo);
+        if (houseIds != null && houseIds.isEmpty()) {
+            vo.setTotalCount(0);
+            vo.setOnlineCount(0);
+            vo.setOfflineCount(0);
+            return vo;
+        }
+
         LambdaQueryWrapper<PrHeatValveArchive> valveLqw = new LambdaQueryWrapper<>();
         valveLqw.eq(StringUtils.isNotBlank(bo.getOrgId()), PrHeatValveArchive::getOrgId, bo.getOrgId());
         valveLqw.eq(PrHeatValveArchive::getIsChanged, 0);
+        if (houseIds != null) {
+            valveLqw.in(PrHeatValveArchive::getHouseId, houseIds);
+        }
         List<PrHeatValveArchive> valves = valveArchiveMapper.selectList(valveLqw);
 
         vo.setTotalCount(valves.size());
@@ -272,14 +418,17 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         vo.setOfflineCount(vo.getTotalCount() - onlineN);
 
         if (StringUtils.isNotBlank(bo.getOrgId())) {
-            buildSiteGroups(vo, bo.getOrgId(), valves);
+            buildSiteGroups(vo, bo.getOrgId(), valves, houseIds);
         }
         return vo;
     }
 
-    private void buildSiteGroups(MonitorAggregateVo vo, String orgId, List<PrHeatValveArchive> valves) {
+    private void buildSiteGroups(MonitorAggregateVo vo, String orgId, List<PrHeatValveArchive> valves, List<Long> houseIds) {
         LambdaQueryWrapper<PrHouse> houseLqw = new LambdaQueryWrapper<>();
         houseLqw.eq(PrHouse::getOrgId, orgId);
+        if (houseIds != null) {
+            houseLqw.in(PrHouse::getId, houseIds);
+        }
         houseLqw.select(PrHouse::getId, PrHouse::getSiteType);
         List<PrHouse> houses = houseMapper.selectList(houseLqw);
         if (houses.isEmpty()) {
@@ -805,7 +954,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         List<Long> houseIds = parseIds(bo.getIds());
         if (houseIds.isEmpty()) return;
 
-        // 批量更新 is_special（XML mapper，绕过 @TableField(exist=false)）
+        // 批量更新 is_special（XML mapper 批量操作）
         houseMapper.updateIsSpecialBatch(houseIds, bo.getFlag());
 
         // 写 pr_house_log
