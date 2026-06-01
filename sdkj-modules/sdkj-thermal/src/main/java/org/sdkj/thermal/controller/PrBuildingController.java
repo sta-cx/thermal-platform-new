@@ -165,6 +165,17 @@ public class PrBuildingController extends BaseController {
     }
 
     /**
+     * 按楼宇ID查询其下房屋实际使用的单元编码列表（DISTINCT pr_house.unit_code）
+     * 供「按单元筛选」下拉用，下拉值与 pr_house.unit_code 筛选键同源
+     */
+    @SaCheckPermission("thermal:property:building:list")
+    @SaCheckLogin
+    @GetMapping("/houseUnits")
+    public R<List<String>> getHouseUnits(@RequestParam String buildingId) {
+        return R.ok(buildingService.selectHouseUnitCodesByBuildingId(buildingId));
+    }
+
+    /**
      * 根据热力站查询楼宇列表
      * 旧端点: GET /property/prBuilding/getBuildingByStationId
      * 新端点: GET /thermal/property/building/byStation

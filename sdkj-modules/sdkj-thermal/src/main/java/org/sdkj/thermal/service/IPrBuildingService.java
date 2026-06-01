@@ -60,6 +60,13 @@ public interface IPrBuildingService extends IService<PrBuilding> {
     List<String> selectRoomNumsByUnitCode(String unitCode);
 
     /**
+     * 按楼宇查询其下房屋实际使用的单元编码（DISTINCT pr_house.unit_code）。
+     * 与 selectUnitCodesByBuildingId 区别：后者取 pr_unit.code，本方法取 pr_house.unit_code，
+     * 供「按单元筛选房屋/户阀」的下拉用，保证下拉值与 pr_house.unit_code 筛选键同源。
+     */
+    List<String> selectHouseUnitCodesByBuildingId(String buildingId);
+
+    /**
      * 根据热力站ID查询楼宇列表
      * @param stationId 热力站ID
      * @return 楼宇列表

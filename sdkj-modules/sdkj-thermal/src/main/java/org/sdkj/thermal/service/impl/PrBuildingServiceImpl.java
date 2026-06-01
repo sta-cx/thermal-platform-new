@@ -105,6 +105,24 @@ public class PrBuildingServiceImpl extends ServiceImpl<PrBuildingMapper, PrBuild
     }
 
     @Override
+    public List<String> selectHouseUnitCodesByBuildingId(String buildingId) {
+        if (buildingId == null || buildingId.trim().isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        return houseMapper.selectList(
+            new LambdaQueryWrapper<PrHouse>()
+                .eq(PrHouse::getBuildingId, buildingId)
+                .isNotNull(PrHouse::getUnitCode)
+                .ne(PrHouse::getUnitCode, "")
+                .select(PrHouse::getUnitCode)
+        ).stream()
+            .map(PrHouse::getUnitCode)
+            .distinct()
+            .sorted()
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<PrBuildingVo> selectByStationId(String stationId) {
         LambdaQueryWrapper<PrBuilding> lqw = new LambdaQueryWrapper<>();
         lqw.eq(PrBuilding::getStationId, stationId);
