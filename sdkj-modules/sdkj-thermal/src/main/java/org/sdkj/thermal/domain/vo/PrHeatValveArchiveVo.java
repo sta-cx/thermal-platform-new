@@ -80,6 +80,7 @@ public class PrHeatValveArchiveVo implements Serializable {
 
     private String orgName;
     private String buildingName;
+    private String unitName;
     private String roomNum;
     private String houseType;
     private Integer isSpecial;
@@ -87,4 +88,9 @@ public class PrHeatValveArchiveVo implements Serializable {
     private String siteType;
     private Integer isVirtual;
     private BigDecimal curFlow;
+
+    /** 分区id(=pr_house.station_type) + 换热站/分站名（列表展示用） */
+    private String stationType;
+    private String stationName;
+    private String stationPartitionName;
 }
