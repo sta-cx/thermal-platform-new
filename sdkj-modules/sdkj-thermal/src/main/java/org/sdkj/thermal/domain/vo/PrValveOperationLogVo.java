@@ -19,4 +19,10 @@ public class PrValveOperationLogVo {
     private String orgId;
     private String operatorId;
     private Date createTime;
+
+    /** 小区名称（enrich，非数据库字段） */
+    private String orgName;
+
+    /** 操作人名称（enrich，sys_user.nick_name） */
+    private String operatorName;
 }
