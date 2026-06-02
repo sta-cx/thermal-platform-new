@@ -87,6 +87,11 @@ public class HtRepairController extends BaseController {
     public R<Void> insert(@Validated @RequestBody HtRepairBo bo) {
         HtRepair repair = MapstructUtils.convert(bo, HtRepair.class);
         repair.setRepairNo(htRepairService.generateRepairNo());
+        // repair_time 为 NOT NULL 且无 DB 默认值；普通新增（如报警转报修）未传时兜底当前时间，
+        // 避免 MySQL 严格模式 "Field 'repair_time' doesn't have a default value" 报错
+        if (repair.getRepairTime() == null) {
+            repair.setRepairTime(new Date());
+        }
         return toAjax(htRepairService.save(repair));
     }
 
