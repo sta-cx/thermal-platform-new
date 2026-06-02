@@ -179,6 +179,9 @@ public class PrHouseVo implements Serializable {
     /** 是否特殊户 */
     private Integer isSpecial;
 
+    /** 缴费位置属性(1孤岛/2上不供/3下不供/4正常) */
+    private Integer paySitType;
+
     /** 缴费状态 */
     private String payStatus;
 

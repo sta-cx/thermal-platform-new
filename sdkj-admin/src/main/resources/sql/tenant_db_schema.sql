@@ -1687,6 +1687,7 @@ CREATE TABLE `pr_house` (
   `status` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '房屋状态',
   `pay_status` tinyint DEFAULT NULL COMMENT '缴费状态:0-欠费,1-已缴,2-停供,3-空置',
   `is_special` tinyint unsigned DEFAULT '0' COMMENT '是否特殊户',
+  `pay_sit_type` tinyint DEFAULT NULL COMMENT '缴费位置属性(1孤岛/2上不供/3下不供/4正常)',
   `rental_status` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '出租状态',
   `seq` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '排序',
   `site_type` varchar(32) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '位置属性',
