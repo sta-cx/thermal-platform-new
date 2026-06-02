@@ -25,4 +25,11 @@ public class PrValveOperationLog extends BaseEntity {
     private Date operationTime;
     private String orgId;
     private String operatorId;
+
+    /** 操作类型 1写卡 2开卡 3补卡（写卡日志视角，阶段5 阀门操作视角不使用） */
+    private String type;
+    /** 卡类型 */
+    private String cardType;
+    /** 写卡报文JSON */
+    private String content;
 }

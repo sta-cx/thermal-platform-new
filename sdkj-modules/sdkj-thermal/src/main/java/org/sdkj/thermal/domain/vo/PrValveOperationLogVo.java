@@ -25,4 +25,11 @@ public class PrValveOperationLogVo {
 
     /** 操作人名称（enrich，sys_user.nick_name） */
     private String operatorName;
+
+    /** 操作类型 1写卡 2开卡 3补卡 */
+    private String type;
+    /** 卡类型 */
+    private String cardType;
+    /** 写卡报文JSON */
+    private String content;
 }
