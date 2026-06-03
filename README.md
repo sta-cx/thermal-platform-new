@@ -1,6 +1,22 @@
 # SDKJ Thermal Platform Backend
 
-SDKJ 智慧供热综合管理平台新后端，基于 RuoYi-Vue-Plus 5.6.0 改造。当前代码包名为 `org.sdkj`，模块前缀为 `sdkj-`，打包为单体多模块 JAR。
+SDKJ 智慧供热综合管理平台新后端，基于 [RuoYi-Vue-Plus](https://github.com/dromara/RuoYi-Vue-Plus) 5.6.0 改造。
+
+## 🙏 致谢
+
+本项目基于以下开源项目构建：
+
+- **[RuoYi-Vue-Plus](https://github.com/dromara/RuoYi-Vue-Plus)** - 若依升级版后台管理系统框架
+  - 许可证：MIT License
+  - 感谢原作者和社区的持续贡献
+
+本项目遵循 MIT License 开源协议，详见 [LICENSE](./LICENSE) 文件。
+
+---
+
+## 简介
+
+SDKJ 智慧供热综合管理平台新后端。当前代码包名为 `org.sdkj`，模块前缀为 `sdkj-`，打包为单体多模块 JAR。
 
 ## 当前技术栈
 
