@@ -178,10 +178,10 @@ api-decrypt:
   headerFlag: encrypt-key
   # 响应加密公钥 非对称算法的公私钥 如：SM2，RSA 使用者请自行更换
   # 对应前端解密私钥 [REMOVED]=
-  publicKey: ${RSA_PUBLIC_KEY:[REMOVED]==}
+  publicKey: ${RSA_PUBLIC_KEY:}
   # 请求解密私钥 非对称算法的公私钥 如：SM2，RSA 使用者请自行更换
   # 对应前端加密公钥 [REMOVED]==
-  privateKey: ${RSA_PRIVATE_KEY:[REMOVED]=}
+  privateKey: ${RSA_PRIVATE_KEY:}
 
 springdoc:
   api-docs:

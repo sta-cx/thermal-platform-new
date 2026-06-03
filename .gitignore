@@ -48,3 +48,10 @@ nbdist/
 
 .flattened-pom.xml
 build-output.txt
+
+######################################################################
+# Local secrets (DO NOT commit)
+**/application-local.yml
+**/application-local.yaml
+.env
+.env.*

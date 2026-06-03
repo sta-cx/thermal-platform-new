@@ -3,8 +3,8 @@ thermal:
   # 采集平台配置
   collect:
     ipPort: 127.0.0.1:8081
-    username: admin
-    password: admin123
+    username: ${COLLECT_USERNAME:admin}
+    password: ${COLLECT_PASSWORD:}
 
   # MBus 阀门控制中间件地址
   mbus:
@@ -37,14 +37,14 @@ thermal:
     # 旧系统 token 名称
     legacy-token-name: satoken
     # JWT 密钥（与旧系统保持一致，迁移期兼容）
-    jwt-secret-key: sdkj2024
+    jwt-secret-key: ${SA_TOKEN_JWT_SECRET:your-jwt-secret-here}
 
 --- # ============== Spring AI ==============
 # 模型 API key 必须通过环境变量 SDKJ_AI_DEEPSEEK_KEY 注入,不要硬编码
 spring:
   ai:
     openai:
-      api-key: ${SDKJ_AI_DEEPSEEK_KEY:[REMOVED]}
+      api-key: ${SDKJ_AI_DEEPSEEK_KEY:}
       base-url: https://api.deepseek.com
       chat:
         options:
@@ -81,7 +81,7 @@ thermal:
       open-duration-seconds: 60
     embedding:
       base-url: https://api.jina.ai
-      api-key: ${SDKJ_AI_JINA_KEY:[REMOVED]}
+      api-key: ${SDKJ_AI_JINA_KEY:}
       model: jina-embeddings-v3
       task:
         query: retrieval.query
@@ -121,7 +121,7 @@ thermal:
         enabled: true
         model: jina-reranker-v2-base-multilingual
         base-url: https://api.jina.ai
-        api-key: ${SDKJ_AI_JINA_KEY:[REMOVED]}
+        api-key: ${SDKJ_AI_JINA_KEY:}
         timeout-ms: 5000
         score-threshold: 0.3
         fallback-on-error: true

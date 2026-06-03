@@ -134,8 +134,8 @@ justauth:
       # maxkey 服务器地址
       # 注意 如下均配置均不需要修改 maxkey 已经内置好了数据
       server-url: http://sso.maxkey.top
-      client-id: 876892492581044224
-      client-secret: [REMOVED]
+      client-id: ${JUSTAUTH_MAXKEY_CLIENT_ID:876892492581044224}
+      client-secret: ${JUSTAUTH_MAXKEY_CLIENT_SECRET:}
       redirect-uri: ${justauth.address}/social-callback?source=maxkey
     topiam:
       # topiam 服务器地址
@@ -154,8 +154,8 @@ justauth:
       client-secret: 1f7d08**********5b7**********29e
       redirect-uri: ${justauth.address}/social-callback?source=weibo
     gitee:
-      client-id: [REMOVED]
-      client-secret: [REMOVED]
+      client-id: ${JUSTAUTH_GITEE_CLIENT_ID:}
+      client-secret: ${JUSTAUTH_GITEE_CLIENT_SECRET:}
       redirect-uri: ${justauth.address}/social-callback?source=gitee
     dingtalk:
       client-id: 10**********6
@@ -203,6 +203,6 @@ thermal:
   third-party:
     yungu:
       app-code: sdkjApp
-      app-secret: [REMOVED]
+      app-secret: ${YUNGU_APP_SECRET:}
     xinao:
-      expected-token: [REMOVED]
+      expected-token: ${XINAO_EXPECTED_TOKEN:}
