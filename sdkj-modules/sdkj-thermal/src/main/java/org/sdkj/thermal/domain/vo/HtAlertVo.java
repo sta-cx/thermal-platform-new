@@ -50,17 +50,28 @@ public class HtAlertVo {
     /** 报警时间 */
     private Date alertTime;
 
-    /** 报警状态 */
+    /** 报警内容（旧系统 alert_status 列实际存的是报警描述文字，非状态码） */
     private String alertStatus;
 
     /** 组织ID */
     private String orgId;
 
 
-    /** 维修中标记：关联的 pr_repair_record.id，NULL 表示未在维修 */
+    /** 维修中标记：非空表示已转报修（已处理），NULL 表示未处理 */
     private String inMaintenance;
 
-    /** 创建人名称 */
-    private String createName;
+    // ========== enrich 回填字段（非数据库列，selectPageList 中 Stream 组装，无 JOIN） ==========
+
+    /** 小区名称（org_id → sys_organization.name） */
+    private String orgName;
+
+    /** 楼栋名称（house_id → pr_house.building_name） */
+    private String buildingName;
+
+    /** 房号（house_id → pr_house.room_num） */
+    private String roomNum;
+
+    /** 表号（meter_id → pr_heat_valve_archive.meter_num） */
+    private String meterNum;
 
 }
