@@ -10,7 +10,7 @@ SDKJ 智慧供热综合管理平台新后端，基于 [RuoYi-Vue-Plus](https://g
   - 许可证：MIT License
   - 感谢原作者和社区的持续贡献
 
-本项目遵循 MIT License 开源协议，详见 [LICENSE](./LICENSE) 文件。
+本项目遵循 **Apache License 2.0** 开源协议（修改和新增部分），原始框架部分保留 **MIT License**。详见 [LICENSE](./LICENSE) 和 [NOTICE](./NOTICE) 文件。
 
 ---
 

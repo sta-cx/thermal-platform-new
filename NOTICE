@@ -18,7 +18,25 @@ Licensed under the MIT License.
 
 ---
 
-MIT License
+## 双重许可声明
+
+本项目采用双重许可模式：
+
+1. **原始代码**：基于 RuoYi-Vue-Plus (MIT License)
+   - 原始框架代码保留其 MIT License
+   - 详见原始 LICENSE 文件
+
+2. **修改和新增代码**：Apache License 2.0
+   - 本项目修改和新增的代码采用 Apache License 2.0
+   - 详见 LICENSE 文件
+
+---
+
+## MIT License (原始框架部分)
+
+The MIT License (MIT)
+
+Copyright (c) 2019 RuoYi-Vue-Plus
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -37,3 +55,21 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+## Apache License 2.0 (修改和新增部分)
+
+Copyright 2026 sta-cx
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
