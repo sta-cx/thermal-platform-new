@@ -79,6 +79,9 @@ public class HtRepair extends BaseEntity {
     /** 处理结果 */
     private String repairResult;
 
+    /** 验收结论 */
+    private String verifyResult;
+
     /** 小区ID */
     private String orgId;
 

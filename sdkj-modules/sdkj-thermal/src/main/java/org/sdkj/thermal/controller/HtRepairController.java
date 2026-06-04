@@ -2,6 +2,7 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,10 @@ public class HtRepairController extends BaseController {
             PageQuery pageQuery) {
         LambdaQueryWrapper<HtRepair> lqw = new LambdaQueryWrapper<>();
         lqw.eq(HtRepair::getIsDelete, 0);
+        // 维修人员（无派单权限）只能查看派给自己的工单；维修主管/超管查看全部
+        if (!StpUtil.hasPermission("thermal:ht:repair:dispatch")) {
+            lqw.eq(HtRepair::getFixId, LoginHelper.getUserIdStr());
+        }
         lqw.eq(orgId != null, HtRepair::getOrgId, orgId);
         lqw.eq(buildingId != null, HtRepair::getBuildingId, buildingId);
         lqw.eq(repairType != null, HtRepair::getRepairType, repairType);
@@ -128,11 +133,12 @@ public class HtRepairController extends BaseController {
     @SaCheckLogin
     @GetMapping("/fixers")
     public R<List<Map<String, String>>> fixers() {
-        // 1. 查找 repair_worker 角色（SysRoleMapper 有 @DS("master")）
+        // 1. 查找 repair_worker 角色（SysRoleMapper 有 @DS("master")；last limit 1 防多租户多行）
         SysRole workerRole = sysRoleMapper.selectOne(
             new LambdaQueryWrapper<SysRole>()
                 .eq(SysRole::getRoleKey, "repair_worker")
                 .eq(SysRole::getStatus, "0")
+                .last("limit 1")
         );
         if (workerRole == null) {
             return R.ok(List.of());
@@ -185,6 +191,17 @@ public class HtRepairController extends BaseController {
     public R<Void> dispatch(
             @RequestParam String repairNo,
             @RequestParam String fixId) {
+        // 0. 校验工单存在且处于待派单状态（与 process/complete/verify 的前置校验保持一致，
+        //    防止已派单/处理中的工单被重复派单打回 status=1、覆盖既有 fixId/dispatchTime）
+        HtRepair current = htRepairService.getOne(
+            new LambdaQueryWrapper<HtRepair>().eq(HtRepair::getRepairNo, repairNo));
+        if (current == null) {
+            return R.fail("报修记录不存在");
+        }
+        if (current.getRepairStatus() != null && current.getRepairStatus() != 0) {
+            return R.fail("当前状态不允许派单，需为待派单状态");
+        }
+
         // 1. 校验 fixId 对应的用户存在且正常
         Long fixIdLong;
         try {
@@ -206,6 +223,7 @@ public class HtRepairController extends BaseController {
             new LambdaQueryWrapper<SysRole>()
                 .eq(SysRole::getRoleKey, "repair_worker")
                 .eq(SysRole::getStatus, "0")
+                .last("limit 1")
         );
         if (workerRole == null) {
             return R.fail("系统未配置维修人员角色，请联系管理员");
@@ -256,6 +274,7 @@ public class HtRepairController extends BaseController {
 
     /**
      * 处理报修（状态 1已派单 → 2处理中）
+     * 维修人员接单/开始处理；接单备注可选，维修结果在"完成"环节填写
      * 新端点: PUT /thermal/ht/repair/process
      */
     @SaCheckPermission("thermal:ht:repair:edit")
@@ -264,7 +283,7 @@ public class HtRepairController extends BaseController {
     @PutMapping("/process")
     public R<Void> process(
             @RequestParam String repairNo,
-            @RequestParam String repairResult) {
+            @RequestParam(required = false) String repairResult) {
         // 校验当前状态必须为已派单(1)
         HtRepair current = htRepairService.getOne(
             new LambdaQueryWrapper<HtRepair>()
@@ -274,6 +293,11 @@ public class HtRepairController extends BaseController {
         }
         if (current.getRepairStatus() != 1) {
             return R.fail("当前状态不允许处理，需为已派单状态");
+        }
+        // 维修人员只能处理派给自己的工单（超管/租户管理员可越权运维）
+        if (!LoginHelper.isSuperAdmin() && !LoginHelper.isTenantAdmin()
+            && !LoginHelper.getUserIdStr().equals(current.getFixId())) {
+            return R.fail("只能处理派给自己的工单");
         }
         HtRepair repair = new HtRepair();
         repair.setRepairStatus(2);
@@ -287,13 +311,19 @@ public class HtRepairController extends BaseController {
 
     /**
      * 完成报修（状态 2处理中 → 3已完成）
+     * 维修人员完工，必填维修结果（解决方案）；记录维修完成时间
      * 新端点: PUT /thermal/ht/repair/complete
      */
     @SaCheckPermission("thermal:ht:repair:edit")
     @SaCheckLogin
     @Log(title = "报修记录完成", businessType = BusinessType.UPDATE)
     @PutMapping("/complete")
-    public R<Void> complete(@RequestParam String repairNo) {
+    public R<Void> complete(
+            @RequestParam String repairNo,
+            @RequestParam String repairResult) {
+        if (StringUtils.isBlank(repairResult)) {
+            return R.fail("请填写维修结果");
+        }
         HtRepair current = htRepairService.getOne(
             new LambdaQueryWrapper<HtRepair>()
                 .eq(HtRepair::getRepairNo, repairNo));
@@ -303,8 +333,14 @@ public class HtRepairController extends BaseController {
         if (current.getRepairStatus() != 2) {
             return R.fail("当前状态不允许完成，需为处理中状态");
         }
+        // 维修人员只能完成派给自己的工单（超管/租户管理员可越权运维）
+        if (!LoginHelper.isSuperAdmin() && !LoginHelper.isTenantAdmin()
+            && !LoginHelper.getUserIdStr().equals(current.getFixId())) {
+            return R.fail("只能完成派给自己的工单");
+        }
         HtRepair repair = new HtRepair();
         repair.setRepairStatus(3);
+        repair.setRepairResult(repairResult);
         repair.setFixTime(new Date());
         LambdaQueryWrapper<HtRepair> lqw = new LambdaQueryWrapper<>();
         lqw.eq(HtRepair::getRepairNo, repairNo);
@@ -333,8 +369,9 @@ public class HtRepairController extends BaseController {
         }
         HtRepair repair = new HtRepair();
         repair.setRepairStatus(4);
+        // 验收结论写入独立字段 verify_result，不覆盖维修结果 repair_result
         if (StringUtils.isNotBlank(repairResult)) {
-            repair.setRepairResult(repairResult);
+            repair.setVerifyResult(repairResult);
         }
         LambdaQueryWrapper<HtRepair> lqw = new LambdaQueryWrapper<>();
         lqw.eq(HtRepair::getRepairNo, repairNo);
