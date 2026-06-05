@@ -178,6 +178,8 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
             }
 
             try {
+                Integer normalizedPayStatus = normalizePaymentStatus(row.getPayStatus());
+
                 // 2. Update house fields if provided
                 LambdaUpdateWrapper<PrHouse> houseUpdate = new LambdaUpdateWrapper<>();
                 houseUpdate.eq(PrHouse::getId, house.getId());
@@ -216,6 +218,9 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
                     houseUpdate.set(PrHouse::getUpdateBy, createBy);
                     houseUpdate.set(PrHouse::getUpdateTime, now);
                     houseMapper.update(null, houseUpdate);
+                }
+                if (normalizedPayStatus != null) {
+                    houseMapper.updatePayStatusBatch(List.of(house.getId()), normalizedPayStatus);
                 }
 
                 // 3. Handle user info (if userName and phone are both provided)
@@ -295,5 +300,18 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
                 .last("LIMIT 1")
         );
         return house != null;
+    }
+
+    static Integer normalizePaymentStatus(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return switch (value.trim()) {
+            case "1", "已缴费", "已收费", "已交费" -> 1;
+            case "0", "未缴费", "未收费", "欠费" -> 0;
+            case "2", "停供" -> 2;
+            case "3", "空置" -> 3;
+            default -> throw new IllegalArgumentException("缴费状态只能填写：已缴费、未缴费、停供、空置");
+        };
     }
 }

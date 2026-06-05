@@ -394,7 +394,7 @@ public class PrHeatValveArchiveController extends BaseController {
     public R<List<PrHeatValveArchiveVo>> queryMeterByMeterNum(
             @RequestParam String meterNum,
             @RequestParam String orgId,
-            @RequestParam String code) {
+            @RequestParam(required = false) String code) {
         return R.ok(valveArchiveService.queryMeterByMeterNum(meterNum, orgId, code));
     }
 

@@ -763,7 +763,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         return houseMapper.selectList(
             new LambdaQueryWrapper<PrHouse>()
                 .eq(PrHouse::getOrgId, orgId)
-                .eq(PrHouse::getPayStatus, "1")
+                .eq(PrHouse::getIsCharged, 1)
                 .isNotNull(PrHouse::getOtherCode)
                 .ne(PrHouse::getOtherCode, "")
         ).stream().map(PrHouse::getId).collect(Collectors.toSet());
@@ -773,7 +773,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
         return houseMapper.selectList(
             new LambdaQueryWrapper<PrHouse>()
                 .eq(PrHouse::getOrgId, orgId)
-                .in(PrHouse::getPayStatus, "0", "2", "3")
+                .and(w -> w.isNull(PrHouse::getIsCharged).or().in(PrHouse::getIsCharged, 0, 2, 3))
                 .isNotNull(PrHouse::getOtherCode)
                 .ne(PrHouse::getOtherCode, "")
         ).stream().map(PrHouse::getId).collect(Collectors.toSet());
