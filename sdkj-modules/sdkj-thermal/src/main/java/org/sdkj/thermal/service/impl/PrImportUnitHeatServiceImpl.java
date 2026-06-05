@@ -7,6 +7,7 @@ import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.PrImportUnitHeat;
 import org.sdkj.thermal.mapper.PrImportUnitHeatMapper;
 import org.sdkj.thermal.service.IPrImportUnitHeatService;
+import org.sdkj.thermal.service.OrgAccessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,7 @@ public class PrImportUnitHeatServiceImpl extends ServiceImpl<PrImportUnitHeatMap
     implements IPrImportUnitHeatService {
 
     private final PrImportUnitHeatMapper mapper;
+    private final OrgAccessService orgAccessService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -74,6 +76,7 @@ public class PrImportUnitHeatServiceImpl extends ServiceImpl<PrImportUnitHeatMap
         mapper.updateOrgId(create);
         mapper.updateBuildingId(create);
         mapper.updateUnitId(create);
+        orgAccessService.assertCurrentUserCanAccessOrgIds(mapper.selectImportedOrgIds(create));
     }
 
     @Override
@@ -152,6 +155,7 @@ public class PrImportUnitHeatServiceImpl extends ServiceImpl<PrImportUnitHeatMap
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
+        orgAccessService.assertCurrentUserCanAccessOrgIds(mapper.selectImportedOrgIds(create));
         mapper.submitData(create);
         mapper.deleteImportUnitHeatData(create);
         return true;
@@ -165,6 +169,7 @@ public class PrImportUnitHeatServiceImpl extends ServiceImpl<PrImportUnitHeatMap
 
     @Override
     public List<PrImportUnitHeat> selectByOrgId(String orgId) {
+        orgAccessService.assertCurrentUserCanAccessOrg(orgId);
         return mapper.selectByOrgId(orgId);
     }
 }

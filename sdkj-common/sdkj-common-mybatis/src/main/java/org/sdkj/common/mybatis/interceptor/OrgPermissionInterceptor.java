@@ -16,14 +16,19 @@ import net.sf.jsqlparser.expression.operators.relational.InExpression;
 import net.sf.jsqlparser.expression.operators.relational.ParenthesedExpressionList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.delete.Delete;
+import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.select.ParenthesedSelect;
+import net.sf.jsqlparser.statement.update.Update;
 import org.apache.ibatis.executor.Executor;
+import org.apache.ibatis.executor.statement.StatementHandler;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
+import org.apache.ibatis.mapping.SqlCommandType;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import cn.dev33.satoken.exception.SaTokenContextException;
@@ -32,6 +37,7 @@ import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.common.mybatis.helper.OrgPermissionHelper;
 import org.sdkj.common.satoken.utils.LoginHelper;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,13 +66,78 @@ public class OrgPermissionInterceptor extends JsqlParserSupport implements Inner
 
     @Override
     public void beforeQuery(Executor executor, MappedStatement ms, Object parameter,
-                           RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
-        if (InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId())) {
+                            RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
+        OrgPermissionContext context = resolveOrgPermissionContext(ms);
+        if (context == null) {
             return;
+        }
+        PluginUtils.MPBoundSql mpBs = PluginUtils.mpBoundSql(boundSql);
+        mpBs.sql(parserSingle(mpBs.sql(), context));
+    }
+
+    @Override
+    public void beforePrepare(StatementHandler sh, Connection connection, Integer transactionTimeout) {
+        PluginUtils.MPStatementHandler mpSh = PluginUtils.mpStatementHandler(sh);
+        MappedStatement ms = mpSh.mappedStatement();
+        SqlCommandType commandType = ms.getSqlCommandType();
+        if (commandType != SqlCommandType.UPDATE && commandType != SqlCommandType.DELETE) {
+            return;
+        }
+
+        OrgPermissionContext context = resolveOrgPermissionContext(ms);
+        if (context == null) {
+            return;
+        }
+        PluginUtils.MPBoundSql mpBs = mpSh.mPBoundSql();
+        mpBs.sql(parserMulti(mpBs.sql(), context));
+    }
+
+    @Override
+    protected void processSelect(Select select, int index, String sql, Object condition) {
+        OrgPermissionContext context = (OrgPermissionContext) condition;
+        if (select instanceof PlainSelect plainSelect) {
+            appendCondition(plainSelect, buildOrgPermissionExpression(
+                context.userId(), qualifyColumn(plainSelect.getFromItem(), context.column())));
+        } else if (select instanceof SetOperationList setOpList) {
+            List<Select> selects = setOpList.getSelects();
+            selects.forEach(s -> {
+                if (s instanceof PlainSelect ps) {
+                    appendCondition(ps, buildOrgPermissionExpression(
+                        context.userId(), qualifyColumn(ps.getFromItem(), context.column())));
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void processUpdate(Update update, int index, String sql, Object condition) {
+        OrgPermissionContext context = (OrgPermissionContext) condition;
+        Expression cond = buildOrgPermissionExpression(context.userId(), qualifyColumn(update.getTable(), context.column()));
+        update.setWhere(appendCondition(update.getWhere(), cond));
+    }
+
+    @Override
+    protected void processDelete(Delete delete, int index, String sql, Object condition) {
+        OrgPermissionContext context = (OrgPermissionContext) condition;
+        Expression cond = buildOrgPermissionExpression(context.userId(), qualifyColumn(delete.getTable(), context.column()));
+        delete.setWhere(appendCondition(delete.getWhere(), cond));
+    }
+
+    private void appendCondition(PlainSelect plainSelect, Expression conditionExpr) {
+        plainSelect.setWhere(appendCondition(plainSelect.getWhere(), conditionExpr));
+    }
+
+    private Expression appendCondition(Expression where, Expression conditionExpr) {
+        return where == null ? conditionExpr : new AndExpression(new ParenthesedExpressionList<>(where), conditionExpr);
+    }
+
+    private OrgPermissionContext resolveOrgPermissionContext(MappedStatement ms) {
+        if (InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId())) {
+            return null;
         }
         OrgPermission permission = OrgPermissionHelper.getPermission();
         if (permission == null) {
-            return;
+            return null;
         }
         boolean superAdmin;
         Long userId;
@@ -75,45 +146,34 @@ public class OrgPermissionInterceptor extends JsqlParserSupport implements Inner
             userId = LoginHelper.getUserId();
         } catch (SaTokenContextException e) {
             // 非 HTTP 请求上下文（启动阶段、定时任务等），跳过过滤
-            return;
+            return null;
         }
         if (superAdmin || userId == null) {
-            return;
+            return null;
         }
 
         String column = permission.value();
         if (!column.matches("[a-zA-Z0-9_]+")) {
             throw new ServiceException("非法的权限列名: " + column);
         }
-
-        Expression conditionExpr = buildOrgPermissionExpression(userId, column);
-
-        PluginUtils.MPBoundSql mpBs = PluginUtils.mpBoundSql(boundSql);
-        mpBs.sql(parserSingle(mpBs.sql(), conditionExpr));
+        return new OrgPermissionContext(userId, column);
     }
 
-    @Override
-    protected void processSelect(Select select, int index, String sql, Object condition) {
-        Expression cond = (Expression) condition;
-        if (select instanceof PlainSelect plainSelect) {
-            appendCondition(plainSelect, cond);
-        } else if (select instanceof SetOperationList setOpList) {
-            List<Select> selects = setOpList.getSelects();
-            selects.forEach(s -> {
-                if (s instanceof PlainSelect ps) {
-                    appendCondition(ps, cond);
-                }
-            });
+    private String qualifyColumn(Table table, String column) {
+        if (table == null) {
+            return column;
         }
+        if (table.getAlias() != null && table.getAlias().getName() != null) {
+            return table.getAlias().getName() + "." + column;
+        }
+        return table.getName() + "." + column;
     }
 
-    private void appendCondition(PlainSelect plainSelect, Expression conditionExpr) {
-        Expression where = plainSelect.getWhere();
-        if (where != null) {
-            plainSelect.setWhere(new AndExpression(where, conditionExpr));
-        } else {
-            plainSelect.setWhere(conditionExpr);
+    private String qualifyColumn(FromItem fromItem, String column) {
+        if (fromItem instanceof Table table) {
+            return qualifyColumn(table, column);
         }
+        return column;
     }
 
     /**
@@ -154,5 +214,8 @@ public class OrgPermissionInterceptor extends JsqlParserSupport implements Inner
         ParenthesedSelect parens = new ParenthesedSelect();
         parens.setSelect(inner);
         return parens;
+    }
+
+    record OrgPermissionContext(Long userId, String column) {
     }
 }

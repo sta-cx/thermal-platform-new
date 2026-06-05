@@ -1,6 +1,7 @@
 package org.sdkj.thermal.mapper;
 
 import org.apache.ibatis.annotations.Param;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrHeatValveArchive;
@@ -13,6 +14,7 @@ import java.util.List;
 /**
  * 调控执行记录Mapper
  */
+@OrgPermission
 public interface HtTasksPerformMapper extends BaseMapperPlus<HtTasksPerform, HtTasksPerformVo> {
 
     /**

@@ -1,6 +1,7 @@
 package org.sdkj.thermal.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.HtScopeDtu;
 import org.apache.ibatis.annotations.Param;
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * DTU控制范围表Mapper接口
  */
+@OrgPermission
 public interface HtScopeDtuMapper extends BaseMapperPlus<HtScopeDtu, HtScopeDtu> {
 
     /**

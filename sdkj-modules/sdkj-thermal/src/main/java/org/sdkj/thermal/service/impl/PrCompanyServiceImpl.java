@@ -13,6 +13,7 @@ import org.sdkj.thermal.mapper.PrBuildingMapper;
 import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrDataGrantMapper;
 import org.sdkj.thermal.service.IPrCompanyService;
+import org.sdkj.thermal.service.OrgAccessService;
 import org.sdkj.thermal.vo.TreeNode;
 import org.sdkj.thermal.vo.TreeUtil;
 import org.sdkj.common.core.exception.ServiceException;
@@ -34,6 +35,7 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
     private final PrCompanyMapper prCompanyMapper;
     private final PrBuildingMapper prBuildingMapper;
     private final PrDataGrantMapper prDataGrantMapper;
+    private final OrgAccessService orgAccessService;
 
     @Override
     public List<PrCompany> listCompanies() {
@@ -181,6 +183,7 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
         }
 
         if ("2".equals(level)) {
+            orgAccessService.assertCurrentUserCanAccessOrg(orgIdStr);
             // 小区：检查有无子部门，有则拒绝删除
             int childCount = prCompanyMapper.findChild(orgIdStr, companyId);
             if (childCount > 0) {
@@ -279,9 +282,14 @@ public class PrCompanyServiceImpl extends ServiceImpl<PrCompanyMapper, PrCompany
 
     @Override
     public void clearUserOrg(Long userId) {
-        prDataGrantMapper.delete(
-            new LambdaQueryWrapper<PrDataGrant>().eq(PrDataGrant::getUserId, userId)
-        );
+        Long currentUserId = LoginHelper.getUserId();
+        boolean isPrivileged = LoginHelper.isSuperAdmin() || LoginHelper.isTenantAdmin();
+        LambdaQueryWrapper<PrDataGrant> deleteWrapper = new LambdaQueryWrapper<PrDataGrant>()
+            .eq(PrDataGrant::getUserId, userId);
+        if (!isPrivileged) {
+            deleteWrapper.eq(PrDataGrant::getCreateBy, currentUserId);
+        }
+        prDataGrantMapper.delete(deleteWrapper);
     }
 
     @Override

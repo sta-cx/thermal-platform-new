@@ -2,6 +2,7 @@ package org.sdkj.thermal.mapper;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
+import org.sdkj.common.mybatis.annotation.OrgPermission;
 import org.sdkj.common.mybatis.core.mapper.BaseMapperPlus;
 import org.sdkj.thermal.domain.PrExpenseItem;
 import org.sdkj.thermal.domain.vo.PrExpenseItemVo;
@@ -12,6 +13,7 @@ import java.util.List;
  * 费用项目 Mapper
  * 迁移自旧系统 PrExpenseItemMapper
  */
+@OrgPermission
 public interface PrExpenseItemMapper extends BaseMapperPlus<PrExpenseItem, PrExpenseItemVo> {
 
     /**

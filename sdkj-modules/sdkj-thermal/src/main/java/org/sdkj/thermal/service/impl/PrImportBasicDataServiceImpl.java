@@ -16,6 +16,7 @@ import org.sdkj.thermal.domain.PrHouseExpense;
 import org.sdkj.thermal.mapper.PrImportBasicDataMapper;
 import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.service.IPrImportBasicDataService;
+import org.sdkj.thermal.service.OrgAccessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
 
     private final PrImportBasicDataMapper mapper;
     private final PrHouseMapper houseMapper;
+    private final OrgAccessService orgAccessService;
 
     @Override
     public Integer importData(List<PrImportBasicData> objects) {
@@ -52,6 +54,7 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
         }
         mapper.insertList(lists);
         mapper.updateOrgId(create);
+        orgAccessService.assertCurrentUserCanAccessOrgIds(mapper.groupOrgId(create));
         return lists.size();
     }
 
@@ -133,6 +136,7 @@ public class PrImportBasicDataServiceImpl extends ServiceImpl<PrImportBasicDataM
         String create = LoginHelper.getUserIdStr();
         List<String> orgIds = mapper.groupOrgId(create);
         if (orgIds != null && !orgIds.isEmpty()) {
+            orgAccessService.assertCurrentUserCanAccessOrgIds(orgIds);
             mapper.insertUsers(create, "e10adc3949ba59abbe56e057f20f883e");
             mapper.insertUserHouse(create);
             mapper.insertHouseChange(create);

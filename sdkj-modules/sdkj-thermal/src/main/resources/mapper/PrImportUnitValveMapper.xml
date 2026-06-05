@@ -193,6 +193,15 @@
         order by c.id, b.name, a.name
     </select>
 
+    <select id="selectImportedOrgIds" resultType="string">
+        select distinct org_id
+        from pr_import_unit_valve
+        where create_by = #{create}
+          and type = '0'
+          and org_id is not null
+          and org_id != ''
+    </select>
+
     <delete id="deleteData">
         delete
         from pr_import_unit_valve

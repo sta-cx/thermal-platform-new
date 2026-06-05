@@ -7,6 +7,7 @@ import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.PrImportHeat;
 import org.sdkj.thermal.mapper.PrImportHeatMapper;
 import org.sdkj.thermal.service.IPrImportHeatService;
+import org.sdkj.thermal.service.OrgAccessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -22,6 +23,7 @@ public class PrImportHeatServiceImpl extends ServiceImpl<PrImportHeatMapper, PrI
     implements IPrImportHeatService {
 
     private final PrImportHeatMapper prImportHeatMapper;
+    private final OrgAccessService orgAccessService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -76,6 +78,7 @@ public class PrImportHeatServiceImpl extends ServiceImpl<PrImportHeatMapper, PrI
     public void updateHouseId() {
         String create = LoginHelper.getUserIdStr();
         prImportHeatMapper.updateHouseId(create);
+        orgAccessService.assertCurrentUserCanAccessOrgIds(prImportHeatMapper.selectImportedOrgIds(create));
     }
 
     @Override
@@ -155,6 +158,7 @@ public class PrImportHeatServiceImpl extends ServiceImpl<PrImportHeatMapper, PrI
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
+        orgAccessService.assertCurrentUserCanAccessOrgIds(prImportHeatMapper.selectImportedOrgIds(create));
         prImportHeatMapper.deleteHeatByNoHouseId(create);
         prImportHeatMapper.submitData(create);
         prImportHeatMapper.deleteImportHeatData(create);
@@ -169,6 +173,7 @@ public class PrImportHeatServiceImpl extends ServiceImpl<PrImportHeatMapper, PrI
 
     @Override
     public List<PrImportHeat> selectByOrgId(String orgId) {
+        orgAccessService.assertCurrentUserCanAccessOrg(orgId);
         return prImportHeatMapper.selectByOrgId(orgId);
     }
 }

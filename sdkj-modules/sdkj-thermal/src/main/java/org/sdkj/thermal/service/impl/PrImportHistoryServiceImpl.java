@@ -7,6 +7,7 @@ import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.PrImportHistory;
 import org.sdkj.thermal.mapper.PrImportHistoryMapper;
 import org.sdkj.thermal.service.IPrImportHistoryService;
+import org.sdkj.thermal.service.OrgAccessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class PrImportHistoryServiceImpl extends ServiceImpl<PrImportHistoryMappe
     implements IPrImportHistoryService {
 
     private final PrImportHistoryMapper mapper;
+    private final OrgAccessService orgAccessService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -43,6 +45,7 @@ public class PrImportHistoryServiceImpl extends ServiceImpl<PrImportHistoryMappe
     public void updateIds() {
         String create = LoginHelper.getUserIdStr();
         mapper.updateHouseId(create);
+        orgAccessService.assertCurrentUserCanAccessOrgIds(mapper.selectImportedOrgIds(create));
         mapper.updateStandardId(create);
     }
 
@@ -69,6 +72,7 @@ public class PrImportHistoryServiceImpl extends ServiceImpl<PrImportHistoryMappe
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
+        orgAccessService.assertCurrentUserCanAccessOrgIds(mapper.selectImportedOrgIds(create));
         mapper.submitData(create);
         mapper.deleteImportHistoryData(create);
         return true;

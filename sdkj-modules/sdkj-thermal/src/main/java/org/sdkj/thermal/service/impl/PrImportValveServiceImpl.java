@@ -7,6 +7,7 @@ import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.PrImportValve;
 import org.sdkj.thermal.mapper.PrImportValveMapper;
 import org.sdkj.thermal.service.IPrImportValveService;
+import org.sdkj.thermal.service.OrgAccessService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -24,6 +25,7 @@ public class PrImportValveServiceImpl extends ServiceImpl<PrImportValveMapper, P
     implements IPrImportValveService {
 
     private final PrImportValveMapper prImportValveMapper;
+    private final OrgAccessService orgAccessService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -58,6 +60,7 @@ public class PrImportValveServiceImpl extends ServiceImpl<PrImportValveMapper, P
     public void updateHouseId() {
         String create = LoginHelper.getUserIdStr();
         prImportValveMapper.updateHouseId(create);
+        orgAccessService.assertCurrentUserCanAccessOrgIds(prImportValveMapper.selectImportedOrgIds(create));
     }
 
     @Override
@@ -117,6 +120,7 @@ public class PrImportValveServiceImpl extends ServiceImpl<PrImportValveMapper, P
     @Transactional(rollbackFor = Exception.class)
     public boolean submitData() {
         String create = LoginHelper.getUserIdStr();
+        orgAccessService.assertCurrentUserCanAccessOrgIds(prImportValveMapper.selectImportedOrgIds(create));
         prImportValveMapper.deleteHeatValveByNoHouseId(create);
         prImportValveMapper.submitData(create);
         prImportValveMapper.deleteImportValveData(create);
@@ -131,6 +135,7 @@ public class PrImportValveServiceImpl extends ServiceImpl<PrImportValveMapper, P
 
     @Override
     public List<PrImportValve> selectByOrgId(String orgId) {
+        orgAccessService.assertCurrentUserCanAccessOrg(orgId);
         return prImportValveMapper.selectByOrgId(orgId);
     }
 }

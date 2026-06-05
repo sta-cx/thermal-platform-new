@@ -26,6 +26,8 @@ public interface PrImportHeatTempMapper extends BaseMapperPlus<PrImportHeatTemp,
 
     List<PrImportHeatTemp> selectByOrgId(@Param("orgId") String orgId);
 
+    List<String> selectImportedOrgIds(@Param("create") String create);
+
     boolean deleteData(@Param("create") String create);
 
     void submitData(@Param("create") String create);

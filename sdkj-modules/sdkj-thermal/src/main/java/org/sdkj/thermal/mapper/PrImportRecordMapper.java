@@ -26,6 +26,8 @@ public interface PrImportRecordMapper extends BaseMapperPlus<PrImportRecord, PrI
 
     List<PrImportRecord> checkAmountError(@Param("create") String create);
 
+    List<String> selectImportedOrgIds(@Param("create") String create);
+
     boolean deleteData(@Param("create") String create);
 
     void submitData(@Param("create") String create);

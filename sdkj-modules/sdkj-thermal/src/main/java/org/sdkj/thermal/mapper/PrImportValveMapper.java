@@ -72,6 +72,8 @@ public interface PrImportValveMapper extends BaseMapperPlus<PrImportValve, PrImp
      */
     List<PrImportValve> selectByOrgId(@Param("orgId") String orgId);
 
+    List<String> selectImportedOrgIds(@Param("create") String create);
+
     /**
      * 删除导入数据
      */

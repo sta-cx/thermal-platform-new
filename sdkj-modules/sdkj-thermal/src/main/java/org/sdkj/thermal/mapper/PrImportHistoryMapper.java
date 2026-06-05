@@ -20,6 +20,8 @@ public interface PrImportHistoryMapper extends BaseMapperPlus<PrImportHistory, P
 
     Integer select(@Param("create") String create);
 
+    List<String> selectImportedOrgIds(@Param("create") String create);
+
     boolean deleteData(@Param("create") String create);
 
     void submitData(@Param("create") String create);
