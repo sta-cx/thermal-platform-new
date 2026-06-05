@@ -47,4 +47,7 @@ public class MtTcArchiveVo {
     /** 创建时间 */
     private java.util.Date createTime;
 
+    /** 备注 */
+    private String remark;
+
 }

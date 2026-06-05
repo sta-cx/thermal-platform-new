@@ -93,4 +93,7 @@ public class PrHeatValveArchiveVo implements Serializable {
     private String stationType;
     private String stationName;
     private String stationPartitionName;
+
+    /** 备注 */
+    private String remark;
 }

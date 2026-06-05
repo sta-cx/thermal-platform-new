@@ -205,4 +205,7 @@ public class PrHeatArchiveBo extends BaseEntity {
 
     /** 打印类型 */
     private String printType;
+
+    /** 备注 */
+    private String remark;
 }

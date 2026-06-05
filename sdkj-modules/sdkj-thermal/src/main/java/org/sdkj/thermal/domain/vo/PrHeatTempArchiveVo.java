@@ -49,4 +49,7 @@ public class PrHeatTempArchiveVo implements Serializable {
 
     /** 关联房屋（非数据库字段） */
     private PrHouseVo prHouse;
+
+    /** 备注 */
+    private String remark;
 }

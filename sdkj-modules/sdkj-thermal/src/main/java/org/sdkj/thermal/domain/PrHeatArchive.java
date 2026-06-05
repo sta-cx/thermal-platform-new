@@ -233,4 +233,7 @@ public class PrHeatArchive extends BaseEntity {
     /** 实收（查询用） */
     @TableField(exist = false)
     private BigDecimal paidIn;
+
+    /** 备注 */
+    private String remark;
 }

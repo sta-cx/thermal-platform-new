@@ -90,4 +90,7 @@ public class PrHeatArchiveVo implements Serializable {
     private BigDecimal deducted;
     /** 实收 */
     private BigDecimal paidIn;
+
+    /** 备注 */
+    private String remark;
 }

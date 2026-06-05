@@ -190,4 +190,7 @@ public class PrHouseVo implements Serializable {
 
     /** 预充值金额 */
     private BigDecimal preloaded;
+
+    /** 备注 */
+    private String remark;
 }

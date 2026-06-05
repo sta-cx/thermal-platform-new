@@ -51,4 +51,7 @@ public class MtHeatArchive extends BaseEntity {
     /** 是否启用 (0=禁用 1=启用) */
     private Integer isEnabled;
 
+    /** 备注 */
+    private String remark;
+
 }

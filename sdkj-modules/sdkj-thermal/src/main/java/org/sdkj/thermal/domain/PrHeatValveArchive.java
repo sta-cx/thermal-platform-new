@@ -198,4 +198,7 @@ public class PrHeatValveArchive extends BaseEntity {
     /** 是否已收费 */
     @TableField(exist = false)
     private Integer isCharged;
+
+    /** 备注 */
+    private String remark;
 }

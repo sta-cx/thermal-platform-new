@@ -110,4 +110,7 @@ public class PrHeatTempArchiveBo extends BaseEntity {
 
     /** 设备ID */
     private String deviceId;
+
+    /** 备注 */
+    private String remark;
 }

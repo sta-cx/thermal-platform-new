@@ -179,4 +179,7 @@ public class PrHeatValveArchiveBo extends BaseEntity {
 
     /** 瞬时流量 */
     private BigDecimal insFlow;
+
+    /** 备注 */
+    private String remark;
 }

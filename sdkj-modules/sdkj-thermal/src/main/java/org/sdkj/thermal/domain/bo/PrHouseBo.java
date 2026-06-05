@@ -143,4 +143,7 @@ public class PrHouseBo extends BaseEntity {
 
     /** 小区ID */
     private String orgId;
+
+    /** 备注 */
+    private String remark;
 }

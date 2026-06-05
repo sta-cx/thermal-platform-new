@@ -203,4 +203,7 @@ public class PrHouse extends BaseEntity {
     /** 预充值金额 */
     @TableField(exist = false)
     private BigDecimal preloaded;
+
+    /** 备注 */
+    private String remark;
 }

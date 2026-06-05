@@ -119,4 +119,7 @@ public class PrHeatTempArchive extends BaseEntity {
     /** 关联房屋 */
     @TableField(exist = false)
     private PrHouse prHouse;
+
+    /** 备注 */
+    private String remark;
 }
