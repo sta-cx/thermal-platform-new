@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
@@ -11,6 +10,7 @@ import org.sdkj.thermal.domain.PrHeatReading;
 import org.sdkj.thermal.domain.vo.PrHeatReadingVo;
 import org.sdkj.thermal.mapper.PrHeatReadingMapper;
 import org.sdkj.thermal.service.IPrHeatReadingService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +19,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class PrHeatReadingServiceImpl extends ServiceImpl<PrHeatReadingMapper, PrHeatReading> implements IPrHeatReadingService {
+public class PrHeatReadingServiceImpl extends OrgScopedServiceImpl<PrHeatReadingMapper, PrHeatReading> implements IPrHeatReadingService {
 
     private final PrHeatReadingMapper baseMapper;
 

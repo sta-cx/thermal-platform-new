@@ -5,7 +5,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.utils.MapstructUtils;
@@ -23,6 +22,7 @@ import org.sdkj.thermal.mapper.*;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatArchiveService;
 import org.sdkj.thermal.service.IPrOptionsHeatService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +36,7 @@ import java.util.concurrent.ThreadLocalRandom;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, PrHeatArchive> implements IPrHeatArchiveService {
+public class PrHeatArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatArchiveMapper, PrHeatArchive> implements IPrHeatArchiveService {
 
     private final PrHeatArchiveMapper baseMapper;
     private final IHtTasksPerformService htTasksPerformService;
@@ -234,6 +234,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     @Transactional(rollbackFor = Exception.class)
     public boolean manualControl(List<PrHeatVo> prHeatVoList, boolean switch1, Integer scale, String adjust,
                                   String orgId, String intervall, String unit, String duration) {
+        assertOrgAllowed(orgId);
         PrOptionsHeat prOptionsHeat = prOptionsHeatService.getDataById(orgId, "2");
         if (prOptionsHeat == null) {
             throw new ServiceException("未找到调控配置");
@@ -689,6 +690,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean xunce(List<PrHeatVo> prHeatVoList, String orgId) {
+        assertOrgAllowed(orgId);
         if (prHeatVoList.isEmpty()) {
             return true;
         }
@@ -721,6 +723,7 @@ public class PrHeatArchiveServiceImpl extends ServiceImpl<PrHeatArchiveMapper, P
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean setValveGroupParam(List<PrHeatVo> prHeatVoList, String commandParam, String orgId) {
+        assertOrgAllowed(orgId);
         if (prHeatVoList.isEmpty()) {
             return true;
         }

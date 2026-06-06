@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.exception.ServiceException;
@@ -22,6 +21,7 @@ import org.sdkj.thermal.domain.vo.PrUserHouseVo;
 import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.mapper.PrUserHouseMapper;
 import org.sdkj.thermal.service.IPrHouseService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PrHouseServiceImpl extends ServiceImpl<PrHouseMapper, PrHouse> implements IPrHouseService {
+public class PrHouseServiceImpl extends OrgScopedServiceImpl<PrHouseMapper, PrHouse> implements IPrHouseService {
 
     private final PrHouseMapper baseMapper;
     private final PrUserHouseMapper userHouseMapper;

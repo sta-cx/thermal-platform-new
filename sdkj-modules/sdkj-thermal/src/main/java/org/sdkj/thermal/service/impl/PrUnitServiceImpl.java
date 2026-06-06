@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
@@ -14,6 +13,7 @@ import org.sdkj.thermal.mapper.PrBuildingMapper;
 import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrUnitMapper;
 import org.sdkj.thermal.service.IPrUnitService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class PrUnitServiceImpl extends ServiceImpl<PrUnitMapper, PrUnit> implements IPrUnitService {
+public class PrUnitServiceImpl extends OrgScopedServiceImpl<PrUnitMapper, PrUnit> implements IPrUnitService {
 
     private final PrUnitMapper baseMapper;
     private final PrBuildingMapper buildingMapper;

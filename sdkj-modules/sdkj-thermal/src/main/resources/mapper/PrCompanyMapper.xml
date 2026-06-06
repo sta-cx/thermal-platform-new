@@ -70,7 +70,7 @@
     </select>
 
     <select id="getUserOrgByUserId" resultType="org.sdkj.thermal.domain.SysOrganization">
-        SELECT b.id, b.name
+        SELECT DISTINCT b.id, b.name, '-1' AS parent_id
         FROM pr_data_grant a
                  INNER JOIN sys_organization b ON a.org_id = b.id
         WHERE a.user_id = #{userId}
@@ -79,7 +79,7 @@
     </select>
 
     <select id="listAllOrgsByLevel" resultType="org.sdkj.thermal.domain.SysOrganization">
-        SELECT id, name
+        SELECT id, name, '-1' AS parent_id
         FROM sys_organization
         WHERE level = #{level}
           AND del_flag = '0'

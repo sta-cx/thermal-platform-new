@@ -1,10 +1,10 @@
 package org.sdkj.thermal.service.impl;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.thermal.domain.HtScopeDtu;
 import org.sdkj.thermal.mapper.HtScopeDtuMapper;
 import org.sdkj.thermal.service.IHtScopeDtuService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**
@@ -12,6 +12,6 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class HtScopeDtuServiceImpl extends ServiceImpl<HtScopeDtuMapper, HtScopeDtu> implements IHtScopeDtuService {
+public class HtScopeDtuServiceImpl extends OrgScopedServiceImpl<HtScopeDtuMapper, HtScopeDtu> implements IHtScopeDtuService {
 
 }

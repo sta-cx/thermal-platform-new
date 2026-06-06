@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.domain.PrAccountBalance;
+import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.PrTransactionRecord;
 import org.sdkj.thermal.domain.bo.RefundDataBo;
 import org.sdkj.thermal.domain.vo.PrAccountBalanceVo;
 import org.sdkj.thermal.mapper.PrAccountBalanceMapper;
+import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.mapper.PrTransactionRecordMapper;
 import org.sdkj.thermal.service.IPrAccountService;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
 
     private final PrAccountBalanceMapper balanceMapper;
     private final PrTransactionRecordMapper transactionMapper;
+    private final PrHouseMapper houseMapper;
 
     @Override
     public List<PrAccountBalanceVo> pageList(String orgId, String buildingId,
@@ -49,11 +52,13 @@ public class PrAccountServiceImpl implements IPrAccountService {
         Long userId = LoginHelper.getUserId();
 
         for (Long houseId : houseIds) {
+            PrHouse house = requireAccessibleHouse(houseId);
             PrAccountBalance balance = new PrAccountBalance();
             balance.setHouseId(houseId);
             balance.setItemGroup(itemGroup);
             balance.setItemCode(itemCode);
             balance.setBalance(BigDecimal.ZERO);
+            balance.setOrgId(house.getOrgId());
             balance.setCreateBy(userId);
             balance.setCreateTime(now);
             balanceMapper.insert(balance);
@@ -66,6 +71,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
             record.setPaidAmount(BigDecimal.ZERO);
             record.setStatus(0);
             record.setHouseId(houseId);
+            record.setOrgId(house.getOrgId());
             record.setItemGroup(itemGroup);
             record.setItemCode(itemCode);
             record.setTransactionTime(now);
@@ -107,6 +113,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
                 continue;
             }
             Long houseId = Long.valueOf(houseIdStr);
+            PrHouse accessibleHouse = requireAccessibleHouse(houseId);
 
             BigDecimal amount = new BigDecimal(amountStr);
             String houseUserIdStr = house.get("userId");
@@ -123,6 +130,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
             record.setStatus(0);
             record.setHouseId(houseId);
             record.setUserId(houseUserId);
+            record.setOrgId(accessibleHouse.getOrgId());
             record.setItemGroup(itemGroup);
             record.setItemCode(itemCode);
             record.setTransactionTime(now);
@@ -145,6 +153,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
             if (entry.getKey() == null || entry.getValue() == null) continue;
             Long houseId = Long.valueOf(entry.getKey());
             Long houseUserId = Long.valueOf(entry.getValue());
+            PrHouse house = requireAccessibleHouse(houseId);
 
             balanceMapper.updateBalance(houseUserId, houseId,
                 bo.getItemGroup(), bo.getItemCode(), amount.negate());
@@ -157,6 +166,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
             refundRecord.setStatus(0);
             refundRecord.setHouseId(houseId);
             refundRecord.setUserId(houseUserId);
+            refundRecord.setOrgId(house.getOrgId());
             refundRecord.setItemGroup(bo.getItemGroup());
             refundRecord.setItemCode(bo.getItemCode());
             refundRecord.setTransactionTime(now);
@@ -176,6 +186,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
         int paymentType = payment != null ? Integer.parseInt(payment) : 1;
 
         for (Long houseId : houseIds) {
+            PrHouse house = requireAccessibleHouse(houseId);
             // Query existing balance records for this house
             LambdaQueryWrapper<PrAccountBalance> qw = new LambdaQueryWrapper<>();
             qw.eq(PrAccountBalance::getHouseId, houseId);
@@ -206,6 +217,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
                 sourceRecord.setStatus(0);
                 sourceRecord.setHouseId(houseId);
                 sourceRecord.setUserId(source.getUserId());
+                sourceRecord.setOrgId(house.getOrgId());
                 sourceRecord.setItemGroup(source.getItemGroup());
                 sourceRecord.setItemCode(source.getItemCode());
                 sourceRecord.setTransactionTime(now);
@@ -232,7 +244,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
                     newBalance.setItemGroup(itemGroup);
                     newBalance.setItemCode(itemCode);
                     newBalance.setBalance(balance);
-                    newBalance.setOrgId(source.getOrgId());
+                    newBalance.setOrgId(house.getOrgId());
                     newBalance.setCreateBy(userId);
                     newBalance.setCreateTime(now);
                     balanceMapper.insert(newBalance);
@@ -248,6 +260,7 @@ public class PrAccountServiceImpl implements IPrAccountService {
                 targetRecord.setStatus(0);
                 targetRecord.setHouseId(houseId);
                 targetRecord.setUserId(source.getUserId());
+                targetRecord.setOrgId(house.getOrgId());
                 targetRecord.setItemGroup(itemGroup);
                 targetRecord.setItemCode(itemCode);
                 targetRecord.setTransactionTime(now);
@@ -295,6 +308,11 @@ public class PrAccountServiceImpl implements IPrAccountService {
         if (houseId == null) {
             throw new ServiceException("房屋ID不能为空");
         }
+        PrHouse house = requireAccessibleHouse(houseId);
+        if (orgId != null && !orgId.isBlank() && !orgId.equals(house.getOrgId())) {
+            throw new ServiceException("房屋与组织不匹配");
+        }
+        orgId = house.getOrgId();
         if (itemGroup == null || itemGroup.isEmpty()) {
             throw new ServiceException("费用分组不能为空");
         }
@@ -403,9 +421,11 @@ public class PrAccountServiceImpl implements IPrAccountService {
                     balance.setHouseId(houseIdVal instanceof Long ? (Long) houseIdVal :
                         houseIdVal instanceof Number ? ((Number) houseIdVal).longValue() :
                         houseIdVal != null ? Long.valueOf(houseIdVal.toString()) : null);
+                    PrHouse house = requireAccessibleHouse(balance.getHouseId());
                     balance.setItemGroup(String.valueOf(row.getOrDefault("itemGroup", "")));
                     balance.setItemCode(String.valueOf(row.getOrDefault("itemCode", "")));
                     balance.setBalance(java.math.BigDecimal.ZERO);
+                    balance.setOrgId(house.getOrgId());
                     balance.setCreateBy(userId);
                     balance.setCreateTime(now);
                     balanceMapper.insert(balance);
@@ -422,5 +442,16 @@ public class PrAccountServiceImpl implements IPrAccountService {
     @Override
     public boolean deleteImportData() {
         return balanceMapper.deleteImportStagingData() > 0;
+    }
+
+    private PrHouse requireAccessibleHouse(Long houseId) {
+        if (houseId == null) {
+            throw new ServiceException("房屋ID不能为空");
+        }
+        PrHouse house = houseMapper.selectById(houseId);
+        if (house == null) {
+            throw new ServiceException("无权操作房屋数据");
+        }
+        return house;
     }
 }

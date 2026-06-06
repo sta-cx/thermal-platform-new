@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
@@ -16,6 +15,7 @@ import org.sdkj.thermal.domain.vo.PrValveOperationLogVo;
 import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrValveOperationLogMapper;
 import org.sdkj.thermal.service.IPrValveOperationLogService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
-public class PrValveOperationLogServiceImpl extends ServiceImpl<PrValveOperationLogMapper, PrValveOperationLog>
+public class PrValveOperationLogServiceImpl extends OrgScopedServiceImpl<PrValveOperationLogMapper, PrValveOperationLog>
         implements IPrValveOperationLogService {
 
     private final PrValveOperationLogMapper baseMapper;

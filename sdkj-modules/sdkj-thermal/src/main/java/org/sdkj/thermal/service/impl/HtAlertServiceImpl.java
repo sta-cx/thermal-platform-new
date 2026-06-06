@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
@@ -17,6 +16,7 @@ import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrHeatValveArchiveMapper;
 import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.service.IHtAlertService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @RequiredArgsConstructor
-public class HtAlertServiceImpl extends ServiceImpl<HtAlertMapper, HtAlert> implements IHtAlertService {
+public class HtAlertServiceImpl extends OrgScopedServiceImpl<HtAlertMapper, HtAlert> implements IHtAlertService {
 
     private final HtAlertMapper baseMapper;
     private final PrHouseMapper houseMapper;

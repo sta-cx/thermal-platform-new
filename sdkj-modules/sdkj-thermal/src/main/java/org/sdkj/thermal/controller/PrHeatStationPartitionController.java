@@ -2,8 +2,6 @@ package org.sdkj.thermal.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.domain.R;
 import org.sdkj.common.log.annotation.Log;
@@ -33,13 +31,7 @@ public class PrHeatStationPartitionController extends BaseController {
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String stationId,
             PageQuery pageQuery) {
-        Page<PrHeatStationPartition> page = pageQuery.build();
-        LambdaQueryWrapper<PrHeatStationPartition> lqw = new LambdaQueryWrapper<>();
-        lqw.like(search != null && !search.isEmpty(), PrHeatStationPartition::getName, search);
-        lqw.eq(stationId != null && !stationId.isEmpty(), PrHeatStationPartition::getStationId, stationId);
-        lqw.orderByAsc(PrHeatStationPartition::getSeq);
-        partitionService.page(page, lqw);
-        return TableDataInfo.build(page);
+        return partitionService.selectPageList(search, stationId, pageQuery);
     }
 
     @SaCheckPermission("thermal:ht:station:query")

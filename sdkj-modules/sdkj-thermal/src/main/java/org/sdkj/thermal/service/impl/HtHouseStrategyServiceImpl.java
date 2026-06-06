@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
@@ -10,6 +9,7 @@ import org.sdkj.thermal.domain.HtHouseStrategy;
 import org.sdkj.thermal.domain.vo.HtHouseStrategyVo;
 import org.sdkj.thermal.mapper.HtHouseStrategyMapper;
 import org.sdkj.thermal.service.IHtHouseStrategyService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +20,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class HtHouseStrategyServiceImpl extends ServiceImpl<HtHouseStrategyMapper, HtHouseStrategy> implements IHtHouseStrategyService {
+public class HtHouseStrategyServiceImpl extends OrgScopedServiceImpl<HtHouseStrategyMapper, HtHouseStrategy> implements IHtHouseStrategyService {
 
     private final HtHouseStrategyMapper baseMapper;
 
@@ -34,6 +34,7 @@ public class HtHouseStrategyServiceImpl extends ServiceImpl<HtHouseStrategyMappe
     @Transactional(rollbackFor = Exception.class)
     public boolean insertBatch(List<HtHouseStrategy> list, String orgId) {
         if (list == null || list.isEmpty()) return false;
+        assertOrgAllowed(orgId);
         for (HtHouseStrategy item : list) {
             item.setOrgId(orgId);
             baseMapper.insert(item);
@@ -45,6 +46,7 @@ public class HtHouseStrategyServiceImpl extends ServiceImpl<HtHouseStrategyMappe
     @Transactional(rollbackFor = Exception.class)
     public boolean updateBatch(List<HtHouseStrategy> list) {
         if (list == null || list.isEmpty()) return false;
+        assertEntitiesOrgAllowed(list);
         for (HtHouseStrategy item : list) {
             baseMapper.updateById(item);
         }

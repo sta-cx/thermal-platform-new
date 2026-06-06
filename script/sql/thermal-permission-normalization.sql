@@ -47,7 +47,7 @@ DELETE FROM sys_menu WHERE menu_id BETWEEN 3001 AND 3042;
 DELETE FROM sys_menu WHERE menu_id BETWEEN 3100 AND 3177;
 DELETE FROM sys_menu WHERE menu_id BETWEEN 3200 AND 3307;
 DELETE FROM sys_menu WHERE menu_id BETWEEN 3400 AND 3421;
-DELETE FROM sys_menu WHERE menu_id BETWEEN 3500 AND 3510;
+DELETE FROM sys_menu WHERE menu_id BETWEEN 3500 AND 3511;
 
 -- 仪表管理
 INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, query_param, is_frame, is_cache, menu_type, visible, status, perms, icon, create_dept, create_by, create_time) VALUES
@@ -207,6 +207,7 @@ INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component,
 (3231,'费用标准修改',2308,3,'','',NULL,1,0,'F','0','0','thermal:property:standard:edit','#',103,1,NOW()),
 (3232,'费用标准删除',2308,4,'','',NULL,1,0,'F','0','0','thermal:property:standard:remove','#',103,1,NOW()),
 (3233,'费用标准复制',2308,5,'','',NULL,1,0,'F','0','0','thermal:property:standard:copy','#',103,1,NOW()),
+(3511,'供热选项',2003,35,'options-heat','thermal/property/options-heat/index',NULL,1,0,'C','0','0','thermal:property:optionsHeat:list','lucide:thermometer',103,1,NOW()),
 (3234,'收费策略查询',2309,1,'','',NULL,1,0,'F','0','0','thermal:property:strategy:query','#',103,1,NOW()),
 (3235,'收费策略新增',2309,2,'','',NULL,1,0,'F','0','0','thermal:property:strategy:add','#',103,1,NOW()),
 (3236,'收费策略修改',2309,3,'','',NULL,1,0,'F','0','0','thermal:property:strategy:edit','#',103,1,NOW()),
@@ -283,9 +284,9 @@ INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component,
 (3302,'选项新增',2308,6,'','',NULL,1,0,'F','0','0','thermal:property:options:add','#',103,1,NOW()),
 (3303,'选项修改',2308,7,'','',NULL,1,0,'F','0','0','thermal:property:options:edit','#',103,1,NOW()),
 (3304,'选项查询',2308,8,'','',NULL,1,0,'F','0','0','thermal:property:options:query','#',103,1,NOW()),
-(3305,'供热选项新增',2308,9,'','',NULL,1,0,'F','0','0','thermal:property:optionsHeat:add','#',103,1,NOW()),
-(3306,'供热选项修改',2308,10,'','',NULL,1,0,'F','0','0','thermal:property:optionsHeat:edit','#',103,1,NOW()),
-(3307,'供热选项查询',2308,11,'','',NULL,1,0,'F','0','0','thermal:property:optionsHeat:query','#',103,1,NOW()),
+(3305,'供热选项新增',3511,1,'','',NULL,1,0,'F','0','0','thermal:property:optionsHeat:add','#',103,1,NOW()),
+(3306,'供热选项修改',3511,2,'','',NULL,1,0,'F','0','0','thermal:property:optionsHeat:edit','#',103,1,NOW()),
+(3307,'供热选项查询',3511,3,'','',NULL,1,0,'F','0','0','thermal:property:optionsHeat:query','#',103,1,NOW()),
 -- 代理商管理
 (3400,'代理商用户查询',2400,1,'','',NULL,1,0,'F','0','0','thermal:agent:user:query','#',103,1,NOW()),
 (3401,'代理商用户新增',2400,2,'','',NULL,1,0,'F','0','0','thermal:agent:user:add','#',103,1,NOW()),

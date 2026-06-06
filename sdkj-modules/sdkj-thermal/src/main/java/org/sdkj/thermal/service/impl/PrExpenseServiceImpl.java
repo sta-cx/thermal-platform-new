@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.mybatis.core.page.PageQuery;
@@ -18,6 +17,7 @@ import org.sdkj.thermal.domain.vo.PrExpenseVo;
 import org.sdkj.thermal.mapper.PrExpenseMapper;
 import org.sdkj.thermal.mapper.PrStandardMapper;
 import org.sdkj.thermal.service.IPrExpenseService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense> implements IPrExpenseService {
+public class PrExpenseServiceImpl extends OrgScopedServiceImpl<PrExpenseMapper, PrExpense> implements IPrExpenseService {
 
     private final PrExpenseMapper baseMapper;
     private final org.sdkj.thermal.mapper.PrStandardMapper standardMapper;
@@ -76,6 +76,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Transactional(rollbackFor = Exception.class)
     public boolean insertData(List<PrHouseExpense> list) {
         if (list == null || list.isEmpty()) return false;
+        assertEntitiesOrgAllowed(list);
 
         List<PrExpense> expenses = new ArrayList<>();
         Date now = new Date();
@@ -155,6 +156,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Transactional(rollbackFor = Exception.class)
     public boolean insertDatall(List<PrHouseExpense> list) {
         if (list == null || list.isEmpty()) return false;
+        assertEntitiesOrgAllowed(list);
 
         List<PrExpense> expenses = new ArrayList<>();
         Date now = new Date();
@@ -435,6 +437,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Transactional(rollbackFor = Exception.class)
     public boolean insertDataLs(List<PrHouseExpense> list) {
         if (list == null || list.isEmpty()) return false;
+        assertEntitiesOrgAllowed(list);
 
         List<PrExpense> expenses = new ArrayList<>();
         Date now = new Date();
@@ -471,6 +474,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Transactional(rollbackFor = Exception.class)
     public boolean insertAllDatall(List<PrHouseExpense> list) {
         if (list == null || list.isEmpty()) return false;
+        assertEntitiesOrgAllowed(list);
 
         // 按 itemGroup 拆分：2=固定费, 3=临时费, 6=取暖费
         List<PrHouseExpense> fixedList = new ArrayList<>();
@@ -523,6 +527,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Transactional(rollbackFor = Exception.class)
     public boolean insertDatallCw(List<PmParkingSpace> list) {
         if (list == null || list.isEmpty()) return false;
+        assertEntitiesOrgAllowed(list);
         List<PrExpense> expenses = new ArrayList<>();
         Date now = new Date();
         Long userId = LoginHelper.getUserId();
@@ -688,6 +693,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteDate(List<PrExpense> list) {
         if (list == null || list.isEmpty()) return false;
+        assertEntitiesOrgAllowed(list);
         List<Long> ids = list.stream().map(PrExpense::getId).toList();
         return removeByIds(ids);
     }
@@ -695,6 +701,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateDatall(List<PrExpense> list) {
+        assertEntitiesOrgAllowed(list);
         for (PrExpense e : list) {
             if (e.getStandardIdNew() != null) e.setStandardId(e.getStandardIdNew());
             if (e.getStandardPriceNew() != null) e.setStandardPrice(e.getStandardPriceNew());
@@ -707,6 +714,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean recalculate(String orgId) {
+        assertOrgAllowed(orgId);
         boolean a = baseMapper.updateStepPrice(orgId) > 0;
         a &= updatePrice(orgId);
         a &= updateFormula(orgId);
@@ -715,6 +723,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean recalculateCw(String orgId) {
+        assertOrgAllowed(orgId);
         return updateFormulaCw(orgId);
     }
 
@@ -726,6 +735,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean updateStepPrice(String orgId) {
+        assertOrgAllowed(orgId);
         // 查询所有收费标准
         List<org.sdkj.thermal.domain.vo.PrStandardVo> standardList = standardMapper.selectPageList(
             new com.baomidou.mybatisplus.extension.plugins.pagination.Page<>(1, 1000), orgId, null);
@@ -767,6 +777,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean updatePrice(String orgId) {
+        assertOrgAllowed(orgId);
         List<String> formulas = baseMapper.selectDistinctPriceFormula(orgId);
         if (formulas == null || formulas.isEmpty()) return false;
         boolean result = false;
@@ -778,6 +789,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean updateFormula(String orgId) {
+        assertOrgAllowed(orgId);
         List<String> formulas = baseMapper.selectDistinctMoneyFormula(orgId);
         if (formulas == null || formulas.isEmpty()) return false;
         boolean result = false;
@@ -789,6 +801,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean updateFormulaCw(String orgId) {
+        assertOrgAllowed(orgId);
         List<String> formulas = baseMapper.selectDistinctMoneyFormula(orgId);
         if (formulas == null || formulas.isEmpty()) return false;
         boolean result = false;
@@ -834,6 +847,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean updateLatefeeQs(String orgId, String latefeeFormula, Long standardId) {
+        assertOrgAllowed(orgId);
         validateFormula(latefeeFormula);
         boolean result = baseMapper.updateLatefeeQs(orgId, latefeeFormula, standardId) > 0;
         // 计算滞纳金后更新最终金额
@@ -845,6 +859,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean updateLatefeeJs(String orgId, String latefeeFormula, Long standardId) {
+        assertOrgAllowed(orgId);
         validateFormula(latefeeFormula);
         boolean result = baseMapper.updateLatefeeJs(orgId, latefeeFormula, standardId) > 0;
         // 计算滞纳金后更新最终金额
@@ -857,6 +872,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Override
     public boolean updateLatefeeZd(String orgId, String latefeeFormula, Long standardId,
                                     java.util.Date latefeeStartdate) {
+        assertOrgAllowed(orgId);
         validateFormula(latefeeFormula);
         boolean result = baseMapper.updateLatefeeZd(orgId, latefeeFormula, standardId, latefeeStartdate) > 0;
         // 计算滞纳金后更新最终金额
@@ -869,6 +885,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
     @Override
     public boolean updateLatefeeSJHC(String orgId, String latefeeFormula, Long standardId,
                                       String year, String month) {
+        assertOrgAllowed(orgId);
         validateFormula(latefeeFormula);
         boolean result = baseMapper.updateLatefeeSJHC(orgId, latefeeFormula, standardId, year, month) > 0;
         // 计算滞纳金后更新最终金额
@@ -880,6 +897,7 @@ public class PrExpenseServiceImpl extends ServiceImpl<PrExpenseMapper, PrExpense
 
     @Override
     public boolean updateFinalMoneyAfterLateFee(String orgId, Long standardId) {
+        assertOrgAllowed(orgId);
         return baseMapper.updateFinalMoneyAfterLateFee(orgId, standardId) > 0;
     }
 

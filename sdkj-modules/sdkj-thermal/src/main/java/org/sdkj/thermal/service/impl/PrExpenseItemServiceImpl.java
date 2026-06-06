@@ -4,7 +4,6 @@ import org.sdkj.common.core.exception.ServiceException;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
@@ -14,6 +13,7 @@ import org.sdkj.thermal.domain.vo.PrExpenseItemVo;
 import org.sdkj.thermal.mapper.PrExpenseItemMapper;
 import org.sdkj.thermal.mapper.PrStandardMapper;
 import org.sdkj.thermal.service.IPrExpenseItemService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class PrExpenseItemServiceImpl extends ServiceImpl<PrExpenseItemMapper, PrExpenseItem> implements IPrExpenseItemService {
+public class PrExpenseItemServiceImpl extends OrgScopedServiceImpl<PrExpenseItemMapper, PrExpenseItem> implements IPrExpenseItemService {
 
     private final PrExpenseItemMapper baseMapper;
     private final PrStandardMapper standardMapper;
@@ -40,6 +40,7 @@ public class PrExpenseItemServiceImpl extends ServiceImpl<PrExpenseItemMapper, P
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean insertData(PrExpenseItem item) {
+        assertEntityOrgAllowed(item);
         // 自动编号：非分组5时，取该分组下最大 itemCode + 1
         if (!"5".equals(item.getItemGroup())) {
             String maxCode = baseMapper.queryMaxItemCode(item.getItemGroup(), item.getOrgId());

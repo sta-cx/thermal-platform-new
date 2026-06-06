@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
@@ -11,6 +10,7 @@ import org.sdkj.thermal.domain.PrHeatDaily;
 import org.sdkj.thermal.domain.vo.PrHeatDailyVo;
 import org.sdkj.thermal.mapper.PrHeatDailyMapper;
 import org.sdkj.thermal.service.IPrHeatDailyService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +26,7 @@ import org.sdkj.thermal.mapper.PrHouseMapper;
  */
 @Service
 @RequiredArgsConstructor
-public class PrHeatDailyServiceImpl extends ServiceImpl<PrHeatDailyMapper, PrHeatDaily> implements IPrHeatDailyService {
+public class PrHeatDailyServiceImpl extends OrgScopedServiceImpl<PrHeatDailyMapper, PrHeatDaily> implements IPrHeatDailyService {
 
     private final PrHeatDailyMapper baseMapper;
     private final PrHouseMapper houseMapper;

@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import org.sdkj.common.core.exception.ServiceException;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
@@ -11,6 +10,7 @@ import org.sdkj.thermal.domain.vo.PrTransactionRecordSubVo;
 import org.sdkj.thermal.domain.vo.PrTransactionRecordVo;
 import org.sdkj.thermal.mapper.PrTransactionRecordMapper;
 import org.sdkj.thermal.service.IPrTransactionRecordService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +19,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
-public class PrTransactionRecordServiceImpl extends ServiceImpl<PrTransactionRecordMapper, PrTransactionRecord>
+public class PrTransactionRecordServiceImpl extends OrgScopedServiceImpl<PrTransactionRecordMapper, PrTransactionRecord>
         implements IPrTransactionRecordService {
 
     private final PrTransactionRecordMapper baseMapper;

@@ -4,7 +4,6 @@ import org.sdkj.common.core.exception.ServiceException;
 import org.sdkj.common.mybatis.utils.IdGeneratorUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.mybatis.core.page.PageQuery;
@@ -15,6 +14,7 @@ import org.sdkj.thermal.domain.*;
 import org.sdkj.thermal.domain.vo.*;
 import org.sdkj.thermal.mapper.*;
 import org.sdkj.thermal.service.IHtTasksService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.sdkj.thermal.quartz.ThermalJobManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class HtTasksServiceImpl extends ServiceImpl<HtTasksMapper, HtTasks> implements IHtTasksService {
+public class HtTasksServiceImpl extends OrgScopedServiceImpl<HtTasksMapper, HtTasks> implements IHtTasksService {
 
     private final HtTasksMapper baseMapper;
     private final HtScopeMapper scopeMapper;

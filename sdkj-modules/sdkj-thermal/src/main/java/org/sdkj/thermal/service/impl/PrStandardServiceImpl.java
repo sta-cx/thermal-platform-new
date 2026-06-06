@@ -4,7 +4,6 @@ import org.sdkj.common.core.exception.ServiceException;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
@@ -15,6 +14,7 @@ import org.sdkj.thermal.domain.PrStandardPrice;
 import org.sdkj.thermal.domain.vo.PrStandardVo;
 import org.sdkj.thermal.mapper.PrStandardMapper;
 import org.sdkj.thermal.service.IPrStandardService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +29,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class PrStandardServiceImpl extends ServiceImpl<PrStandardMapper, PrStandard> implements IPrStandardService {
+public class PrStandardServiceImpl extends OrgScopedServiceImpl<PrStandardMapper, PrStandard> implements IPrStandardService {
 
     private final PrStandardMapper baseMapper;
 

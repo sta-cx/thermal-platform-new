@@ -13,6 +13,7 @@ import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.web.core.BaseController;
 import org.sdkj.thermal.domain.HtScopeDtu;
 import org.sdkj.thermal.mapper.HtScopeDtuMapper;
+import org.sdkj.thermal.service.IHtScopeDtuService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,7 @@ import java.util.Arrays;
 public class HtScopeDtuController extends BaseController {
 
     private final HtScopeDtuMapper htScopeDtuMapper;
+    private final IHtScopeDtuService htScopeDtuService;
 
     /**
      * 查询DTU控制范围列表
@@ -65,7 +67,7 @@ public class HtScopeDtuController extends BaseController {
     @Log(title = "DTU控制范围", businessType = BusinessType.INSERT)
     @PostMapping
     public R<Void> add(@Validated @RequestBody HtScopeDtu entity) {
-        return toAjax(htScopeDtuMapper.insert(entity));
+        return toAjax(htScopeDtuService.save(entity));
     }
 
     /**
@@ -76,7 +78,7 @@ public class HtScopeDtuController extends BaseController {
     @Log(title = "DTU控制范围", businessType = BusinessType.UPDATE)
     @PutMapping
     public R<Void> edit(@Validated @RequestBody HtScopeDtu entity) {
-        return toAjax(htScopeDtuMapper.updateById(entity));
+        return toAjax(htScopeDtuService.updateById(entity));
     }
 
     /**

@@ -5,7 +5,6 @@ import cn.hutool.json.JSONObject;
 import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
@@ -32,6 +31,7 @@ import org.sdkj.thermal.mapper.PrHeatValveArchiveMapper;
 import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.IPrHeatValveArchiveService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.sdkj.thermal.utils.CollectPlatformUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiveMapper, PrHeatValveArchive> implements IPrHeatValveArchiveService {
+public class PrHeatValveArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatValveArchiveMapper, PrHeatValveArchive> implements IPrHeatValveArchiveService {
 
     private final PrHeatValveArchiveMapper baseMapper;
     private final PrHeatHotArchiveMapper hotArchiveMapper;
@@ -688,6 +688,7 @@ public class PrHeatValveArchiveServiceImpl extends ServiceImpl<PrHeatValveArchiv
                                           String userName, String phone,
                                           String gfloorArea, String nfloorArea, String heatingArea,
                                           String meterNum) {
+        assertOrgAllowed(orgId);
         // 1. 创建房屋
         PrHouse house = new PrHouse();
         house.setRoomNum(roomNum);

@@ -1,6 +1,7 @@
 package org.sdkj.thermal.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import cn.dev33.satoken.exception.SaTokenContextException;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.exception.ServiceException;
 import org.sdkj.common.satoken.utils.LoginHelper;
@@ -25,10 +26,15 @@ public class OrgAccessService {
     }
 
     public void assertCurrentUserCanAccessOrgIds(Collection<String> orgIds) {
-        if (LoginHelper.isSuperAdmin() || LoginHelper.isTenantAdmin()) {
+        Long userId;
+        try {
+            if (LoginHelper.isSuperAdmin() || LoginHelper.isTenantAdmin()) {
+                return;
+            }
+            userId = LoginHelper.getUserId();
+        } catch (SaTokenContextException e) {
             return;
         }
-        Long userId = LoginHelper.getUserId();
         List<PrDataGrant> grants = prDataGrantMapper.selectList(
             new LambdaQueryWrapper<PrDataGrant>().eq(PrDataGrant::getUserId, userId)
         );

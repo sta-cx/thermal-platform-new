@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.domain.PrExpense;
@@ -11,6 +10,7 @@ import org.sdkj.thermal.mapper.HtAlertMapper;
 import org.sdkj.thermal.mapper.PrRepairRecordMapper;
 import org.sdkj.thermal.service.IPrExpenseService;
 import org.sdkj.thermal.service.IPrRepairRecordService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -23,7 +23,7 @@ import java.util.*;
 
 @Service
 @RequiredArgsConstructor
-public class PrRepairRecordServiceImpl extends ServiceImpl<PrRepairRecordMapper, PrRepairRecord>
+public class PrRepairRecordServiceImpl extends OrgScopedServiceImpl<PrRepairRecordMapper, PrRepairRecord>
         implements IPrRepairRecordService {
 
     private final PrRepairRecordMapper baseMapper;

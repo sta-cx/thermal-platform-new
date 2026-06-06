@@ -5,7 +5,6 @@ import cn.hutool.json.JSONObject;
 import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
@@ -17,6 +16,7 @@ import org.sdkj.thermal.domain.dto.PrHeatUnitHotArchiveDto;
 import org.sdkj.thermal.domain.vo.PrHeatUnitHotArchiveVo;
 import org.sdkj.thermal.mapper.PrHeatUnitHotArchiveMapper;
 import org.sdkj.thermal.service.IPrHeatUnitHotArchiveService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.sdkj.thermal.utils.CollectPlatformUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PrHeatUnitHotArchiveServiceImpl extends ServiceImpl<PrHeatUnitHotArchiveMapper, PrHeatUnitHotArchive> implements IPrHeatUnitHotArchiveService {
+public class PrHeatUnitHotArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatUnitHotArchiveMapper, PrHeatUnitHotArchive> implements IPrHeatUnitHotArchiveService {
 
     private final PrHeatUnitHotArchiveMapper baseMapper;
 

@@ -21,6 +21,7 @@ import org.sdkj.thermal.mapper.PrHeatValveArchiveMapper;
 import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.mapper.PrValveOperationLogMapper;
 import org.sdkj.thermal.service.IPrWriteCardLogService;
+import org.sdkj.thermal.service.OrgAccessService;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -41,9 +42,11 @@ public class PrWriteCardLogServiceImpl implements IPrWriteCardLogService {
     private final PrHeatValveArchiveMapper valveArchiveMapper;
     private final PrCompanyMapper companyMapper;
     private final SysUserMapper sysUserMapper;
+    private final OrgAccessService orgAccessService;
 
     @Override
     public Long insertWriteCardLog(PrWriteCardLogBo bo) {
+        orgAccessService.assertCurrentUserCanAccessOrg(bo.getOrgId());
         PrValveOperationLog entity = new PrValveOperationLog();
         entity.setMeterId(bo.getMeterId());
         entity.setMeterNum(bo.getMeterNum());

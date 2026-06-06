@@ -4,7 +4,6 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.idev.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.common.core.domain.R;
@@ -17,6 +16,7 @@ import org.sdkj.thermal.domain.dto.PrHeatDtuArchiveDto;
 import org.sdkj.thermal.domain.vo.PrHeatDtuArchiveVo;
 import org.sdkj.thermal.mapper.PrHeatDtuArchiveMapper;
 import org.sdkj.thermal.service.IPrHeatDtuArchiveService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,7 +30,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PrHeatDtuArchiveServiceImpl extends ServiceImpl<PrHeatDtuArchiveMapper, PrHeatDtuArchive> implements IPrHeatDtuArchiveService {
+public class PrHeatDtuArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatDtuArchiveMapper, PrHeatDtuArchive> implements IPrHeatDtuArchiveService {
 
     private final PrHeatDtuArchiveMapper baseMapper;
 

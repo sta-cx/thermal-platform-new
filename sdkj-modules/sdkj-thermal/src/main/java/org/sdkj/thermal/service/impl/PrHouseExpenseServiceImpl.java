@@ -2,7 +2,6 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
@@ -12,6 +11,7 @@ import org.sdkj.thermal.domain.vo.PrHouseExpenseVo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
 import org.sdkj.thermal.mapper.PrHouseExpenseMapper;
 import org.sdkj.thermal.service.IPrHouseExpenseService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,7 +23,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class PrHouseExpenseServiceImpl extends ServiceImpl<PrHouseExpenseMapper, PrHouseExpense> implements IPrHouseExpenseService {
+public class PrHouseExpenseServiceImpl extends OrgScopedServiceImpl<PrHouseExpenseMapper, PrHouseExpense> implements IPrHouseExpenseService {
 
     private final PrHouseExpenseMapper baseMapper;
 

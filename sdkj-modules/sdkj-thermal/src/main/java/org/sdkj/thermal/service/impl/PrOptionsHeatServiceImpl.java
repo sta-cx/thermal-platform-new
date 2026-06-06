@@ -1,12 +1,12 @@
 package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.thermal.domain.PrOptionsHeat;
 import org.sdkj.thermal.mapper.PrOptionsHeatMapper;
 import org.sdkj.thermal.service.IPrOptionsHeatService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +21,7 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
-public class PrOptionsHeatServiceImpl extends ServiceImpl<PrOptionsHeatMapper, PrOptionsHeat>
+public class PrOptionsHeatServiceImpl extends OrgScopedServiceImpl<PrOptionsHeatMapper, PrOptionsHeat>
         implements IPrOptionsHeatService {
 
     private final PrOptionsHeatMapper baseMapper;

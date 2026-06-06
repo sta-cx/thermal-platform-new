@@ -65,6 +65,7 @@ import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.mapper.PrUnitMapper;
 import org.sdkj.thermal.service.IPrHeatArchiveService;
 import org.sdkj.thermal.service.IPrMonitorService;
+import org.sdkj.thermal.service.OrgAccessService;
 import org.sdkj.system.mapper.SysUserMapper;
 import org.sdkj.system.domain.vo.SysUserVo;
 import org.springframework.stereotype.Service;
@@ -109,6 +110,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     private final SysUserMapper sysUserMapper;
     private final ObjectMapper objectMapper;
     private final org.sdkj.thermal.service.support.HeatValveVoEnricher heatValveVoEnricher;
+    private final OrgAccessService orgAccessService;
 
     @Override
     public TableDataInfo<PrHeatArchiveVo> heatList(MonitorBo bo, PageQuery pageQuery) {
@@ -492,6 +494,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     @Override
     @Transactional
     public int generateVirtualDevice(String orgId) {
+        orgAccessService.assertCurrentUserCanAccessOrg(orgId);
         LambdaQueryWrapper<PrHouse> houseLqw = new LambdaQueryWrapper<>();
         houseLqw.eq(PrHouse::getOrgId, orgId);
         List<PrHouseVo> houses = houseMapper.selectVoList(houseLqw);
@@ -737,6 +740,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
 
     @Override
     public R<Void> manualControl(MonitorManualControlBo bo) {
+        orgAccessService.assertCurrentUserCanAccessOrg(bo.getOrgId());
         List<PrHeatVo> heatVos = toPrHeatVoList(bo.getIds());
         if (heatVos == null) return R.fail("ids 包含非法数字");
 
@@ -765,6 +769,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
 
     @Override
     public R<Void> xunce(MonitorXunceBo bo) {
+        orgAccessService.assertCurrentUserCanAccessOrg(bo.getOrgId());
         List<PrHeatVo> heatVos = toPrHeatVoList(bo.getIds());
         if (heatVos == null) return R.fail("ids 包含非法数字");
 
@@ -774,6 +779,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
 
     @Override
     public R<Void> setValveGroup(MonitorSetValveGroupBo bo) {
+        orgAccessService.assertCurrentUserCanAccessOrg(bo.getOrgId());
         List<PrHeatVo> heatVos = toPrHeatVoList(bo.getIds());
         if (heatVos == null) return R.fail("ids 包含非法数字");
 
@@ -796,6 +802,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
 
     @Override
     public Map<String, String> readOtherCode(MonitorOtherCodeReadBo bo) {
+        orgAccessService.assertCurrentUserCanAccessOrg(bo.getOrgId());
         // 1) 通过 meterNums 查阀门拿 houseId 映射（限定 orgId，避免租户内重号跨小区误读）
         LambdaQueryWrapper<PrHeatValveArchive> valveLqw = new LambdaQueryWrapper<>();
         valveLqw.in(PrHeatValveArchive::getMeterNum, bo.getMeterNums())
@@ -832,6 +839,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     @Override
     @Transactional
     public void writeOtherCode(MonitorOtherCodeWriteBo bo) {
+        orgAccessService.assertCurrentUserCanAccessOrg(bo.getOrgId());
         // 1) 通过 meterNums 查阀门拿 houseId（限定 orgId，避免租户内重号跨小区误写）
         LambdaQueryWrapper<PrHeatValveArchive> valveLqw = new LambdaQueryWrapper<>();
         valveLqw.in(PrHeatValveArchive::getMeterNum, bo.getMeterNums())
@@ -953,6 +961,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     public void specialHouse(SpecialHouseBo bo) {
         List<Long> houseIds = parseIds(bo.getIds());
         if (houseIds.isEmpty()) return;
+        assertHousesAccessible(houseIds, bo.getOrgId());
 
         // 批量更新 is_special（XML mapper 批量操作）
         houseMapper.updateIsSpecialBatch(houseIds, bo.getFlag());
@@ -969,6 +978,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     public void stopSupply(StopSupplyBo bo) {
         List<Long> houseIds = parseIds(bo.getIds());
         if (houseIds.isEmpty()) return;
+        assertHousesAccessible(houseIds, bo.getOrgId());
 
         // 批量更新 pay_status（XML mapper，绕过 @TableField(exist=false)）
         houseMapper.updatePayStatusBatch(houseIds, bo.getFlag());
@@ -1010,6 +1020,22 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             })
             .filter(id -> id != null)
             .toList();
+    }
+
+    private void assertHousesAccessible(List<Long> houseIds, String orgId) {
+        orgAccessService.assertCurrentUserCanAccessOrg(orgId);
+        List<PrHouse> houses = houseMapper.selectList(new LambdaQueryWrapper<PrHouse>()
+            .in(PrHouse::getId, houseIds)
+            .select(PrHouse::getId, PrHouse::getOrgId));
+        Set<Long> accessibleIds = houses.stream()
+            .map(PrHouse::getId)
+            .collect(Collectors.toSet());
+        boolean hasMissing = houseIds.stream().distinct().anyMatch(id -> !accessibleIds.contains(id));
+        boolean hasOrgMismatch = StringUtils.isNotBlank(orgId) && houses.stream()
+            .anyMatch(h -> !orgId.equals(h.getOrgId()));
+        if (hasMissing || hasOrgMismatch) {
+            throw new org.sdkj.common.core.exception.ServiceException("无权操作房屋数据");
+        }
     }
 
     /**

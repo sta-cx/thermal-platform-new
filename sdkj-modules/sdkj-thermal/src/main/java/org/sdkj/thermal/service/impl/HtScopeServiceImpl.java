@@ -1,12 +1,12 @@
 package org.sdkj.thermal.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.sdkj.thermal.domain.HtScope;
 import org.sdkj.thermal.domain.vo.HtScopeVo;
 import org.sdkj.thermal.mapper.HtScopeMapper;
 import org.sdkj.thermal.service.IHtScopeService;
+import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Service
 @RequiredArgsConstructor
-public class HtScopeServiceImpl extends ServiceImpl<HtScopeMapper, HtScope> implements IHtScopeService {
+public class HtScopeServiceImpl extends OrgScopedServiceImpl<HtScopeMapper, HtScope> implements IHtScopeService {
 
     private final HtScopeMapper baseMapper;
 
