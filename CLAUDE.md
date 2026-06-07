@@ -29,7 +29,7 @@ sdkj-common/          # 24个公共模块（core/mybatis/redis/security/satoken/
 sdkj-modules/
   sdkj-system/        # 系统管理（用户/角色/菜单/部门/字典/租户/OSS）
   sdkj-meter/         # 仪表管理（热力表/水表/电表/燃气表/集中器/温控器/阀门）
-  sdkj-thermal/       # 热力调控 + 物业收费（核心业务，当前工作树 70 个 Controller）
+  sdkj-thermal/       # 热力调控 + 物业收费（核心业务，~65 个 Controller）
   sdkj-ai/            # AI 集成（Spring AI 1.0.7，Alt+A 旁注 + Alt+K 助手 + Tool Calling 基建，OpenAI 兼容协议）
 ```
 
@@ -55,13 +55,12 @@ Mapper.selectVoXxx() → MapstructUtils.convert→Vo → 返回前端
 |------|------|------|
 | `Ht*` | sdkj-thermal | 热力调控 |
 | `Pr*` | sdkj-thermal | 物业收费 |
-| `Ag*` | sdkj-thermal | 物业端代理 |
 | `Mt*` | sdkj-meter | 仪表 |
-| `Wx*`/`Wechat*` | sdkj-thermal | 微信 |
-| `IoT*`/`Control*` | sdkj-thermal | IoT 回调 |
+| `IoT*`/`Control*` | sdkj-thermal | IoT 回调与控制指令返回 |
 | `PrImport*` | sdkj-thermal | 批量导入 |
-| `PrInspection*` | sdkj-thermal | 巡检 |
 | `Ai*` | sdkj-ai | AI 调用记录 / 用量日志 / 上下文视图 |
+
+**已删除不再使用的前缀**: `Ag*`（物业代理）、`Wx*`/`Wechat*`（微信）、`Pm*`（停车）、`PrInspection*`（巡检）。
 
 ## 数据源 & 多租户
 
@@ -141,10 +140,8 @@ Sa-Token JWT 简单模式：`Authorization: Bearer <token>`，允许并发登录
 | 热力调控 | `/thermal/ht/*` |
 | 物业收费 | `/thermal/property/*` |
 | 单笔收费 | `/thermal/property/singleCharge/*` |
-| 微信 | `/thermal/wechat/*` |
 | IoT | `/thermal/iot/*` |
 | 认证 | `/auth/*` |
-| 小程序 | `/thermal/wxma/*` |
 | AI 集成 | `/ai/*`（`/ai/contextual-view`、`/ai/health`、`/ai/admin/*`、`/ai/assistant/*`、`/ai/tool-calls/*`） |
 
 ## AI 模块（sdkj-ai）
