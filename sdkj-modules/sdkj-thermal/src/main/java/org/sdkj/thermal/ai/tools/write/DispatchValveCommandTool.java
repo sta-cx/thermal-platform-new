@@ -27,7 +27,7 @@ public class DispatchValveCommandTool {
         典型用途:客服根据用户请求调节阀门开度。
         action 枚举:OPEN(全开) / CLOSE(全关) / SET_OPENNESS(部分开,需配合 openness 参数 0-100)。
         如果用户只说了门牌号,先调用 queryHouseByAddress 查到 houseId,再调用 getValveStatus 确认阀门存在后再调用本 Tool。
-        若 IoT 链路未就绪或用户无执行权限,系统会强制 dryRun=true 只生成指令清单。
+        dryRun 默认 true 仅生成指令清单;dryRun=false 时指令将加入下发队列,由定时任务发送至采集平台。
         """)
     @WriteTool(
         risk = RiskLevel.HIGH,
@@ -45,7 +45,7 @@ public class DispatchValveCommandTool {
                    required = false)
         Integer openness,
 
-        @ToolParam(description = "是否仅模拟,默认 true;生产实发需配置 dryRun=false 并具备 thermal:ht:valve:execute 权限",
+        @ToolParam(description = "是否仅模拟,默认 true;dryRun=false 时指令真实加入下发队列",
                    required = false)
         Boolean dryRun
     ) {

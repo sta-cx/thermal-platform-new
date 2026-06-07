@@ -2,6 +2,7 @@ package org.sdkj.thermal.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -12,9 +13,11 @@ import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.thermal.constant.ThermalTaskConstants;
 import org.sdkj.thermal.domain.HtTasksPerform;
+import org.sdkj.thermal.domain.PrValveOperationLog;
 import org.sdkj.thermal.domain.dto.ValveArchiveInfo;
 import org.sdkj.thermal.domain.vo.HtTasksPerformVo;
 import org.sdkj.thermal.mapper.HtTasksPerformMapper;
+import org.sdkj.thermal.mapper.PrValveOperationLogMapper;
 import org.sdkj.thermal.service.IHtTasksPerformService;
 import org.sdkj.thermal.service.support.OrgScopedServiceImpl;
 import org.sdkj.thermal.utils.CollectPlatformUtil;
@@ -22,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +40,7 @@ import java.util.UUID;
 public class HtTasksPerformServiceImpl extends OrgScopedServiceImpl<HtTasksPerformMapper, HtTasksPerform> implements IHtTasksPerformService {
 
     private final HtTasksPerformMapper baseMapper;
+    private final PrValveOperationLogMapper valveOperationLogMapper;
 
     @Value("${collect.ipPort:}")
     private String ipPort;
@@ -184,6 +189,18 @@ public class HtTasksPerformServiceImpl extends OrgScopedServiceImpl<HtTasksPerfo
                 .set("meterInfo", task.getMeterArcCode())
                 .set("meterCode", task.getMeterArcCode())
                 .set("valveStatus", task.getInstruction());
+            // NB 上报周期设定（instructionType=6，对齐旧系统 getNonExecutionNew1）
+            if (task.getInstructionType() != null && task.getInstructionType() == 6) {
+                item.set("reportInterval", task.getIntervall())
+                    .set("intervalUnit", task.getUnit())
+                    .set("validTime", task.getDuration());
+            }
+            // NB 采集周期设定（instructionType=9）
+            if (task.getInstructionType() != null && task.getInstructionType() == 9) {
+                item.set("collectInterval", task.getIntervall())
+                    .set("collectUnit", task.getUnit())
+                    .set("collectValidTime", task.getDuration());
+            }
             dataArray.add(item);
         }
         JSONObject payload = new JSONObject();
@@ -288,18 +305,115 @@ public class HtTasksPerformServiceImpl extends OrgScopedServiceImpl<HtTasksPerfo
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insertValveOCLog(List<HtTasksPerform> htTasksPerformList) {
-        // Phase 6: 创建 pr_valve_oc_log 表后实现阀门开关日志记录
-        log.info("阀门开关日志（Phase 6 待实现），数量：{}", htTasksPerformList.size());
+        if (CollUtil.isEmpty(htTasksPerformList)) {
+            return;
+        }
+        // 阀门操作审计日志：复刻旧系统 insertValveOCStatusLog → pr_use_card_log（阀门视角）。
+        // 写入后由 PrValveOperationLogController(/list, isNotNull(valveStatus)) 展示；
+        // 覆盖缴费自动开阀 Job / 档案 controlValve / 设阀门组号三条下发路径。
+        Date now = new Date();
+        List<PrValveOperationLog> records = new ArrayList<>(htTasksPerformList.size());
+        for (HtTasksPerform task : htTasksPerformList) {
+            PrValveOperationLog record = new PrValveOperationLog();
+            record.setMeterId(task.getMeterId());
+            record.setMeterNum(task.getMeterNum());
+            // valveStatus 取指令值；组号设置等无 instruction 的场景回退取 number，保证日志页可见（isNotNull 过滤）。
+            record.setValveStatus(task.getInstruction() != null ? task.getInstruction() : task.getNumber());
+            record.setOrgId(task.getOrgId());
+            record.setOperationTime(now);
+            if (task.getCreateBy() != null) {
+                record.setOperatorId(String.valueOf(task.getCreateBy()));
+            }
+            record.setContent(buildValveOpDesc(task));
+            records.add(record);
+        }
+        valveOperationLogMapper.insertBatch(records);
+        log.info("阀门操作日志写入完成，数量：{}", records.size());
+    }
+
+    /**
+     * 阀门操作描述（写入 pr_use_card_log.content，便于审计可读）。
+     */
+    private String buildValveOpDesc(HtTasksPerform task) {
+        Integer type = task.getInstructionType();
+        Integer val = task.getInstruction();
+        if (type != null) {
+            switch (type) {
+                case 1:
+                    return "开阀";
+                case 2:
+                    return "关阀";
+                case 3:
+                    return "设置开度" + (val != null ? " " + val : "");
+                case 6:
+                    return "NB上报周期设定";
+                case 9:
+                    return "采集周期设定";
+                default:
+                    break;
+            }
+        }
+        if (val == null && task.getNumber() != null) {
+            return "设置阀门组号 " + task.getNumber();
+        }
+        return "阀门指令" + (type != null ? " type=" + type : "") + (val != null ? " value=" + val : "");
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void executePendingCommands(String orgId) {
-        // 等外部 IoT 平台(DTU/NB/MBus)API 就绪后从旧 getNonExecutionNew 移植:
-        // 1. Query all pending (status=1, instructionStatus=0) HtTasksPerform records
-        // 2. Group by concentrator/device
-        // 3. Send via DTU/NB/MBus depending on device type
-        // 4. Update instructionStatus after send
-        log.warn("executePendingCommands not yet implemented for orgId={}", orgId);
+        if (StrUtil.isBlank(orgId)) {
+            log.warn("executePendingCommands: orgId 为空，跳过");
+            return;
+        }
+        // 1. 捞取该小区待发指令（status=0 待执行）。
+        //    覆盖调控引擎(insertHtTasksPerform 写 status='0')、批量阀控、蓝牙、云谷等"只写不发"入口；
+        //    缴费控阀/状态查询 Job 自产自销时用 status=1(PERFORM_SENT)+立即下发，不会被重复捞取。
+        List<HtTasksPerform> pending = lambdaQuery()
+            .eq(HtTasksPerform::getOrgId, orgId)
+            .eq(HtTasksPerform::getStatus, ThermalTaskConstants.PERFORM_PENDING)
+            .list();
+        if (CollUtil.isEmpty(pending)) {
+            return;
+        }
+
+        // 2. 按 meterArcCode 分组（复刻旧系统 getNonExecutionNew：热表 vs 阀门两路）。
+        List<HtTasksPerform> heatMeterTasks = new ArrayList<>();
+        List<HtTasksPerform> valveTasks = new ArrayList<>();
+        for (HtTasksPerform task : pending) {
+            if (isHeatMeter(task.getMeterArcCode())) {
+                heatMeterTasks.add(task);
+            } else {
+                valveTasks.add(task);
+            }
+        }
+
+        // 3. 分组下发（executeXxxTasks 内部完成 sendControlMsg + 状态回写 status=2/3 + sendTime）。
+        //    每组独立 try/catch，单组失败不影响另一组。
+        if (CollUtil.isNotEmpty(valveTasks)) {
+            try {
+                executeValveControlTasks(valveTasks);
+            } catch (Exception e) {
+                log.error("待发阀门指令下发失败: orgId={}, 数量={}", orgId, valveTasks.size(), e);
+            }
+        }
+        if (CollUtil.isNotEmpty(heatMeterTasks)) {
+            try {
+                executeHeatMeterTasks(heatMeterTasks);
+            } catch (Exception e) {
+                log.error("待发热表指令下发失败: orgId={}, 数量={}", orgId, heatMeterTasks.size(), e);
+            }
+        }
+        log.info("待发指令下发完成: orgId={}, 阀门={}, 热表={}", orgId, valveTasks.size(), heatMeterTasks.size());
+    }
+
+    /**
+     * 热表类档案号判断（meter_arc_code，复刻旧系统 getNonExecutionNew 分组规则）。
+     */
+    private boolean isHeatMeter(String meterArcCode) {
+        return "040303".equals(meterArcCode) || "04030301".equals(meterArcCode)
+            || "090301".equals(meterArcCode) || "09030101".equals(meterArcCode);
     }
 }

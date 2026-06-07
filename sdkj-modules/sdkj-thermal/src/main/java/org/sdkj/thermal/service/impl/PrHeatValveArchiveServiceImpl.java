@@ -107,13 +107,30 @@ public class PrHeatValveArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatVa
      *         非 null = 命中的 house_id（可能为空，空 → 列表应返回空）
      */
     private List<Long> resolveHouseIds(String orgId, String buildingId, String unit) {
-        boolean hasFilter = StringUtils.isNotBlank(buildingId) || StringUtils.isNotBlank(unit);
+        return resolveHouseIds(orgId, buildingId, unit, null);
+    }
+
+    /**
+     * 房屋侧筛选 → house_id 集合（两步无 JOIN）。
+     * payStatus 复刻老系统 pageListHeatCard：99=pay_status IS NULL（未设置），其余=pay_status 等值。
+     * pay_status 是 @TableField(exist=false) 字段，用原生列名筛选（apply 占位符参数化，防注入）。
+     */
+    private List<Long> resolveHouseIds(String orgId, String buildingId, String unit, String payStatus) {
+        boolean hasFilter = StringUtils.isNotBlank(buildingId) || StringUtils.isNotBlank(unit)
+            || StringUtils.isNotBlank(payStatus);
         if (!hasFilter) return null;
         LambdaQueryWrapper<PrHouse> hq = new LambdaQueryWrapper<>();
         hq.eq(StringUtils.isNotBlank(orgId), PrHouse::getOrgId, orgId)
           .eq(StringUtils.isNotBlank(buildingId), PrHouse::getBuildingId, buildingId)
-          .eq(StringUtils.isNotBlank(unit), PrHouse::getUnitCode, unit)
-          .select(PrHouse::getId);
+          .eq(StringUtils.isNotBlank(unit), PrHouse::getUnitCode, unit);
+        if (StringUtils.isNotBlank(payStatus)) {
+            if ("99".equals(payStatus)) {
+                hq.apply("pay_status IS NULL");
+            } else {
+                hq.apply("pay_status = {0}", payStatus);
+            }
+        }
+        hq.select(PrHouse::getId);
         return houseMapper.selectList(hq).stream().map(PrHouse::getId).toList();
     }
 
@@ -492,10 +509,16 @@ public class PrHeatValveArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatVa
                                                                  String unit, String meterArcCode, String payStatus,
                                                                  String search, String parentId, String writeCardStatus,
                                                                  PageQuery pageQuery) {
+        // 房屋侧筛选（楼宇/单元/缴费状态）：两步无 JOIN —— 先查 pr_house 拿 house_id 集合，再 IN 进档案
+        List<Long> houseIds = resolveHouseIds(orgId, buildingId, unit, payStatus);
+        if (houseIds != null && houseIds.isEmpty()) {
+            return TableDataInfo.build(new ArrayList<>());
+        }
+
         LambdaQueryWrapper<PrHeatValveArchive> lqw = new LambdaQueryWrapper<>();
         lqw.eq(StringUtils.isNotBlank(orgId), PrHeatValveArchive::getOrgId, orgId);
+        lqw.in(houseIds != null, PrHeatValveArchive::getHouseId, houseIds);
         lqw.eq(StringUtils.isNotBlank(parentId), PrHeatValveArchive::getHouseId, parentId);
-        // buildingId / unit 需通过 house 关联，这里先按 archive 的直接字段过滤
         if (StringUtils.isNotBlank(meterArcCode)) {
             lqw.eq(PrHeatValveArchive::getMeterArcCode, meterArcCode);
         }
@@ -509,7 +532,6 @@ public class PrHeatValveArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatVa
         if (StringUtils.isNotBlank(writeCardStatus)) {
             lqw.eq(PrHeatValveArchive::getIsOpen, Integer.parseInt(writeCardStatus));
         }
-        // payStatus 筛选需要 JOIN pr_house，在简单查询中暂不支持；预留参数位置
         lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
         Page<PrHeatValveArchiveVo> result = baseMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -827,13 +849,28 @@ public class PrHeatValveArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatVa
                 summary, "dryRun:命令已生成,未真实下发到 IoT。请运维确认 IoT 链路后改 dryRun=false 重试。");
         }
 
-        // 4. 真实下发（Phase 3 占位）
-        // 等外部 IoT 平台(MBus/AG)API 就绪后接入:失败写 ht_control_record(operatorId 设置 createBy/updateBy)。
-        // 当前为占位实现,只回写阀门档案,不真实下发硬件指令。
-        String summary = String.format("指令已下发：房屋 %s 阀门 %s %s",
+        // 4. 真实下发：写入待发队列（status=待发），由 SendMeterCommandJob → executePendingCommands
+        //    消费并发送至采集平台。与 batchSetValveStatus 同一下发模式，不再"假成功"。
+        int instruction = switch (normalizedAction) {
+            case "OPEN" -> 100;
+            case "CLOSE" -> 0;
+            default -> openness; // SET_OPENNESS：openness 已在上方校验非空且 0-100
+        };
+        ValveArchiveInfo info = new ValveArchiveInfo(
+            valve.getId(), valve.getMeterArcCode(), valve.getMeterNum(),
+            valve.getDeviceId(), valve.getConcentratorCode(), valve.getImeiNum(),
+            valve.getDtuNum(), valve.getChanNum());
+        // instructionType=3（开度设定）统一表达 开(100)/关(0)/指定开度
+        List<HtTasksPerform> tasks = buildTasks(List.of(info), valve.getOrgId(), 3, instruction);
+        if (operatorId != null) {
+            tasks.forEach(t -> t.setCreateBy(operatorId));
+        }
+        htTasksPerformService.saveBatchTasks(tasks);
+
+        String summary = String.format("指令已入队：房屋 %s 阀门 %s %s",
             houseId, normalizedAction,
             "SET_OPENNESS".equals(normalizedAction) ? "开度 " + openness : "");
         return new ValveCommandResultDto(houseId, normalizedAction, openness, true,
-            summary, "指令已下发(IoT 链路待接入,当前为占位实现)");
+            summary, "指令已加入下发队列，将由定时任务（SendMeterCommandJob）发送至采集平台");
     }
 }

@@ -25,7 +25,9 @@ import java.util.List;
  * 热力表档案管理
  * 迁移自旧系统 MtHeatArchiveController
  * 旧端点: /heatArchive/* -> 新端点: /thermal/meter/heat/*
- * TODO: 旧系统中删除热力表时有级联更新 pr_heat_hot_archive 的逻辑，本次迁移暂不实现
+ * 级联已在 MtHeatArchiveServiceImpl 实现：改名同步 pr_heat_hot_archive/pr_heat_unit_hot_archive
+ * 的 meter_arc_name（updateById），删除清理 mt_meter_match（removeById）。旧系统 deleteData 的
+ * getCount 引用保护基于代理商分配（mt_meter_match.company_id），agent 模块已移除故不适用。
  */
 @Validated
 @RequiredArgsConstructor

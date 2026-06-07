@@ -13,6 +13,7 @@ import org.sdkj.common.core.domain.R;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.satoken.utils.LoginHelper;
+import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrHeatArchive;
 import org.sdkj.thermal.domain.PrHeatCommandValveArchive;
 import org.sdkj.thermal.domain.PrHeatHotArchive;
@@ -50,6 +51,7 @@ import org.sdkj.thermal.domain.vo.PrHeatUnitValveArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
 import org.sdkj.thermal.domain.dto.PrHeatVo;
+import org.sdkj.thermal.mapper.HtTasksPerformMapper;
 import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrHeatArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatCommandValveArchiveMapper;
@@ -106,6 +108,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     private final PrCompanyMapper companyMapper;
     private final PrHouseLogMapper houseLogMapper;
     private final PrUnitMapper unitMapper;
+    private final HtTasksPerformMapper tasksPerformMapper;
     private final IPrHeatArchiveService heatArchiveService;
     private final SysUserMapper sysUserMapper;
     private final ObjectMapper objectMapper;
@@ -129,6 +132,12 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         if (houseIds != null) {
             if (houseIds.isEmpty()) return TableDataInfo.build(new Page<>());
             lqw.in(PrHeatArchive::getHouseId, houseIds);
+        }
+        // 执行任务筛选 → 档案 id IN（ht_tasks_perform.meter_id = 档案主键）
+        List<Long> taskArchiveIds = resolveTaskArchiveIds(bo);
+        if (taskArchiveIds != null) {
+            if (taskArchiveIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatArchive::getId, taskArchiveIds);
         }
         lqw.orderByDesc(PrHeatArchive::getCreateTime);
         Page<PrHeatArchiveVo> result = heatArchiveMapper.selectVoPage(pageQuery.build(), lqw);
@@ -154,6 +163,12 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         if (houseIds != null) {
             if (houseIds.isEmpty()) return TableDataInfo.build(new Page<>());
             lqw.in(PrHeatValveArchive::getHouseId, houseIds);
+        }
+        // 执行任务筛选 → 档案 id IN（ht_tasks_perform.meter_id = 档案主键）
+        List<Long> taskArchiveIds = resolveTaskArchiveIds(bo);
+        if (taskArchiveIds != null) {
+            if (taskArchiveIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatValveArchive::getId, taskArchiveIds);
         }
         lqw.orderByDesc(PrHeatValveArchive::getCreateTime);
         Page<PrHeatValveArchiveVo> result = valveArchiveMapper.selectVoPage(pageQuery.build(), lqw);
@@ -232,6 +247,30 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
 
         hq.select(PrHouse::getId);
         return houseMapper.selectList(hq).stream().map(PrHouse::getId).toList();
+    }
+
+    /**
+     * 按"执行任务"筛选 → 该任务涉及的档案 id 集合（pr_heat_*_archive.id）。
+     * ht_tasks_perform.meter_id 存的就是档案主键 id（见 ValveArchiveInfo 各构建处，均取 archive.getId()），
+     * 雪花 id 全局唯一，可安全 IN 进任意档案表（不匹配的表自然查不到）。
+     * 两步查询不 JOIN：先查 perform 拿 meterId 集合，再 IN 进档案查询。
+     *
+     * @return null = 无任务筛选（调用方跳过 IN）；非 null = 命中的档案 id（空 → 列表返回空）
+     */
+    private List<Long> resolveTaskArchiveIds(MonitorBo bo) {
+        if (StringUtils.isBlank(bo.getTasksId())) return null;
+        Long taskId = parseLongOrNull(bo.getTasksId());
+        if (taskId == null) return Collections.emptyList();
+        return tasksPerformMapper.selectList(
+            new LambdaQueryWrapper<HtTasksPerform>()
+                .eq(HtTasksPerform::getTasksId, taskId)
+                .eq(StringUtils.isNotBlank(bo.getOrgId()), HtTasksPerform::getOrgId, bo.getOrgId())
+                .select(HtTasksPerform::getMeterId)
+        ).stream()
+         .map(HtTasksPerform::getMeterId)
+         .filter(Objects::nonNull)
+         .distinct()
+         .toList();
     }
 
     /**
@@ -314,6 +353,12 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             if (unitIds.isEmpty()) return TableDataInfo.build(new Page<>());
             lqw.in(PrHeatUnitHotArchive::getUnitId, unitIds);
         }
+        // 执行任务筛选 → 档案 id IN（ht_tasks_perform.meter_id = 档案主键）
+        List<Long> taskArchiveIds = resolveTaskArchiveIds(bo);
+        if (taskArchiveIds != null) {
+            if (taskArchiveIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatUnitHotArchive::getId, taskArchiveIds);
+        }
         lqw.orderByDesc(PrHeatUnitHotArchive::getCreateTime);
         Page<PrHeatUnitHotArchiveVo> result = unitHotArchiveMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -334,6 +379,12 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         if (unitIds != null) {
             if (unitIds.isEmpty()) return TableDataInfo.build(new Page<>());
             lqw.in(PrHeatUnitValveArchive::getUnitId, unitIds);
+        }
+        // 执行任务筛选 → 档案 id IN（ht_tasks_perform.meter_id = 档案主键）
+        List<Long> taskArchiveIds = resolveTaskArchiveIds(bo);
+        if (taskArchiveIds != null) {
+            if (taskArchiveIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatUnitValveArchive::getId, taskArchiveIds);
         }
         lqw.orderByDesc(PrHeatUnitValveArchive::getCreateTime);
         Page<PrHeatUnitValveArchiveVo> result = unitValveArchiveMapper.selectVoPage(pageQuery.build(), lqw);
@@ -359,6 +410,12 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             if (houseIds.isEmpty()) return TableDataInfo.build(new Page<>());
             lqw.in(PrHeatTempArchive::getHouseId, houseIds);
         }
+        // 执行任务筛选 → 档案 id IN（ht_tasks_perform.meter_id = 档案主键）
+        List<Long> taskArchiveIds = resolveTaskArchiveIds(bo);
+        if (taskArchiveIds != null) {
+            if (taskArchiveIds.isEmpty()) return TableDataInfo.build(new Page<>());
+            lqw.in(PrHeatTempArchive::getId, taskArchiveIds);
+        }
         lqw.orderByDesc(PrHeatTempArchive::getCreateTime);
         Page<PrHeatTempArchiveVo> result = tempArchiveMapper.selectVoPage(pageQuery.build(), lqw);
         return TableDataInfo.build(result);
@@ -378,12 +435,23 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
             vo.setOfflineCount(0);
             return vo;
         }
+        // 执行任务筛选 → 档案 id IN（与列表口径一致；空任务直接 0）
+        List<Long> taskArchiveIds = resolveTaskArchiveIds(bo);
+        if (taskArchiveIds != null && taskArchiveIds.isEmpty()) {
+            vo.setTotalCount(0);
+            vo.setOnlineCount(0);
+            vo.setOfflineCount(0);
+            return vo;
+        }
 
         LambdaQueryWrapper<PrHeatValveArchive> valveLqw = new LambdaQueryWrapper<>();
         valveLqw.eq(StringUtils.isNotBlank(bo.getOrgId()), PrHeatValveArchive::getOrgId, bo.getOrgId());
         valveLqw.eq(PrHeatValveArchive::getIsChanged, 0);
         if (houseIds != null) {
             valveLqw.in(PrHeatValveArchive::getHouseId, houseIds);
+        }
+        if (taskArchiveIds != null) {
+            valveLqw.in(PrHeatValveArchive::getId, taskArchiveIds);
         }
         List<PrHeatValveArchive> valves = valveArchiveMapper.selectList(valveLqw);
 

@@ -12,12 +12,14 @@ import org.sdkj.common.core.utils.StringUtils;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
+import org.sdkj.thermal.domain.PrHeatValveArchive;
 import org.sdkj.thermal.domain.PrHouse;
 import org.sdkj.thermal.domain.PrUserHouse;
 import org.sdkj.thermal.domain.bo.PrHouseBo;
 import org.sdkj.thermal.domain.bo.PrHouseChangeOwnerBo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
 import org.sdkj.thermal.domain.vo.PrUserHouseVo;
+import org.sdkj.thermal.mapper.PrHeatValveArchiveMapper;
 import org.sdkj.thermal.mapper.PrHouseMapper;
 import org.sdkj.thermal.mapper.PrUserHouseMapper;
 import org.sdkj.thermal.service.IPrHouseService;
@@ -32,8 +34,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 房屋信息 Service 实现
@@ -46,6 +51,7 @@ public class PrHouseServiceImpl extends OrgScopedServiceImpl<PrHouseMapper, PrHo
 
     private final PrHouseMapper baseMapper;
     private final PrUserHouseMapper userHouseMapper;
+    private final PrHeatValveArchiveMapper valveArchiveMapper;
 
     @Override
     public PrHouseVo selectById(java.io.Serializable id) {
@@ -306,19 +312,29 @@ public class PrHouseServiceImpl extends OrgScopedServiceImpl<PrHouseMapper, PrHo
     public List<PrHouseVo> queryIsolatedHouses(String orgId, String buildingId) {
         // 获取楼宇下所有房屋
         List<PrHouse> allHouses = baseMapper.queryIsolatedHouses(orgId, buildingId);
-        List<PrHouse> isolatedHouses = new ArrayList<>();
-
         if (allHouses.isEmpty()) {
             return List.of();
         }
 
-        // 获取所有房屋ID
+        // 一次查询该范围内"开阀供暖"房屋的 house_id 集合（复刻老系统 queryGDH 判定，两步无 JOIN）。
+        // 开阀 = valve_status 开 + is_changed=0 + is_stop=0。新库 valve_status 为混合值域，
+        // 经 tenant 库核实"开"含 '1'(老迁移) 与 'OPEN'(新枚举)；PARTIAL/FAULT/CLOSED 不算稳定供暖。
         List<Long> houseIds = allHouses.stream().map(PrHouse::getId).toList();
+        Set<Long> openValveHouseIds = valveArchiveMapper.selectList(
+            new LambdaQueryWrapper<PrHeatValveArchive>()
+                .select(PrHeatValveArchive::getHouseId)
+                .in(PrHeatValveArchive::getHouseId, houseIds)
+                .in(PrHeatValveArchive::getValveStatus, "1", "OPEN")
+                .eq(PrHeatValveArchive::getIsChanged, 0)
+                .eq(PrHeatValveArchive::getIsStop, 0)
+        ).stream().map(PrHeatValveArchive::getHouseId).filter(Objects::nonNull).collect(Collectors.toSet());
 
-        // 等业务确认:相邻房屋"开阀"判定值未定(valve_status 是 varchar(10),
-        // 旧库分布为 NULL/空/02/03/04...,需业务领域定义哪些值算"开阀")。
-        // 当前简化:不关联 pr_heat_valve_archive,仅按相邻房号存在判定非孤岛。
+        // roomNum → 房屋，用于按相邻房号定位 houseId（内存判断，避免逐房查库）
+        Map<String, PrHouse> roomToHouse = allHouses.stream()
+            .filter(h -> StringUtils.isNotBlank(h.getRoomNum()))
+            .collect(Collectors.toMap(PrHouse::getRoomNum, h -> h, (a, b) -> a));
 
+        List<PrHouse> isolatedHouses = new ArrayList<>();
         // 房号格式: XX-XX-XXXX (楼栋-单元-房号)
         Pattern roomPattern = Pattern.compile("^(\\d+)-(\\d+)-(\\d+)$");
 
@@ -326,7 +342,6 @@ public class PrHouseServiceImpl extends OrgScopedServiceImpl<PrHouseMapper, PrHo
             if (StringUtils.isBlank(house.getRoomNum())) {
                 continue;
             }
-
             Matcher matcher = roomPattern.matcher(house.getRoomNum());
             if (!matcher.matches()) {
                 continue;
@@ -345,13 +360,14 @@ public class PrHouseServiceImpl extends OrgScopedServiceImpl<PrHouseMapper, PrHo
                 int floorNum = Integer.parseInt(floor);
                 int roomNumInt = Integer.parseInt(room);
 
-                // 构建相邻房号
+                // 构建相邻房号（左/右/上）
                 String leftRoomNum = building + "-" + unit + "-" + floor + String.format("%02d", roomNumInt - 1);
                 String rightRoomNum = building + "-" + unit + "-" + floor + String.format("%02d", roomNumInt + 1);
                 String upperRoomNum = building + "-" + unit + "-" + (floorNum + 1) + String.format("%02d", roomNumInt);
 
-                // 检查相邻房号是否有开阀的房屋（简化判断：暂不关联阀门状态）
-                boolean hasNeighborWithValve = checkNeighborHasValve(allHouses, leftRoomNum, rightRoomNum, upperRoomNum);
+                // 相邻房号中有"开阀供暖"的房屋 → 非孤岛；否则判定为孤岛户
+                boolean hasNeighborWithValve = neighborHasOpenValve(roomToHouse, openValveHouseIds,
+                    leftRoomNum, rightRoomNum, upperRoomNum);
 
                 if (!hasNeighborWithValve) {
                     isolatedHouses.add(house);
@@ -366,17 +382,15 @@ public class PrHouseServiceImpl extends OrgScopedServiceImpl<PrHouseMapper, PrHo
     }
 
     /**
-     * 检查相邻房号是否有开阀的房屋
-     * 简化实现：仅检查相邻房号是否存在，不关联阀门状态
-     * 完整实现需要关联 PrHeatValveArchive 表查询阀门状态
+     * 相邻房号中是否存在"开阀供暖"的房屋（复刻老系统 queryGDH 判定）。
+     * 开阀 = pr_heat_valve_archive.valve_status ∈ {'1','OPEN'} 且 is_changed=0 且 is_stop=0。
      */
-    private boolean checkNeighborHasValve(List<PrHouse> allHouses, String... neighborRoomNums) {
+    private boolean neighborHasOpenValve(Map<String, PrHouse> roomToHouse, Set<Long> openValveHouseIds,
+                                         String... neighborRoomNums) {
         for (String roomNum : neighborRoomNums) {
-            for (PrHouse house : allHouses) {
-                if (roomNum.equals(house.getRoomNum())) {
-                    // 等业务确认 valve_status 开阀判定值,当前简化为"存在相邻房号即非孤岛"
-                    return true;
-                }
+            PrHouse neighbor = roomToHouse.get(roomNum);
+            if (neighbor != null && openValveHouseIds.contains(neighbor.getId())) {
+                return true;
             }
         }
         return false;
@@ -505,8 +519,9 @@ public class PrHouseServiceImpl extends OrgScopedServiceImpl<PrHouseMapper, PrHo
         // 复用 selectByType 的 SQL 层过滤
         List<PrHouseVo> houses = selectByType(orgId, buildingId, unitCode, stationId, types);
 
-        // D5 降级: PrHouseVo 无 heatValveArchiveList 字段，无法做内存层阀门过滤
-        // controllableList 始终为空，后续补齐阀门档案字段后可完整实现
+        // 有意降级（byTypeAndValve 前端暂无页面消费）：PrHouseVo 无 heatValveArchiveList 嵌套字段，
+        // controllableList 恒空。完整实现需给 PrHouseVo 补阀门档案列表(两步查询组装) + 按 chanNum!='5' 判可控，
+        // 属结构性改动，待前端"按类型+阀门可控"筛选页落地时一并补（孤岛户判定 A5-2 已用真实 valve_status 修复）。
         if (StringUtils.isNotBlank(treeTypeValve)) {
             log.warn("byTypeAndValve 降级: treeTypeValve={} 被忽略, PrHouseVo 缺阀门档案字段", treeTypeValve);
         }
