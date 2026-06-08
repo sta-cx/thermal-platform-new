@@ -10,6 +10,8 @@ class OrgPermissionInterceptorTest {
 
     private final TestableOrgPermissionInterceptor interceptor = new TestableOrgPermissionInterceptor();
 
+    // ==================== SELECT ====================
+
     @Test
     void selectSqlWithJoinUsesFromTableAliasForOrgPermissionColumn() throws Exception {
         String sql = """
@@ -46,6 +48,8 @@ class OrgPermissionInterceptorTest {
         assertTrue(rewritten.contains("pr_house.org_id in"), rewritten);
     }
 
+    // ==================== UPDATE ====================
+
     @Test
     void updateSqlKeepsExistingWhereAndAddsOrgPermissionCondition() throws Exception {
         String sql = "UPDATE pr_house SET name = ? WHERE id = ?";
@@ -72,6 +76,29 @@ class OrgPermissionInterceptorTest {
     }
 
     @Test
+    void updateSqlWithInClauseAddsOrgPermissionCondition() throws Exception {
+        String sql = "UPDATE pr_expense SET status = ? WHERE id IN (?, ?, ?)";
+
+        String rewritten = interceptor.rewriteMulti(sql).toLowerCase();
+
+        assertTrue(rewritten.contains("where (id in"), rewritten);
+        assertTrue(rewritten.contains("pr_data_grant"), rewritten);
+        assertTrue(rewritten.contains("pr_expense.org_id in"), rewritten);
+    }
+
+    @Test
+    void updateSqlWithSubqueryWhereAddsOrgPermissionCondition() throws Exception {
+        String sql = "UPDATE pr_house SET pay_status = ? WHERE id IN (SELECT house_id FROM pr_building WHERE org_id = ?)";
+
+        String rewritten = interceptor.rewriteMulti(sql).toLowerCase();
+
+        assertTrue(rewritten.contains("pr_data_grant"), rewritten);
+        assertTrue(rewritten.contains("pr_house.org_id in"), rewritten);
+    }
+
+    // ==================== DELETE ====================
+
+    @Test
     void deleteSqlKeepsExistingWhereAndAddsOrgPermissionCondition() throws Exception {
         String sql = "DELETE FROM pr_house WHERE id = ?";
 
@@ -80,6 +107,37 @@ class OrgPermissionInterceptorTest {
         assertTrue(rewritten.contains("where (id = ?)"), rewritten);
         assertTrue(rewritten.contains("pr_data_grant"), rewritten);
         assertTrue(rewritten.contains("pr_house.org_id in"), rewritten);
+    }
+
+    @Test
+    void deleteSqlWithInClauseAddsOrgPermissionCondition() throws Exception {
+        String sql = "DELETE FROM pr_expense WHERE id IN (?, ?, ?)";
+
+        String rewritten = interceptor.rewriteMulti(sql).toLowerCase();
+
+        assertTrue(rewritten.contains("where (id in"), rewritten);
+        assertTrue(rewritten.contains("pr_data_grant"), rewritten);
+        assertTrue(rewritten.contains("pr_expense.org_id in"), rewritten);
+    }
+
+    @Test
+    void deleteSqlWithNoExistingWhereAddsOrgPermissionCondition() throws Exception {
+        String sql = "DELETE FROM pr_house";
+
+        String rewritten = interceptor.rewriteMulti(sql).toLowerCase();
+
+        assertTrue(rewritten.contains("pr_data_grant"), rewritten);
+        assertTrue(rewritten.contains("pr_house.org_id in"), rewritten);
+    }
+
+    @Test
+    void deleteSqlWithCompoundWhereAddsOrgPermissionCondition() throws Exception {
+        String sql = "DELETE FROM pr_building WHERE org_id = ? AND code = ?";
+
+        String rewritten = interceptor.rewriteMulti(sql).toLowerCase();
+
+        assertTrue(rewritten.contains("pr_data_grant"), rewritten);
+        assertTrue(rewritten.contains("pr_building.org_id in"), rewritten);
     }
 
     static class TestableOrgPermissionInterceptor extends OrgPermissionInterceptor {
