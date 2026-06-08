@@ -2,6 +2,7 @@ package org.sdkj.thermal.service.impl;
 
 import com.baomidou.dynamic.datasource.toolkit.DynamicDataSourceContextHolder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,12 +11,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.sdkj.common.core.domain.R;
+import org.sdkj.common.core.utils.MapstructUtils;
+import org.sdkj.common.mybatis.core.domain.BaseEntity;
 import org.sdkj.common.mybatis.core.page.PageQuery;
 import org.sdkj.common.mybatis.core.page.TableDataInfo;
 import org.sdkj.common.satoken.utils.LoginHelper;
 import org.sdkj.thermal.domain.HtTasksPerform;
 import org.sdkj.thermal.domain.PrHeatArchive;
 import org.sdkj.thermal.domain.PrHeatCommandValveArchive;
+import org.sdkj.thermal.domain.PrHeatDtuArchive;
 import org.sdkj.thermal.domain.PrHeatHotArchive;
 import org.sdkj.thermal.domain.PrHeatTempArchive;
 import org.sdkj.thermal.domain.PrHeatUnitHotArchive;
@@ -50,11 +54,16 @@ import org.sdkj.thermal.domain.vo.PrHeatUnitHotArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHeatUnitValveArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHeatValveArchiveVo;
 import org.sdkj.thermal.domain.vo.PrHouseVo;
+import org.sdkj.thermal.domain.dto.PrHeatCommandValveArchiveDto;
+import org.sdkj.thermal.domain.dto.PrHeatDtuArchiveDto;
+import org.sdkj.thermal.domain.dto.PrHeatHotArchiveDto;
+import org.sdkj.thermal.domain.dto.PrHeatValveArchiveDto;
 import org.sdkj.thermal.domain.dto.PrHeatVo;
 import org.sdkj.thermal.mapper.HtTasksPerformMapper;
 import org.sdkj.thermal.mapper.PrCompanyMapper;
 import org.sdkj.thermal.mapper.PrHeatArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatCommandValveArchiveMapper;
+import org.sdkj.thermal.mapper.PrHeatDtuArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatHotArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatTempArchiveMapper;
 import org.sdkj.thermal.mapper.PrHeatUnitHotArchiveMapper;
@@ -101,6 +110,7 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     private final PrHeatUnitValveArchiveMapper unitValveArchiveMapper;
     private final PrHeatTempArchiveMapper tempArchiveMapper;
     private final PrHeatCommandValveArchiveMapper commandValveArchiveMapper;
+    private final PrHeatDtuArchiveMapper dtuArchiveMapper;
     private final PrHeatHotArchiveMapper hotArchiveMapper;
     private final PrHouseMapper houseMapper;
     private final PrHeatStationPartitionMapper stationPartitionMapper;
@@ -817,12 +827,12 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
         String adjust = null;
 
         switch (bo.getControlType()) {
-            case "open" -> switch1 = true;
-            case "close" -> switch1 = false;
+            case "open" -> { switch1 = true; adjust = "2"; }    // adjust=2 = 开关控制 → 开阀
+            case "close" -> { switch1 = false; adjust = "2"; }   // adjust=2 = 开关控制 → 关阀
             case "adjust" -> {
                 switch1 = true; // 调节时开阀
                 scale = bo.getOpening();
-                adjust = "manual";
+                adjust = "3";  // adjust=3 = 开度设定
             }
             default -> {
                 log.warn("未知的控制类型: {}", bo.getControlType());
@@ -1107,21 +1117,54 @@ public class PrMonitorServiceImpl implements IPrMonitorService {
     }
 
     /**
-     * 将 String ID 列表转为 PrHeatVo 列表（委托 heat-archive 用）
+     * 将 String ID 列表转为 PrHeatVo 列表（委托 heat-archive 用）。
+     * <p>批量查询四种设备档案表（阀门/命令阀门/热表/DTU），填充对应嵌套 DTO，
+     * 保证 manualControl 等下游方法能正确生成 HtTasksPerform 记录。</p>
      * @return null 表示存在非法 ID
      */
     private List<PrHeatVo> toPrHeatVoList(List<String> ids) {
-        List<PrHeatVo> result = new ArrayList<>(ids.size());
+        // 解析 ID
+        List<Long> longIds = new ArrayList<>(ids.size());
         for (String id : ids) {
             try {
-                PrHeatVo v = new PrHeatVo();
-                v.setId(Long.valueOf(id));
-                result.add(v);
+                longIds.add(Long.valueOf(id));
             } catch (NumberFormatException e) {
                 log.warn("无效的 ID 格式: {}", id);
                 return null;
             }
         }
+
+        // 批量查询四种档案表（4 次 DB 查询代替最多 4N 次）
+        Map<Long, PrHeatValveArchive> valveMap = selectBatchIdMap(valveArchiveMapper, longIds, PrHeatValveArchive::getId);
+        Map<Long, PrHeatCommandValveArchive> cmdMap = selectBatchIdMap(commandValveArchiveMapper, longIds, PrHeatCommandValveArchive::getId);
+        Map<Long, PrHeatHotArchive> hotMap = selectBatchIdMap(hotArchiveMapper, longIds, PrHeatHotArchive::getId);
+        Map<Long, PrHeatDtuArchive> dtuMap = selectBatchIdMap(dtuArchiveMapper, longIds, PrHeatDtuArchive::getId);
+
+        List<PrHeatVo> result = new ArrayList<>(longIds.size());
+        for (Long longId : longIds) {
+            PrHeatVo v = new PrHeatVo();
+            v.setId(longId);
+
+            if (valveMap.containsKey(longId)) {
+                v.setPrHeatValveArchive(MapstructUtils.convert(valveMap.get(longId), PrHeatValveArchiveDto.class));
+            } else if (cmdMap.containsKey(longId)) {
+                v.setPrHeatCommandValveArchive(MapstructUtils.convert(cmdMap.get(longId), PrHeatCommandValveArchiveDto.class));
+            } else if (hotMap.containsKey(longId)) {
+                v.setPrHeatHotArchive(MapstructUtils.convert(hotMap.get(longId), PrHeatHotArchiveDto.class));
+            } else if (dtuMap.containsKey(longId)) {
+                v.setPrHeatDtuArchive(MapstructUtils.convert(dtuMap.get(longId), PrHeatDtuArchiveDto.class));
+            } else {
+                log.warn("未找到 ID={} 对应的设备档案", longId);
+            }
+            result.add(v);
+        }
         return result;
+    }
+
+    /** 批量按 ID 查询并构建 Map，去重取第一个。 */
+    private <T> Map<Long, T> selectBatchIdMap(BaseMapper<T> mapper, List<Long> ids,
+                                               java.util.function.Function<T, Long> idExtractor) {
+        return mapper.selectBatchIds(ids).stream()
+            .collect(Collectors.toMap(idExtractor, v -> v, (a, b) -> a));
     }
 }

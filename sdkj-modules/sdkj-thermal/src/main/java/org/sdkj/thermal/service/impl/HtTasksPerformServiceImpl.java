@@ -314,7 +314,6 @@ public class HtTasksPerformServiceImpl extends OrgScopedServiceImpl<HtTasksPerfo
         // 写入后由 PrValveOperationLogController(/list, isNotNull(valveStatus)) 展示；
         // 覆盖缴费自动开阀 Job / 档案 controlValve / 设阀门组号三条下发路径。
         Date now = new Date();
-        List<PrValveOperationLog> records = new ArrayList<>(htTasksPerformList.size());
         for (HtTasksPerform task : htTasksPerformList) {
             PrValveOperationLog record = new PrValveOperationLog();
             record.setMeterId(task.getMeterId());
@@ -327,10 +326,10 @@ public class HtTasksPerformServiceImpl extends OrgScopedServiceImpl<HtTasksPerfo
                 record.setOperatorId(String.valueOf(task.getCreateBy()));
             }
             record.setContent(buildValveOpDesc(task));
-            records.add(record);
+            // 逐条 insert 而非 Db.saveBatch，确保动态数据源正确路由到租户库
+            valveOperationLogMapper.insert(record);
         }
-        valveOperationLogMapper.insertBatch(records);
-        log.info("阀门操作日志写入完成，数量：{}", records.size());
+        log.info("阀门操作日志写入完成，数量：{}", htTasksPerformList.size());
     }
 
     /**
@@ -347,6 +346,8 @@ public class HtTasksPerformServiceImpl extends OrgScopedServiceImpl<HtTasksPerfo
                     return "关阀";
                 case 3:
                     return "设置开度" + (val != null ? " " + val : "");
+                case 5:
+                    return "制动";
                 case 6:
                     return "NB上报周期设定";
                 case 9:

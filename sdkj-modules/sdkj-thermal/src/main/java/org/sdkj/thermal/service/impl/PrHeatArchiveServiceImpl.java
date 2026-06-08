@@ -38,6 +38,9 @@ import java.util.concurrent.ThreadLocalRandom;
 @RequiredArgsConstructor
 public class PrHeatArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatArchiveMapper, PrHeatArchive> implements IPrHeatArchiveService {
 
+    /** 非阀门调控 adjust 值 — 这些操作跳过阀门操作日志，走 DTU/热表下发路径。 */
+    private static final Set<String> NON_VALVE_ADJUST = Set.of("7", "27", "28-2", "29", "30");
+
     private final PrHeatArchiveMapper baseMapper;
     private final IHtTasksPerformService htTasksPerformService;
     private final IPrOptionsHeatService prOptionsHeatService;
@@ -347,19 +350,29 @@ public class PrHeatArchiveServiceImpl extends OrgScopedServiceImpl<PrHeatArchive
         if (!htTasksPerformList.isEmpty()) {
             htTasksPerformService.saveBatchTasks(htTasksPerformList);
 
+            boolean executeSuccess = true;
             try {
                 if ("7".equals(adjust)) {
                     htTasksPerformService.executeHeatMeterTasks(htTasksPerformList);
-                } else if ("28-2".equals(adjust) || "27".equals(adjust) || "29".equals(adjust) || "30".equals(adjust)) {
+                } else if (NON_VALVE_ADJUST.contains(adjust)) {
                     htTasksPerformService.executeDtuControlTasks(htTasksPerformList);
                 } else {
                     htTasksPerformService.executeValveControlTasks(htTasksPerformList);
+                }
+            } catch (Exception e) {
+                log.warn("执行调控指令失败(日志仍写入), adjust={}", adjust, e);
+                executeSuccess = false;
+            }
+
+            // 操作日志独立于下发成败，始终写入
+            try {
+                if (!NON_VALVE_ADJUST.contains(adjust)) {
                     htTasksPerformService.insertValveOCLog(htTasksPerformList);
                 }
             } catch (Exception e) {
-                log.error("执行调控指令失败, adjust={}", adjust, e);
-                return false;
+                log.error("阀门操作日志写入失败", e);
             }
+            return executeSuccess;
         }
 
         return true;
