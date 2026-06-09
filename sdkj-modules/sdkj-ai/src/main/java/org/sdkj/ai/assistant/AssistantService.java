@@ -69,6 +69,9 @@ public class AssistantService {
         RetrievalResult rag = retrieveRag(tenantId, req.getMessage());
         String promptText = rag.isEmpty() ? req.getMessage() : buildRagPrompt(req.getMessage(), rag);
 
+        // A 补充：页面上下文播种 focus
+        contextService.seedFromPageContext(sessionId, req.getPageContext());
+
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         String reply;
         try {
@@ -119,6 +122,9 @@ public class AssistantService {
         RetrievalResult rag = retrieveRag(tenantId, req.getMessage());
         String promptText = rag.isEmpty() ? req.getMessage() : buildRagPrompt(req.getMessage(), rag);
         List<Citation> citations = rag.isEmpty() ? null : rag.citations();
+
+        // A 补充：页面上下文播种 focus
+        contextService.seedFromPageContext(sessionId, req.getPageContext());
 
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         return streamRound(promptText, tenantId, userId, sessionId, conversationId, 0, true, citations);
