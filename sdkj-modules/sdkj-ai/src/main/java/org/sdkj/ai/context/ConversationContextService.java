@@ -118,4 +118,23 @@ public class ConversationContextService {
             return null;
         }
     }
+
+    // ===== C：多步编排辅助 =====
+
+    /** 读取当前上下文（可空时返回空 context）。 */
+    public ConversationContext loadCtx(Long sessionId) {
+        return store.load(sessionId);
+    }
+
+    /** 保存上下文。 */
+    public void saveCtx(ConversationContext ctx) {
+        store.save(ctx);
+    }
+
+    /** 存入新计划（AWAITING_APPROVAL）。 */
+    public void putTaskState(Long sessionId, TaskState ts) {
+        ConversationContext ctx = store.load(sessionId);
+        ctx.setTaskState(ts);
+        store.save(ctx);
+    }
 }
