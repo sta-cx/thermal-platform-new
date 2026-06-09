@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.config.AiProperties;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
+import io.micrometer.core.instrument.MeterRegistry;
 
 import java.util.*;
 
@@ -18,11 +19,14 @@ public class PlanService {
     private final ChatClient planClient;     // 仅用于 houseId 抽取；可为 null（测试/降级）
     private final ContextStore contextStore;
     private final AiProperties aiProperties;
+    private final MeterRegistry meterRegistry;
 
-    public PlanService(ChatClient.Builder builder, ContextStore contextStore, AiProperties aiProperties) {
+    public PlanService(ChatClient.Builder builder, ContextStore contextStore,
+                       AiProperties aiProperties, MeterRegistry meterRegistry) {
         this.planClient = builder == null ? null : builder.build();
         this.contextStore = contextStore;
         this.aiProperties = aiProperties;
+        this.meterRegistry = meterRegistry;
     }
 
     /** 用于 LLM 抽取 houseId 的 structured 输出。 */
@@ -40,6 +44,7 @@ public class PlanService {
             log.info("[PlanService] heating complaint intent but no houseId resolved; fallback to chat");
             return null;
         }
+        meterRegistry.counter("ai.ctx.task.planned", "type", "handle_heating_complaint").increment();
         return buildHeatingComplaintTask(houseId);
     }
 

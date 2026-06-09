@@ -1,6 +1,7 @@
 package org.sdkj.ai.context;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.assistant.AssistantChunk;
@@ -34,6 +35,7 @@ public class TaskExecutor {
     private final ConfirmationStore confirmationStore;
     private final AiProperties aiProperties;
     private final ObjectMapper objectMapper;
+    private final MeterRegistry meterRegistry;
 
     /** 从当前 step 起推进。在 emitter 上 send taskProgress/toolCallPending，结束/暂停时 complete。 */
     public void run(Long sessionId, String tenantId, Long userId, SseEmitter emitter) {
@@ -49,16 +51,18 @@ public class TaskExecutor {
                 if (curId == null || "END".equals(curId)) {
                     ts.setStatus("DONE");
                     contextStore.save(ctx);
+                    meterRegistry.counter("ai.ctx.task.completed").increment();
                     send(emitter, progress(ts, "DONE", "任务完成"));
                     emitter.complete(); return;
                 }
                 TaskStep step = ts.stepById(curId);
-                if (step == null) { ts.setStatus("DONE"); contextStore.save(ctx); send(emitter, progress(ts, "DONE", "任务完成")); emitter.complete(); return; }
+                if (step == null) { ts.setStatus("DONE"); contextStore.save(ctx); meterRegistry.counter("ai.ctx.task.completed").increment(); send(emitter, progress(ts, "DONE", "任务完成")); emitter.complete(); return; }
 
                 ToolMetadata md = registry.resolve(step.getToolName());
                 if (md == null || md.risk() == RiskLevel.CRITICAL) {     // CRITICAL 不入编排（双保险）
                     ts.setStatus("ABORTED");
                     contextStore.save(ctx);
+                    meterRegistry.counter("ai.ctx.task.aborted").increment();
                     send(emitter, progress(ts, "ABORTED", "步骤不可执行：" + step.getToolName()));
                     emitter.complete(); return;
                 }
@@ -90,6 +94,7 @@ public class TaskExecutor {
                     ConversationContext c2 = contextStore.load(sessionId);
                     c2.getTaskState().setStatus("ABORTED");
                     contextStore.save(c2);
+                    meterRegistry.counter("ai.ctx.task.aborted").increment();
                     send(emitter, progress(c2.getTaskState(), "ABORTED", "包含禁止操作，已中止"));
                     emitter.complete(); return;
                 }

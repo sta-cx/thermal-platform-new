@@ -8,7 +8,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Tag("dev")
 class PlanServiceTest {
 
-    private final PlanService svc = new PlanService(null, null, null);
+    private final PlanService svc = new PlanService(null, null, null,
+        new io.micrometer.core.instrument.simple.SimpleMeterRegistry());
 
     @Test
     void recognizesHeatingComplaintIntent() {
