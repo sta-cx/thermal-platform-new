@@ -170,6 +170,21 @@ public class AiProperties {
         }
     }
 
+    /** B：推荐规则 */
+    @Data
+    public static class SuggestionRule {
+        /** 断言的 fact 字段名（如 valveStatus）。 */
+        private String field;
+        /** 操作符：eq / in / lt / gt。 */
+        private String op;
+        /** 比较值；op=in 时逗号分隔多值。 */
+        private String value;
+        /** 按钮文案。 */
+        private String label;
+        /** 点击后填入输入框的话术，支持 {field} 占位（从 fact.keys / focus.attrs 取）。 */
+        private String promptTemplate;
+    }
+
     /** Phase3 上下文感知配置 */
     @Data
     public static class Context {
@@ -187,5 +202,11 @@ public class AiProperties {
             "houseId", "valveId", "stationId", "expenseId", "repairId", "meterNum");
         /** focus 选取优先级（entityType；对应主键 = type+"Id"）。 */
         private java.util.List<String> focusPriority = java.util.List.of("house", "station", "valve");
+        /** C：阀门"关闭"判定值集合（查 tenant 库后填真实值；见 spec §6.4）。B 推荐也复用。 */
+        private java.util.List<String> closedValues = java.util.List.of("2", "CLOSE", "CLOSED");
+        /** C：阀门"故障"判定值集合。 */
+        private java.util.List<String> errorValues = java.util.List.of("3", "ERROR");
+        /** B：推荐规则（外置，加 Tool 加规则不改引擎）。 */
+        private java.util.List<SuggestionRule> suggestionRules = new java.util.ArrayList<>();
     }
 }

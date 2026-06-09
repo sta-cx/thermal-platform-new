@@ -110,6 +110,23 @@ thermal:
       write-rate-limit-per-minute: 10
       valve:
         dry-run: true                           # IoT 就绪后改 false
+    context:
+      suggestion-rules:
+        - field: valveStatus
+          op: in
+          value: "2,CLOSE,CLOSED"
+          label: 一键开阀
+          prompt-template: "请给 houseId={houseId} 的住户阀门执行开阀（action=OPEN）"
+        - field: actualStatus
+          op: in
+          value: "3,ERROR"
+          label: 生成报修单
+          prompt-template: "请给 houseId={houseId} 的住户创建报修单，原因：阀门反馈异常"
+        - field: overdueDay
+          op: gt
+          value: "90"
+          label: 登记缴费
+          prompt-template: "请把 expenseId={expenseId} 的欠费标记为已缴费"
     rag:
       enabled: true
       hybrid:
