@@ -37,6 +37,9 @@ public class AssistantChunk {
     /** Tool 执行结果摘要 — 前端实时渲染 TOOL 角色消息卡片 */
     private ToolResultView toolCallResult;
 
+    /** Phase3 能力 B：本轮回复后的下一步操作建议（空/无则不下发）。 */
+    private java.util.List<org.sdkj.ai.context.SuggestedAction> suggestions;
+
     @Data
     @Builder
     @NoArgsConstructor
