@@ -40,6 +40,11 @@ public class AssistantChunk {
     /** Phase3 能力 B：本轮回复后的下一步操作建议（空/无则不下发）。 */
     private java.util.List<org.sdkj.ai.context.SuggestedAction> suggestions;
 
+    /** Phase3 能力 C：待批准的任务计划。 */
+    private TaskPlanView taskPlan;
+    /** Phase3 能力 C：任务执行进度。 */
+    private TaskProgressView taskProgress;
+
     @Data
     @Builder
     @NoArgsConstructor
@@ -71,5 +76,42 @@ public class AssistantChunk {
         private String toolName;
         private String status;    // SUCCESS / FAILED / DRY_RUN
         private String summary;
+    }
+
+    // === Phase 3: 能力 C 多步编排 ===
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TaskPlanView {
+        private String taskId;
+        private String taskType;
+        private String title;
+        private List<PlanStepView> steps;
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PlanStepView {
+        private String stepId;
+        private String toolName;
+        private String desc;
+        private boolean conditional;   // 是否带条件分支（前端标注"视情况"）
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TaskProgressView {
+        private String taskId;
+        private String status;         // RUNNING / AWAITING_CONFIRM / DONE / ABORTED
+        private int currentStep;       // 1-based
+        private int totalSteps;
+        private String stepDesc;
+        private String message;
     }
 }
