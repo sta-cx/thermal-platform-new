@@ -24,4 +24,7 @@ public class AiChatSession implements Serializable {
     private String title;
     private Date lastActiveAt;
     private Date createTime;
+
+    /** Phase3 会话上下文记忆(JSON 字符串: focus + facts)。null 表示无记忆。 */
+    private String contextData;
 }
