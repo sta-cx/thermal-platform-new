@@ -191,7 +191,9 @@ public class AssistantService {
                     var messages = sessionService.listMessages(sessionId);
                     Long messageId = messages.isEmpty() ? null : messages.get(messages.size() - 1).getId();
                     return deltaFlux.concatWith(Flux.just(AssistantChunk.builder()
-                        .sessionId(sessionId).messageId(messageId).citations(citations).finish(true).build()));
+                        .sessionId(sessionId).messageId(messageId).citations(citations)
+                        .suggestions(contextService.buildSuggestions(sessionId))
+                        .finish(true).build()));
                 }
 
                 // 5) 构建 ToolCallRequest 列表（A 能力：参数补全）

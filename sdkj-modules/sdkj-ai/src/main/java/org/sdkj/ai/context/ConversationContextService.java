@@ -27,6 +27,7 @@ public class ConversationContextService {
     private final ContextArgFiller filler;
     private final ToolRegistry registry;
     private final AiProperties aiProperties;
+    private final SuggestionEngine suggestionEngine;
 
     /** 启动时检测 -parameters 编译标志是否生效，否则 enrichArgs 会静默失效。 */
     @PostConstruct
@@ -101,6 +102,20 @@ public class ConversationContextService {
             }
         } catch (Exception e) {
             log.warn("[CtxService] seedFromPageContext failed (session={}): {}", sessionId, e.getMessage());
+        }
+    }
+
+    /** B：基于会话最近 facts 产出推荐动作。空则返回 null（SSE NON_NULL 不下发）。 */
+    public List<SuggestedAction> buildSuggestions(Long sessionId) {
+        AiProperties.Context cfg = aiProperties.getContext();
+        if (!cfg.isEnabled() || !cfg.isSuggestion()) return null;
+        try {
+            ConversationContext ctx = store.load(sessionId);
+            var actions = suggestionEngine.evaluate(ctx.getFacts(), ctx.getFocus(), cfg.getSuggestionRules());
+            return actions.isEmpty() ? null : actions;
+        } catch (Exception e) {
+            log.warn("[CtxService] buildSuggestions failed (session={}): {}", sessionId, e.getMessage());
+            return null;
         }
     }
 }
