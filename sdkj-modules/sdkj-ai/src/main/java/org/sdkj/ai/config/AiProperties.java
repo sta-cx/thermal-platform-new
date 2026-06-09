@@ -42,6 +42,9 @@ public class AiProperties {
     /** KB 知识库参数 */
     private Kb kb = new Kb();
 
+    /** Phase3 上下文感知配置 */
+    private Context context = new Context();
+
     @Data
     public static class Contextual {
         private Duration cacheDefaultTtl = Duration.ofMinutes(5);
@@ -151,6 +154,7 @@ public class AiProperties {
 
     @Data
     public static class Tools {
+
         /** Tool Bean 黑名单,如 ["valveControlTool"];运维侧禁用 */
         private List<String> disabled = new ArrayList<>();
 
@@ -164,5 +168,24 @@ public class AiProperties {
         public static class Valve {
             private boolean dryRun = true;
         }
+    }
+
+    /** Phase3 上下文感知配置 */
+    @Data
+    public static class Context {
+        private boolean enabled = true;            // 总开关，false 完全回落 Phase 2B
+        private boolean argFill = true;            // A：参数补全
+        private boolean suggestion = true;         // B（Plan 2 用）
+        private boolean orchestration = true;      // C（Plan 3 用）
+        private int maxFacts = 20;
+        private Duration factTtl = Duration.ofMinutes(30);
+        private int focusIdleMinutes = 10;
+        private int maxOrchestrationSteps = 5;     // C（Plan 3 用）
+        private boolean injectPageContext = true;
+        /** 业务主键名：新增主键加一行即可（A 补全只认这些参数名）。 */
+        private java.util.List<String> entityKeys = java.util.List.of(
+            "houseId", "valveId", "stationId", "expenseId", "repairId", "meterNum");
+        /** focus 选取优先级（entityType；对应主键 = type+"Id"）。 */
+        private java.util.List<String> focusPriority = java.util.List.of("house", "station", "valve");
     }
 }
