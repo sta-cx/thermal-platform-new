@@ -47,6 +47,7 @@ public class AiToolCallController {
     private final org.sdkj.ai.context.TaskExecutor taskExecutor;
     private final org.sdkj.ai.context.BranchEvaluator branchEvaluator;
     private final org.sdkj.ai.config.AiProperties aiProperties;
+    private final org.sdkj.ai.assistant.SessionService sessionService;
 
     /** 按 messageId 查 Tool 调用详情 — 前端 TOOL 角色消息点击展开 */
     @SaCheckLogin
@@ -171,6 +172,7 @@ public class AiToolCallController {
                         .toolName(call.getToolName()).resultJson(outcome.resultJson()).build()));
                 var c2 = contextStore.load(call.getSessionId());
                 var step = c2.getTaskState().stepById(c2.getTaskState().getCurrentStepId());
+                if (step != null) step.setStepStatus("COMPLETED");   // 写步已确认执行 → 计入收尾复述
                 String next = branchEvaluator.next(step, c2.getFacts(),
                     aiProperties.getContext().getClosedValues(), aiProperties.getContext().getErrorValues());
                 c2.getTaskState().setCurrentStepId(next);
@@ -203,6 +205,7 @@ public class AiToolCallController {
                 c -> { c.setResult("permission denied"); c.setDecidedAt(Instant.now()); }
             );
             Long failMsgId = recorder.record(call, null, AiConstants.ToolExecStatus.FAILED.name(), latency, "permission denied: " + se.getMessage());
+            abortOrchestrationOnFailure(callId, call, "权限不足:" + se.getMessage());
             sendFailureChunk(emitter, call, failMsgId, "权限不足:" + se.getMessage());
 
         } catch (Exception e) {
@@ -215,6 +218,7 @@ public class AiToolCallController {
                 c -> { c.setResult(errMsg); c.setExecutedAt(Instant.now()); }
             );
             Long failMsgId = recorder.record(call, null, AiConstants.ToolExecStatus.FAILED.name(), latency, errMsg);
+            abortOrchestrationOnFailure(callId, call, "执行出错：" + errMsg);
             sendFailureChunk(emitter, call, failMsgId, "tool execution failed: " + errMsg);
         }
         return emitter;
@@ -222,6 +226,28 @@ public class AiToolCallController {
 
     private boolean requireOwner(PendingToolCall call) {
         return call.getUserId() != null && call.getUserId().equals(LoginHelper.getUserId());
+    }
+
+    /**
+     * 写步在编排中执行失败 → 把任务干净中止并落库一句收尾，避免 taskState 滞留 AWAITING_CONFIRM 僵尸态、
+     * 且历史只剩原始报错。仅当该 callId 正是当前编排等待确认的写步时才动。
+     */
+    private void abortOrchestrationOnFailure(String callId, PendingToolCall call, String reason) {
+        try {
+            var ctx = contextStore.load(call.getSessionId());
+            var ts = ctx.getTaskState();
+            if (ts != null && "AWAITING_CONFIRM".equals(ts.getStatus())
+                && callId.equals(ts.getPendingCallId())) {
+                ts.setStatus("ABORTED");
+                ts.setPendingCallId(null);
+                contextStore.save(ctx);
+                String summary = org.sdkj.ai.context.OrchestrationSummary.build(ts, null, "ABORTED", reason,
+                    aiProperties.getContext().getClosedValues(), aiProperties.getContext().getErrorValues());
+                sessionService.appendAssistantMessage(call.getSessionId(), summary);
+            }
+        } catch (Exception ex) {
+            log.warn("[AiToolCall] abort orchestration on failure failed (call={}): {}", callId, ex.getMessage());
+        }
     }
 
     private void sendFailureChunk(SseEmitter emitter, PendingToolCall call,

@@ -81,6 +81,25 @@ public class SessionService {
     }
 
     /**
+     * 落库一条 ASSISTANT 消息并返回其 id(供 SSE 流末尾下发 messageId,前端落地为真消息、刷新不丢)。
+     * 能力 C 编排收尾语走此方法(见 spec §6.5「一句收尾」)。
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public Long appendAssistantMessage(Long sessionId, String content) {
+        AiChatMessage row = new AiChatMessage();
+        row.setSessionId(sessionId);
+        row.setRole(AiConstants.ChatRole.ASSISTANT.name());
+        row.setContent(content);
+        row.setCreateTime(new Date());
+        messageMapper.insert(row);
+        AiChatSession update = new AiChatSession();
+        update.setId(sessionId);
+        update.setLastActiveAt(new Date());
+        sessionMapper.updateById(update);
+        return row.getId();
+    }
+
+    /**
      * 把 Tool 调用结果作为对话消息落库(role=TOOL)。
      * Content 是给前端流里展示的"短摘要"(如"已创建报修 #123"),完整入参出参在 ai_tool_invocation 表。
      */

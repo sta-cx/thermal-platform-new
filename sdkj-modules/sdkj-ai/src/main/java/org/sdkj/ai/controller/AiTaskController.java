@@ -5,8 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.AiConstants;
+import org.sdkj.ai.assistant.SessionService;
+import org.sdkj.ai.config.AiProperties;
 import org.sdkj.ai.context.ContextStore;
 import org.sdkj.ai.context.ConversationContext;
+import org.sdkj.ai.context.OrchestrationSummary;
 import org.sdkj.ai.context.TaskExecutor;
 import org.sdkj.ai.context.TaskState;
 import org.sdkj.ai.safety.AiTenantGate;
@@ -27,6 +30,8 @@ public class AiTaskController {
     private final ContextStore contextStore;
     private final TaskExecutor taskExecutor;
     private final AiTenantGate tenantGate;
+    private final SessionService sessionService;
+    private final AiProperties aiProperties;
 
     /** 批准计划 → 启动编排，SSE 流式返回进度/暂停帧。 */
     @SaCheckLogin
@@ -60,9 +65,18 @@ public class AiTaskController {
         tenantGate.requireEnabled(LoginHelper.getTenantId());
         Long sid = Long.valueOf(sessionId);
         ConversationContext ctx = contextStore.load(sid);
-        if (ctx.getTaskState() != null) {
-            ctx.getTaskState().setStatus("ABORTED");
+        TaskState ts = ctx.getTaskState();
+        if (ts != null) {
+            ts.setStatus("ABORTED");
             contextStore.save(ctx);
+            // 落库一条取消说明，保证历史「有来有回」（刷新不丢）
+            String summary = OrchestrationSummary.build(ts, null, "ABORTED", null,
+                aiProperties.getContext().getClosedValues(), aiProperties.getContext().getErrorValues());
+            try {
+                sessionService.appendAssistantMessage(sid, summary);
+            } catch (Exception e) {
+                log.warn("[AiTask] persist abort summary failed (session={}): {}", sid, e.getMessage());
+            }
         }
         return R.ok();
     }
