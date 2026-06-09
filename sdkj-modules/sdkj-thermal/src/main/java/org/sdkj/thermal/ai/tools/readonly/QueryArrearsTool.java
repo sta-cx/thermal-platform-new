@@ -22,7 +22,7 @@ public class QueryArrearsTool {
     private final PrExpenseMapper expenseMapper;
 
     public record ArrearsItem(
-        Long id,
+        Long expenseId,
         Long houseId,
         String itemName,
         BigDecimal finalMoney,
@@ -34,7 +34,7 @@ public class QueryArrearsTool {
     @Tool(description = """
         查询未缴费的费用明细列表。可按欠费天数下限过滤。
         典型用途:用户问"有多少户欠费 3 个月以上"或"今年有多少未缴费用"。
-        返回 JSON 数组,每条包含 id/houseId/itemName/finalMoney/paidIn/isCharged/overdueDay。
+        返回 JSON 数组,每条包含 expenseId/houseId/itemName/finalMoney/paidIn/isCharged/overdueDay。
         最多返回 50 条。
         """)
     public List<ArrearsItem> queryUnpaid(

@@ -21,7 +21,7 @@ public class GetValveStatusTool {
     private final PrHeatValveArchiveMapper valveMapper;
 
     public record ValveStatus(
-        Long id,
+        Long valveId,
         Long houseId,
         String meterNum,
         String valveStatus,

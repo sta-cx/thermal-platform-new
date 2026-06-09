@@ -16,7 +16,7 @@ public class GetStationDailyStatTool {
     private final PrHeatStationMapper stationMapper;
 
     public record StationInfo(
-        Long id,
+        Long stationId,
         String name,
         String code,
         String address,

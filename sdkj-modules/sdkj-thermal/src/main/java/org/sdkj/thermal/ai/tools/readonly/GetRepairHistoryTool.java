@@ -23,7 +23,7 @@ public class GetRepairHistoryTool {
     private final HtRepairMapper repairMapper;
 
     public record RepairItem(
-        Long id,
+        Long repairId,
         Long houseId,
         String buildingName,
         String roomNum,
