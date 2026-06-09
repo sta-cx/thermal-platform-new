@@ -8,6 +8,10 @@ import org.sdkj.ai.tools.registry.ToolMetadata;
 import org.sdkj.ai.tools.registry.ToolRegistry;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.PostConstruct;
+import org.springframework.ai.tool.annotation.Tool;
+
+import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.time.Instant;
 import java.util.*;
@@ -23,6 +27,17 @@ public class ConversationContextService {
     private final ContextArgFiller filler;
     private final ToolRegistry registry;
     private final AiProperties aiProperties;
+
+    /** 启动时检测 -parameters 编译标志是否生效，否则 enrichArgs 会静默失效。 */
+    @PostConstruct
+    void checkParameterNamesAvailable() {
+        for (ToolMetadata md : registry.all()) {
+            Parameter[] params = md.method().getParameters();
+            if (params.length > 0 && params[0].isNamePresent()) return;
+        }
+        log.warn("[CtxService] javac -parameters flag not detected; enrichArgs (arg-fill) will not match entity keys. "
+            + "Ensure maven-compiler-plugin has <parameters>true</parameters>.");
+    }
 
     /** A 补全：给某个 tool call 的参数 map 补全缺失的 ID 类参数。异常时返回原 args。 */
     public Map<String, Object> enrichArgs(Long sessionId, String toolName, Map<String, Object> args) {
