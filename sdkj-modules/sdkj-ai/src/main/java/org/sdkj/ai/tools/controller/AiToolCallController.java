@@ -42,6 +42,11 @@ public class AiToolCallController {
     private final AiTenantGate tenantGate;
     private final ObjectMapper objectMapper;
     private final AiToolInvocationMapper invocationMapper;
+    private final org.sdkj.ai.context.ContextStore contextStore;
+    private final org.sdkj.ai.context.ConversationContextService conversationContextService;
+    private final org.sdkj.ai.context.TaskExecutor taskExecutor;
+    private final org.sdkj.ai.context.BranchEvaluator branchEvaluator;
+    private final org.sdkj.ai.config.AiProperties aiProperties;
 
     /** 按 messageId 查 Tool 调用详情 — 前端 TOOL 角色消息点击展开 */
     @SaCheckLogin
@@ -155,20 +160,40 @@ public class AiToolCallController {
                 ).build()
             ), MediaType.APPLICATION_JSON));
 
-            // 拉起 LLM 继续生成（传入工具执行结果作为上下文）
-            Disposable disp = resumeService.resumeAfterToolCall(
-                call.getTenantId(), call.getUserId(), call.getSessionId(), outcome.resultJson()
-            ).doOnNext(chunk -> {
-                try {
-                    emitter.send(SseEmitter.event()
-                        .data(objectMapper.writeValueAsString(chunk), MediaType.APPLICATION_JSON));
-                } catch (Exception e) { emitter.completeWithError(e); }
-            }).doOnComplete(emitter::complete)
-              .doOnError(emitter::completeWithError)
-              .subscribe();
-            emitter.onCompletion(disp::dispose);
-            emitter.onTimeout(disp::dispose);
-            emitter.onError(e -> disp.dispose());
+            // 能力 C：若该确认属于运行中的编排任务 → 评估分支并续跑后续步骤
+            var ctx = contextStore.load(call.getSessionId());
+            var ts = ctx.getTaskState();
+            if (ts != null && "AWAITING_CONFIRM".equals(ts.getStatus())
+                && callId.equals(ts.getPendingCallId())) {
+                // 写步结果入会话记忆，供后续分支判断
+                conversationContextService.recordResults(call.getSessionId(), java.util.List.of(
+                    org.sdkj.ai.tools.dispatcher.ToolCallResult.ToolExecResult.builder()
+                        .toolName(call.getToolName()).resultJson(outcome.resultJson()).build()));
+                var c2 = contextStore.load(call.getSessionId());
+                var step = c2.getTaskState().stepById(c2.getTaskState().getCurrentStepId());
+                String next = branchEvaluator.next(step, c2.getFacts(),
+                    aiProperties.getContext().getClosedValues(), aiProperties.getContext().getErrorValues());
+                c2.getTaskState().setCurrentStepId(next);
+                c2.getTaskState().setStatus("RUNNING");
+                c2.getTaskState().setPendingCallId(null);
+                contextStore.save(c2);
+                taskExecutor.run(call.getSessionId(), call.getTenantId(), call.getUserId(), emitter);
+            } else {
+                // 普通写 Tool 确认：拉起 LLM 继续生成（原 Phase 2B 行为）
+                Disposable disp = resumeService.resumeAfterToolCall(
+                    call.getTenantId(), call.getUserId(), call.getSessionId(), outcome.resultJson()
+                ).doOnNext(chunk -> {
+                    try {
+                        emitter.send(SseEmitter.event()
+                            .data(objectMapper.writeValueAsString(chunk), MediaType.APPLICATION_JSON));
+                    } catch (Exception e) { emitter.completeWithError(e); }
+                }).doOnComplete(emitter::complete)
+                  .doOnError(emitter::completeWithError)
+                  .subscribe();
+                emitter.onCompletion(disp::dispose);
+                emitter.onTimeout(disp::dispose);
+                emitter.onError(e -> disp.dispose());
+            }
 
         } catch (SecurityException se) {
             int latency = (int) (System.currentTimeMillis() - t0);
