@@ -17,6 +17,7 @@ public class ConversationContext {
     private Long sessionId;
     private FocusEntity focus;
     private List<EntityFact> facts = new ArrayList<>();
+    private TaskState taskState;
     private Instant updatedAt;
 
     public ConversationContext(Long sessionId) {
