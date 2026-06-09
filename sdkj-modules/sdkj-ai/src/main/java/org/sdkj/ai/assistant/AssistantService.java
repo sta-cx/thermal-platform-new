@@ -43,6 +43,7 @@ public class AssistantService {
     private final ObjectMapper objectMapper;
     private final KbRetrievalService retrievalService;
     private final AiProperties aiProperties;
+    private final org.sdkj.ai.context.ConversationContextService contextService;
 
     private static final String FEATURE = "assistant";
 
@@ -187,11 +188,11 @@ public class AssistantService {
                         .sessionId(sessionId).messageId(messageId).citations(citations).finish(true).build()));
                 }
 
-                // 5) 构建 ToolCallRequest 列表
+                // 5) 构建 ToolCallRequest 列表（A 能力：参数补全）
                 List<ToolCallDispatcher.ToolCallRequest> reqs = toolCalls.stream()
                     .map(tc -> new ToolCallDispatcher.ToolCallRequest(
                         tc.name(),
-                        parseArgs(tc.arguments()),
+                        contextService.enrichArgs(sessionId, tc.name(), parseArgs(tc.arguments())),
                         tenantId,
                         userId,
                         sessionId,
@@ -201,6 +202,8 @@ public class AssistantService {
                 // 6) Dispatcher 分流
                 try {
                     ToolCallResult tcr = dispatcher.dispatch(reqs);
+                    // A 能力：把 LOW 结果记入会话记忆（focus + facts），供后续轮次补全
+                    contextService.recordResults(sessionId, tcr.getToolResults());
                     // 全 LOW:存储 assistant 文本 + 递归下一轮
                     if (!fullText.isEmpty()) {
                         sessionService.appendMessage(sessionId, AiConstants.ChatRole.ASSISTANT.name(), fullText, null);
