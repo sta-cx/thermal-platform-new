@@ -44,6 +44,7 @@ public class AssistantService {
     private final KbRetrievalService retrievalService;
     private final AiProperties aiProperties;
     private final org.sdkj.ai.context.ConversationContextService contextService;
+    private final org.sdkj.ai.context.PlanService planService;
 
     private static final String FEATURE = "assistant";
 
@@ -125,6 +126,24 @@ public class AssistantService {
 
         // A 补充：页面上下文播种 focus
         contextService.seedFromPageContext(sessionId, req.getPageContext());
+
+        // 能力 C：多步任务规划。命中 → 产出待批准计划帧并关流（不进 streamRound）。
+        org.sdkj.ai.context.TaskState plan = planService.tryPlan(req.getMessage(), sessionId);
+        if (plan != null) {
+            contextService.putTaskState(sessionId, plan);
+            java.util.List<AssistantChunk.PlanStepView> stepViews = plan.getSteps().stream()
+                .map(s -> AssistantChunk.PlanStepView.builder()
+                    .stepId(s.getStepId()).toolName(s.getToolName()).desc(s.getDesc())
+                    .conditional(s.getBranches() != null && s.getBranches().size() > 1)
+                    .build())
+                .toList();
+            return Flux.just(AssistantChunk.builder()
+                .sessionId(sessionId)
+                .taskPlan(AssistantChunk.TaskPlanView.builder()
+                    .taskId(plan.getTaskId()).taskType(plan.getTaskType()).title(plan.getTitle())
+                    .steps(stepViews).build())
+                .finish(true).build());
+        }
 
         String conversationId = ConversationIdFactory.of(tenantId, userId, sessionId);
         return streamRound(promptText, tenantId, userId, sessionId, conversationId, 0, true, citations);
