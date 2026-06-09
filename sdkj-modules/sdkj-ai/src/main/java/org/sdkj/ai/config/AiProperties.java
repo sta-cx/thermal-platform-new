@@ -202,11 +202,21 @@ public class AiProperties {
             "houseId", "valveId", "stationId", "expenseId", "repairId", "meterNum");
         /** focus 选取优先级（entityType；对应主键 = type+"Id"）。 */
         private java.util.List<String> focusPriority = java.util.List.of("house", "station", "valve");
-        /** C：阀门"关闭"判定值集合（查 tenant 库后填真实值；见 spec §6.4）。B 推荐也复用。 */
+        /** C：阀门"关闭"判定值集合（已按 tenant_000000 实测校准；见 spec §6.4）。B 推荐也复用。
+         *  实测库值含 CLOSED；PARTIAL=半开按"开/正常"处理，不入此集。 */
         private java.util.List<String> closedValues = java.util.List.of("2", "CLOSE", "CLOSED");
-        /** C：阀门"故障"判定值集合。 */
-        private java.util.List<String> errorValues = java.util.List.of("3", "ERROR");
+        /** C：阀门"故障"判定值集合（已按实测校准：库中 FAULT 与 "3" 均为故障态）。 */
+        private java.util.List<String> errorValues = java.util.List.of("3", "ERROR", "FAULT");
         /** B：推荐规则（外置，加 Tool 加规则不改引擎）。 */
         private java.util.List<SuggestionRule> suggestionRules = new java.util.ArrayList<>();
+        /** C 通用编排触发——连接词（强信号，命中即尝试 LLM 动态规划）。 */
+        private java.util.List<String> orchestrationConnectors = java.util.List.of(
+            "然后", "接着", "再帮", "之后", "随后", "顺便", "一条龙");
+        /** C 通用编排触发——处理类动词（需与名词同现）。 */
+        private java.util.List<String> orchestrationActions = java.util.List.of(
+            "处理", "解决", "搞定", "跟进");
+        /** C 通用编排触发——业务名词（与动词同现才触发，降低误触发）。 */
+        private java.util.List<String> orchestrationNouns = java.util.List.of(
+            "欠费", "报修", "阀门", "供热", "费用", "用热", "账单", "开阀", "关阀");
     }
 }
