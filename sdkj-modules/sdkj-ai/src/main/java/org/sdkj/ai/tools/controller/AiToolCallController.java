@@ -205,8 +205,8 @@ public class AiToolCallController {
                 c -> { c.setResult("permission denied"); c.setDecidedAt(Instant.now()); }
             );
             Long failMsgId = recorder.record(call, null, AiConstants.ToolExecStatus.FAILED.name(), latency, "permission denied: " + se.getMessage());
-            abortOrchestrationOnFailure(callId, call, "权限不足:" + se.getMessage());
-            sendFailureChunk(emitter, call, failMsgId, "权限不足:" + se.getMessage());
+            AbortClosing abort = abortOrchestrationOnFailure(callId, call, "权限不足:" + se.getMessage());
+            sendFailureChunk(emitter, call, failMsgId, "权限不足:" + se.getMessage(), abort);
 
         } catch (Exception e) {
             // ToolExecutor 已解包 InvocationTargetException，此处 e 是原始业务异常
@@ -218,8 +218,8 @@ public class AiToolCallController {
                 c -> { c.setResult(errMsg); c.setExecutedAt(Instant.now()); }
             );
             Long failMsgId = recorder.record(call, null, AiConstants.ToolExecStatus.FAILED.name(), latency, errMsg);
-            abortOrchestrationOnFailure(callId, call, "执行出错：" + errMsg);
-            sendFailureChunk(emitter, call, failMsgId, "tool execution failed: " + errMsg);
+            AbortClosing abort = abortOrchestrationOnFailure(callId, call, "执行出错：" + errMsg);
+            sendFailureChunk(emitter, call, failMsgId, "tool execution failed: " + errMsg, abort);
         }
         return emitter;
     }
@@ -229,10 +229,11 @@ public class AiToolCallController {
     }
 
     /**
-     * 写步在编排中执行失败 → 把任务干净中止并落库一句收尾，避免 taskState 滞留 AWAITING_CONFIRM 僵尸态、
-     * 且历史只剩原始报错。仅当该 callId 正是当前编排等待确认的写步时才动。
+     * 写步在编排中执行失败 → 把任务干净中止、落库一句收尾，并把收尾信息返回给调用方以便即时流式下发，
+     * 避免 taskState 滞留 AWAITING_CONFIRM 僵尸态、且历史只剩原始报错。仅当该 callId 正是当前编排
+     * 等待确认的写步时才动；非编排写步返回 null。
      */
-    private void abortOrchestrationOnFailure(String callId, PendingToolCall call, String reason) {
+    private AbortClosing abortOrchestrationOnFailure(String callId, PendingToolCall call, String reason) {
         try {
             var ctx = contextStore.load(call.getSessionId());
             var ts = ctx.getTaskState();
@@ -243,27 +244,59 @@ public class AiToolCallController {
                 contextStore.save(ctx);
                 String summary = org.sdkj.ai.context.OrchestrationSummary.build(ts, null, "ABORTED", reason,
                     aiProperties.getContext().getClosedValues(), aiProperties.getContext().getErrorValues());
-                sessionService.appendAssistantMessage(call.getSessionId(), summary);
+                Long mid = sessionService.appendAssistantMessage(call.getSessionId(), summary);
+                int total = ts.getSteps() == null ? 0 : ts.getSteps().size();
+                return new AbortClosing(mid, summary, ts.getTaskId(), total);
             }
         } catch (Exception ex) {
             log.warn("[AiToolCall] abort orchestration on failure failed (call={}): {}", callId, ex.getMessage());
         }
+        return null;
     }
 
+    /** 编排写步失败时的中止收尾信息（用于即时流式下发，与 TaskExecutor.finishWithSummary 帧序列一致）。 */
+    private record AbortClosing(Long messageId, String summary, String taskId, int totalSteps) {}
+
     private void sendFailureChunk(SseEmitter emitter, PendingToolCall call,
-                                   Long messageId, String error) {
+                                   Long messageId, String error, AbortClosing abort) {
         try {
             String summary = DefaultToolInvocationRecorder.buildSummary(call.getToolName(), AiConstants.ToolExecStatus.FAILED, error);
-            emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
-                AssistantChunk.builder().toolCallResult(
-                    AssistantChunk.ToolResultView.builder()
-                        .messageId(messageId)
-                        .toolName(call.getToolName())
-                        .status(AiConstants.ToolExecStatus.FAILED.name())
-                        .summary(summary)
-                        .build()
-                ).error(error).finish(true).build()
-            ), MediaType.APPLICATION_JSON));
+            AssistantChunk.ToolResultView toolView = AssistantChunk.ToolResultView.builder()
+                .messageId(messageId)
+                .toolName(call.getToolName())
+                .status(AiConstants.ToolExecStatus.FAILED.name())
+                .summary(summary)
+                .build();
+
+            if (abort == null) {
+                // 普通写 Tool 失败(非编排)：带 error 的终止帧 → 前端 onError 提示(原 Phase 2B 行为)
+                emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
+                    AssistantChunk.builder().toolCallResult(toolView).error(error).finish(true).build()
+                ), MediaType.APPLICATION_JSON));
+            } else {
+                // 编排写步失败：前端见 chunk.error 会 onError+return 丢弃后续帧，故全程不带 error，
+                // 复刻 TaskExecutor.finishWithSummary 帧序列(toolCallResult → taskProgress → delta → messageId)，
+                // 即时显示「计划已中止」收尾、与成功路径体验对齐，messageId 为真实库 id 刷新不丢。
+                emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
+                    AssistantChunk.builder().toolCallResult(toolView).finish(false).build()
+                ), MediaType.APPLICATION_JSON));
+                emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
+                    AssistantChunk.builder()
+                        .taskProgress(AssistantChunk.TaskProgressView.builder()
+                            .taskId(abort.taskId()).status("ABORTED")
+                            .currentStep(abort.totalSteps()).totalSteps(abort.totalSteps())
+                            .message("ABORTED").build())
+                        .finish(false).build()
+                ), MediaType.APPLICATION_JSON));
+                emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
+                    AssistantChunk.builder().delta(abort.summary())
+                        .sessionId(call.getSessionId()).finish(false).build()
+                ), MediaType.APPLICATION_JSON));
+                emitter.send(SseEmitter.event().data(objectMapper.writeValueAsString(
+                    AssistantChunk.builder().sessionId(call.getSessionId())
+                        .messageId(abort.messageId()).finish(true).build()
+                ), MediaType.APPLICATION_JSON));
+            }
             emitter.complete();
         } catch (Exception ignored) {
             log.debug("[AiToolCall] sendFailureChunk failed: {}", ignored.getMessage());
