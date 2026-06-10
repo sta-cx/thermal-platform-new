@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sdkj.ai.assistant.SessionService;
 import org.sdkj.ai.domain.AiToolInvocation;
 import org.sdkj.ai.mapper.AiToolInvocationMapper;
+import org.sdkj.ai.tools.annotation.RiskLevel;
 import org.sdkj.ai.tools.store.PendingToolCall;
 import org.sdkj.common.json.utils.JsonUtils;
 import org.springframework.stereotype.Component;
@@ -44,6 +45,34 @@ public class DefaultToolInvocationRecorder implements ToolInvocationRecorder {
             row.setStatus(status);
             row.setLatencyMs(latencyMs);
             row.setErrorMessage(errorMessage);
+            row.setCreatedTime(new Date());
+            invocationMapper.insert(row);
+            return messageId;
+        } finally {
+            DynamicDataSourceContextHolder.clear();
+        }
+    }
+
+    @Override
+    public Long recordReadonly(Long sessionId, String tenantId, Long userId, String toolName,
+                               String summaryContent, Map<String, Object> args,
+                               String resultJson, String status, int latencyMs) {
+        // 同 record:写 master 表前强制切回主库;不能用 @Transactional(事务会在 push 前绑定租户库)
+        DynamicDataSourceContextHolder.push(AiConstants.DS_MASTER);
+        try {
+            Long messageId = sessionService.appendToolMessage(sessionId, summaryContent);
+            AiToolInvocation row = new AiToolInvocation();
+            row.setMessageId(messageId);
+            row.setPendingCallId(null);           // 只读步无确认流,无 callId
+            row.setTenantId(tenantId);
+            row.setUserId(userId);
+            row.setToolName(toolName);
+            row.setRiskLevel(RiskLevel.LOW.name());
+            row.setArguments(toJsonSafe(args));
+            row.setResult(resultJson);
+            row.setStatus(status);
+            row.setLatencyMs(latencyMs);
+            row.setErrorMessage(null);
             row.setCreatedTime(new Date());
             invocationMapper.insert(row);
             return messageId;

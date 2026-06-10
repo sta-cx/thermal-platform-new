@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.sdkj.ai.AiConstants;
 import org.sdkj.ai.assistant.AssistantChunk;
 import org.sdkj.ai.assistant.SessionService;
 import org.sdkj.ai.config.AiProperties;
 import org.sdkj.ai.tools.annotation.RiskLevel;
 import org.sdkj.ai.tools.dispatcher.*;
+import org.sdkj.ai.tools.invocation.ToolInvocationRecorder;
 import org.sdkj.ai.tools.registry.ToolMetadata;
 import org.sdkj.ai.tools.registry.ToolRegistry;
 import org.sdkj.ai.tools.store.ConfirmationStore;
@@ -38,6 +40,7 @@ public class TaskExecutor {
     private final ObjectMapper objectMapper;
     private final MeterRegistry meterRegistry;
     private final SessionService sessionService;
+    private final ToolInvocationRecorder recorder;
 
     /** 从当前 step 起推进。在 emitter 上 send taskProgress/toolCallPending，结束/暂停时 complete。 */
     public void run(Long sessionId, String tenantId, Long userId, SseEmitter emitter) {
@@ -80,8 +83,12 @@ public class TaskExecutor {
                 var req = new ToolCallDispatcher.ToolCallRequest(step.getToolName(), args, tenantId, userId, sessionId, null);
 
                 try {
+                    long t0 = System.currentTimeMillis();
                     ToolCallResult tcr = dispatcher.dispatch(List.of(req));      // LOW → 直接执行
+                    int latency = (int) (System.currentTimeMillis() - t0);
                     contextService.recordResults(sessionId, tcr.getToolResults());
+                    // 只读步:落库 TOOL 消息+invocation 并即时下发结果卡片,让每一步可见、可展开看查询数据
+                    sendReadonlyResult(emitter, sessionId, tenantId, userId, step, args, tcr, latency);
                     // 评估分支 → 推进（在 reload 后的 c2 上标记完成，避免被覆盖）
                     ConversationContext c2 = contextStore.load(sessionId);
                     TaskStep curStep = c2.getTaskState().stepById(curId);
@@ -187,6 +194,30 @@ public class TaskExecutor {
                 .taskId(ts.getTaskId()).status(status).currentStep(cur).totalSteps(total).message(msg).build())
             .finish("DONE".equals(status) || "ABORTED".equals(status))
             .build();
+    }
+
+    /** 只读步执行后:落库 TOOL 消息+invocation,下发 toolCallResult 卡片(可展开看查询数据)。记录失败不阻断编排。 */
+    private void sendReadonlyResult(SseEmitter emitter, Long sessionId, String tenantId, Long userId,
+                                    TaskStep step, Map<String, Object> args, ToolCallResult tcr, int latencyMs) {
+        String resultJson = (tcr.getToolResults() != null && !tcr.getToolResults().isEmpty())
+            ? tcr.getToolResults().get(0).getResultJson() : null;
+        boolean isErr = resultJson != null && resultJson.contains("\"error\"");
+        String status = isErr ? AiConstants.ToolExecStatus.FAILED.name() : AiConstants.ToolExecStatus.SUCCESS.name();
+        String baseDesc = (step.getDesc() == null || step.getDesc().isBlank()) ? step.getToolName() : step.getDesc();
+        String cardSummary = isErr ? baseDesc + "（执行失败）" : baseDesc;
+        Long toolMsgId = null;
+        try {
+            toolMsgId = recorder.recordReadonly(sessionId, tenantId, userId, step.getToolName(),
+                cardSummary, args, resultJson, status, latencyMs);
+        } catch (Exception e) {
+            log.warn("[TaskExecutor] record readonly step failed (session={}, tool={}): {}",
+                sessionId, step.getToolName(), e.getMessage());
+        }
+        send(emitter, AssistantChunk.builder()
+            .toolCallResult(AssistantChunk.ToolResultView.builder()
+                .messageId(toolMsgId).toolName(step.getToolName())
+                .status(status).summary(cardSummary).build())
+            .finish(false).build());
     }
 
     private void sendPending(SseEmitter emitter, String callId) {
